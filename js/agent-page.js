@@ -500,7 +500,8 @@ async function loadRemOffplanProjects() {
   const { data: projects, error } = await supabase
     .from('projects')
     .select('slug, name, cover_image_url, location, district_name, min_price, max_price, property_types, completion_date, status, developers(name)')
-    .order('name');
+    .order('synced_at', { ascending: false })
+    .limit(120);
 
   if (error || !projects || projects.length === 0) return;
 
@@ -520,7 +521,7 @@ async function loadRemOffplanProjects() {
     const badge = statusLabel(p.status);
     const imgSrc = p.cover_image_url ? escAttr(NETLIFY_IMG_REM(p.cover_image_url, 600)) : '';
     return `<a href="/a/boban-pepic/project/${encodeURIComponent(p.slug)}" class="rem-project-card" style="display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;transition:border-color 0.15s;">
-      ${imgSrc ? `<div style="height:160px;overflow:hidden;"><img src="${imgSrc}" alt="${escAttr(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>` : `<div style="height:160px;background:rgba(255,255,255,0.06);"></div>`}
+      ${imgSrc ? `<div style="height:160px;overflow:hidden;"><img src="${imgSrc}" alt="${escAttr(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="handleImgError(this)"></div>` : `<div style="height:160px;background:rgba(255,255,255,0.06);"></div>`}
       <div style="padding:14px 16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">${escHtml(badge)}</span>

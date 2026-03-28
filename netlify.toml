@@ -1,5 +1,9 @@
 [images]
-  remote_images = ["https://pjyorgedaxevxophpfib\\.supabase\\.co/.*"]
+  remote_images = [
+    "https://pjyorgedaxevxophpfib\\.supabase\\.co/.*",
+    "https://images\\.unsplash\\.com/.*",
+    "https://files\\.remapp\\.ae/.*"
+  ]
 
 [build]
   publish = "."
