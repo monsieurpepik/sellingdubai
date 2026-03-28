@@ -5,6 +5,11 @@ import { escHtml, escAttr, safeUrl } from './utils.js';
 const NETLIFY_IMG = (url, w) =>
   url ? `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80` : '';
 
+const SUPABASE_STORAGE = 'https://pjyorgedaxevxophpfib.supabase.co/';
+function safeImgUrl(url) {
+  return url && url.startsWith(SUPABASE_STORAGE) ? url : null;
+}
+
 const slug = window.location.pathname.replace(/^\/agency\//, '').replace(/\/$/, '');
 
 async function init() {
@@ -18,16 +23,29 @@ async function init() {
 
   if (agencyErr || !agency) { showError('Agency not found.'); return; }
 
+  const { data: agents, error: agentsErr } = await supabase
+    .from('agents')
+    .select('id, slug, name, photo_url, tagline, tier, verification_status, dld_broker_number, whatsapp')
+    .eq('agency_id', agency.id)
+    .eq('verification_status', 'verified')
+    .order('name');
+
+  if (agentsErr) {
+    console.error('Failed to load agents:', agentsErr);
+  }
+
   document.title = agency.name + ' — SELLING DUBAI';
   document.querySelector('meta[property="og:title"]').setAttribute('content', agency.name + ' — SELLING DUBAI');
-  if (agency.logo_url) {
-    document.querySelector('meta[property="og:image"]').setAttribute('content', NETLIFY_IMG(agency.logo_url, 400));
+  const safeLogoUrl = safeImgUrl(agency.logo_url);
+  if (safeLogoUrl) {
+    const ogImageUrl = 'https://sellingdubai.ae' + NETLIFY_IMG(safeLogoUrl, 400);
+    document.querySelector('meta[property="og:image"]').setAttribute('content', ogImageUrl);
   }
 
   const logoEl = document.getElementById('agency-logo');
-  if (agency.logo_url) {
+  if (safeLogoUrl) {
     const img = document.createElement('img');
-    img.src = NETLIFY_IMG(agency.logo_url, 144);
+    img.src = NETLIFY_IMG(safeLogoUrl, 144);
     img.alt = agency.name;
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:16px;';
     logoEl.appendChild(img);
@@ -43,21 +61,15 @@ async function init() {
   if (agency.website) {
     const websiteEl = document.getElementById('agency-website');
     const safeWebsite = safeUrl(agency.website);
-    if (safeWebsite) {
+    if (safeWebsite && (safeWebsite.startsWith('https://') || safeWebsite.startsWith('http://'))) {
       websiteEl.href = safeWebsite;
       websiteEl.querySelector('span').textContent = agency.website.replace(/^https?:\/\//, '');
       websiteEl.style.display = 'inline-flex';
     }
   }
+
   document.getElementById('skeleton').style.display = 'none';
   document.getElementById('agency-header').style.display = 'block';
-
-  const { data: agents } = await supabase
-    .from('agents')
-    .select('id, slug, name, photo_url, tagline, tier, verification_status, dld_broker_number, whatsapp')
-    .eq('agency_id', agency.id)
-    .eq('verification_status', 'verified')
-    .order('name');
 
   const grid = document.getElementById('agents-grid');
   if (!agents || agents.length === 0) {
@@ -69,8 +81,9 @@ async function init() {
   document.getElementById('agents-count').textContent = agents.length + ' agent' + (agents.length === 1 ? '' : 's');
   grid.innerHTML = agents.map(a => {
     const initials = (a.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const avatarHtml = a.photo_url
-      ? `<img src="${escAttr(NETLIFY_IMG(a.photo_url, 112))}" alt="${escAttr(a.name)}" style="width:100%;height:100%;object-fit:cover;">`
+    const safePhoto = safeImgUrl(a.photo_url);
+    const avatarHtml = safePhoto
+      ? `<img src="${escAttr(NETLIFY_IMG(safePhoto, 112))}" alt="${escAttr(a.name)}" style="width:100%;height:100%;object-fit:cover;">`
       : `<span style="font-size:20px;font-weight:700;">${escHtml(initials)}</span>`;
     return `
       <a href="/a/${encodeURIComponent(a.slug)}" class="agent-card">
