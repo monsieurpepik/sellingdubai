@@ -454,11 +454,11 @@ export function hydrateOgMeta(agent) {
     setMeta('og-title', title);
     setMeta('og-desc', desc);
     setMeta('og-url', url);
-    if (agent.photo_url) setMeta('og-image', agent.photo_url);
+    if (agent.photo_url) setMeta('og-image', NETLIFY_IMG_REM(agent.photo_url, 1200));
     // Update Twitter meta tags
     setMeta('twitter-title', title);
     setMeta('twitter-description', desc);
-    if (agent.photo_url) setMeta('twitter-image', agent.photo_url);
+    if (agent.photo_url) setMeta('twitter-image', NETLIFY_IMG_REM(agent.photo_url, 1200));
     const canon = document.getElementById('canonical-url');
     if (canon) canon.setAttribute('href', url);
     // Update meta description

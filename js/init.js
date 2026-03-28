@@ -22,10 +22,14 @@ async function loadModules() {
 loadModules();
 
 // mortgage.js is lazy-loaded on first openMortgage() call
-window.openMortgage = async function() {
+// Named so the guard below can detect whether the module replaced it
+window.openMortgage = async function openMortgageLazy() {
   try {
     await import('./mortgage.js');
-    window.openMortgage();
+    // mortgage.js sets window.openMortgage to the real impl as a side-effect.
+    // Only call it if the replacement happened — prevents infinite recursion if
+    // the module ever fails to overwrite the global.
+    if (window.openMortgage !== openMortgageLazy) window.openMortgage();
   } catch (e) {
     console.error('[mortgage] failed to load:', e);
   }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — SellingDubai</title>
   <meta name="description" content="Simple, transparent pricing for Dubai real estate agents. Free forever with Pro and Premium plans to unlock analytics, listings, and WhatsApp automation.">
+  <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://sellingdubai.ae/pricing">
   <meta property="og:title" content="Pricing — SellingDubai">
   <meta property="og:description" content="Simple, transparent pricing for Dubai real estate agents. Free forever with Pro and Premium plans.">
@@ -647,6 +648,9 @@
       });
     });
 
+    // Flip to true once Stripe price IDs are confirmed in production env vars
+    const BILLING_LIVE = false;
+
     // Redirect to /edit for re-auth, preserving plan+interval for retry on return
     function redirectToAuth(plan, interval) {
       sessionStorage.setItem('sd_pending_checkout', JSON.stringify({ plan, interval }));
@@ -654,6 +658,15 @@
     }
 
     async function startCheckout(plan, interval, btn) {
+      if (!BILLING_LIVE) {
+        if (btn) {
+          const original = btn.textContent;
+          btn.textContent = 'Billing coming soon';
+          setTimeout(() => { btn.textContent = original; }, 2000);
+        }
+        return;
+      }
+
       const token = localStorage.getItem('sd_edit_token');
 
       if (!token) {
@@ -672,6 +685,8 @@
         const data = await res.json();
         if (data.url) {
           window.location.href = data.url;
+        } else if (res.status === 409 && data.error === 'already_on_plan') {
+          if (btn) { btn.textContent = 'Already on this plan'; btn.disabled = false; }
         } else if (res.status === 401 || (data.error && data.error.toLowerCase().includes('session'))) {
           // Token expired — re-auth then retry
           localStorage.removeItem('sd_edit_token');
@@ -688,7 +703,7 @@
 
     // On return from /edit after re-auth, auto-retry the pending checkout
     const pending = sessionStorage.getItem('sd_pending_checkout');
-    if (pending && localStorage.getItem('sd_edit_token')) {
+    if (pending && localStorage.getItem('sd_edit_token') && BILLING_LIVE) {
       sessionStorage.removeItem('sd_pending_checkout');
       try {
         const { plan, interval } = JSON.parse(pending);

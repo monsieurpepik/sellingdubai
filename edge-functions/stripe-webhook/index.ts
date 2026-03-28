@@ -172,18 +172,22 @@ Deno.serve(async (req: Request) => {
         }
 
         const resolved = resolvePlan(priceToTier, data);
+        if (!resolved) {
+          console.error(`subscription.updated: unknown price ID for agent ${agentId} — tier unchanged`);
+          break;
+        }
         const periodEnd = new Date((data.current_period_end as number) * 1000).toISOString();
         const status = data.status as string;
 
         await supabase.from("agents").update({
-          tier:                      resolved?.tier ?? "pro",
+          tier:                      resolved.tier,
           stripe_subscription_id:    subscriptionId,
           stripe_subscription_status: status,
-          stripe_plan:               resolved?.plan ?? null,
+          stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
         }).eq("id", agentId);
 
-        console.log(`subscription.updated: agent ${agentId} → ${resolved?.tier ?? "pro"}, status=${status}`);
+        console.log(`subscription.updated: agent ${agentId} → ${resolved.tier}, status=${status}`);
         break;
       }
 
@@ -281,9 +285,10 @@ Deno.serve(async (req: Request) => {
     }
   } catch (e) {
     console.error(`Error processing ${eventType}:`, e);
-    // Return 200 anyway to prevent Stripe retry storms on transient errors
-    return new Response(JSON.stringify({ received: true, warning: "Processing error logged." }), {
-      status: 200,
+    // Return 500 so Stripe retries on transient errors (DB failures, network issues).
+    // Stripe uses exponential backoff and will stop after ~3 days.
+    return new Response(JSON.stringify({ error: "Processing error — will retry." }), {
+      status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }

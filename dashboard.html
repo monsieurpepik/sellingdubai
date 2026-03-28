@@ -1077,7 +1077,7 @@
 
     const a = currentAgent;
     const hasPhoto = !!a.photo_url;
-    const hasBio = !!(a.bio && a.bio.trim().length > 10);
+    const hasBio = !!(a.tagline && a.tagline.trim().length > 10);
     const hasWhatsapp = !!(a.whatsapp && String(a.whatsapp).replace(/\D/g, '').length >= 8);
     // Property count will be checked after analytics load — for now mark as pending
     const hasProperty = (a.property_count || 0) > 0;

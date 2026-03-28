@@ -8,14 +8,14 @@
 <link rel="canonical" href="https://sellingdubai.ae/join">
 <meta property="og:title" content="Claim Your Profile | SellingDubai"/>
 <meta property="og:description" content="Verify your broker license and go live in under 2 minutes. RERA-licensed link-in-bio for Dubai real estate agents."/>
-<meta property="og:image" content="https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg"/>
+<meta property="og:image" content="https://sellingdubai.ae/dubai-skyline.jpg"/>
 <meta property="og:url" content="https://sellingdubai.ae/join"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="SellingDubai"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Claim Your Profile | SellingDubai"/>
 <meta name="twitter:description" content="Verify your broker license and go live in under 2 minutes."/>
-<meta name="twitter:image" content="https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg"/>
+<meta name="twitter:image" content="https://sellingdubai.ae/dubai-skyline.jpg"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,7 +40,7 @@
   /* Background — same Dubai image + overlay as agent profiles */
   .bg {
     position: fixed; inset: 0; z-index: 0;
-    background-image: url('https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg');
+    background-image: url('/dubai-skyline.jpg');
     background-size: cover; background-position: center top;
   }
   .bg::after {
@@ -265,7 +265,7 @@
   }
   .preview-bg {
     height: 120px;
-    background-image: url('https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg');
+    background-image: url('/dubai-skyline.jpg');
     background-size: cover; background-position: center;
     position: relative;
   }
@@ -866,7 +866,18 @@ async function resendOtp() {
     showError(2, networkErrorMsg());
   }
 
-  setTimeout(() => { btn.textContent = "Didn't get it? Resend code"; btn.disabled = false; }, 60000);
+  let countdown = 60;
+  btn.textContent = `Resend code (${countdown}s)`;
+  const countdownTimer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(countdownTimer);
+      btn.textContent = "Didn't get it? Resend code";
+      btn.disabled = false;
+    } else {
+      btn.textContent = `Resend code (${countdown}s)`;
+    }
+  }, 1000);
 }
 
 async function verifyOtpAndCreate() {
@@ -1018,7 +1029,7 @@ const bgEl = document.getElementById('bg');
 const bgImg = new Image();
 bgImg.onload = function() { /* image loaded fine */ };
 bgImg.onerror = function() { bgEl.classList.add('bg-fallback'); };
-bgImg.src = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
+bgImg.src = '/dubai-skyline.jpg';
 
 function networkErrorMsg() {
   return navigator.onLine

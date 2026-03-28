@@ -83,6 +83,11 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Agent not found." }), { status: 404, headers: cors });
     }
 
+    // Prevent duplicate subscriptions — block if already on the requested plan
+    if (agent.tier === plan) {
+      return new Response(JSON.stringify({ error: "already_on_plan" }), { status: 409, headers: cors });
+    }
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY")!;
     const priceKey = `${plan}_${interval}`;
     const priceId = PRICE_MAP[priceKey];
