@@ -188,6 +188,11 @@
     let _agency = null;
     let _agencyId = null;
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
     function show(id) {
       ['loading','auth-gate','create-section','dashboard-section'].forEach(s => {
         document.getElementById(s).style.display = 'none';
@@ -196,12 +201,17 @@
     }
 
     async function callManage(body) {
-      const res = await fetch(MANAGE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: _token, ...body })
-      });
-      return res.json();
+      try {
+        const res = await fetch(MANAGE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: _token, ...body })
+        });
+        if (!res.ok && res.status >= 500) return { error: 'Server error. Please try again.' };
+        return res.json();
+      } catch {
+        return { error: 'Network error. Please try again.' };
+      }
     }
 
     async function init() {
@@ -234,7 +244,11 @@
         const logoSrc = agency.logo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
           ? `/.netlify/images?url=${encodeURIComponent(agency.logo_url)}&w=112&fm=webp&q=80`
           : agency.logo_url;
-        logoEl.innerHTML = `<img src="${logoSrc}" alt="">`;
+        const img = document.createElement('img');
+        img.src = logoSrc;
+        img.alt = '';
+        logoEl.innerHTML = '';
+        logoEl.appendChild(img);
       }
       document.getElementById('edit-name').value = agency.name || '';
       document.getElementById('edit-logo').value = agency.logo_url || '';
@@ -277,8 +291,8 @@
           ? `/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=64&fm=webp&q=80`
           : a.photo_url;
         const avatar = photoSrc
-          ? `<img src="${photoSrc}" alt="">`
-          : initials;
+          ? `<img src="${escapeHtml(photoSrc)}" alt="">`
+          : escapeHtml(initials);
         const tierBadge = a.tier === 'premium' ? '<span class="badge badge-premium">Premium</span>'
           : a.tier === 'pro' ? '<span class="badge badge-pro">Pro</span>'
           : '<span class="badge badge-free">Free</span>';
@@ -287,8 +301,8 @@
             <div style="display:flex;align-items:center;gap:10px;">
               <div class="member-avatar">${avatar}</div>
               <div>
-                <div class="member-name">${a.name || '—'}</div>
-                <div class="member-slug"><a href="/a/${a.slug}" target="_blank" style="color:rgba(255,255,255,0.4);">@${a.slug}</a></div>
+                <div class="member-name">${escapeHtml(a.name) || '—'}</div>
+                <div class="member-slug"><a href="/a/${encodeURIComponent(a.slug)}" target="_blank" style="color:rgba(255,255,255,0.4);">@${escapeHtml(a.slug)}</a></div>
               </div>
             </div>
           </td>
@@ -296,9 +310,13 @@
           <td class="stat-cell">${a.leads_this_month ?? '—'}</td>
           <td class="stat-cell">${a.views_this_month ?? '—'}</td>
           <td class="stat-cell">${a.properties_active ?? '—'}</td>
-          <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" onclick="removeMember('${(a.agent_id || a.id)}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove from agency">Remove</button></td>
+          <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" data-member-id="${escapeHtml(a.agent_id || a.id)}" title="Remove from agency">Remove</button></td>
         </tr>`;
       }).join('');
+      // Bind remove handlers via data attributes (avoids XSS in inline onclick)
+      tbody.querySelectorAll('[data-member-id]').forEach((btn, i) => {
+        btn.addEventListener('click', () => removeMember(agents[i].agent_id || agents[i].id, agents[i].name || ''));
+      });
     }
 
     window.createAgency = async function() {
