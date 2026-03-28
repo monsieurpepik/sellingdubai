@@ -5,6 +5,7 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
+  "https://sellingdubai-agents.netlify.app",
 ];
 
 function corsHeaders(req: Request): Record<string, string> {
@@ -31,6 +32,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "Method not allowed." }), { status: 405, headers: cors });
 
+  try {
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return new Response(JSON.stringify({ error: "Invalid JSON." }), { status: 400, headers: cors }); }
 
@@ -42,11 +44,12 @@ Deno.serve(async (req: Request) => {
   // Validate magic link token
   const { data: link, error: linkErr } = await supabase
     .from("magic_links")
-    .select("agent_id, expires_at")
+    .select("agent_id, expires_at, used_at")
     .eq("token", token)
     .single();
   if (linkErr || !link) return new Response(JSON.stringify({ error: "Invalid or expired session." }), { status: 401, headers: cors });
   if (new Date(link.expires_at) < new Date()) return new Response(JSON.stringify({ error: "Session expired. Please log in again." }), { status: 401, headers: cors });
+  if (!link.used_at) return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), { status: 401, headers: cors });
   const agentId: string = link.agent_id;
 
   // ── GET_MY_AGENCY ──
@@ -64,7 +67,8 @@ Deno.serve(async (req: Request) => {
       .from("agents")
       .select("id, name, slug, email, photo_url, tier, verification_status, whatsapp")
       .eq("agency_id", agency.id)
-      .order("name");
+      .order("name")
+      .limit(200);
     return new Response(JSON.stringify({ agency, members: members ?? [], is_owner: true }), { headers: cors });
   }
 
@@ -72,15 +76,17 @@ Deno.serve(async (req: Request) => {
   if (action === "create") {
     const name = typeof body.name === "string" ? body.name.trim() : "";
     if (name.length < 2) return new Response(JSON.stringify({ error: "Agency name required (min 2 chars)." }), { status: 400, headers: cors });
+    // Billing gate — Pro or Premium required
+    const { data: agentTierData } = await supabase.from("agents").select("tier").eq("id", agentId).single();
+    if (!agentTierData || agentTierData.tier === "free") return new Response(JSON.stringify({ error: "Agency creation requires a Pro or Premium plan. Upgrade at sellingdubai.ae to unlock this feature." }), { status: 403, headers: cors });
     const { data: existing } = await supabase.from("agencies").select("id").eq("owner_agent_id", agentId).maybeSingle();
     if (existing) return new Response(JSON.stringify({ error: "You already have an agency." }), { status: 409, headers: cors });
     // Generate unique slug
     let base = slugify(name) || "agency";
     let slug = base;
-    for (let i = 1; ; i++) {
+    {
       const { data: taken } = await supabase.from("agencies").select("id").eq("slug", slug).maybeSingle();
-      if (!taken) break;
-      slug = `${base}-${i}`;
+      if (taken) slug = `${base}-${Date.now()}`;
     }
     const { data: agency, error: insertErr } = await supabase
       .from("agencies")
@@ -122,14 +128,30 @@ Deno.serve(async (req: Request) => {
     const agencyId = typeof body.agency_id === "string" ? body.agency_id : "";
     const memberEmail = typeof body.member_email === "string" ? body.member_email.trim().toLowerCase() : "";
     if (!agencyId || !memberEmail) return new Response(JSON.stringify({ error: "Missing agency_id or member_email." }), { status: 400, headers: cors });
-    const { data: ownerAgency } = await supabase.from("agencies").select("id").eq("id", agencyId).eq("owner_agent_id", agentId).maybeSingle();
+    const { data: ownerAgency } = await supabase.from("agencies").select("id, name").eq("id", agencyId).eq("owner_agent_id", agentId).maybeSingle();
     if (!ownerAgency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
+    const { data: ownerAgent } = await supabase.from("agents").select("name").eq("id", agentId).single();
     const { data: target } = await supabase.from("agents").select("id, name, email, agency_id").eq("email", memberEmail).maybeSingle();
     if (!target) return new Response(JSON.stringify({ error: "No agent found with that email." }), { status: 404, headers: cors });
     if (target.id === agentId) return new Response(JSON.stringify({ error: "You are already the agency owner." }), { status: 409, headers: cors });
     if (target.agency_id) return new Response(JSON.stringify({ error: "This agent already belongs to an agency." }), { status: 409, headers: cors });
     const { error: addErr } = await supabase.from("agents").update({ agency_id: agencyId }).eq("id", target.id);
     if (addErr) return new Response(JSON.stringify({ error: "Failed to add member." }), { status: 500, headers: cors });
+    // Notify new member via email (fire-and-forget)
+    const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
+    const RESEND_FROM = Deno.env.get("RESEND_FROM") || "SellingDubai <leads@sellingdubai.ae>";
+    if (RESEND_KEY && target.email) {
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: RESEND_FROM,
+          to: [target.email],
+          subject: `You've been added to ${ownerAgency.name} on SellingDubai`,
+          html: `<p>Hi ${target.name},</p><p>You've been added to <strong>${ownerAgency.name}</strong> on SellingDubai by ${ownerAgent?.name || "an agency owner"}.</p><p>You can now view agency analytics via your dashboard. If this was unexpected, please contact <a href="mailto:support@sellingdubai.ae">support@sellingdubai.ae</a>.</p>`,
+        }),
+      }).catch(() => {});
+    }
     return new Response(JSON.stringify({ success: true, member: { id: target.id, name: target.name, email: target.email } }), { headers: cors });
   }
 
@@ -147,4 +169,8 @@ Deno.serve(async (req: Request) => {
   }
 
   return new Response(JSON.stringify({ error: "Unknown action." }), { status: 400, headers: cors });
+  } catch (e) {
+    console.error("manage-agency error:", e);
+    return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: corsHeaders(req) });
+  }
 });
