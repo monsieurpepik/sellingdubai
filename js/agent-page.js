@@ -501,7 +501,7 @@ async function loadRemOffplanProjects() {
     .from('projects')
     .select('slug, name, cover_image_url, location, district_name, min_price, max_price, property_types, completion_date, status, developers(name)')
     .order('synced_at', { ascending: false })
-    .limit(120);
+    .limit(20);
 
   if (error || !projects || projects.length === 0) return;
 
