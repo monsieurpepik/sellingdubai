@@ -111,10 +111,14 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // ── 2. Filter: Dubai only, exclude Out Of Stock ───────────────────────────
-  const eligible = remData.data.filter(
-    (p) => p.city_name === "Dubai" && p.status !== "Out Of Stock",
-  );
+  // ── 2. Filter: Dubai only, exclude Out Of Stock, deduplicate by id ──────────
+  const seenIds = new Set<number>();
+  const eligible = remData.data.filter((p) => {
+    if (p.city_name !== "Dubai" || p.status === "Out Of Stock") return false;
+    if (seenIds.has(p.id)) return false;
+    seenIds.add(p.id);
+    return true;
+  });
 
   // ── 3. Upsert developers (by slug, keyed on developer_name) ───────────────
   // Collect unique developers
