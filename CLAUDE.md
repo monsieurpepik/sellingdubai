@@ -26,9 +26,29 @@ These rules exist because the site has been optimized from Performance 56 → 82
 - If icons are needed, extend the existing Material Symbols request with `&icon_names=` — do not add a second icon font.
 - System font fallback stack: `-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`.
 
-### Pre-deploy Checklist
-Before every deploy, confirm:
+## Pre-Deploy Checklist
+
+Run these checks before every deploy, in order. These rules exist because each one maps to a real bug or revenue regression found in production.
+
+### Build
 - [ ] `npm run build` passes with no new errors
-- [ ] No new chunks in `dist/chunks/` exceed 20KB without justification
+- [ ] `dist/init.bundle.js` is under 30KB (currently ~23KB) — check esbuild output
+- [ ] No new chunks in `dist/chunks/` exceed 20KB without justification in `DECISIONS.md`
 - [ ] No new third-party `<script>` tags added without approval
-- [ ] Any new images use Netlify Image CDN transform URLs
+- [ ] Any new images use Netlify Image CDN transform URLs — no raw `supabase.co/storage` URLs in rendered UI
+
+### CTAs and routing
+- [ ] All CTAs on `index.html` and `landing.html` point to correct destinations — "Get Your Page", "Claim your profile", and referral links must go to `/join`, not `/#hero-waitlist` or any waitlist anchor
+
+### Field name consistency
+- [ ] Any field collected in `join.html` and later read in `dashboard.html` uses the same column name — the `bio` vs `tagline` mismatch broke the onboarding checklist for every signup. When in doubt, `grep` for the field name across both files before deploying.
+
+### Lazy-load callbacks
+- [ ] No lazy-load callback calls `window.<functionName>()` without first checking that the function has been replaced by the imported module — use a named function expression and guard: `if (window.fn !== namedLazy) window.fn()`
+
+### Billing gate
+- [ ] Confirm `BILLING_LIVE` flag status in `pricing.html` is intentional. It is `false` by default. Only set to `true` when Stripe price IDs are confirmed in production env vars and billing is ready to open.
+
+### Diff review
+- [ ] Run `git diff` and scan for obviously broken patterns: raw Supabase URLs, `href="#"` or waitlist anchors on primary CTAs, hardcoded field names that diverge from the DB schema, `?? "pro"` fallbacks in webhook handlers
+
