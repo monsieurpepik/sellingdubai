@@ -446,7 +446,7 @@
         </div>
         <div>
           <div class="text-sm font-bold text-on-surface">Live Now</div>
-          <div class="text-[11px] text-zinc-400" style="font-weight:300;">Claim your page today</div>
+          <div class="text-[11px] text-zinc-400" style="font-weight:300;"><span id="agent-count-live">Join</span> verified agents</div>
         </div>
       </div>
       <!-- Divider -->
@@ -994,6 +994,25 @@ function joinWaitlist(e, form) {
   return false;
 }
 
+</script>
+
+<script>
+(function() {
+  var SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+  fetch(SUPABASE_URL + '/rest/v1/agents?select=id&verification_status=eq.verified', {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+  }).then(function(res) {
+    var countHeader = res.headers.get('content-range');
+    if (countHeader) {
+      var total = parseInt(countHeader.split('/')[1], 10);
+      if (!isNaN(total) && total > 0) {
+        var el = document.getElementById('agent-count-live');
+        if (el) el.textContent = total.toLocaleString();
+      }
+    }
+  }).catch(function() {});
+})();
 </script>
 
 </body>
