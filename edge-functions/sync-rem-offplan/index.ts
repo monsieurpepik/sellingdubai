@@ -250,7 +250,15 @@ Deno.serve(async (req: Request) => {
   const existingRemIds = new Set((existing ?? []).map((r: { rem_id: string }) => r.rem_id));
 
   for (let offset = 0; offset < projectRows.length; offset += BATCH_SIZE) {
-    const batch = projectRows.slice(offset, offset + BATCH_SIZE);
+    // Deduplicate within batch by rem_id then by slug (keep first occurrence)
+    const seenBatchRemIds = new Set<string>();
+    const seenBatchSlugs = new Set<string>();
+    const batch = projectRows.slice(offset, offset + BATCH_SIZE).filter((row) => {
+      if (seenBatchRemIds.has(row.rem_id) || seenBatchSlugs.has(row.slug)) return false;
+      seenBatchRemIds.add(row.rem_id);
+      seenBatchSlugs.add(row.slug);
+      return true;
+    });
 
     const { error: projErr } = await sb
       .from("projects")
