@@ -1,0 +1,208 @@
+import type { Config, Context } from "@netlify/edge-functions";
+
+const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+const DEFAULT_IMAGE = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
+
+// Bot user-agent patterns for SSR prerendering
+const BOT_UA_PATTERNS = [
+  'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
+  'yandexbot', 'facebookexternalhit', 'facebot', 'twitterbot',
+  'linkedinbot', 'whatsapp', 'telegrambot', 'discordbot',
+  'applebot', 'semrushbot', 'ahrefsbot', 'mj12bot',
+  'ia_archiver', 'archive.org_bot', 'petalbot',
+];
+
+function isBot(userAgent: string): boolean {
+  if (!userAgent) return false;
+  const ua = userAgent.toLowerCase();
+  return BOT_UA_PATTERNS.some(pattern => ua.includes(pattern));
+}
+
+function escapeHtml(text: string): string {
+  if (!text) return '';
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+export default async (request: Request, context: Context) => {
+  const url = new URL(request.url);
+  const pathParts = url.pathname.split('/').filter(Boolean);
+
+  let slug = '';
+  if (pathParts[0] === 'a' && pathParts[1]) {
+    slug = pathParts[1];
+  } else if (pathParts.length === 1) {
+    slug = pathParts[0];
+  }
+
+  if (!slug) {
+    return context.next();
+  }
+
+  // Skip known paths that aren't agent slugs
+  const reserved = ['join', 'edit', 'landing', 'dashboard', 'pricing', 'terms', 'privacy', 'favicon.ico', '_redirects'];
+  if (reserved.includes(slug)) {
+    return context.next();
+  }
+
+  // ─── BOT DETECTION: Proxy to Supabase prerender function ───
+  const userAgent = request.headers.get('user-agent') || '';
+  if (isBot(userAgent)) {
+    try {
+      const prerenderUrl = `${SUPABASE_URL}/functions/v1/prerender?slug=${encodeURIComponent(slug)}`;
+      const prerenderRes = await fetch(prerenderUrl, {
+        headers: {
+          'User-Agent': userAgent,
+        },
+      });
+
+      if (prerenderRes.ok) {
+        const html = await prerenderRes.text();
+        return new Response(html, {
+          status: 200,
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'public, max-age=3600, s-maxage=7200',
+            'x-robots-tag': 'index, follow',
+          },
+        });
+      }
+      // If prerender returns non-200 (e.g. 404 for unknown agent),
+      // pass through the response as-is
+      if (prerenderRes.status === 404) {
+        const html = await prerenderRes.text();
+        return new Response(html, {
+          status: 404,
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'x-robots-tag': 'noindex',
+          },
+        });
+      }
+    } catch {
+      // Prerender failed — fall through to normal OG injection
+    }
+  }
+
+  // ─── HUMAN VISITORS: OG tag injection into SPA HTML ───
+
+  // Fetch agent from Supabase — do this BEFORE context.next() so we
+  // can bail cleanly if the agent doesn't exist.
+  let agent: { name: string; tagline: string; photo_url: string; slug: string; verification_status: string } | null = null;
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/agents?slug=eq.${encodeURIComponent(slug)}&select=name,tagline,photo_url,slug,verification_status`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
+
+    if (res.ok) {
+      const agents = await res.json();
+      if (agents && agents.length > 0 && agents[0].name) {
+        agent = agents[0];
+      }
+    }
+  } catch {
+    // Supabase fetch failed — pass through without OG injection
+  }
+
+  // If no verified agent found, serve the page as-is (no OG tags)
+  if (!agent) {
+    return context.next();
+  }
+
+  // Now get the HTML response and inject OG tags
+  try {
+    const response = await context.next();
+    const html = await response.text();
+
+    const title = escapeHtml(agent.name) + ' | SellingDubai';
+    const description = escapeHtml(agent.tagline || 'Dubai Real Estate Agent');
+
+    // Validate image URL — prevents stored XSS via photo_url
+    let rawImage = DEFAULT_IMAGE;
+    if (agent.photo_url) {
+      try {
+        const parsedUrl = new URL(agent.photo_url);
+        if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
+          rawImage = agent.photo_url;
+        }
+      } catch {
+        // Invalid URL — fall back to default
+      }
+    }
+    const image = escapeHtml(rawImage);
+    const profileUrl = `${url.origin}/a/${encodeURIComponent(agent.slug)}`;
+
+    let modified = html.replace(
+      /<title>[^<]*<\/title>/,
+      `<title>${title}</title>`
+    );
+
+    // Use Netlify Image CDN for OG image (absolute URL required for social cards)
+    const ogImage = rawImage.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
+      ? `${url.origin}/.netlify/images?url=${encodeURIComponent(rawImage)}&w=1200&fm=webp&q=80`
+      : image;
+
+    const jsonLd = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "RealEstateAgent",
+      "name": agent.name,
+      "description": agent.tagline || "Dubai Real Estate Agent",
+      "url": profileUrl,
+      "image": rawImage,
+      "sameAs": [],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Dubai",
+        "addressCountry": "AE"
+      }
+    });
+
+    const ogBlock = `
+    <link rel="canonical" href="${profileUrl}" />
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
+    <meta property="og:image" content="${ogImage}" />
+    <meta property="og:url" content="${profileUrl}" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="SellingDubai" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:image" content="${ogImage}" />
+    <meta name="description" content="${description}" />
+    <script type="application/ld+json">${jsonLd}</script>
+    `;
+
+    modified = modified.replace(/<\/head>/i, `${ogBlock}</head>`);
+
+    // CRITICAL: Strip Content-Encoding and Content-Length.
+    // response.text() decompresses the body (gzip/br → plain text).
+    // If we pass the original Content-Encoding header, the browser will
+    // try to decompress already-plain text → blank/white page.
+    const headers = new Headers(response.headers);
+    headers.delete('content-encoding');
+    headers.delete('content-length');
+
+    return new Response(modified, {
+      status: response.status,
+      headers,
+    });
+  } catch {
+    // If HTML modification fails, context.next() was already consumed —
+    // serve a minimal redirect to let the browser re-fetch cleanly.
+    return new Response(
+      `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${url.pathname}?_bypass=1"></head><body></body></html>`,
+      { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }
+    );
+  }
+};
+
+// Config is declared in netlify.toml — path: /a/* only
+// No catch-all needed; _redirects handles all other routing

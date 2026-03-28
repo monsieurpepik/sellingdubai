@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://sellingdubai.ae/sitemap.xml
+
+# Disallow internal paths
+Disallow: /edit
+Disallow: /netlify/
+Disallow: /edge-functions/

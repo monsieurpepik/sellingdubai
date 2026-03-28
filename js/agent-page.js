@@ -275,7 +275,7 @@ export async function renderAgent(agent) {
   // === REM OFF-PLAN PROJECTS (boban-pepic test environment only) ===
   if (agent.slug === 'boban-pepic') {
     upsertMeta('name', 'robots', 'noindex, nofollow');
-    loadRemOffplanProjects();
+    // loadRemOffplanProjects(); // off-plan section removed; will be rebuilt inside Portfolio
   }
 
   // === SOCIAL ICONS ===

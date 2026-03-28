@@ -7,8 +7,8 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap&subset=latin" rel="stylesheet"></noscript>
 <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
 <script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
 <style>
@@ -73,8 +73,8 @@
   .field textarea { resize: none; height: 70px; }
   .field select, select { outline: none; }
   .field select option, select option { background: #111; color: #fff; }
-  .field-hint { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 6px; }
-  .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.45); font-size: 8px; }
+  .field-hint { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 6px; }
+  .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.6); font-size: 8px; }
   .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; }
   .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.1); border-radius: 24px; transition: 0.3s; }
@@ -115,7 +115,7 @@
   .link-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .link-btn-wa { background: #25d366; color: #fff; }
   .link-btn-danger { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.2); box-shadow: none; }
-  .link-btn-ghost { background: none; color: rgba(255,255,255,0.65); box-shadow: none; font-size: 14px; padding: 14px; }
+  .link-btn-ghost { background: none; color: rgba(255,255,255,0.7); box-shadow: none; font-size: 14px; padding: 14px; }
   .link-btn-ghost:hover { color: rgba(255,255,255,0.9); }
   .btn-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
@@ -173,17 +173,23 @@
     border: none; cursor: pointer; transition: all 0.15s;
   }
   .share-row-copy {
-    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
   }
   .share-row-copy:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
   .share-row-copy.copied { background: rgba(37,211,102,0.15); color: #25d366; }
   .share-row-view {
-    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.65);
     text-decoration: none;
   }
   .share-row-view:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
 
   .hidden { display: none !important; }
+
+  /* Focus-visible outlines for keyboard navigation */
+  input:focus-visible, button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
 
   /* Verification banners */
   .verify-banner {
@@ -431,27 +437,27 @@
         <div class="field">
           <label>Profile Photo</label>
           <input type="hidden" id="ed-photo" value="">
-          <div class="upload-zone" id="upload-avatar" onclick="document.getElementById('file-avatar').click()">
+          <button type="button" class="upload-zone" id="upload-avatar" onclick="document.getElementById('file-avatar').click()" aria-label="Upload profile photo">
             <div class="upload-preview" id="preview-avatar"></div>
             <div class="upload-prompt" id="prompt-avatar">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
               <span>Tap to upload photo</span>
             </div>
             <div class="upload-loading hidden" id="loading-avatar"><span class="spinner"></span></div>
-          </div>
+          </button>
           <input type="file" id="file-avatar" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadImage(this, 'avatar')">
         </div>
         <div class="field">
           <label>Background Image</label>
           <input type="hidden" id="ed-bg" value="">
-          <div class="upload-zone upload-zone-wide" id="upload-bg" onclick="document.getElementById('file-bg').click()">
+          <button type="button" class="upload-zone upload-zone-wide" id="upload-bg" onclick="document.getElementById('file-bg').click()" aria-label="Upload background image">
             <div class="upload-preview" id="preview-bg"></div>
             <div class="upload-prompt" id="prompt-bg">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
               <span>Tap to upload background</span>
             </div>
             <div class="upload-loading hidden" id="loading-bg"><span class="spinner"></span></div>
-          </div>
+          </button>
           <input type="file" id="file-bg" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadImage(this, 'background')">
         </div>
       </div>
@@ -466,14 +472,14 @@
         <div class="field">
           <label>Agency Logo</label>
           <input type="hidden" id="ed-agency-logo" value="">
-          <div class="upload-zone upload-zone-small" id="upload-logo" onclick="document.getElementById('file-logo').click()">
+          <button type="button" class="upload-zone upload-zone-small" id="upload-logo" onclick="document.getElementById('file-logo').click()" aria-label="Upload agency logo">
             <div class="upload-preview" id="preview-logo"></div>
             <div class="upload-prompt" id="prompt-logo">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
               <span>Upload logo</span>
             </div>
             <div class="upload-loading hidden" id="loading-logo"><span class="spinner"></span></div>
-          </div>
+          </button>
           <input type="file" id="file-logo" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadImage(this, 'agency_logo')">
           <div class="field-hint">Small square logo — shown as a badge under your name</div>
         </div>
@@ -489,14 +495,14 @@
         <div class="field">
           <label>Upload DLD / RERA License</label>
           <input type="hidden" id="ed-license-img" value="">
-          <div class="upload-zone upload-zone-wide" id="upload-license" onclick="document.getElementById('file-license').click()">
+          <button type="button" class="upload-zone upload-zone-wide" id="upload-license" onclick="document.getElementById('file-license').click()" aria-label="Upload RERA license photo">
             <div class="upload-preview" id="preview-license"></div>
             <div class="upload-prompt" id="prompt-license">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
               <span>Tap to upload license photo</span>
             </div>
             <div class="upload-loading hidden" id="loading-license"><span class="spinner"></span></div>
-          </div>
+          </button>
           <input type="file" id="file-license" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="uploadImage(this, 'license')">
           <div class="field-hint">Upload a photo of your DLD broker card or RERA certificate. This speeds up verification from 48hrs to same-day.</div>
         </div>
@@ -574,13 +580,13 @@
           </div>
           <div class="field">
             <label>Photo</label>
-            <div class="upload-zone upload-zone-wide" onclick="document.getElementById('file-prop').click()">
+            <button type="button" class="upload-zone upload-zone-wide" onclick="document.getElementById('file-prop').click()" aria-label="Upload property photo">
               <div class="upload-preview" id="preview-prop"></div>
               <div class="upload-prompt" id="prompt-prop">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                 <span>Tap to upload property photo</span>
               </div>
-            </div>
+            </button>
             <input type="file" id="file-prop" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewPropPhoto(this)">
             <input type="hidden" id="prop-image-data" value="">
           </div>
@@ -637,7 +643,7 @@
               <div style="font-size:13px;font-weight:600;color:#E1306C;" id="ig-username">@username</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            <button onclick="disconnectInstagram()" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
+            <button onclick="disconnectInstagram()" aria-label="Disconnect Instagram" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
           </div>
         </div>
 
@@ -655,7 +661,7 @@
               <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);" id="tt-username">@username</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            <button onclick="disconnectTikTok()" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
+            <button onclick="disconnectTikTok()" aria-label="Disconnect TikTok" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
           </div>
         </div>
 

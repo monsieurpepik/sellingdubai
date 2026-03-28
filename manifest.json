@@ -1,0 +1,18 @@
+{
+  "name": "SellingDubai",
+  "short_name": "SellingDubai",
+  "description": "Dubai real estate agent profiles — verified listings, off-plan projects, and direct contact.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/sellingdubailogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

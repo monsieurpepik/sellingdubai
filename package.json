@@ -1,0 +1,17 @@
+{
+  "name": "sellingdubai-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "npx tailwindcss -i landing-input.css -o landing-output.css --minify",
+    "build:js": "mkdir -p dist && esbuild js/init.js --bundle --minify --sourcemap --format=esm --splitting --outdir=dist --entry-names=[name].bundle --chunk-names=chunks/[name]-[hash]",
+    "build:styles": "esbuild styles.css --minify --outfile=dist/styles.min.css",
+    "build": "npm run build:css && npm run build:js && npm run build:styles"
+  },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.9",
+    "esbuild": "^0.27.4",
+    "tailwindcss": "^3.4.17"
+  }
+}

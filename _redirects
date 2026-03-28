@@ -1,0 +1,28 @@
+# Landing page (root)
+/         /landing.html  200!
+
+# Onboarding
+/join     /join.html  200
+
+# Agent edit dashboard
+/edit     /edit.html  200
+
+# Agent dashboard
+/dashboard  /dashboard.html  200
+
+# Pricing
+/pricing   /pricing.html  200
+
+# Legal pages
+/terms     /terms.html    200
+/privacy   /privacy.html  200
+
+# Agent link page — /a/slug
+/a/*      /index.html  200
+
+# Static assets — serve directly (must be above catch-all)
+/styles.css   /styles.css  200
+/app.js       /app.js      200
+
+# Catch-all for direct slug access (clean URLs like /boban-pepic)
+/*        /index.html  200
