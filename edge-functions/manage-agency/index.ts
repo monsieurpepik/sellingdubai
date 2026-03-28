@@ -10,7 +10,7 @@ const ALLOWED_ORIGINS = [
 
 function corsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") ?? "";
-  const ao = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  const ao = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": ao,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -84,22 +84,32 @@ Deno.serve(async (req: Request) => {
     // Generate unique slug
     let base = slugify(name) || "agency";
     let slug = base;
-    {
+    let agency = null;
+    let insertErr = null;
+    // Try up to 10 times to get a unique slug
+    for (let attempt = 0; attempt < 10; attempt++) {
+      if (attempt > 0) {
+        slug = `${base}-${attempt}`;
+      }
       const { data: taken } = await supabase.from("agencies").select("id").eq("slug", slug).maybeSingle();
-      if (taken) slug = `${base}-${Date.now()}`;
+      if (taken) { slug = `${base}-${attempt + 1}`; continue; }
+      const { data: inserted, error: err } = await supabase
+        .from("agencies")
+        .insert({
+          slug,
+          name,
+          logo_url: typeof body.logo_url === "string" ? body.logo_url || null : null,
+          website: typeof body.website === "string" ? body.website || null : null,
+          description: typeof body.description === "string" ? body.description || null : null,
+          owner_agent_id: agentId,
+        })
+        .select("id, slug, name, logo_url, website, description, created_at")
+        .single();
+      if (err && err.code === "23505") continue; // slug conflict, retry
+      agency = inserted;
+      insertErr = err;
+      break;
     }
-    const { data: agency, error: insertErr } = await supabase
-      .from("agencies")
-      .insert({
-        slug,
-        name,
-        logo_url: typeof body.logo_url === "string" ? body.logo_url || null : null,
-        website: typeof body.website === "string" ? body.website || null : null,
-        description: typeof body.description === "string" ? body.description || null : null,
-        owner_agent_id: agentId,
-      })
-      .select("id, slug, name, logo_url, website, description, created_at")
-      .single();
     if (insertErr || !agency) return new Response(JSON.stringify({ error: "Failed to create agency." }), { status: 500, headers: cors });
     // Add owner as member
     await supabase.from("agents").update({ agency_id: agency.id }).eq("id", agentId);
@@ -114,9 +124,9 @@ Deno.serve(async (req: Request) => {
     if (!agency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
     const updates: Record<string, unknown> = {};
     if ("name" in body) updates.name = typeof body.name === "string" ? body.name.trim() || null : null;
-    if ("logo_url" in body) updates.logo_url = body.logo_url || null;
-    if ("website" in body) updates.website = body.website || null;
-    if ("description" in body) updates.description = body.description || null;
+    if ("logo_url" in body) updates.logo_url = typeof body.logo_url === "string" ? body.logo_url || null : null;
+    if ("website" in body) updates.website = typeof body.website === "string" ? body.website || null : null;
+    if ("description" in body) updates.description = typeof body.description === "string" ? body.description || null : null;
     if (Object.keys(updates).length === 0) return new Response(JSON.stringify({ error: "No fields to update." }), { status: 400, headers: cors });
     const { data: updated, error: upErr } = await supabase.from("agencies").update(updates).eq("id", agencyId).select("id, slug, name, logo_url, website, description, created_at").single();
     if (upErr) return new Response(JSON.stringify({ error: "Update failed." }), { status: 500, headers: cors });
@@ -163,8 +173,9 @@ Deno.serve(async (req: Request) => {
     const { data: ownerAgency } = await supabase.from("agencies").select("id").eq("id", agencyId).eq("owner_agent_id", agentId).maybeSingle();
     if (!ownerAgency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
     if (memberId === agentId) return new Response(JSON.stringify({ error: "Cannot remove the agency owner." }), { status: 409, headers: cors });
-    const { error: removeErr } = await supabase.from("agents").update({ agency_id: null }).eq("id", memberId).eq("agency_id", agencyId);
+    const { data: removed, error: removeErr } = await supabase.from("agents").update({ agency_id: null }).eq("id", memberId).eq("agency_id", agencyId).select("id");
     if (removeErr) return new Response(JSON.stringify({ error: "Failed to remove member." }), { status: 500, headers: cors });
+    if (!removed || removed.length === 0) return new Response(JSON.stringify({ error: "Member not found in this agency." }), { status: 404, headers: cors });
     return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
