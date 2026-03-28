@@ -8,6 +8,8 @@ import { allProperties, currentFilters } from './state.js';
 // Netlify Image CDN — WebP, max width, quality 80
 function optimizeImg(url, w = 800) {
   if (!url) return '';
+  // Unsplash URLs are not in the Netlify Image CDN allowlist — serve directly
+  if (url.includes('images.unsplash.com')) return url;
   return `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&q=80&fm=webp`;
 }
 
