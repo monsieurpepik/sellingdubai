@@ -6,6 +6,7 @@
 <title>SellingDubai | The Verified Page for Dubai Agents</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <meta name="description" content="The DLD-verified link-in-bio for Dubai real estate agents. Your badge, your listings, direct WhatsApp, visitor analytics. Free to set up in 5 minutes."/>
+<link rel="canonical" href="https://sellingdubai.ae/"/>
 <meta property="og:title" content="SellingDubai | The Verified Page for Dubai Agents"/>
 <meta property="og:description" content="The DLD-verified link-in-bio for Dubai real estate agents. Your badge, listings, direct WhatsApp, analytics. Free."/>
 <meta property="og:image" content="https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg"/>
@@ -20,10 +21,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
-<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/></noscript>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
-<noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/></noscript>
+<link rel="preload" as="image" fetchpriority="high" href="/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg&w=800&fm=webp&q=80">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap&subset=latin" rel="stylesheet"/></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" rel="stylesheet"/></noscript>
 <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
 <script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
 <style>
@@ -91,7 +93,7 @@
     overflow: hidden;
     position: relative;
     background-color: #0a0a0a;
-    background-image: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.10) 40%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.40) 100%), url('https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg');
+    background-image: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.10) 40%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.40) 100%), url('/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg&w=800&fm=webp&q=80');
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
@@ -132,6 +134,12 @@
   /* RTL support */
   [dir="rtl"] { text-align: right; }
   [dir="rtl"] .brand-logo { letter-spacing: 0.06em; }
+
+  /* Focus-visible outlines for keyboard navigation */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid #09090b;
+    outline-offset: 2px;
+  }
 </style>
 </head>
 
@@ -158,12 +166,12 @@
 <section class="max-w-7xl mx-auto px-6 pt-16 pb-12 text-center">
   <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">Turn followers into clients</div>
   <h1 class="font-headline text-5xl md:text-8xl text-on-surface mb-8 tight-tracking leading-[1.1]">
-    <span>You are the brand.<br/>This is your stage.</span>
+    <span>Post the reel.<br/>Close the deal.</span>
   </h1>
   <p class="font-body text-base text-on-surface-variant max-w-lg mx-auto mb-10 leading-relaxed" style="font-weight:300;">
-    Your DLD badge, your listings, your WhatsApp — one page in your Instagram bio. Followers see your credentials, browse your properties, and message you directly. No middleman. No forms. You are the storefront.
+    SellingDubai gives Dubai real estate agents a professional profile page that generates leads via WhatsApp. Your DLD badge builds trust, your listings do the pitch — one tap from follower to conversation.
   </p>
-  <div class="max-w-md mx-auto mb-24 w-full px-4">
+  <div class="max-w-md mx-auto mb-6 w-full px-4">
     <a href="/join" class="inline-block bg-primary text-on-primary px-10 py-4 rounded-full text-base font-bold hover:opacity-90 transition-all">Claim Your Page — Free</a>
     <p class="text-xs text-zinc-400 mt-3">Set up in under 2 minutes. No credit card required.</p>
   </div>
@@ -592,7 +600,7 @@
           <span class="material-symbols-outlined text-xs">trending_up</span> WhatsApp taps
         </p>
       </div>
-      <h2 class="font-headline text-3xl mb-4 tight-tracking">Know Every Visitor</h2>
+      <h3 class="font-headline text-3xl mb-4 tight-tracking">Know Every Visitor</h3>
       <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">See who visits your page, what listings they view, when they tap WhatsApp. Connect your pixel and retarget them with ads. Your dashboard shows everything. Every visitor, every tap, every conversation.</p>
     </div>
 
@@ -607,7 +615,7 @@
           <span class="material-symbols-outlined text-xs">done</span> Verified
         </p>
       </div>
-      <h2 class="font-headline text-3xl mb-4 tight-tracking">Prove You're Real</h2>
+      <h3 class="font-headline text-3xl mb-4 tight-tracking">Prove You're Real</h3>
       <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">International buyers don't know who to trust. Your DLD badge tells them instantly. This agent is legit.</p>
     </div>
 
@@ -624,7 +632,7 @@
           <span class="material-symbols-outlined text-xs">link</span> Connected
         </p>
       </div>
-      <h2 class="font-headline text-3xl mb-4 tight-tracking">Your Storefront</h2>
+      <h3 class="font-headline text-3xl mb-4 tight-tracking">Your Storefront</h3>
       <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">Your photo, your agency, your listings, your socials — one page that works like a personal marketplace. Buyers browse, trust, and reach out. You are the store.</p>
     </div>
   </div>
@@ -708,61 +716,99 @@
   </div>
 </section>
 
+<!-- ======== PRICING TEASER ======== -->
+<section class="max-w-3xl mx-auto px-6 py-24 text-center reveal">
+  <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">Pricing</div>
+  <h2 class="font-headline text-4xl md:text-5xl mb-4 tight-tracking">Start free. Upgrade when you're ready.</h2>
+  <p class="text-zinc-500 text-sm mb-12 max-w-md mx-auto leading-relaxed">Your verified page is free forever. Unlock advanced tools as your business grows.</p>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left mb-10">
+    <div class="bg-white border border-zinc-100 rounded-2xl p-6 shadow-sm">
+      <div class="font-headline text-lg tight-tracking mb-1">Free</div>
+      <div class="text-3xl font-bold mb-4">AED 0<span class="text-base font-normal text-zinc-400">/forever</span></div>
+      <ul class="space-y-2 text-sm text-zinc-500">
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-zinc-400">check</span>Verified profile page</li>
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-zinc-400">check</span>Up to 3 listings</li>
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-zinc-400">check</span>Lead capture + analytics</li>
+      </ul>
+    </div>
+    <div class="bg-white border border-zinc-100 rounded-2xl p-6 shadow-sm">
+      <div class="font-headline text-lg tight-tracking mb-1">Pro</div>
+      <div class="text-3xl font-bold mb-4">AED 299<span class="text-base font-normal text-zinc-400">/month</span></div>
+      <ul class="space-y-2 text-sm text-zinc-500">
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-zinc-400">check</span>Up to 20 listings</li>
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-zinc-400">check</span>Remove branding</li>
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-zinc-400">check</span>Advanced analytics + CRM</li>
+      </ul>
+    </div>
+    <div class="bg-zinc-900 text-white rounded-2xl p-6 shadow-sm relative">
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-on-primary text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">Most Popular</div>
+      <div class="font-headline text-lg tight-tracking mb-1">Premium</div>
+      <div class="text-3xl font-bold mb-4">AED 799<span class="text-base font-normal opacity-50">/month</span></div>
+      <ul class="space-y-2 text-sm opacity-70">
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base">check</span>Unlimited listings</li>
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base">check</span>WhatsApp bot + AI replies</li>
+        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base">check</span>Priority placement</li>
+      </ul>
+    </div>
+  </div>
+  <a href="/pricing" class="text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition-colors underline underline-offset-4">See full plan comparison →</a>
+</section>
+
 <!-- ======== FAQ ======== -->
 <section id="faq" class="max-w-3xl mx-auto px-6 py-32 text-center reveal">
   <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">FAQs</div>
   <h2 class="font-headline text-5xl mb-16 tight-tracking leading-tight">Got questions?<br/>Here's the answers.</h2>
   <div class="space-y-3" id="faq-list">
-    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left cursor-pointer hover:bg-zinc-50 transition-colors" onclick="toggleFaq(this)">
-      <div class="p-6 flex justify-between items-center">
+    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">What is SellingDubai?</h4>
-        <span class="material-symbols-outlined text-zinc-300 faq-icon">add_circle</span>
-      </div>
+        <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
+      </button>
       <div class="faq-answer px-6">
         <p class="text-sm text-zinc-500 pb-6 leading-relaxed">SellingDubai is the verified link-in-bio built for Dubai real estate agents. Your DLD badge, your listings, direct WhatsApp, visitor analytics, and ad retargeting — all on one page. Put it in your Instagram bio and turn followers into conversations.</p>
       </div>
     </div>
-    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left cursor-pointer hover:bg-zinc-50 transition-colors" onclick="toggleFaq(this)">
-      <div class="p-6 flex justify-between items-center">
+    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">Is it really free?</h4>
-        <span class="material-symbols-outlined text-zinc-300 faq-icon">add_circle</span>
-      </div>
+        <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
+      </button>
       <div class="faq-answer px-6">
         <p class="text-sm text-zinc-500 pb-6 leading-relaxed">Yes. Your verified page, WhatsApp link, analytics dashboard, and DLD badge are all free. No credit card required. We may introduce optional premium features in the future, but the core product will always be free.</p>
       </div>
     </div>
-    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left cursor-pointer hover:bg-zinc-50 transition-colors" onclick="toggleFaq(this)">
-      <div class="p-6 flex justify-between items-center">
+    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">How does verification work?</h4>
-        <span class="material-symbols-outlined text-zinc-300 faq-icon">add_circle</span>
-      </div>
+        <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
+      </button>
       <div class="faq-answer px-6">
         <p class="text-sm text-zinc-500 pb-6 leading-relaxed">Enter your DLD broker number during registration. We check it against the official Dubai Land Department registry in real time. If your license is active, your page goes live with a verified badge that clients can see instantly.</p>
       </div>
     </div>
-    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left cursor-pointer hover:bg-zinc-50 transition-colors" onclick="toggleFaq(this)">
-      <div class="p-6 flex justify-between items-center">
+    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">How does WhatsApp work on my page?</h4>
-        <span class="material-symbols-outlined text-zinc-300 faq-icon">add_circle</span>
-      </div>
+        <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
+      </button>
       <div class="faq-answer px-6">
         <p class="text-sm text-zinc-500 pb-6 leading-relaxed">One tap, straight to your WhatsApp. No forms, no friction. Your verified page already built the trust, so when they message you, they're ready to talk business. Your dashboard tracks every WhatsApp tap, and you can retarget visitors who browsed but didn't message yet.</p>
       </div>
     </div>
-    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left cursor-pointer hover:bg-zinc-50 transition-colors" onclick="toggleFaq(this)">
-      <div class="p-6 flex justify-between items-center">
+    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">Can I add my own listings?</h4>
-        <span class="material-symbols-outlined text-zinc-300 faq-icon">add_circle</span>
-      </div>
+        <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
+      </button>
       <div class="faq-answer px-6">
         <p class="text-sm text-zinc-500 pb-6 leading-relaxed">Property listings are featured on your page as scrollable cards with photos, pricing, and specs. We're actively building self-serve listing management — for now, reach out and we'll add your properties for you.</p>
       </div>
     </div>
-    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left cursor-pointer hover:bg-zinc-50 transition-colors" onclick="toggleFaq(this)">
-      <div class="p-6 flex justify-between items-center">
+    <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">What about tracking and analytics?</h4>
-        <span class="material-symbols-outlined text-zinc-300 faq-icon">add_circle</span>
-      </div>
+        <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
+      </button>
       <div class="faq-answer px-6">
         <p class="text-sm text-zinc-500 pb-6 leading-relaxed">Connect your Facebook Pixel and GA4 Measurement ID from your dashboard. Track every visitor, every lead, every conversion. Then retarget them with ads.</p>
       </div>
