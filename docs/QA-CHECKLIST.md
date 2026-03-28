@@ -4,6 +4,19 @@ Run this checklist before every deploy. Each item has an exact URL, action, expe
 
 ---
 
+## Test Credentials
+
+These bypass real DLD and email infrastructure. They only work when `ENABLE_TEST_MODE=true` is set as a Supabase project secret. **Never set this flag in production.**
+
+| What | Value | Notes |
+|------|-------|-------|
+| Test BRN | `TEST-0000` | Skips DLD registry lookup. Returns Name: `Test Agent`, Agency: `Test Agency`. |
+| Test email | `boban@sellingdubai.com` | OTP is always `123456`. No email is sent — code is stored directly in DB. |
+
+To activate: set `ENABLE_TEST_MODE=true` in Supabase Dashboard → Edge Functions → Secrets (applies to all functions).
+
+---
+
 ## Journey 1 — Agent Signup (`/join`)
 
 ### Step 1: DLD Broker Verification
