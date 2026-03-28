@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Dashboard — SELLING DUBAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap&subset=latin" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,🏠">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #09090b; color: #fff; font-family: "Inter", sans-serif; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .topbar-brand { font-family: "Manrope", sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.9; display: flex; align-items: center; gap: 8px; }
+    .topbar-brand img { height: 28px; filter: invert(1); }
+    .topbar-nav { display: flex; gap: 8px; }
+    .topbar-nav a { font-size: 13px; color: rgba(255,255,255,0.5); padding: 6px 12px; border-radius: 6px; transition: background 0.15s; }
+    .topbar-nav a:hover, .topbar-nav a.active { background: rgba(255,255,255,0.07); color: #fff; }
+    .main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+    .auth-gate { text-align: center; padding: 80px 24px; }
+    .auth-gate h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .auth-gate p { font-size: 14px; color: rgba(255,255,255,0.5); }
+    #create-section h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    #create-section p { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 24px; }
+    .form-field { margin-bottom: 16px; }
+    .form-field label { display: block; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .form-field input, .form-field textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .form-field input:focus, .form-field textarea:focus { border-color: rgba(255,255,255,0.3); }
+    .form-field textarea { resize: vertical; min-height: 80px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
+    .btn-primary { background: #fff; color: #09090b; }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: #fff; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn:disabled { opacity: 0.4; pointer-events: none; }
+    .agency-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .agency-logo { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; flex-shrink: 0; }
+    .agency-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .agency-name { font-size: 22px; font-weight: 700; }
+    .agency-slug { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .agency-header-actions { margin-left: auto; display: flex; gap: 8px; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+    @media (max-width: 640px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+    .metric-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; }
+    .metric-label { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; margin-bottom: 6px; }
+    .metric-value { font-size: 28px; font-weight: 700; font-family: "Manrope", sans-serif; }
+    .metric-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+    .section { margin-bottom: 32px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-size: 16px; font-weight: 700; }
+    .members-table { width: 100%; border-collapse: collapse; }
+    .members-table th { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .members-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; vertical-align: middle; }
+    .member-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,0.1); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; overflow: hidden; }
+    .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .member-name { font-weight: 600; }
+    .member-slug { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .badge-pro { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .badge-premium { background: rgba(139,92,246,0.15); color: #a78bfa; }
+    .badge-free { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); }
+    .stat-cell { color: rgba(255,255,255,0.8); }
+    .add-member-row { display: flex; gap: 8px; margin-top: 12px; }
+    .add-member-row input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 14px; font-family: inherit; outline: none; }
+    .add-member-row input:focus { border-color: rgba(255,255,255,0.3); }
+    .banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .banner.show { display: block; }
+    .banner-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+    .banner-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #4ade80; }
+    .profile-link { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .profile-link a { color: rgba(255,255,255,0.6); text-decoration: underline; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state { text-align: center; padding: 60px; color: rgba(255,255,255,0.3); }
+    #dashboard-section { display: none; }
+    #create-section { display: none; }
+    #auth-gate { display: none; }
+    #loading { display: block; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="/sellingdubailogo.png" alt="Selling Dubai">
+    </div>
+    <nav class="topbar-nav">
+      <a href="/dashboard.html">My Dashboard</a>
+      <a href="/agency-dashboard.html" class="active">Agency</a>
+    </nav>
+  </div>
+
+  <div class="main">
+    <div id="loading" class="loading-state"><div class="spinner"></div></div>
+
+    <div id="auth-gate" class="auth-gate">
+      <h2>Not logged in</h2>
+      <p>Please log in via your agent profile to access the agency dashboard.</p>
+    </div>
+
+    <div id="create-section">
+      <h2>Create Your Agency</h2>
+      <p>Set up your agency profile. You'll be able to add team members after creation.</p>
+      <div class="banner banner-error" id="create-error"></div>
+      <div class="form-field">
+        <label>Agency Name *</label>
+        <input type="text" id="create-name" placeholder="e.g. Better Homes Dubai" maxlength="80">
+      </div>
+      <div class="form-field">
+        <label>Logo URL</label>
+        <input type="url" id="create-logo" placeholder="https://...">
+      </div>
+      <div class="form-field">
+        <label>Website</label>
+        <input type="url" id="create-website" placeholder="https://...">
+      </div>
+      <div class="form-field">
+        <label>Description</label>
+        <textarea id="create-description" placeholder="A brief description of your agency..."></textarea>
+      </div>
+      <button class="btn btn-primary" id="btn-create-agency" onclick="createAgency()">Create Agency</button>
+    </div>
+
+    <div id="dashboard-section">
+      <div class="agency-header">
+        <div class="agency-logo" id="agency-logo-el">🏢</div>
+        <div>
+          <div class="agency-name" id="agency-name-el"></div>
+          <div class="agency-slug" id="agency-slug-el"></div>
+          <div class="profile-link">Public profile: <a id="agency-profile-link" href="#" target="_blank"></a></div>
+        </div>
+        <div class="agency-header-actions">
+          <button class="btn btn-secondary" onclick="toggleEditPanel()">Edit Agency</button>
+        </div>
+      </div>
+
+      <div id="edit-panel" style="display:none; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; margin-bottom:24px;">
+        <div class="banner banner-error" id="edit-error"></div>
+        <div class="banner banner-success" id="edit-success"></div>
+        <div class="form-field"><label>Agency Name</label><input type="text" id="edit-name" maxlength="80"></div>
+        <div class="form-field"><label>Logo URL</label><input type="url" id="edit-logo"></div>
+        <div class="form-field"><label>Website</label><input type="url" id="edit-website"></div>
+        <div class="form-field"><label>Description</label><textarea id="edit-description"></textarea></div>
+        <button class="btn btn-primary" id="btn-save-agency" onclick="saveAgency()">Save Changes</button>
+      </div>
+
+      <div class="metrics" id="metrics-grid">
+        <div class="metric-card"><div class="metric-label">Leads This Month</div><div class="metric-value" id="m-leads-month">—</div><div class="metric-sub" id="m-leads-last">— last month</div></div>
+        <div class="metric-card"><div class="metric-label">Views This Month</div><div class="metric-value" id="m-views-month">—</div><div class="metric-sub" id="m-views-last">— last month</div></div>
+        <div class="metric-card"><div class="metric-label">WhatsApp Taps</div><div class="metric-value" id="m-wa-month">—</div><div class="metric-sub">this month</div></div>
+        <div class="metric-card"><div class="metric-label">Active Properties</div><div class="metric-value" id="m-props">—</div><div class="metric-sub" id="m-agents-count">— agents</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Team Members</div>
+        </div>
+        <div class="banner banner-error" id="member-error"></div>
+        <div class="banner banner-success" id="member-success"></div>
+        <table class="members-table">
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Tier</th>
+              <th>Leads (month)</th>
+              <th>Views (month)</th>
+              <th>Properties</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="members-tbody"></tbody>
+        </table>
+        <div class="add-member-row">
+          <input type="email" id="add-member-email" placeholder="Agent email address...">
+          <button class="btn btn-secondary" id="btn-add-member" onclick="addMember()">Add Agent</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+    const MANAGE_URL = SUPABASE_URL + '/functions/v1/manage-agency';
+    const STATS_URL = SUPABASE_URL + '/functions/v1/agency-stats';
+
+    let _token = null;
+    let _agency = null;
+    let _agencyId = null;
+
+    function show(id) {
+      ['loading','auth-gate','create-section','dashboard-section'].forEach(s => {
+        document.getElementById(s).style.display = 'none';
+      });
+      document.getElementById(id).style.display = 'block';
+    }
+
+    async function callManage(body) {
+      const res = await fetch(MANAGE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: _token, ...body })
+      });
+      return res.json();
+    }
+
+    async function init() {
+      _token = localStorage.getItem('sd_edit_token');
+      if (!_token) { show('auth-gate'); return; }
+
+      const data = await callManage({ action: 'get_my_agency' });
+      if (data.error) { show('auth-gate'); return; }
+
+      if (!data.agency) {
+        show('create-section');
+        return;
+      }
+
+      _agency = data.agency;
+      _agencyId = data.agency.id;
+      renderAgencyHeader(data.agency);
+      show('dashboard-section');
+      loadStats(data.members || []);
+    }
+
+    function renderAgencyHeader(agency) {
+      document.getElementById('agency-name-el').textContent = agency.name;
+      document.getElementById('agency-slug-el').textContent = '/' + agency.slug;
+      const link = document.getElementById('agency-profile-link');
+      link.href = '/agency/' + agency.slug;
+      link.textContent = 'sellingdubai.ae/agency/' + agency.slug;
+      const logoEl = document.getElementById('agency-logo-el');
+      if (agency.logo_url) {
+        logoEl.innerHTML = `<img src="${agency.logo_url}" alt="">`;
+      }
+      document.getElementById('edit-name').value = agency.name || '';
+      document.getElementById('edit-logo').value = agency.logo_url || '';
+      document.getElementById('edit-website').value = agency.website || '';
+      document.getElementById('edit-description').value = agency.description || '';
+    }
+
+    async function loadStats(membersFromGet) {
+      try {
+        const res = await fetch(STATS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: _token })
+        });
+        const data = await res.json();
+        if (!data.totals) return;
+        const t = data.totals;
+        document.getElementById('m-leads-month').textContent = t.leads_this_month;
+        document.getElementById('m-leads-last').textContent = t.leads_last_month + ' last month';
+        document.getElementById('m-views-month').textContent = t.views_this_month;
+        document.getElementById('m-views-last').textContent = t.views_last_month + ' last month';
+        document.getElementById('m-wa-month').textContent = t.wa_taps_this_month;
+        document.getElementById('m-props').textContent = t.properties_active;
+        document.getElementById('m-agents-count').textContent = t.agents_count + ' agents';
+        renderMembersTable(data.agents || []);
+      } catch(e) {
+        renderMembersTable(membersFromGet.map(m => ({ ...m })));
+      }
+    }
+
+    function renderMembersTable(agents) {
+      const tbody = document.getElementById('members-tbody');
+      if (!agents.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:rgba(255,255,255,0.3);padding:24px;text-align:center;">No members yet. Add agents by email below.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = agents.map(a => {
+        const initials = (a.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const avatar = a.photo_url
+          ? `<img src="${a.photo_url}" alt="">`
+          : initials;
+        const tierBadge = a.tier === 'premium' ? '<span class="badge badge-premium">Premium</span>'
+          : a.tier === 'pro' ? '<span class="badge badge-pro">Pro</span>'
+          : '<span class="badge badge-free">Free</span>';
+        return `<tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="member-avatar">${avatar}</div>
+              <div>
+                <div class="member-name">${a.name || '—'}</div>
+                <div class="member-slug"><a href="/a/${a.slug}" target="_blank" style="color:rgba(255,255,255,0.4);">@${a.slug}</a></div>
+              </div>
+            </div>
+          </td>
+          <td>${tierBadge}</td>
+          <td class="stat-cell">${a.leads_this_month ?? '—'}</td>
+          <td class="stat-cell">${a.views_this_month ?? '—'}</td>
+          <td class="stat-cell">${a.properties_active ?? '—'}</td>
+          <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" onclick="removeMember('${(a.agent_id || a.id)}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove from agency">Remove</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    window.createAgency = async function() {
+      const name = document.getElementById('create-name').value.trim();
+      const errEl = document.getElementById('create-error');
+      errEl.classList.remove('show');
+      if (!name) { errEl.textContent = 'Agency name is required.'; errEl.classList.add('show'); return; }
+      const btn = document.getElementById('btn-create-agency');
+      btn.disabled = true; btn.textContent = 'Creating...';
+      const data = await callManage({
+        action: 'create', name,
+        logo_url: document.getElementById('create-logo').value.trim() || null,
+        website: document.getElementById('create-website').value.trim() || null,
+        description: document.getElementById('create-description').value.trim() || null,
+      });
+      btn.disabled = false; btn.textContent = 'Create Agency';
+      if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+      _agency = data.agency; _agencyId = data.agency.id;
+      renderAgencyHeader(data.agency);
+      show('dashboard-section');
+      loadStats([]);
+    };
+
+    window.toggleEditPanel = function() {
+      const panel = document.getElementById('edit-panel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    };
+
+    window.saveAgency = async function() {
+      const errEl = document.getElementById('edit-error');
+      const sucEl = document.getElementById('edit-success');
+      errEl.classList.remove('show'); sucEl.classList.remove('show');
+      const btn = document.getElementById('btn-save-agency');
+      btn.disabled = true; btn.textContent = 'Saving...';
+      const data = await callManage({
+        action: 'update', agency_id: _agencyId,
+        name: document.getElementById('edit-name').value.trim(),
+        logo_url: document.getElementById('edit-logo').value.trim() || null,
+        website: document.getElementById('edit-website').value.trim() || null,
+        description: document.getElementById('edit-description').value.trim() || null,
+      });
+      btn.disabled = false; btn.textContent = 'Save Changes';
+      if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+      _agency = data.agency;
+      renderAgencyHeader(data.agency);
+      sucEl.textContent = 'Agency updated.'; sucEl.classList.add('show');
+      setTimeout(() => sucEl.classList.remove('show'), 3000);
+    };
+
+    window.addMember = async function() {
+      const email = document.getElementById('add-member-email').value.trim();
+      const errEl = document.getElementById('member-error');
+      const sucEl = document.getElementById('member-success');
+      errEl.classList.remove('show'); sucEl.classList.remove('show');
+      if (!email) { errEl.textContent = 'Enter an agent email.'; errEl.classList.add('show'); return; }
+      const btn = document.getElementById('btn-add-member');
+      btn.disabled = true;
+      const data = await callManage({ action: 'add_member', agency_id: _agencyId, member_email: email });
+      btn.disabled = false;
+      if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+      document.getElementById('add-member-email').value = '';
+      sucEl.textContent = `${data.member.name} added to the agency.`; sucEl.classList.add('show');
+      setTimeout(() => sucEl.classList.remove('show'), 3000);
+      const refreshData = await callManage({ action: 'get_my_agency' });
+      if (refreshData.agency) loadStats(refreshData.members || []);
+    };
+
+    window.removeMember = async function(memberId, memberName) {
+      if (!confirm(`Remove ${memberName} from the agency?`)) return;
+      const errEl = document.getElementById('member-error');
+      errEl.classList.remove('show');
+      const data = await callManage({ action: 'remove_member', agency_id: _agencyId, member_id: memberId });
+      if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+      const refreshData = await callManage({ action: 'get_my_agency' });
+      if (refreshData.agency) loadStats(refreshData.members || []);
+    };
+
+    init();
+  </script>
+</body>
+</html>
