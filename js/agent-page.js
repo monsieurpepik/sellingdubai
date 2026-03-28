@@ -180,15 +180,6 @@ export async function renderAgent(agent) {
   Object.entries(ogTags).forEach(([prop, content]) => {
     if (content) upsertMeta('property', prop, content);
   });
-  const twitterTags = {
-    'twitter:card': 'summary_large_image',
-    'twitter:title': `${agent.name} | SellingDubai`,
-    'twitter:description': agent.tagline || 'Dubai Real Estate Agent',
-    'twitter:image': agent.photo_url || DEFAULT_BG
-  };
-  Object.entries(twitterTags).forEach(([name, content]) => {
-    if (content) upsertMeta('name', name, content);
-  });
 
   // === JSON-LD STRUCTURED DATA ===
   const jsonLd = {
