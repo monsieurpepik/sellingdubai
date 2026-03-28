@@ -18,7 +18,7 @@ async function init() {
 
   if (agencyErr || !agency) { showError('Agency not found.'); return; }
 
-  document.title = escHtml(agency.name) + ' — SELLING DUBAI';
+  document.title = agency.name + ' — SELLING DUBAI';
   document.querySelector('meta[property="og:title"]').setAttribute('content', agency.name + ' — SELLING DUBAI');
   if (agency.logo_url) {
     document.querySelector('meta[property="og:image"]').setAttribute('content', NETLIFY_IMG(agency.logo_url, 400));
