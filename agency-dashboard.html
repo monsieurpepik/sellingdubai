@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agency Dashboard — SELLING DUBAI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap&subset=latin" rel="stylesheet">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="icon" href="data:image/svg+xml,🏠">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -231,7 +231,10 @@
       link.textContent = 'sellingdubai.ae/agency/' + agency.slug;
       const logoEl = document.getElementById('agency-logo-el');
       if (agency.logo_url) {
-        logoEl.innerHTML = `<img src="${agency.logo_url}" alt="">`;
+        const logoSrc = agency.logo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
+          ? `/.netlify/images?url=${encodeURIComponent(agency.logo_url)}&w=112&fm=webp&q=80`
+          : agency.logo_url;
+        logoEl.innerHTML = `<img src="${logoSrc}" alt="">`;
       }
       document.getElementById('edit-name').value = agency.name || '';
       document.getElementById('edit-logo').value = agency.logo_url || '';
@@ -270,8 +273,11 @@
       }
       tbody.innerHTML = agents.map(a => {
         const initials = (a.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-        const avatar = a.photo_url
-          ? `<img src="${a.photo_url}" alt="">`
+        const photoSrc = a.photo_url && a.photo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
+          ? `/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=64&fm=webp&q=80`
+          : a.photo_url;
+        const avatar = photoSrc
+          ? `<img src="${photoSrc}" alt="">`
           : initials;
         const tierBadge = a.tier === 'premium' ? '<span class="badge badge-premium">Premium</span>'
           : a.tier === 'pro' ? '<span class="badge badge-pro">Pro</span>'
