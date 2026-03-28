@@ -67,15 +67,20 @@ Deno.serve(async (req: Request) => {
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-  const { data: link } = await sb.from("magic_links").select("agent_id, expires_at, used_at").eq("token", token).single();
+  const { data: link, error: linkErr } = await sb.from("magic_links").select("agent_id, expires_at, used_at").eq("token", token).single();
+  if (linkErr && linkErr.code !== "PGRST116") {
+    return new Response(JSON.stringify({ error: "Internal error." }), { status: 500, headers: cors });
+  }
   if (!link || new Date(link.expires_at) < new Date()) return new Response(JSON.stringify({ error: "Invalid or expired session." }), { status: 401, headers: cors });
   if (!link.used_at) return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), { status: 401, headers: cors });
   const agentId: string = link.agent_id;
 
-  const { data: agency } = await sb.from("agencies").select("id, name, slug, logo_url").eq("owner_agent_id", agentId).maybeSingle();
+  const { data: agency, error: agencyErr } = await sb.from("agencies").select("id, name, slug, logo_url").eq("owner_agent_id", agentId).maybeSingle();
+  if (agencyErr) return new Response(JSON.stringify({ error: "Internal error." }), { status: 500, headers: cors });
   if (!agency) return new Response(JSON.stringify({ error: "No agency found for this account." }), { status: 403, headers: cors });
 
-  const { data: members } = await sb.from("agents").select("id, name, slug, photo_url").eq("agency_id", agency.id);
+  const { data: members, error: membersErr } = await sb.from("agents").select("id, name, slug, photo_url").eq("agency_id", agency.id);
+  if (membersErr) return new Response(JSON.stringify({ error: "Internal error." }), { status: 500, headers: cors });
   if (!members || members.length === 0) {
     const empty = { views_this_month: 0, views_last_month: 0, leads_this_month: 0, leads_last_month: 0, leads_all_time: 0, wa_taps_this_month: 0, properties_active: 0 };
     return new Response(JSON.stringify({ agency, agents: [], totals: empty }), { headers: cors });
@@ -86,9 +91,12 @@ Deno.serve(async (req: Request) => {
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
   const lastMonthEnd = thisMonthStart;
 
-  const agentStats = await Promise.all(
+  const settledStats = await Promise.allSettled(
     members.map((m: any) => statsForAgent(m.id, m.name, m.slug, m.photo_url, thisMonthStart, lastMonthStart, lastMonthEnd, sb))
   );
+  const agentStats: AgentStats[] = settledStats
+    .filter((r): r is PromiseFulfilledResult<AgentStats> => r.status === "fulfilled")
+    .map(r => r.value);
 
   const sum = (key: keyof AgentStats) => agentStats.reduce((acc: number, a: AgentStats) => acc + (a[key] as number), 0);
   const totals = {
