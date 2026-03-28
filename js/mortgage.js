@@ -128,7 +128,7 @@ async function loadEiborRate() {
     });
     if (!res.ok) return;
     const data = await res.json();
-    if (data.rate && data.rate > 0) {
+    if (data.rate > 0) {
       window._eiborRate = { rate: data.rate, spread: 1.5 };
       renderEiborBadge();
       // Update the default rate used before a bank is selected
@@ -148,22 +148,28 @@ function renderEiborBadge() {
     <span style="font-size:10px;color:rgba(255,255,255,0.5);font-weight:400;">Current rate: <strong style="color:#fff;font-weight:700;">${total}%</strong>&nbsp;&nbsp;·&nbsp;&nbsp;EIBOR ${r.rate.toFixed(2)}% + ${r.spread}% bank spread</span>
   </div>`;
 
-  // Step 1: insert before #mort-elig-result (which is hidden until eligibility is checked)
+  // Step 1: upsert badge before #mort-elig-result
   const s1Target = document.getElementById('mort-elig-result');
-  if (s1Target && !document.getElementById('mort-eibor-badge-s1')) {
-    const el = document.createElement('div');
-    el.id = 'mort-eibor-badge-s1';
+  if (s1Target) {
+    let el = document.getElementById('mort-eibor-badge-s1');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'mort-eibor-badge-s1';
+      s1Target.parentElement?.insertBefore(el, s1Target);
+    }
     el.innerHTML = badgeHtml;
-    s1Target.parentElement?.insertBefore(el, s1Target);
   }
 
-  // Step 2: insert before #mort-bank-cards
+  // Step 2: upsert badge before #mort-bank-cards
   const s2Target = document.getElementById('mort-bank-cards');
-  if (s2Target && !document.getElementById('mort-eibor-badge-s2')) {
-    const el = document.createElement('div');
-    el.id = 'mort-eibor-badge-s2';
+  if (s2Target) {
+    let el = document.getElementById('mort-eibor-badge-s2');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'mort-eibor-badge-s2';
+      s2Target.parentElement?.insertBefore(el, s2Target);
+    }
     el.innerHTML = badgeHtml;
-    s2Target.parentElement?.insertBefore(el, s2Target);
   }
 }
 
