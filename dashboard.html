@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap&subset=latin" rel="stylesheet"></noscript>
 <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
 <script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
 <style>
@@ -65,7 +65,7 @@
   }
   .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .sidebar-agent-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sidebar-agent-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .sidebar-agent-role { font-size: 11px; color: rgba(255,255,255,0.5); }
 
   /* ── Main content ── */
   .main {
@@ -100,12 +100,12 @@
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 12px; padding: 20px;
   }
-  .metric-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
   .metric-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
   .metric-change { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
   .metric-up { color: #22c55e; }
   .metric-down { color: #ef4444; }
-  .metric-flat { color: rgba(255,255,255,0.3); }
+  .metric-flat { color: rgba(255,255,255,0.5); }
 
   /* ── Chart area ── */
   .chart-card {
@@ -115,7 +115,7 @@
   }
   .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .chart-title { font-size: 14px; font-weight: 600; }
-  .chart-period { font-size: 12px; color: rgba(255,255,255,0.35); }
+  .chart-period { font-size: 12px; color: rgba(255,255,255,0.5); }
   .chart-bars { display: flex; align-items: flex-end; gap: 3px; height: 80px; }
   .chart-bar {
     flex: 1; background: rgba(255,255,255,0.08); border-radius: 3px 3px 0 0;
@@ -154,14 +154,14 @@
   .lead-card:hover { border-color: rgba(255,255,255,0.12); }
   .lead-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
   .lead-name { font-size: 14px; font-weight: 600; }
-  .lead-time { font-size: 12px; color: rgba(255,255,255,0.3); white-space: nowrap; }
+  .lead-time { font-size: 12px; color: rgba(255,255,255,0.5); white-space: nowrap; }
   .lead-details { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
   .lead-pill {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
-    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.65);
   }
-  .lead-msg { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.4; margin-bottom: 12px; font-style: italic; }
+  .lead-msg { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.4; margin-bottom: 12px; font-style: italic; }
   .lead-actions { display: flex; gap: 6px; align-items: center; }
   .lead-btn {
     padding: 10px 14px; border-radius: 8px; font-size: 12px;
@@ -220,7 +220,7 @@
     outline: none; margin-bottom: 12px; transition: all 0.2s;
   }
   .auth-input:focus { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
-  .auth-input::placeholder { color: rgba(255,255,255,0.3); }
+  .auth-input::placeholder { color: rgba(255,255,255,0.5); }
   .auth-btn {
     width: 100%; padding: 14px; border-radius: 10px;
     background: #fff; color: #09090b; font-size: 15px;
@@ -243,6 +243,12 @@
 
   .hidden { display: none !important; }
 
+  /* Focus-visible outlines for keyboard navigation */
+  button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
+
   /* ── Referral section ── */
   .referral-section { margin-top: 32px; }
   .referral-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; }
@@ -252,7 +258,7 @@
     flex: 1; padding: 12px 14px; border-radius: 8px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
     color: #fff; font-size: 13px; font-family: 'Inter', sans-serif;
-    outline: none; min-width: 0;
+    min-width: 0;
   }
   .referral-copy-btn {
     padding: 12px 20px; border-radius: 8px; border: none;
@@ -282,7 +288,6 @@
   .prop-badge-rented { background: rgba(168,85,247,0.15); color: #a855f7; }
   .prop-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .prop-status-select { padding: 5px 8px; border-radius: 7px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
-  .prop-status-select:focus { outline: none; }
   .prop-status-just_listed { background: rgba(59,130,246,0.15); color: #3b82f6; }
   .prop-status-available { background: rgba(34,197,94,0.15); color: #22c55e; }
   .prop-status-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
@@ -308,7 +313,7 @@
   .modal-card-sm { max-width: 360px; }
   .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
   .modal-header h3 { font-size: 17px; font-weight: 700; }
-  .modal-close { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .modal-close { background: none; border: none; color: rgba(255,255,255,0.55); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
   .modal-close:hover { color: rgba(255,255,255,0.65); }
   .modal-body { display: flex; flex-direction: column; gap: 14px; }
   .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
@@ -326,7 +331,7 @@
   .modal-thumb-area:hover { border-color: rgba(255,255,255,0.3); }
   .modal-thumb-area img { width: 100%; height: 100%; object-fit: cover; }
   .modal-thumb-meta { flex: 1; }
-  .modal-thumb-hint { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 6px; line-height: 1.5; }
+  .modal-thumb-hint { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; line-height: 1.5; }
   .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; }
   .btn-danger:hover { background: rgba(239,68,68,0.25); }
 
@@ -536,7 +541,7 @@
 
     <!-- Onboarding Checklist (hidden when complete) -->
     <div class="onboard" id="onboard-checklist" style="display:none;">
-      <button class="onboard-dismiss" onclick="dismissOnboarding()" title="Dismiss">&times;</button>
+      <button class="onboard-dismiss" onclick="dismissOnboarding()" title="Dismiss" aria-label="Dismiss">&times;</button>
       <div class="onboard-title">🚀 Get your profile live</div>
       <div class="onboard-sub">Complete these steps to start getting leads from your SellingDubai profile.</div>
       <div class="onboard-progress"><div class="onboard-bar" id="onboard-bar" style="width:0%"></div></div>
@@ -623,7 +628,7 @@
         <div class="ref-title">Traffic Sources</div>
         <div id="ref-list">
           <div class="empty-state" style="padding:24px;border:none;">
-            <div class="empty-sub">No traffic data yet</div>
+            <div class="empty-sub">No visits yet — share your profile link to get started</div>
           </div>
         </div>
       </div>
@@ -631,7 +636,7 @@
         <div class="ref-title">Lead Sources</div>
         <div id="lead-source-list">
           <div class="empty-state" style="padding:24px;border:none;">
-            <div class="empty-sub">No lead data yet</div>
+            <div class="empty-sub">Lead sources will appear once you receive your first inquiry</div>
           </div>
         </div>
       </div>
@@ -647,7 +652,7 @@
         <div class="empty-state">
           <div class="empty-icon">📋</div>
           <div class="empty-title">No leads yet</div>
-          <div class="empty-sub">Share your profile link to start receiving leads</div>
+          <div class="empty-sub">Post your link on Instagram or WhatsApp — leads will appear here</div>
         </div>
       </div>
     </div>
@@ -665,14 +670,14 @@
         <div class="empty-state">
           <div class="empty-icon">🏠</div>
           <div class="empty-title">No listings yet</div>
-          <div class="empty-sub">Add your first property to showcase it on your profile</div>
+          <div class="empty-sub">Add a property — it's the #1 reason clients tap WhatsApp</div>
         </div>
       </div>
       <div class="props-limit-note" id="props-limit-note" style="display:none;"></div>
     </div>
 
     <!-- Referral Invite Section — Coming Soon -->
-    <div class="referral-section" id="referral-section" style="position:relative;opacity:0.45;pointer-events:none;">
+    <div class="referral-section" id="referral-section" style="position:relative;">
       <div style="position:absolute;top:12px;right:16px;background:#3b82f6;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;z-index:2;pointer-events:auto;">COMING SOON</div>
       <div class="leads-header">
         <span class="leads-title">Invite Agents</span>
@@ -743,14 +748,14 @@
   <div class="modal-card">
     <div class="modal-header">
       <h3 id="prop-modal-title">Add Listing</h3>
-      <button class="modal-close" onclick="closePropModal()">&times;</button>
+      <button class="modal-close" onclick="closePropModal()" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
       <!-- Image -->
       <div>
         <div class="modal-label">Photo</div>
         <div class="modal-thumb-row">
-          <div class="modal-thumb-area" id="prop-thumb-preview" onclick="document.getElementById('prop-photo-input').click()">🏠</div>
+          <button type="button" class="modal-thumb-area" id="prop-thumb-preview" onclick="document.getElementById('prop-photo-input').click()" aria-label="Upload listing photo">🏠</button>
           <div class="modal-thumb-meta">
             <input type="file" id="prop-photo-input" accept="image/*" style="display:none;" onchange="onPropModalPhoto(this)">
             <input type="hidden" id="prop-image-base64">
@@ -834,7 +839,7 @@
   <div class="modal-card modal-card-sm">
     <div class="modal-header">
       <h3>Delete Listing?</h3>
-      <button class="modal-close" onclick="closeDeletePropModal()">&times;</button>
+      <button class="modal-close" onclick="closeDeletePropModal()" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
       <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
@@ -854,6 +859,7 @@
 <script>
 (function() {
   const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
   const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
   const VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
   const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
@@ -1052,12 +1058,12 @@
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Could not open billing portal.');
+        showToast(data.error || 'Could not open billing portal.');
         btn.disabled = false;
         btn.textContent = 'Manage billing';
       }
     } catch (e) {
-      alert('Connection error. Please try again.');
+      showToast('Connection error. Please try again.');
       btn.disabled = false;
       btn.textContent = 'Manage billing';
     }
@@ -1154,7 +1160,7 @@
       try {
         const pRes = await fetch(
           SUPABASE_URL + '/rest/v1/properties?agent_id=eq.' + currentAgent.id + '&select=id&limit=1',
-          { headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU' } }
+          { headers: { 'apikey': SUPABASE_ANON_KEY } }
         );
         if (pRes.ok) {
           const props = await pRes.json();
@@ -1229,7 +1235,7 @@
     document.getElementById('leads-count').textContent = leads.length + ' lead' + (leads.length !== 1 ? 's' : '') + ' (30 days)';
 
     if (!leads.length) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No leads yet</div><div class="empty-sub">Share your profile link to start receiving leads</div></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No leads yet</div><div class="empty-sub">Post your link on Instagram or WhatsApp — leads will appear here</div></div>';
       return;
     }
 
@@ -1450,7 +1456,7 @@
     badge.textContent = props.length + ' / ' + limitLabel;
 
     if (propLimitReached) {
-      limitNote.textContent = 'Listing limit reached (' + limit + '). Upgrade to Pro or Premium to add more.';
+      limitNote.innerHTML = 'Listing limit reached (' + limit + '). <a href="/pricing.html" style="color:#fff;font-weight:600;text-decoration:underline;">Upgrade to Pro or Premium</a> to add more.';
       limitNote.style.display = 'block';
     } else {
       limitNote.style.display = 'none';
@@ -1458,7 +1464,7 @@
 
     const container = document.getElementById('props-list');
     if (!props.length) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-title">No listings yet</div><div class="empty-sub">Add your first property to showcase it on your profile</div></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-title">No listings yet</div><div class="empty-sub">Add a property — it's the #1 reason clients tap WhatsApp</div></div>';
       return;
     }
 
@@ -1480,8 +1486,8 @@
 
       return '<div class="prop-card">' +
         '<div class="prop-reorder">' +
-          '<button class="prop-arrow-btn" onclick="reorderProp(\'' + p.id + '\', -1)"' + (isFirst ? ' disabled' : '') + ' title="Move up">▲</button>' +
-          '<button class="prop-arrow-btn" onclick="reorderProp(\'' + p.id + '\', 1)"' + (isLast ? ' disabled' : '') + ' title="Move down">▼</button>' +
+          '<button class="prop-arrow-btn" onclick="reorderProp(\'' + p.id + '\', -1)"' + (isFirst ? ' disabled' : '') + ' title="Move up" aria-label="Move listing up">▲</button>' +
+          '<button class="prop-arrow-btn" onclick="reorderProp(\'' + p.id + '\', 1)"' + (isLast ? ' disabled' : '') + ' title="Move down" aria-label="Move listing down">▼</button>' +
         '</div>' +
         thumbHtml +
         '<div class="prop-body">' +
