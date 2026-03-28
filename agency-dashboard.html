@@ -307,9 +307,9 @@
             </div>
           </td>
           <td>${tierBadge}</td>
-          <td class="stat-cell">${a.leads_this_month ?? '—'}</td>
-          <td class="stat-cell">${a.views_this_month ?? '—'}</td>
-          <td class="stat-cell">${a.properties_active ?? '—'}</td>
+          <td class="stat-cell">${escapeHtml(String(a.leads_this_month ?? '—'))}</td>
+          <td class="stat-cell">${escapeHtml(String(a.views_this_month ?? '—'))}</td>
+          <td class="stat-cell">${escapeHtml(String(a.properties_active ?? '—'))}</td>
           <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" data-member-id="${escapeHtml(a.agent_id || a.id)}" title="Remove from agency">Remove</button></td>
         </tr>`;
       }).join('');
