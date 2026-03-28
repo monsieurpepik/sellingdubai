@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SellingDubai</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M16 6L6 14v12a1 1 0 001 1h6v-7h6v7h6a1 1 0 001-1V14L16 6z' fill='%23fff'/%3E%3C/svg%3E">
+<!-- Preconnect to critical origins -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" as="script" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/dist/styles.min.css">
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" id="canonical-url">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Dubai real estate agent profile — verified listings, off-plan projects, and direct contact.">
+<!-- Open Graph -->
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="SellingDubai">
+<meta property="og:title" id="og-title" content="SellingDubai — Dubai Real Estate Agent">
+<meta property="og:description" id="og-desc" content="Dubai real estate agent profile — verified listings, off-plan projects, and direct contact.">
+<meta property="og:image" id="og-image" content="/sellingdubailogo.png">
+<meta property="og:url" id="og-url" content="">
+<meta name="twitter:card" content="summary_large_image">
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>
+  Sentry.init({
+    dsn: "https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",
+    environment: /sellingdubai\.(ae|com)$/.test(location.hostname) ? "production" : "development",
+    tracesSampleRate: 0.2,
+    sendDefaultPii: false
+  });
+</script>
+<!-- Schema.org structured data — hydrated by app.js -->
+<script type="application/ld+json" id="schema-agent">{}</script>
+</head>
+<body>
+<noscript>
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#000;color:#fff;font-family:'Inter',sans-serif;text-align:center;padding:24px;">
+    <div>
+      <h1 style="font-size:20px;margin-bottom:8px;">JavaScript Required</h1>
+      <p style="color:rgba(255,255,255,0.5);font-size:14px;">Please enable JavaScript to view this agent profile on SellingDubai.</p>
+    </div>
+  </div>
+</noscript>
+
+<!-- ========== LOADING STATE ========== -->
+<div id="loading" class="loading" role="status" aria-label="Loading">
+  <div class="loading-dot"></div>
+  <div class="loading-dot"></div>
+  <div class="loading-dot"></div>
+</div>
+<!-- ========== SKELETON PLACEHOLDER (Airbnb-style shimmer) ========== -->
+<div id="skeleton" class="hidden">
+  <div class="skeleton-group">
+    <div class="skeleton skeleton-avatar"></div>
+    <div class="skeleton skeleton-name"></div>
+    <div class="skeleton skeleton-bio"></div>
+    <div class="skeleton skeleton-bio short"></div>
+    <div style="width:100%;max-width:340px;margin-top:24px;">
+      <div class="skeleton skeleton-btn"></div>
+      <div class="skeleton skeleton-btn"></div>
+      <div class="skeleton skeleton-btn"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ERROR: AGENT NOT FOUND ========== -->
+<div id="error" class="error-page hidden">
+  <div class="error-icon">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+  <h1>Agent Not Found</h1>
+  <p>This profile doesn't exist or the link may have changed.</p>
+  <div class="error-actions">
+    <input class="error-search" type="text" id="agent-search" placeholder="Search agent name..." onkeydown="if(event.key==='Enter')searchAgent()">
+    <div id="search-results" style="display:none;width:100%;margin-bottom:12px;"></div>
+    <a href="/join" class="link-btn link-btn-wa" style="font-size:15px;padding:16px;">
+      <span class="btn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>
+      I'm an Agent — Get Verified
+    </a>
+    <a href="/" class="link-btn link-btn-ghost" style="text-decoration:none;">Browse All Agents</a>
+  </div>
+</div>
+
+<!-- ========== PENDING VERIFICATION ========== -->
+<div id="pending" class="error-page hidden">
+  <div class="error-icon" style="border-color:rgba(251,191,36,0.4);">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.6)" stroke-width="1.5"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/><polyline points="12 8 12 13"/><circle cx="12" cy="16" r="0.5" fill="rgba(251,191,36,0.6)"/></svg>
+  </div>
+  <h1>Verification in Progress</h1>
+  <p><span id="pending-agent-name"></span>'s profile is being verified by our team. DLD license verification typically takes 24–48 hours.</p>
+  <div class="error-actions">
+    <a id="pending-edit-link" href="/edit" class="link-btn link-btn-wa" style="font-size:15px;padding:16px;display:none;">
+      <span class="btn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
+      Edit My Profile
+    </a>
+    <a href="/dashboard" class="link-btn link-btn-wa" style="font-size:15px;padding:16px;">
+      <span class="btn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></span>
+      Go to Dashboard
+    </a>
+    <a href="/join" class="link-btn link-btn-ghost" style="text-decoration:none;font-size:15px;padding:16px;">
+      I'm a Different Agent — Get Verified
+    </a>
+  </div>
+</div>
+
+<!-- ========== AGENT PROFILE PAGE ========== -->
+<div id="agent-page" class="hidden">
+  <div id="bg" class="bg bg-fallback"></div>
+  <div class="page">
+    <div class="top-nav">
+      <div></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <a id="nav-edit-btn" href="/edit" class="nav-share hidden" aria-label="Edit profile" style="text-decoration:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </a>
+        <button id="nav-share-btn" class="nav-share" onclick="nativeShare()" aria-label="Share profile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+        <a href="https://sellingdubai.ae/#hero-waitlist" class="nav-claim" id="nav-claim-btn">Get Your Page</a>
+      </div>
+    </div>
+    <div style="margin-top:28px"></div>
+    <div class="profile">
+      <div id="avatar-container"></div>
+      <div class="name-row">
+        <h1 id="agent-name" class="name"></h1>
+        <span id="verified-badge" class="verified hidden">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#4d65ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </span>
+      </div>
+      <p id="agent-bio" class="bio"></p>
+      <!-- bio-long removed for cleaner mobile UX -->
+      <div id="trust-bar" class="trust-bar hidden"></div>
+      <div id="dld-stats" class="dld-stats hidden"></div>
+      <div id="agency-badge" class="agency-badge hidden"></div>
+    </div>
+    <div id="links" class="links"></div>
+
+    <!-- Golden Visa Info -->
+    <div id="gv-widget" class="gv-widget hidden">
+      <div class="gv-card">
+        <div class="gv-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.4)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        </div>
+        <div class="gv-info">Invest <span class="gv-threshold">AED 2M+</span> in UAE property → 10-year Golden Visa. Mortgaged properties now eligible.</div>
+      </div>
+    </div>
+
+    <div id="socials" class="socials"></div>
+
+    <!-- Referral CTA — shown on free-tier profiles only -->
+    <div id="referral-cta" class="referral-cta" style="display:none;">
+      <a href="https://sellingdubai.ae/#hero-waitlist" class="referral-cta-link">
+        <span>Dubai Agent? Get your verified page</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <footer class="sd-footer">
+      <div class="trust-badges">
+        <span class="trust-badge-item"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg> DLD Authorized</span>
+        <span class="trust-divider"></span>
+        <span class="trust-badge-item"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg> DIFC Registered</span>
+        <span class="trust-divider"></span>
+        <span class="trust-badge-item"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg> 256-bit Encrypted</span>
+      </div>
+      <a href="https://www.sellingdubai.ae" rel="noopener noreferrer" class="sd-footer-powered">
+        <img src="/sellingdubailogo.png" alt="Selling Dubai" width="99" height="22" style="height:22px;opacity:0.25;transition:opacity 0.3s;">
+      </a>
+      <p class="sd-footer-legal"><a href="/terms">Terms</a> | <a href="/privacy">Privacy</a></p>
+      <p class="sd-footer-difc">PropTeFi Tech Limited · DIFC, Dubai, UAE</p>
+    </footer>
+  </div>
+</div>
+
+<!-- ========== STICKY BOTTOM CTA (PropertyFinder pattern) ========== -->
+<div id="sticky-cta" class="sticky-cta-bar" style="display:none;">
+  <div class="sticky-cta-inner">
+    <button id="sticky-wa-btn" class="sticky-btn sticky-btn-wa" style="display:none;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.4 0-4.637-.85-6.366-2.266l-.447-.355-2.948.988.988-2.948-.355-.447A9.965 9.965 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+      WhatsApp
+    </button>
+    <button class="sticky-btn sticky-btn-contact" onclick="openLead()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Contact Me
+    </button>
+  </div>
+</div>
+
+<!-- ========== LEAD CAPTURE MODAL ========== -->
+<div id="lead-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Contact agent" onclick="if(event.target===this)closeLead()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Free Consultation</span>
+      <button class="modal-close" onclick="closeLead()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="lead-form">
+        <div id="lead-error" class="modal-error" role="alert" aria-live="polite"></div>
+        <!-- Honeypot: hidden from real users, bots auto-fill this -->
+        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+          <input type="text" id="lead-website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label for="lead-name">Your Name <span class="modal-req">*</span></label>
+          <input type="text" id="lead-name" placeholder="Full name" autocomplete="name" maxlength="150" required aria-required="true">
+        </div>
+        <div class="modal-field">
+          <label for="lead-phone">Phone / WhatsApp</label>
+          <input type="tel" id="lead-phone" placeholder="+971 50 123 4567" inputmode="tel" autocomplete="tel" maxlength="30">
+          <span class="modal-hint">Phone or email required</span>
+        </div>
+        <div class="modal-field">
+          <label for="lead-email">Email</label>
+          <input type="email" id="lead-email" placeholder="you@email.com" autocomplete="email" maxlength="254">
+        </div>
+        <button type="button" class="modal-expander" id="lead-expander" onclick="toggleExtra()">
+          <span>Tell us more (optional)</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="modal-extra" id="lead-extra">
+        <div class="modal-field">
+          <label for="lead-budget">Budget Range</label>
+          <select id="lead-budget">
+            <option value="">Select budget</option>
+            <option value="< AED 1M">Below AED 1M</option>
+            <option value="AED 1-3M">AED 1M — 3M</option>
+            <option value="AED 3-5M">AED 3M — 5M</option>
+            <option value="AED 5-10M">AED 5M — 10M</option>
+            <option value="AED 10-25M">AED 10M — 25M</option>
+            <option value="AED 25-50M">AED 25M — 50M</option>
+            <option value="AED 50M+">AED 50M+</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label for="lead-type">Property Type</label>
+          <select id="lead-type">
+            <option value="">Select type</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Villa">Villa</option>
+            <option value="Townhouse">Townhouse</option>
+            <option value="Penthouse">Penthouse</option>
+            <option value="Off-Plan">Off-Plan</option>
+            <option value="Plot">Plot / Land</option>
+            <option value="Commercial">Commercial</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label for="lead-area">Preferred Area</label>
+          <input type="text" id="lead-area" placeholder="e.g. Dubai Marina, Palm Jumeirah" maxlength="200">
+        </div>
+        <div class="modal-field">
+          <label for="lead-message">Message</label>
+          <textarea id="lead-message" placeholder="Anything specific you're looking for?" maxlength="2000"></textarea>
+        </div>
+        </div>
+        <div class="modal-hint">Your details go directly to <span id="modal-agent-name"></span></div>
+        <button class="modal-btn" id="btn-lead" onclick="submitLead()">Send My Inquiry</button>
+      </div>
+      <div id="lead-success" class="modal-success hidden">
+        <div class="modal-success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+        <h3>Inquiry Sent</h3>
+        <p id="success-msg">Your details have been sent. You'll hear back within 30 minutes.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PROPERTY POPUP ========== -->
+<div id="prop-overlay" class="prop-overlay" role="dialog" aria-modal="true" aria-label="Property portfolio" onclick="if(event.target===this)closeProps()">
+  <div class="prop-sheet">
+    <div class="prop-header">
+      <div style="display:flex;align-items:baseline;">
+        <span class="prop-header-title">Portfolio</span>
+        <span class="prop-header-count" id="prop-count"></span>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <button class="prop-filter-btn" id="filter-toggle-btn" onclick="event.stopPropagation();openFilters()" title="Filters">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/><circle cx="6" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/></svg>
+        </button>
+        <button class="prop-close" onclick="closeProps()" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="prop-sheet-body">
+      <!-- Desktop sidebar filters (hidden on mobile via CSS) -->
+      <aside class="prop-filters-sidebar" id="sidebar-filters">
+        <div class="sidebar-section">
+          <label class="sidebar-label">Search</label>
+          <input class="sidebar-search" type="text" id="sidebar-search" placeholder="City, location..." oninput="sidebarFilterChanged()">
+        </div>
+        <div class="sidebar-section">
+          <label class="sidebar-label">Price (AED)</label>
+          <div class="sidebar-row">
+            <input class="sidebar-input" type="number" id="sidebar-price-min" placeholder="Min" oninput="sidebarFilterChanged()">
+            <input class="sidebar-input" type="number" id="sidebar-price-max" placeholder="Max" oninput="sidebarFilterChanged()">
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <label class="sidebar-label">Beds</label>
+          <div class="sidebar-pills" id="sidebar-beds">
+            <button class="sidebar-pill" data-val="1" onclick="toggleSidebarPill(this,'sidebar-beds')">1+</button>
+            <button class="sidebar-pill" data-val="2" onclick="toggleSidebarPill(this,'sidebar-beds')">2+</button>
+            <button class="sidebar-pill" data-val="3" onclick="toggleSidebarPill(this,'sidebar-beds')">3+</button>
+            <button class="sidebar-pill" data-val="4" onclick="toggleSidebarPill(this,'sidebar-beds')">4+</button>
+            <button class="sidebar-pill" data-val="5" onclick="toggleSidebarPill(this,'sidebar-beds')">5+</button>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <label class="sidebar-label">Baths</label>
+          <div class="sidebar-pills" id="sidebar-baths">
+            <button class="sidebar-pill" data-val="1" onclick="toggleSidebarPill(this,'sidebar-baths')">1+</button>
+            <button class="sidebar-pill" data-val="2" onclick="toggleSidebarPill(this,'sidebar-baths')">2+</button>
+            <button class="sidebar-pill" data-val="3" onclick="toggleSidebarPill(this,'sidebar-baths')">3+</button>
+            <button class="sidebar-pill" data-val="4" onclick="toggleSidebarPill(this,'sidebar-baths')">4+</button>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <label class="sidebar-label">Area (sqft)</label>
+          <div class="sidebar-row">
+            <input class="sidebar-input" type="number" id="sidebar-area-min" placeholder="Min" oninput="sidebarFilterChanged()">
+            <input class="sidebar-input" type="number" id="sidebar-area-max" placeholder="Max" oninput="sidebarFilterChanged()">
+          </div>
+        </div>
+        <div class="sidebar-actions">
+          <button class="sidebar-clear" onclick="clearSidebarFilters()">Clear</button>
+          <button class="sidebar-apply" onclick="applySidebarFilters()">Apply</button>
+        </div>
+      </aside>
+      <!-- Main content column -->
+      <div class="prop-main-col">
+        <div class="prop-list" id="prop-list">
+          <div class="prop-empty">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FILTERS OVERLAY ========== -->
+<div id="filters-overlay" class="filters-overlay" role="dialog" aria-modal="true" aria-label="Property filters" onclick="if(event.target===this)closeFilters()">
+  <div class="filters-sheet">
+    <div class="filters-header">
+      <span class="filters-title">Filters</span>
+      <button class="prop-close" onclick="closeFilters()" aria-label="Close">&times;</button>
+    </div>
+    <div class="filters-body">
+      <div class="filters-section">
+        <div class="filters-search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="filters-search" id="filter-search" type="text" placeholder="Search properties">
+        </div>
+      </div>
+      <div class="filters-section">
+        <label class="filters-label" for="filter-price-min">Price</label>
+        <div class="filters-row">
+          <input class="filters-input" id="filter-price-min" type="number" placeholder="Min. Price (AED)">
+          <input class="filters-input" id="filter-price-max" type="number" placeholder="Max. Price (AED)">
+        </div>
+      </div>
+      <div class="filters-section">
+        <label class="filters-label" id="label-beds">Beds</label>
+        <div class="filters-pills" id="filter-beds" role="group" aria-labelledby="label-beds">
+          <button class="filters-pill" data-val="1">1+</button>
+          <button class="filters-pill" data-val="2">2+</button>
+          <button class="filters-pill" data-val="3">3+</button>
+          <button class="filters-pill" data-val="4">4+</button>
+          <button class="filters-pill" data-val="5">5+</button>
+          <button class="filters-pill" data-val="6">6+</button>
+        </div>
+      </div>
+      <div class="filters-section">
+        <label class="filters-label" id="label-baths">Bathrooms</label>
+        <div class="filters-pills" id="filter-baths" role="group" aria-labelledby="label-baths">
+          <button class="filters-pill" data-val="1">1+</button>
+          <button class="filters-pill" data-val="2">2+</button>
+          <button class="filters-pill" data-val="3">3+</button>
+          <button class="filters-pill" data-val="4">4+</button>
+          <button class="filters-pill" data-val="5">5+</button>
+          <button class="filters-pill" data-val="6">6+</button>
+        </div>
+      </div>
+      <div class="filters-section">
+        <label class="filters-label">Furnishing</label>
+        <div class="filters-pills" id="filter-furnishing">
+          <button class="filters-pill active" data-val="all">All furnishings</button>
+          <button class="filters-pill" data-val="furnished">Furnished</button>
+          <button class="filters-pill" data-val="unfurnished">Unfurnished</button>
+          <button class="filters-pill" data-val="partly">Partly Furnished</button>
+        </div>
+      </div>
+      <div class="filters-section">
+        <label class="filters-label">Property Size</label>
+        <div class="filters-row">
+          <input class="filters-input" id="filter-area-min" type="number" placeholder="Min. Area (Sqft)">
+          <input class="filters-input" id="filter-area-max" type="number" placeholder="Max. Area (Sqft)">
+        </div>
+      </div>
+      <div class="filters-section">
+        <label class="filters-label">Features & Amenities</label>
+        <div class="filters-pills" id="filter-amenities">
+          <button class="filters-pill" data-val="pool">Pool</button>
+          <button class="filters-pill" data-val="gym">Gym</button>
+          <button class="filters-pill" data-val="garden">Garden</button>
+          <button class="filters-pill" data-val="view">View</button>
+          <button class="filters-pill" data-val="parking">Parking</button>
+          <button class="filters-pill" data-val="balcony">Balcony</button>
+          <button class="filters-pill" data-val="beach">Beach</button>
+          <button class="filters-pill" data-val="maid">Maid's Room</button>
+        </div>
+      </div>
+    </div>
+    <div class="filters-footer">
+      <button class="filters-clear" onclick="clearAllFilters()">Clear all</button>
+      <button class="filters-apply" onclick="applyFilters()">APPLY</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PROPERTY DETAIL VIEW ========== -->
+<div id="detail-overlay" class="detail-overlay" role="dialog" aria-modal="true" aria-label="Property details">
+  <div class="detail-sheet" id="detail-sheet"></div>
+  <button class="detail-back" id="detail-back-btn" onclick="closeDetail()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+  </button>
+  <div class="detail-cta-bar" id="detail-cta-bar">
+    <button class="detail-cta-wa" id="detail-wa-btn" title="WhatsApp">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.465A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.158 0-4.155-.69-5.787-1.862l-.413-.285-2.744.87.912-2.677-.32-.467A9.72 9.72 0 012.25 12 9.75 9.75 0 0112 2.25 9.75 9.75 0 0121.75 12 9.75 9.75 0 0112 21.75z"/></svg>
+    </button>
+    <button class="detail-cta-inquire" id="detail-inquire-btn">Inquire Now</button>
+  </div>
+</div>
+
+<!-- ========== FULL GALLERY OVERLAY ========== -->
+<div id="gallery-overlay" class="gallery-overlay" role="dialog" aria-modal="true" aria-label="Photo gallery">
+  <div class="gallery-overlay-header">
+    <span class="gallery-overlay-title" id="gallery-count"></span>
+    <button class="gallery-overlay-close" onclick="closeFullGallery()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="gallery-overlay-body" id="gallery-body"></div>
+</div>
+
+<!-- ========== SINGLE PHOTO VIEWER ========== -->
+<div id="photo-viewer" class="photo-viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" onclick="if(event.target===this)closePhotoViewer()">
+  <div class="photo-viewer-stage" id="photo-viewer-stage">
+    <img id="photo-viewer-img-a" class="photo-viewer-layer active" src="" alt="">
+    <img id="photo-viewer-img-b" class="photo-viewer-layer" src="" alt="">
+  </div>
+  <button class="photo-viewer-close" onclick="closePhotoViewer()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+  </button>
+  <button class="photo-viewer-nav photo-viewer-prev" onclick="navPhoto(-1)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="photo-viewer-nav photo-viewer-next" onclick="navPhoto(1)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <div class="photo-viewer-counter" id="photo-viewer-counter"></div>
+</div>
+
+<!-- ========== MORTGAGE FLOW MODAL (Multi-step) ========== -->
+<div id="mortgage-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Mortgage pre-approval" onclick="if(event.target===this)closeMortgage()">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <div>
+        <span class="modal-title" id="mort-step-title">Check Your Eligibility</span>
+        <div class="mort-step-bar" id="mort-step-bar">
+          <div class="mort-step-dot active"><span>1</span></div>
+          <div class="mort-step-line"></div>
+          <div class="mort-step-dot"><span>2</span></div>
+          <div class="mort-step-line"></div>
+          <div class="mort-step-dot"><span>3</span></div>
+          <div class="mort-step-line"></div>
+          <div class="mort-step-dot"><span>4</span></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeMortgage()" aria-label="Close">&times;</button>
+    </div>
+
+    <!-- ===== STEP 1: Eligibility ===== -->
+    <div class="mort-step" id="mort-step-1">
+      <p style="font-family:Inter,sans-serif;font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:20px;font-weight:300;line-height:1.5;">Answer 4 questions to see how much you can borrow. No credit check. Takes 30 seconds.</p>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:10px 14px;background:rgba(77,101,255,0.04);border:1px solid rgba(77,101,255,0.1);border-radius:10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(77,101,255,0.6)" stroke-width="2"><path d="M3 21h18"/><path d="M3 7l9-4 9 4"/><path d="M6 7v10"/><path d="M18 7v10"/><path d="M12 7v10"/></svg>
+        <span style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:500;">Comparing rates from 10+ UAE banks</span>
+      </div>
+
+      <div class="modal-field">
+        <label for="mort-income">Monthly Income (AED) <span class="modal-req">*</span></label>
+        <input type="text" id="mort-income" placeholder="e.g. 35,000" inputmode="numeric" style="font-family:Manrope,sans-serif;font-weight:700;font-size:16px;">
+      </div>
+
+      <div class="modal-field">
+        <label>Employment Type <span class="modal-req">*</span></label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="cost-toggle-btn active" onclick="setMortField(this,'employment','salaried')">Salaried</button>
+          <button class="cost-toggle-btn" onclick="setMortField(this,'employment','self_employed')">Self-Employed</button>
+          <button class="cost-toggle-btn" onclick="setMortField(this,'employment','business_owner')">Business Owner</button>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>Residency Status <span class="modal-req">*</span></label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="cost-toggle-btn" onclick="setMortField(this,'residency','uae_national')">UAE National</button>
+          <button class="cost-toggle-btn active" onclick="setMortField(this,'residency','uae_resident')">UAE Resident</button>
+          <button class="cost-toggle-btn" onclick="setMortField(this,'residency','non_resident')">Non-Resident</button>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label for="mort-debt">Existing Monthly Debt Payments (AED)</label>
+        <input type="text" id="mort-debt" placeholder="Car loan, credit cards, etc. (0 if none)" inputmode="numeric" value="0">
+        <span class="modal-hint">Include all monthly obligations</span>
+      </div>
+
+      <div id="mort-elig-result" style="display:none;background:rgba(77,101,255,0.06);border:1px solid rgba(77,101,255,0.15);border-radius:14px;padding:20px;margin-bottom:16px;overflow:hidden;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">You can borrow up to</div>
+        <div id="mort-max-loan" style="font-family:Manrope,sans-serif;font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;"></div>
+        <div id="mort-max-monthly" style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:300;margin-top:4px;"></div>
+      </div>
+
+      <button class="modal-btn" id="mort-check-btn" onclick="mortCheckEligibility()">Check Eligibility</button>
+
+      <!-- Lead capture — shown after eligibility result -->
+      <div id="mort-lead-capture" style="display:none;margin-top:16px;padding:20px;background:rgba(37,211,102,0.04);border:1px solid rgba(37,211,102,0.12);border-radius:14px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:12px;">See your personalized rates — enter your details</div>
+        <div class="modal-field" style="margin-bottom:10px;">
+          <input type="text" id="mort-lead-name" placeholder="Your name" autocomplete="name" style="padding:12px 14px;font-size:14px;">
+        </div>
+        <div class="modal-field" style="margin-bottom:0;">
+          <div style="display:flex;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;">
+            <span style="padding:12px 0 12px 14px;font-size:14px;color:rgba(255,255,255,0.3);font-weight:500;white-space:nowrap;">+971</span>
+            <input type="tel" id="mort-lead-phone" placeholder="50 123 4567" inputmode="tel" autocomplete="tel" style="border:none;background:transparent;padding:12px 14px 12px 8px;font-size:14px;flex:1;min-width:0;">
+          </div>
+        </div>
+        <div id="mort-lead-error" style="display:none;font-size:11px;color:rgba(255,80,80,0.8);margin-top:6px;font-weight:500;"></div>
+        <button class="modal-btn" onclick="mortCaptureAndProceed()" style="margin-top:12px;">Compare Rates →</button>
+        <div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-top:8px;font-weight:300;">Your details go to the agent. No spam, no obligation.</div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: Property + Rate Comparison ===== -->
+    <div class="mort-step" id="mort-step-2" style="display:none;">
+      <div class="modal-field">
+        <label>Property Value (AED) <span class="modal-req">*</span></label>
+        <input type="text" id="mort-value" placeholder="e.g. 2,500,000" inputmode="numeric" style="font-family:Manrope,sans-serif;font-weight:700;font-size:16px;" oninput="calcMortgage()">
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <label style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;">Down Payment</label>
+          <span id="mort-dp-pct" style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#fff;">20%</span>
+        </div>
+        <input type="range" id="mort-dp-slider" min="20" max="80" value="20" step="5" style="width:100%;" oninput="calcMortgage()">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:10px;color:rgba(255,255,255,0.2);">20%</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.2);">80%</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;display:block;margin-bottom:8px;">Loan Term</label>
+        <div style="display:flex;gap:6px;">
+          <button class="cost-toggle-btn" onclick="setMortTerm(this,15)">15 yrs</button>
+          <button class="cost-toggle-btn active" onclick="setMortTerm(this,25)">25 yrs</button>
+          <button class="cost-toggle-btn" onclick="setMortTerm(this,30)">30 yrs</button>
+        </div>
+      </div>
+
+      <!-- Live Bank Rate Cards — populated from Supabase -->
+      <div style="margin-bottom:16px;">
+        <label style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;display:block;margin-bottom:8px;">Best Rates Available</label>
+        <div id="mort-bank-cards" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading rates...</div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="mort-results" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;margin-bottom:16px;display:none;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);font-weight:500;">Monthly Payment</span>
+          <span id="mort-monthly" style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.5px;"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Loan Amount</div>
+            <div id="mort-loan" style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#fff;"></div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Total Interest</div>
+            <div id="mort-interest" style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="modal-btn" onclick="mortGoStep(1)" style="flex:0 0 auto;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:14px 18px;">←</button>
+        <button class="modal-btn" onclick="mortGoStep(3)" style="flex:1;">Get Pre-Approved →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: Contact Details + Submit ===== -->
+    <div class="mort-step" id="mort-step-3" style="display:none;">
+      <p style="font-family:Inter,sans-serif;font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:20px;font-weight:300;line-height:1.5;">Your details go to the agent and a licensed UAE mortgage broker. They'll shop your profile across banks and get you the best rate.</p>
+
+      <div class="modal-field">
+        <label>Full Name <span class="modal-req">*</span></label>
+        <input type="text" id="mort-name" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="modal-field">
+        <label>Phone / WhatsApp <span class="modal-req">*</span></label>
+        <div style="display:flex;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;">
+          <span style="padding:12px 0 12px 14px;font-size:14px;color:rgba(255,255,255,0.3);font-weight:500;white-space:nowrap;">+971</span>
+          <input type="tel" id="mort-phone" placeholder="50 123 4567" inputmode="tel" autocomplete="tel" style="border:none;background:transparent;padding:12px 14px 12px 8px;font-size:14px;flex:1;min-width:0;">
+        </div>
+        <span class="modal-hint">We'll contact you on WhatsApp</span>
+      </div>
+      <div class="modal-field">
+        <label>Email <span class="modal-req">*</span></label>
+        <input type="email" id="mort-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+
+      <div id="mort-submit-error" class="modal-error" style="display:none;"></div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="modal-btn" onclick="mortGoStep(2)" style="flex:0 0 auto;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:14px 18px;">←</button>
+        <button class="modal-btn" id="mort-submit-btn" onclick="mortSubmitApplication()" style="flex:1;">Get My Pre-Approval</button>
+      </div>
+
+      <div style="margin-top:16px;padding:14px;border-radius:10px;background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.12);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);">Free for buyers — no fees, no obligation</span>
+        </div>
+        <span style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:300;">Licensed broker compares 15+ banks. You pick the best offer.</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: Success + What Happens Next ===== -->
+    <div class="mort-step" id="mort-step-4" style="display:none;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(37,211,102,0.1);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+        <h3 style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;">You're Pre-Qualified</h3>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:300;line-height:1.5;">A licensed mortgage broker will contact you within 24 hours to finalize your pre-approval with the best bank for your profile.</p>
+      </div>
+
+      <!-- What happens next -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:20px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">What Happens Next</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:rgba(77,101,255,0.1);border:1px solid rgba(77,101,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:Manrope,sans-serif;font-size:11px;font-weight:800;color:#4d65ff;">1</div>
+            <div>
+              <span style="font-size:13px;color:#fff;font-weight:600;display:block;margin-bottom:2px;">Broker reviews your profile</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:300;line-height:1.4;">A CBUAE-licensed broker compares rates across 15+ banks to find the best match for your income and residency.</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:rgba(77,101,255,0.06);border:1px solid rgba(77,101,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:Manrope,sans-serif;font-size:11px;font-weight:800;color:rgba(77,101,255,0.6);">2</div>
+            <div>
+              <span style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;display:block;margin-bottom:2px;">You get a call or WhatsApp</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.25);font-weight:300;line-height:1.4;">They'll walk you through your options, collect documents, and handle everything with the bank.</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:rgba(77,101,255,0.04);border:1px solid rgba(77,101,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:Manrope,sans-serif;font-size:11px;font-weight:800;color:rgba(77,101,255,0.4);">3</div>
+            <div>
+              <span style="font-size:13px;color:rgba(255,255,255,0.45);font-weight:500;display:block;margin-bottom:2px;">Pre-approval letter issued</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.2);font-weight:300;line-height:1.4;">Once approved, you'll get an official pre-approval letter you can use to make offers with confidence.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="modal-btn" onclick="closeMortgage()" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Done</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== COOKIE CONSENT (UAE PDPL + GDPR) ========== -->
+<div id="cookie-banner" class="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p class="cookie-banner-text">We use essential cookies to run SellingDubai and analytics cookies to improve our service. By continuing, you accept our <a href="/privacy">Privacy Policy</a>.</p>
+  <div class="cookie-banner-btns">
+    <button class="cookie-btn cookie-btn-reject" onclick="window.__sdCookieConsent('reject')">Reject</button>
+    <button class="cookie-btn cookie-btn-accept" onclick="window.__sdCookieConsent('accept')">Accept</button>
+  </div>
+</div>
+<script>
+(function(){
+  var CONSENT_KEY = 'sd_cookie_consent';
+  var stored = null;
+  try { stored = localStorage.getItem(CONSENT_KEY); } catch(e){}
+  if (!stored) {
+    setTimeout(function(){ document.getElementById('cookie-banner').classList.add('show'); }, 1200);
+  }
+  window.__sdCookieConsent = function(choice) {
+    try { localStorage.setItem(CONSENT_KEY, choice); } catch(e){}
+    document.getElementById('cookie-banner').classList.remove('show');
+    if (choice === 'reject') {
+      // Disable non-essential tracking
+      window['ga-disable-GA_MEASUREMENT_ID'] = true;
+      if (window.fbq) window.fbq('consent', 'revoke');
+    }
+  };
+})();
+</script>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- FALLBACK: <script src="/app.js?v=20260327v"></script> -->
+<!-- DEV: <script type="module" src="/js/init.js"></script> -->
+<script type="module" src="/dist/init.bundle.js"></script>
+</body>
+</html>

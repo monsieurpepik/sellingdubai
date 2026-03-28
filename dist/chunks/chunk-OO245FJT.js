@@ -1,0 +1,2 @@
+var t=!1,e="https://pjyorgedaxevxophpfib.supabase.co",s="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU",o=`${e}/functions/v1/capture-lead`,p=e+"/functions/v1/log-event",n=window.supabase.createClient(e,s);export{t as a,e as b,s as c,o as d,p as e,n as f};
+//# sourceMappingURL=chunk-OO245FJT.js.map

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing - SellingDubai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 2rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .logo {
+      font-family: 'Manrope', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .hero {
+      padding: 4rem 1rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -1px;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .billing-toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .billing-label {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch input {
+      display: none;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      transform: translateX(22px);
+      background: #d4af37;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .yearly-badge {
+      display: inline-block;
+      background: #d4af37;
+      color: #000;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .toggle-switch input:checked ~ .yearly-badge {
+      opacity: 1;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+
+    .pricing-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pricing-card:hover {
+      border-color: rgba(212, 175, 55, 0.5);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      transform: translateY(-4px);
+    }
+
+    .pricing-card.featured {
+      border-color: #d4af37;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #d4af37;
+      color: #000;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .plan-name {
+      font-family: 'Manrope', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .plan-description {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 1.5rem;
+    }
+
+    .price-section {
+      margin-bottom: 2rem;
+    }
+
+    .price-monthly,
+    .price-yearly {
+      font-family: 'Manrope', sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .price-yearly {
+      display: none;
+    }
+
+    .price-currency {
+      font-size: 1.5rem;
+      vertical-align: super;
+    }
+
+    .price-period {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 400;
+      margin-top: 0.5rem;
+    }
+
+    .price-save {
+      display: none;
+      font-size: 0.9rem;
+      color: #d4af37;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .price-yearly ~ .price-save {
+      display: inline-block;
+    }
+
+    .features-list {
+      list-style: none;
+      margin: 2rem 0;
+      flex-grow: 1;
+    }
+
+    .features-list li {
+      padding: 0.75rem 0;
+      padding-left: 1.75rem;
+      position: relative;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .features-list li:last-child {
+      border-bottom: none;
+    }
+
+    .features-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #d4af37;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .cta-button {
+      display: inline-block;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      margin-top: 1.5rem;
+      font-family: 'Manrope', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+    }
+
+    .cta-free {
+      background: rgba(212, 175, 55, 0.1);
+      color: #d4af37;
+      border: 1px solid #d4af37;
+    }
+
+    .cta-free:hover {
+      background: rgba(212, 175, 55, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .cta-upgrade {
+      background: #d4af37;
+      color: #000;
+    }
+
+    .cta-upgrade:hover {
+      background: #e8c547;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .cta-upgrade:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .faq-section {
+      margin-top: 6rem;
+      padding: 4rem 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .faq-title {
+      font-family: 'Manrope', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 3rem;
+      letter-spacing: -0.5px;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(212, 175, 55, 0.5);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    }
+
+    .faq-question {
+      font-family: 'Manrope', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .faq-icon {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: rgba(212, 175, 55, 0.2);
+      border: 1px solid #d4af37;
+      border-radius: 50%;
+      color: #d4af37;
+      text-align: center;
+      line-height: 24px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+      margin-left: 1rem;
+    }
+
+    .faq-item.active .faq-icon {
+      background: #d4af37;
+      color: #000;
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 200px;
+    }
+
+    .footer {
+      margin-top: 4rem;
+      padding: 3rem 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 2.5rem 1rem;
+      }
+
+      .hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin: 2.5rem 0;
+      }
+
+      .pricing-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .plan-name {
+        font-size: 1.25rem;
+      }
+
+      .price-monthly,
+      .price-yearly {
+        font-size: 2.5rem;
+      }
+
+      .faq-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .faq-title {
+        font-size: 1.75rem;
+        margin-bottom: 2rem;
+      }
+
+      .billing-toggle-container {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">SellingDubai</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Simple, Transparent Pricing</h1>
+        <p>Choose the perfect plan to grow your real estate business.</p>
+
+        <div class="billing-toggle-container">
+          <span class="billing-label">Monthly</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="billing-toggle">
+            <span class="toggle-slider"></span>
+            <span class="yearly-badge">Save 17%</span>
+          </label>
+          <span class="billing-label">Yearly</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing-cards-section">
+      <div class="container">
+        <div class="pricing-grid">
+          <!-- FREE TIER -->
+          <div class="pricing-card">
+            <div class="plan-name">Free</div>
+            <p class="plan-description">Perfect for getting started</p>
+
+            <div class="price-section">
+              <div class="price-monthly">
+                <span class="price-currency">AED</span> 0<span class="price-period">/forever</span>
+              </div>
+            </div>
+
+            <ul class="features-list">
+              <li>Verified agent profile page</li>
+              <li>Link-in-bio with social links</li>
+              <li>Up to 3 property listings</li>
+              <li>Basic analytics (views, taps)</li>
+              <li>Lead capture form</li>
+              <li>"Powered by SellingDubai" badge</li>
+            </ul>
+
+            <a href="/join" class="cta-button cta-free">Get Started</a>
+          </div>
+
+          <!-- PRO TIER -->
+          <div class="pricing-card">
+            <div class="plan-name">Pro</div>
+            <p class="plan-description">For growing agents</p>
+
+            <div class="price-section">
+              <div class="price-monthly">
+                <span class="price-currency">AED</span> 299<span class="price-period">/month</span>
+              </div>
+              <div class="price-yearly" style="display: none;">
+                <span class="price-currency">AED</span> 2,990<span class="price-period">/year</span>
+              </div>
+              <div class="price-save" style="display: none;">Save 17% with annual billing</div>
+            </div>
+
+            <ul class="features-list">
+              <li>Everything in Free</li>
+              <li>Up to 20 property listings</li>
+              <li>Advanced analytics (sources, conversion rate)</li>
+              <li>Lead CRM with pipeline management</li>
+              <li>Remove SellingDubai branding</li>
+              <li>Priority support</li>
+              <li>Custom background image</li>
+              <li>Facebook Pixel & GA4 integration</li>
+              <li>Weekly performance email</li>
+            </ul>
+
+            <button class="cta-button cta-upgrade upgrade-btn" data-plan="pro" data-interval="monthly">Upgrade Now</button>
+          </div>
+
+          <!-- PREMIUM TIER -->
+          <div class="pricing-card featured">
+            <div class="featured-badge">Most Popular</div>
+            <div class="plan-name">Premium</div>
+            <p class="plan-description">For elite agents</p>
+
+            <div class="price-section">
+              <div class="price-monthly">
+                <span class="price-currency">AED</span> 799<span class="price-period">/month</span>
+              </div>
+              <div class="price-yearly" style="display: none;">
+                <span class="price-currency">AED</span> 7,990<span class="price-period">/year</span>
+              </div>
+              <div class="price-save" style="display: none;">Save 17% with annual billing</div>
+            </div>
+
+            <ul class="features-list">
+              <li>Everything in Pro</li>
+              <li>Unlimited property listings</li>
+              <li>Lead export to CSV</li>
+              <li>Featured agent badge</li>
+              <li style="color:rgba(255,255,255,0.4);">Co-brokerage network <span style="font-size:0.7rem;color:#d4af37;">Coming Soon</span></li>
+              <li style="color:rgba(255,255,255,0.4);">Property matching engine <span style="font-size:0.7rem;color:#d4af37;">Coming Soon</span></li>
+              <li style="color:rgba(255,255,255,0.4);">Webhook integration for CRM <span style="font-size:0.7rem;color:#d4af37;">Coming Soon</span></li>
+              <li style="color:rgba(255,255,255,0.4);">Dedicated account manager <span style="font-size:0.7rem;color:#d4af37;">Coming Soon</span></li>
+            </ul>
+
+            <button class="cta-button cta-upgrade upgrade-btn" data-plan="premium" data-interval="monthly">Upgrade Now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <div class="container">
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+
+        <div class="faq-grid">
+          <div class="faq-item" data-faq="switch">
+            <div class="faq-question">
+              Can I switch plans anytime?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate your billing accordingly.
+            </div>
+          </div>
+
+          <div class="faq-item" data-faq="contract">
+            <div class="faq-question">
+              Is there a contract?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              No contracts at all. We operate on a month-to-month basis, and you can cancel your subscription anytime with no penalties. Your data remains yours.
+            </div>
+          </div>
+
+          <div class="faq-item" data-faq="payment">
+            <div class="faq-question">
+              What payment methods do you accept?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              We accept Visa, Mastercard, and Apple Pay through Stripe, ensuring secure and convenient payments for all our users worldwide.
+            </div>
+          </div>
+
+          <div class="faq-item" data-faq="downgrade">
+            <div class="faq-question">
+              What happens when I downgrade?
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">
+              You keep all your data when downgrading. Feature access adjusts at your next billing cycle. We'll help you export any data if needed during the transition.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 SellingDubai. All rights reserved. | <a href="/" style="color: rgba(255, 255, 255, 0.6); text-decoration: none;">Home</a> | <a href="/support" style="color: rgba(255, 255, 255, 0.6); text-decoration: none;">Support</a></p>
+    </div>
+  </footer>
+
+  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
+  <script>
+    // Billing toggle
+    const toggle = document.getElementById('billing-toggle');
+    const monthlyEls = document.querySelectorAll('.price-monthly');
+    const yearlyEls = document.querySelectorAll('.price-yearly');
+    const saveBadges = document.querySelectorAll('.price-save');
+    const intervalInputs = document.querySelectorAll('[data-interval]');
+
+    if (toggle) {
+      toggle.addEventListener('change', () => {
+        const isYearly = toggle.checked;
+        monthlyEls.forEach(el => el.style.display = isYearly ? 'none' : 'block');
+        yearlyEls.forEach(el => el.style.display = isYearly ? 'block' : 'none');
+        saveBadges.forEach(el => el.style.display = isYearly ? 'block' : 'none');
+        intervalInputs.forEach(el => el.dataset.interval = isYearly ? 'yearly' : 'monthly');
+      });
+    }
+
+    // FAQ toggle
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+        if (!isActive) {
+          item.classList.add('active');
+        }
+      });
+    });
+
+    // Redirect to /edit for re-auth, preserving plan+interval for retry on return
+    function redirectToAuth(plan, interval) {
+      sessionStorage.setItem('sd_pending_checkout', JSON.stringify({ plan, interval }));
+      window.location.href = '/edit?return=/pricing';
+    }
+
+    async function startCheckout(plan, interval, btn) {
+      const token = localStorage.getItem('sd_edit_token');
+
+      if (!token) {
+        redirectToAuth(plan, interval);
+        return;
+      }
+
+      if (btn) { btn.textContent = 'Loading...'; btn.disabled = true; }
+
+      try {
+        const res = await fetch('https://pjyorgedaxevxophpfib.supabase.co/functions/v1/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, plan, interval })
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else if (res.status === 401 || (data.error && data.error.toLowerCase().includes('session'))) {
+          // Token expired — re-auth then retry
+          localStorage.removeItem('sd_edit_token');
+          redirectToAuth(plan, interval);
+        } else {
+          alert(data.error || 'Failed to start checkout.');
+          if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
+        }
+      } catch (e) {
+        alert('Something went wrong. Please try again.');
+        if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
+      }
+    }
+
+    // On return from /edit after re-auth, auto-retry the pending checkout
+    const pending = sessionStorage.getItem('sd_pending_checkout');
+    if (pending && localStorage.getItem('sd_edit_token')) {
+      sessionStorage.removeItem('sd_pending_checkout');
+      try {
+        const { plan, interval } = JSON.parse(pending);
+        // Highlight the right button so the user sees what's happening
+        const matchingBtn = document.querySelector(`.upgrade-btn[data-plan="${plan}"]`);
+        startCheckout(plan, interval, matchingBtn);
+      } catch (e) { /* malformed sessionStorage value — ignore */ }
+    }
+
+    // Upgrade buttons
+    document.querySelectorAll('.upgrade-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const plan = btn.dataset.plan;
+        const interval = btn.dataset.interval || 'monthly';
+        startCheckout(plan, interval, btn);
+      });
+    });
+  </script>
+</body>
+</html>

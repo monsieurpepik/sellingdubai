@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | SellingDubai</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #09090b; color: #fafafa;
+    height: 100vh; height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* ── Layout ── */
+  .shell { display: flex; height: 100vh; height: 100dvh; }
+
+  /* ── Sidebar (desktop) ── */
+  .sidebar {
+    width: 240px; background: #09090b;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 24px 16px; display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
+  }
+  .sidebar-brand {
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: rgba(255,255,255,0.5);
+    padding: 0 12px; margin-bottom: 32px;
+  }
+  .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px; font-size: 14px;
+    font-weight: 500; color: rgba(255,255,255,0.5);
+    text-decoration: none; transition: all 0.15s; cursor: pointer;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+  .nav-item.active { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.6; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 0; }
+  .sidebar-agent {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; border-radius: 10px; margin-top: auto;
+    background: rgba(255,255,255,0.04);
+  }
+  .sidebar-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .sidebar-agent-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-agent-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+  /* ── Main content ── */
+  .main {
+    flex: 1; margin-left: 240px; padding: 32px; max-width: 960px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 8px 14px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; border: none; cursor: pointer;
+    transition: all 0.15s; font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none;
+  }
+  .btn-ghost { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .btn-primary { background: #fff; color: #09090b; }
+  .btn-primary:hover { background: rgba(255,255,255,0.9); }
+
+  /* ── Metric Cards ── */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .metric-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 20px;
+  }
+  .metric-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .metric-change { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .metric-up { color: #22c55e; }
+  .metric-down { color: #ef4444; }
+  .metric-flat { color: rgba(255,255,255,0.3); }
+
+  /* ── Chart area ── */
+  .chart-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 20px; margin-bottom: 32px;
+  }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .chart-title { font-size: 14px; font-weight: 600; }
+  .chart-period { font-size: 12px; color: rgba(255,255,255,0.35); }
+  .chart-bars { display: flex; align-items: flex-end; gap: 3px; height: 80px; }
+  .chart-bar {
+    flex: 1; background: rgba(255,255,255,0.08); border-radius: 3px 3px 0 0;
+    min-height: 2px; transition: background 0.15s; position: relative;
+  }
+  .chart-bar:hover { background: rgba(255,255,255,0.2); }
+  .chart-bar-fill { background: #3b82f6; border-radius: 3px 3px 0 0; }
+
+  /* ── Referrers ── */
+  .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .ref-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 20px;
+  }
+  .ref-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .ref-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .ref-row + .ref-row { border-top: 1px solid rgba(255,255,255,0.04); }
+  .ref-source { font-size: 13px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 8px; }
+  .ref-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ref-count { font-size: 13px; font-weight: 600; }
+
+  /* ── Leads Section ── */
+  .leads-section { margin-bottom: 32px; }
+  .leads-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .leads-title { font-size: 16px; font-weight: 700; }
+  .leads-count { font-size: 13px; color: rgba(255,255,255,0.35); font-weight: 500; }
+
+  /* Lead cards */
+  .lead-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 16px; margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .lead-card:hover { border-color: rgba(255,255,255,0.12); }
+  .lead-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .lead-name { font-size: 14px; font-weight: 600; }
+  .lead-time { font-size: 12px; color: rgba(255,255,255,0.3); white-space: nowrap; }
+  .lead-details { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .lead-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+  }
+  .lead-msg { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.4; margin-bottom: 12px; font-style: italic; }
+  .lead-actions { display: flex; gap: 6px; align-items: center; }
+  .lead-btn {
+    padding: 10px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 600; border: none; cursor: pointer;
+    transition: all 0.15s; font-family: 'Inter', sans-serif;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    min-height: 40px;
+  }
+  .lead-btn-wa { background: rgba(37,211,102,0.12); color: #25d366; }
+  .lead-btn-wa:hover { background: rgba(37,211,102,0.2); }
+  .lead-btn-call { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .lead-btn-call:hover { background: rgba(59,130,246,0.2); }
+  .lead-btn-email { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .lead-btn-email:hover { background: rgba(168,85,247,0.2); }
+
+  /* Status dropdown */
+  .status-select {
+    padding: 10px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 600; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; outline: none;
+    -webkit-appearance: none; margin-left: auto;
+    min-height: 40px;
+  }
+  .status-new { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .status-contacted { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .status-qualified { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .status-lost { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .status-converted { background: rgba(168,85,247,0.15); color: #a855f7; }
+  .status-select option { background: #1a1a1e; color: #fff; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center; padding: 48px 24px;
+    background: rgba(255,255,255,0.02); border-radius: 12px;
+    border: 1px dashed rgba(255,255,255,0.08);
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-title { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; color: rgba(255,255,255,0.25); }
+
+  /* ── Auth Screen ── */
+  .auth-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: #09090b;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .auth-card { max-width: 360px; width: 100%; text-align: center; }
+  .auth-brand { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 40px; }
+  .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .auth-sub { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 32px; line-height: 1.5; }
+  .auth-input {
+    width: 100%; padding: 14px 16px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: #fff; font-size: 15px; font-family: 'Inter', sans-serif;
+    outline: none; margin-bottom: 12px; transition: all 0.2s;
+  }
+  .auth-input:focus { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
+  .auth-input::placeholder { color: rgba(255,255,255,0.3); }
+  .auth-btn {
+    width: 100%; padding: 14px; border-radius: 10px;
+    background: #fff; color: #09090b; font-size: 15px;
+    font-weight: 700; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .auth-btn:hover { background: rgba(255,255,255,0.9); }
+  .auth-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .auth-msg {
+    padding: 12px; border-radius: 8px; font-size: 13px;
+    margin-bottom: 16px; display: none; line-height: 1.4;
+  }
+  .auth-msg.error { display: block; background: rgba(239,68,68,0.08); color: #ef4444; }
+  .auth-msg.success { display: block; background: rgba(34,197,94,0.08); color: #22c55e; }
+  .auth-msg.show { display: block; }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.15); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+  .spinner-dark { border-color: rgba(0,0,0,0.1); border-top-color: #09090b; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none !important; }
+
+  /* ── Referral section ── */
+  .referral-section { margin-top: 32px; }
+  .referral-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; }
+  .referral-card-inner { padding: 20px; }
+  .referral-link-box { display: flex; gap: 8px; }
+  .referral-link-input {
+    flex: 1; padding: 12px 14px; border-radius: 8px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: #fff; font-size: 13px; font-family: 'Inter', sans-serif;
+    outline: none; min-width: 0;
+  }
+  .referral-copy-btn {
+    padding: 12px 20px; border-radius: 8px; border: none;
+    background: #1127d2; color: #fff; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .referral-copy-btn:active { transform: scale(0.96); }
+
+  /* ── Properties Section ── */
+  .props-section { margin-bottom: 28px; }
+  .props-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .props-header-left { display: flex; align-items: center; gap: 10px; }
+  .props-title { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.85); }
+  .props-count-badge { font-size: 12px; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.06); padding: 3px 9px; border-radius: 20px; }
+  .prop-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .prop-thumb { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,0.06); flex-shrink: 0; }
+  .prop-thumb-placeholder { width: 72px; height: 72px; border-radius: 8px; background: rgba(255,255,255,0.06); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .prop-body { flex: 1; min-width: 0; }
+  .prop-title-text { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prop-meta { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+  .prop-badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
+  .prop-badge-just_listed { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .prop-badge-available { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .prop-badge-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .prop-badge-sold { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .prop-badge-rented { background: rgba(168,85,247,0.15); color: #a855f7; }
+  .prop-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .prop-status-select { padding: 5px 8px; border-radius: 7px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .prop-status-select:focus { outline: none; }
+  .prop-status-just_listed { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .prop-status-available { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .prop-status-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .prop-status-sold { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .prop-status-rented { background: rgba(168,85,247,0.15); color: #a855f7; }
+  .prop-share-btn, .prop-edit-btn, .prop-delete-btn { padding: 5px 10px; border-radius: 7px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+  .prop-share-btn { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .prop-share-btn:hover { background: rgba(99,102,241,0.25); }
+  .prop-edit-btn { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+  .prop-edit-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .prop-delete-btn { background: rgba(239,68,68,0.1); color: #f87171; }
+  .prop-delete-btn:hover { background: rgba(239,68,68,0.2); }
+  .prop-reorder { display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+  .prop-arrow-btn { width: 24px; height: 24px; border-radius: 5px; border: none; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.15s; }
+  .prop-arrow-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+  .prop-arrow-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  .props-limit-note { font-size: 12px; color: rgba(255,255,255,0.35); text-align: center; padding: 10px 0 4px; }
+
+  /* ── Modal ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-card { background: #111113; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 24px; }
+  .modal-card-sm { max-width: 360px; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-header h3 { font-size: 17px; font-weight: 700; }
+  .modal-close { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .modal-close:hover { color: rgba(255,255,255,0.65); }
+  .modal-body { display: flex; flex-direction: column; gap: 14px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .modal-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .modal-input, .modal-select { width: 100%; padding: 11px 13px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; }
+  .modal-input:focus, .modal-select:focus { border-color: rgba(99,102,241,0.5); }
+  .modal-select option { background: #1a1a1f; color: #fff; }
+  .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal-radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .modal-radio-label { padding: 7px 14px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); font-size: 13px; font-weight: 500; cursor: pointer; color: rgba(255,255,255,0.5); transition: all 0.15s; display: flex; align-items: center; }
+  .modal-radio-label input[type=radio] { display: none; }
+  .modal-radio-label:has(input:checked) { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
+  .modal-thumb-row { display: flex; gap: 14px; align-items: flex-start; }
+  .modal-thumb-area { width: 80px; height: 80px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1.5px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; flex-shrink: 0; transition: border-color 0.15s; font-size: 24px; }
+  .modal-thumb-area:hover { border-color: rgba(255,255,255,0.3); }
+  .modal-thumb-area img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-thumb-meta { flex: 1; }
+  .modal-thumb-hint { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 6px; line-height: 1.5; }
+  .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+  /* ── Loading skeleton ── */
+  .skel { background: rgba(255,255,255,0.06); border-radius: 8px; animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ── Billing Card ── */
+  .billing-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 16px 20px; margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .billing-card-left { display: flex; align-items: center; gap: 14px; }
+  .billing-card-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .billing-plan-badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+    background: rgba(99,102,241,0.18); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25);
+  }
+  .billing-plan-badge[data-tier="premium"] {
+    background: rgba(245,158,11,0.15); color: #fcd34d; border-color: rgba(245,158,11,0.25);
+  }
+  .billing-plan-label { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.85); }
+  .billing-period-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .billing-status-banner {
+    font-size: 12px; padding: 6px 12px; border-radius: 8px; font-weight: 500;
+  }
+  .billing-status-past-due {
+    background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2);
+  }
+
+  /* ── Onboarding Checklist ── */
+  .onboard {
+    background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.06) 100%);
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 14px; padding: 24px; margin-bottom: 28px;
+    position: relative;
+  }
+  .onboard-dismiss {
+    position: absolute; top: 12px; right: 12px;
+    background: none; border: none; color: rgba(255,255,255,0.25);
+    cursor: pointer; font-size: 18px; padding: 4px 8px; line-height: 1;
+  }
+  .onboard-dismiss:hover { color: rgba(255,255,255,0.5); }
+  .onboard-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .onboard-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 18px; line-height: 1.5; }
+  .onboard-progress {
+    height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px;
+    margin-bottom: 18px; overflow: hidden;
+  }
+  .onboard-bar { height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.5s ease; }
+  .onboard-steps { display: flex; flex-direction: column; gap: 10px; }
+  .onboard-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6);
+    text-decoration: none; cursor: pointer; transition: all 0.15s;
+  }
+  .onboard-step:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+  .onboard-check {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(255,255,255,0.15); font-size: 12px;
+  }
+  .onboard-step.done .onboard-check {
+    background: #22c55e; border-color: #22c55e; color: #fff;
+  }
+  .onboard-step.done { color: rgba(255,255,255,0.3); text-decoration: line-through; }
+  .onboard-step-label { flex: 1; }
+  .onboard-step-action {
+    font-size: 11px; font-weight: 700; color: #3b82f6;
+    text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+  }
+  .onboard-step.done .onboard-step-action { display: none; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+    padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    background: #22c55e; color: #fff; z-index: 200;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 16px; height: 100vh; height: 100dvh; }
+    .metrics { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .metric-value { font-size: 22px; }
+    .metric-card { padding: 14px; }
+    .ref-grid { grid-template-columns: 1fr; }
+    .topbar h1 { font-size: 18px; }
+    .mobile-nav {
+      display: flex !important;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #09090b; border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      z-index: 50; justify-content: space-around;
+    }
+    .mobile-nav a, .mobile-nav button {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 10px 12px; font-size: 10px; font-weight: 600;
+      color: rgba(255,255,255,0.4); text-decoration: none;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; min-height: 44px;
+    }
+    .mobile-nav .active { color: #fff; }
+    .mobile-nav svg { width: 20px; height: 20px; }
+    .main { padding-bottom: 80px; }
+  }
+  @media (min-width: 769px) {
+    .mobile-nav { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-brand"><img src="/sellingdubailogo.png" alt="Selling Dubai" style="height:60px;"></div>
+
+    <!-- Login form -->
+    <div id="auth-form">
+      <h2 class="auth-title">Agent Dashboard</h2>
+      <p class="auth-sub">Enter your email to receive a magic link and access your leads and analytics.</p>
+      <div class="auth-msg" id="auth-error"></div>
+      <div class="auth-msg" id="auth-success"></div>
+      <input type="email" class="auth-input" id="auth-email" placeholder="your@email.com" autocomplete="email">
+      <button class="auth-btn" id="btn-magic" onclick="sendMagicLink()">Send Magic Link</button>
+    </div>
+
+    <!-- Sent confirmation -->
+    <div id="auth-sent" class="hidden">
+      <h2 class="auth-title">Check your email</h2>
+      <p class="auth-sub">We sent a magic link to <strong id="sent-email"></strong>. Click it to access your dashboard.</p>
+      <button class="auth-btn" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);" onclick="showAuthForm()">Use a different email</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="auth-loading" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+        <span class="spinner"></span>
+        <span style="font-size:14px;color:rgba(255,255,255,0.5);">Verifying...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SIDEBAR ============ -->
+<div class="shell" id="app-shell" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><img src="/sellingdubailogo.png" alt="Selling Dubai" style="height:40px;opacity:0.9;"></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="/edit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Profile
+      </a>
+      <button class="nav-item" onclick="scrollToProperties()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Properties
+      </button>
+      <a class="nav-item" id="nav-view-profile" href="/a/" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        View Profile
+      </a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="/pricing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span id="nav-upgrade-label">Upgrade Plan</span>
+      </a>
+      <div class="nav-divider"></div>
+      <button class="nav-item" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </nav>
+    <div class="sidebar-agent" id="sidebar-agent">
+      <div class="sidebar-avatar" id="sidebar-avatar"></div>
+      <div>
+        <div class="sidebar-agent-name" id="sidebar-name">—</div>
+        <div class="sidebar-agent-role" id="sidebar-tier">Free plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+      <div class="topbar-actions">
+        <a class="btn-sm btn-ghost" href="/edit">Edit Profile</a>
+        <a class="btn-sm btn-primary" id="btn-share" onclick="copyProfileLink()" style="cursor:pointer;">Share Link</a>
+      </div>
+    </div>
+
+    <!-- Onboarding Checklist (hidden when complete) -->
+    <div class="onboard" id="onboard-checklist" style="display:none;">
+      <button class="onboard-dismiss" onclick="dismissOnboarding()" title="Dismiss">&times;</button>
+      <div class="onboard-title">🚀 Get your profile live</div>
+      <div class="onboard-sub">Complete these steps to start getting leads from your SellingDubai profile.</div>
+      <div class="onboard-progress"><div class="onboard-bar" id="onboard-bar" style="width:0%"></div></div>
+      <div class="onboard-steps" id="onboard-steps">
+        <a class="onboard-step" id="ob-photo" href="/edit">
+          <span class="onboard-check" id="ob-photo-check"></span>
+          <span class="onboard-step-label">Upload your profile photo</span>
+          <span class="onboard-step-action">Add →</span>
+        </a>
+        <a class="onboard-step" id="ob-bio" href="/edit">
+          <span class="onboard-check" id="ob-bio-check"></span>
+          <span class="onboard-step-label">Write a short bio</span>
+          <span class="onboard-step-action">Add →</span>
+        </a>
+        <a class="onboard-step" id="ob-whatsapp" href="/edit">
+          <span class="onboard-check" id="ob-whatsapp-check"></span>
+          <span class="onboard-step-label">Add your WhatsApp number</span>
+          <span class="onboard-step-action">Add →</span>
+        </a>
+        <div class="onboard-step" id="ob-property" onclick="scrollToProperties(); openPropModal(null);" style="cursor:pointer;">
+          <span class="onboard-check" id="ob-property-check"></span>
+          <span class="onboard-step-label">Add your first property listing</span>
+          <span class="onboard-step-action">Add →</span>
+        </div>
+        <div class="onboard-step" id="ob-share" onclick="copyProfileLink()" style="cursor:pointer;">
+          <span class="onboard-check" id="ob-share-check"></span>
+          <span class="onboard-step-label">Share your profile link</span>
+          <span class="onboard-step-action">Copy →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Billing Status (hidden for free tier; shown for paid + past_due) -->
+    <div class="billing-card" id="billing-card" style="display:none;">
+      <div class="billing-card-left">
+        <div class="billing-plan-badge" id="billing-plan-badge">Pro</div>
+        <div class="billing-details">
+          <div class="billing-plan-label" id="billing-plan-label">Pro Plan</div>
+          <div class="billing-period-label" id="billing-period-label"></div>
+        </div>
+      </div>
+      <div class="billing-card-right">
+        <div class="billing-status-banner" id="billing-status-banner" style="display:none;"></div>
+        <button class="btn-sm btn-ghost" id="btn-manage-billing" onclick="openBillingPortal()">Manage billing</button>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics" id="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Profile Views</div>
+        <div class="metric-value" id="m-views">—</div>
+        <div class="metric-change" id="m-views-change"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Leads</div>
+        <div class="metric-value" id="m-leads">—</div>
+        <div class="metric-change" id="m-leads-change"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">WhatsApp Taps</div>
+        <div class="metric-value" id="m-wa">—</div>
+        <div class="metric-change" id="m-wa-change"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Conversion</div>
+        <div class="metric-value" id="m-conv">—</div>
+        <div class="metric-change" id="m-conv-label"></div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Profile Views</span>
+        <span class="chart-period">Last 30 days</span>
+      </div>
+      <div class="chart-bars" id="chart-bars"></div>
+    </div>
+
+    <!-- Referrers + Sources -->
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-title">Traffic Sources</div>
+        <div id="ref-list">
+          <div class="empty-state" style="padding:24px;border:none;">
+            <div class="empty-sub">No traffic data yet</div>
+          </div>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Lead Sources</div>
+        <div id="lead-source-list">
+          <div class="empty-state" style="padding:24px;border:none;">
+            <div class="empty-sub">No lead data yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leads -->
+    <div class="leads-section">
+      <div class="leads-header">
+        <span class="leads-title">Recent Leads</span>
+        <span class="leads-count" id="leads-count"></span>
+      </div>
+      <div id="leads-list">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">No leads yet</div>
+          <div class="empty-sub">Share your profile link to start receiving leads</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Properties Section -->
+    <div class="props-section" id="props-section">
+      <div class="props-header">
+        <div class="props-header-left">
+          <span class="props-title">My Listings</span>
+          <span class="props-count-badge" id="props-count-badge">0 / 3</span>
+        </div>
+        <button class="btn-sm btn-primary" id="btn-add-prop" onclick="openPropModal(null)">+ Add Listing</button>
+      </div>
+      <div id="props-list">
+        <div class="empty-state">
+          <div class="empty-icon">🏠</div>
+          <div class="empty-title">No listings yet</div>
+          <div class="empty-sub">Add your first property to showcase it on your profile</div>
+        </div>
+      </div>
+      <div class="props-limit-note" id="props-limit-note" style="display:none;"></div>
+    </div>
+
+    <!-- Referral Invite Section — Coming Soon -->
+    <div class="referral-section" id="referral-section" style="position:relative;opacity:0.45;pointer-events:none;">
+      <div style="position:absolute;top:12px;right:16px;background:#3b82f6;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;z-index:2;pointer-events:auto;">COMING SOON</div>
+      <div class="leads-header">
+        <span class="leads-title">Invite Agents</span>
+        <span class="leads-count" id="referral-count"></span>
+      </div>
+      <div class="referral-card">
+        <div class="referral-card-inner">
+          <div style="margin-bottom:16px;">
+            <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;">Earn free listing slots</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.5;">Share your invite link with other Dubai agents. When they join and verify, you both get bonus listing slots on the portal.</div>
+          </div>
+          <div class="referral-link-box">
+            <input type="text" readonly id="referral-link" class="referral-link-input" value="">
+            <button class="referral-copy-btn" id="referral-copy-btn" onclick="copyReferralLink()">Copy</button>
+          </div>
+          <div id="referral-stats" style="margin-top:16px;display:none;">
+            <div style="display:flex;gap:16px;">
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:800;color:#fff;" id="ref-invited">0</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">Invited</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:800;color:#22c55e;" id="ref-verified">0</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">Verified</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:800;color:#eab308;" id="ref-bonus">0</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">Bonus Slots</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-nav">
+    <a href="/dashboard" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="/edit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit
+    </a>
+    <a id="mobile-view-profile" href="/a/" target="_blank" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Profile
+    </a>
+    <button onclick="scrollToProperties()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Properties
+    </button>
+    <a href="/pricing" id="mobile-upgrade">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Upgrade
+    </a>
+    <button onclick="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </nav>
+</div>
+
+<!-- Add / Edit Property Modal -->
+<div class="modal-overlay" id="prop-modal" onclick="if(event.target===this)closePropModal()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="prop-modal-title">Add Listing</h3>
+      <button class="modal-close" onclick="closePropModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Image -->
+      <div>
+        <div class="modal-label">Photo</div>
+        <div class="modal-thumb-row">
+          <div class="modal-thumb-area" id="prop-thumb-preview" onclick="document.getElementById('prop-photo-input').click()">🏠</div>
+          <div class="modal-thumb-meta">
+            <input type="file" id="prop-photo-input" accept="image/*" style="display:none;" onchange="onPropModalPhoto(this)">
+            <input type="hidden" id="prop-image-base64">
+            <div class="modal-thumb-hint">Tap to upload a photo.<br>JPG or PNG, max 5 MB.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Title -->
+      <div>
+        <div class="modal-label">Title *</div>
+        <input type="text" class="modal-input" id="prop-title" placeholder="e.g. Stunning 2BR Marina View Apartment">
+      </div>
+      <!-- Price & Location -->
+      <div class="modal-row">
+        <div>
+          <div class="modal-label">Price (AED)</div>
+          <input type="text" class="modal-input" id="prop-price" placeholder="e.g. 1,200,000">
+        </div>
+        <div>
+          <div class="modal-label">Location</div>
+          <input type="text" class="modal-input" id="prop-location" placeholder="e.g. Dubai Marina">
+        </div>
+      </div>
+      <!-- Beds & Area -->
+      <div class="modal-row">
+        <div>
+          <div class="modal-label">Bedrooms</div>
+          <input type="number" class="modal-input" id="prop-bedrooms" placeholder="e.g. 2" min="0" max="20">
+        </div>
+        <div>
+          <div class="modal-label">Area (sq ft)</div>
+          <input type="number" class="modal-input" id="prop-area" placeholder="e.g. 1200" min="0">
+        </div>
+      </div>
+      <!-- Type -->
+      <div>
+        <div class="modal-label">Property Type</div>
+        <select class="modal-select" id="prop-type">
+          <option value="">Select type</option>
+          <option value="Apartment">Apartment</option>
+          <option value="Villa">Villa</option>
+          <option value="Townhouse">Townhouse</option>
+          <option value="Penthouse">Penthouse</option>
+          <option value="Studio">Studio</option>
+          <option value="Plot">Plot</option>
+          <option value="Commercial">Commercial</option>
+        </select>
+      </div>
+      <!-- Status -->
+      <div>
+        <div class="modal-label">Status</div>
+        <div class="modal-radio-group" id="prop-status-group">
+          <label class="modal-radio-label"><input type="radio" name="prop-status" value="just_listed"> Just Listed</label>
+          <label class="modal-radio-label"><input type="radio" name="prop-status" value="available" checked> Available</label>
+          <label class="modal-radio-label"><input type="radio" name="prop-status" value="under_offer"> Under Offer</label>
+          <label class="modal-radio-label"><input type="radio" name="prop-status" value="sold"> Sold</label>
+          <label class="modal-radio-label"><input type="radio" name="prop-status" value="rented"> Rented</label>
+        </div>
+      </div>
+      <!-- Trakheesi & Link -->
+      <div class="modal-row">
+        <div>
+          <div class="modal-label">Trakheesi Permit #</div>
+          <input type="text" class="modal-input" id="prop-trakheesi" placeholder="Optional">
+        </div>
+        <div>
+          <div class="modal-label">External Link</div>
+          <input type="url" class="modal-input" id="prop-external-url" placeholder="https://...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost" onclick="closePropModal()">Cancel</button>
+      <button class="btn-sm btn-primary" id="btn-save-prop" onclick="savePropModal()">Save Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="delete-prop-modal" onclick="if(event.target===this)closeDeletePropModal()">
+  <div class="modal-card modal-card-sm">
+    <div class="modal-header">
+      <h3>Delete Listing?</h3>
+      <button class="modal-close" onclick="closeDeletePropModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
+        Are you sure you want to delete <strong id="delete-prop-name" style="color:#fff;"></strong>? This cannot be undone.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost" onclick="closeDeletePropModal()">Cancel</button>
+      <button class="btn-sm btn-danger" id="btn-confirm-delete" onclick="confirmDeleteProp()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+  const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
+  const VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
+  const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
+  const PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
+
+  let currentAgent = null;
+  let authToken = null;
+  let propertiesCache = [];
+  let propLimitReached = false;
+  let _pendingDeleteId = null;
+
+  // ── Init ──
+  function init() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const saved = localStorage.getItem('sd_edit_token');
+
+    if (token) {
+      verifyToken(token);
+    } else if (saved) {
+      verifyToken(saved);
+    } else {
+      showAuthOverlay();
+    }
+  }
+
+  function showAuthOverlay() {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    document.getElementById('app-shell').style.display = 'none';
+    document.getElementById('auth-form').classList.remove('hidden');
+    document.getElementById('auth-sent').classList.add('hidden');
+    document.getElementById('auth-loading').classList.add('hidden');
+  }
+
+  window.showAuthForm = function() {
+    document.getElementById('auth-form').classList.remove('hidden');
+    document.getElementById('auth-sent').classList.add('hidden');
+  };
+
+  // ── Send Magic Link ──
+  window.sendMagicLink = async function() {
+    const errEl = document.getElementById('auth-error');
+    const succEl = document.getElementById('auth-success');
+    errEl.className = 'auth-msg'; succEl.className = 'auth-msg';
+
+    const email = document.getElementById('auth-email').value.trim();
+    if (!email) { errEl.textContent = 'Enter your email.'; errEl.className = 'auth-msg error'; return; }
+
+    const btn = document.getElementById('btn-magic');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner spinner-dark"></span>';
+
+    try {
+      const res = await fetch(MAGIC_LINK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      btn.disabled = false;
+      btn.textContent = 'Send Magic Link';
+
+      if (!res.ok) {
+        const data = await res.json();
+        errEl.textContent = data.error || 'Something went wrong.';
+        errEl.className = 'auth-msg error';
+        return;
+      }
+
+      document.getElementById('sent-email').textContent = email;
+      document.getElementById('auth-form').classList.add('hidden');
+      document.getElementById('auth-sent').classList.remove('hidden');
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Send Magic Link';
+      errEl.textContent = 'Connection error.'; errEl.className = 'auth-msg error';
+    }
+  };
+
+  // ── Verify Token ──
+  async function verifyToken(token) {
+    document.getElementById('auth-form').classList.add('hidden');
+    document.getElementById('auth-sent').classList.add('hidden');
+    document.getElementById('auth-loading').classList.remove('hidden');
+
+    try {
+      const res = await fetch(VERIFY_TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.agent) {
+        localStorage.removeItem('sd_edit_token');
+        window.history.replaceState({}, '', '/dashboard');
+        showAuthOverlay();
+        const errEl = document.getElementById('auth-error');
+        errEl.textContent = data.error || 'Session expired. Request a new magic link.';
+        errEl.className = 'auth-msg error';
+        return;
+      }
+
+      authToken = token;
+      localStorage.setItem('sd_edit_token', token);
+      window.history.replaceState({}, '', '/dashboard');
+      currentAgent = data.agent;
+      loadDashboard();
+    } catch (e) {
+      localStorage.removeItem('sd_edit_token');
+      showAuthOverlay();
+      const errEl = document.getElementById('auth-error');
+      errEl.textContent = 'Connection error.'; errEl.className = 'auth-msg error';
+    }
+  }
+
+  // ── Load Dashboard ──
+  function loadDashboard() {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('app-shell').style.display = 'flex';
+
+    // Set agent info
+    const a = currentAgent;
+    document.getElementById('sidebar-name').textContent = a.name || '—';
+    document.getElementById('sidebar-tier').textContent = (a.tier || 'free').charAt(0).toUpperCase() + (a.tier || 'free').slice(1) + ' plan';
+    document.getElementById('nav-view-profile').href = '/a/' + (a.slug || '');
+    document.getElementById('mobile-view-profile').href = '/a/' + (a.slug || '');
+
+    const avatarEl = document.getElementById('sidebar-avatar');
+    if (a.photo_url) {
+      avatarEl.innerHTML = '<img src="' + esc(a.photo_url) + '" alt="">';
+    } else {
+      avatarEl.textContent = (a.name || '?').charAt(0).toUpperCase();
+    }
+
+    fetchAnalytics();
+    renderOnboarding();
+    renderBillingCard();
+    loadProperties();
+  }
+
+  // ── Billing Card ──
+  function renderBillingCard() {
+    const a = currentAgent;
+    if (!a || !a.tier || a.tier === 'free') return;
+
+    const card = document.getElementById('billing-card');
+    const badge = document.getElementById('billing-plan-badge');
+    const planLabel = document.getElementById('billing-plan-label');
+    const periodLabel = document.getElementById('billing-period-label');
+    const statusBanner = document.getElementById('billing-status-banner');
+
+    const tierName = a.tier.charAt(0).toUpperCase() + a.tier.slice(1);
+    const planInterval = a.stripe_plan && a.stripe_plan.includes('yearly') ? 'Yearly' : 'Monthly';
+    badge.textContent = tierName;
+    badge.dataset.tier = a.tier;
+    planLabel.textContent = tierName + ' Plan · ' + planInterval;
+
+    if (a.stripe_current_period_end) {
+      const periodEnd = new Date(a.stripe_current_period_end);
+      const fmt = periodEnd.toLocaleDateString('en-AE', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      if (a.stripe_subscription_status === 'past_due') {
+        const graceEnd = new Date(a.stripe_current_period_end);
+        graceEnd.setDate(graceEnd.getDate() + 7);
+        const now = new Date();
+        if (now <= graceEnd) {
+          periodLabel.textContent = 'Renews ' + fmt;
+          statusBanner.textContent = '⚠ Payment failed — update your card to keep ' + tierName + ' features';
+          statusBanner.style.display = 'block';
+          statusBanner.className = 'billing-status-banner billing-status-past-due';
+        } else {
+          // Grace period expired — show as if free in the nav label
+          document.getElementById('sidebar-tier').textContent = 'Free plan';
+          return; // Don't show the billing card
+        }
+      } else if (a.stripe_subscription_status === 'canceled') {
+        return; // Downgraded — don't show card
+      } else {
+        periodLabel.textContent = 'Renews ' + fmt;
+      }
+    }
+
+    card.style.display = 'flex';
+  }
+
+  async function openBillingPortal() {
+    const btn = document.getElementById('btn-manage-billing');
+    btn.disabled = true;
+    btn.textContent = 'Opening…';
+    try {
+      const res = await fetch('https://pjyorgedaxevxophpfib.supabase.co/functions/v1/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not open billing portal.');
+        btn.disabled = false;
+        btn.textContent = 'Manage billing';
+      }
+    } catch (e) {
+      alert('Connection error. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Manage billing';
+    }
+  }
+
+  // ── Onboarding Checklist ──
+  function renderOnboarding() {
+    if (!currentAgent) return;
+    // Don't show if user previously dismissed
+    if (localStorage.getItem('sd_onboard_dismissed_' + currentAgent.id)) return;
+
+    const a = currentAgent;
+    const hasPhoto = !!a.photo_url;
+    const hasBio = !!(a.bio && a.bio.trim().length > 10);
+    const hasWhatsapp = !!(a.whatsapp && String(a.whatsapp).replace(/\D/g, '').length >= 8);
+    // Property count will be checked after analytics load — for now mark as pending
+    const hasProperty = (a.property_count || 0) > 0;
+    const hasShared = !!localStorage.getItem('sd_shared_' + a.id);
+
+    const steps = [
+      { id: 'ob-photo', done: hasPhoto },
+      { id: 'ob-bio', done: hasBio },
+      { id: 'ob-whatsapp', done: hasWhatsapp },
+      { id: 'ob-property', done: hasProperty },
+      { id: 'ob-share', done: hasShared },
+    ];
+
+    const completed = steps.filter(s => s.done).length;
+    const total = steps.length;
+
+    // All done? Don't show
+    if (completed >= total) return;
+
+    // Show checklist
+    document.getElementById('onboard-checklist').style.display = 'block';
+    document.getElementById('onboard-bar').style.width = ((completed / total) * 100) + '%';
+
+    steps.forEach(s => {
+      const el = document.getElementById(s.id);
+      const check = document.getElementById(s.id + '-check');
+      if (s.done) {
+        el.classList.add('done');
+        check.innerHTML = '✓';
+      } else {
+        el.classList.remove('done');
+        check.innerHTML = '';
+      }
+    });
+  }
+
+  // Update property step after analytics loads
+  function updateOnboardPropertyStep(propertyCount) {
+    if (!currentAgent) return;
+    if (propertyCount > 0) {
+      const el = document.getElementById('ob-property');
+      const check = document.getElementById('ob-property-check');
+      if (el && !el.classList.contains('done')) {
+        el.classList.add('done');
+        check.innerHTML = '✓';
+        // Recalculate progress
+        const doneCount = document.querySelectorAll('.onboard-step.done').length;
+        document.getElementById('onboard-bar').style.width = ((doneCount / 5) * 100) + '%';
+        if (doneCount >= 5) document.getElementById('onboard-checklist').style.display = 'none';
+      }
+    }
+  }
+
+  window.dismissOnboarding = function() {
+    if (currentAgent) localStorage.setItem('sd_onboard_dismissed_' + currentAgent.id, '1');
+    document.getElementById('onboard-checklist').style.display = 'none';
+  };
+
+  // ── Fetch Analytics ──
+  async function fetchAnalytics() {
+    try {
+      const res = await fetch(ANALYTICS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken })
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      renderMetrics(data);
+      renderChart(data.chart || []);
+      renderReferrers(data.top_referrers || []);
+      renderLeads(data.recent_leads || []);
+      loadReferralSection(data.referral_stats || null);
+    } catch (e) {
+      console.error('Analytics fetch error:', e);
+    }
+
+    // Check property count for onboarding step (lightweight HEAD-style query)
+    if (currentAgent && currentAgent.id) {
+      try {
+        const pRes = await fetch(
+          SUPABASE_URL + '/rest/v1/properties?agent_id=eq.' + currentAgent.id + '&select=id&limit=1',
+          { headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU' } }
+        );
+        if (pRes.ok) {
+          const props = await pRes.json();
+          updateOnboardPropertyStep(props.length);
+        }
+      } catch (_) { /* non-critical */ }
+    }
+  }
+
+  // ── Render Metrics ──
+  function renderMetrics(data) {
+    const tm = data.this_month || {};
+    const lm = data.last_month || {};
+
+    setMetric('m-views', tm.views || 0, 'm-views-change', lm.views || 0);
+    setMetric('m-leads', tm.lead_submits || 0, 'm-leads-change', lm.lead_submits || 0);
+    setMetric('m-wa', tm.whatsapp_taps || 0, 'm-wa-change', lm.whatsapp_taps || 0);
+
+    // Conversion = leads / views
+    const views = tm.views || 0;
+    const leads = tm.lead_submits || 0;
+    const conv = views > 0 ? ((leads / views) * 100).toFixed(1) : '0.0';
+    document.getElementById('m-conv').textContent = conv + '%';
+    document.getElementById('m-conv-label').textContent = 'leads / views';
+    document.getElementById('m-conv-label').className = 'metric-change metric-flat';
+  }
+
+  function setMetric(valueId, current, changeId, previous) {
+    document.getElementById(valueId).textContent = current.toLocaleString();
+    const changeEl = document.getElementById(changeId);
+    if (previous === 0 && current === 0) {
+      changeEl.textContent = 'No data yet';
+      changeEl.className = 'metric-change metric-flat';
+    } else if (previous === 0) {
+      changeEl.textContent = '↑ New';
+      changeEl.className = 'metric-change metric-up';
+    } else {
+      const pct = Math.round(((current - previous) / previous) * 100);
+      if (pct > 0) { changeEl.textContent = '↑ ' + pct + '% vs last month'; changeEl.className = 'metric-change metric-up'; }
+      else if (pct < 0) { changeEl.textContent = '↓ ' + Math.abs(pct) + '% vs last month'; changeEl.className = 'metric-change metric-down'; }
+      else { changeEl.textContent = '→ Same as last month'; changeEl.className = 'metric-change metric-flat'; }
+    }
+  }
+
+  // ── Render Chart ──
+  function renderChart(chart) {
+    const container = document.getElementById('chart-bars');
+    if (!chart.length) { container.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:13px;">No data</div>'; return; }
+
+    const max = Math.max(...chart.map(d => d.views), 1);
+    container.innerHTML = chart.map(d => {
+      const h = Math.max(2, (d.views / max) * 80);
+      const cls = d.views > 0 ? 'chart-bar chart-bar-fill' : 'chart-bar';
+      return '<div class="' + cls + '" style="height:' + h + 'px" title="' + d.date + ': ' + d.views + ' views"></div>';
+    }).join('');
+  }
+
+  // ── Render Referrers ──
+  const REF_COLORS = { instagram: '#E1306C', tiktok: '#00f2ea', linkedin: '#0A66C2', youtube: '#FF0000', facebook: '#1877F2', direct: '#6366f1', google: '#34A853', twitter: '#1DA1F2', other: '#71717a' };
+  function renderReferrers(refs) {
+    const el = document.getElementById('ref-list');
+    if (!refs.length) return;
+    el.innerHTML = refs.map(r => {
+      const color = REF_COLORS[r.source.toLowerCase()] || REF_COLORS.other;
+      return '<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:' + color + '"></span>' + esc(r.source) + '</span><span class="ref-count">' + r.count + '</span></div>';
+    }).join('');
+  }
+
+  // ── Render Leads ──
+  function renderLeads(leads) {
+    const container = document.getElementById('leads-list');
+    document.getElementById('leads-count').textContent = leads.length + ' lead' + (leads.length !== 1 ? 's' : '') + ' (30 days)';
+
+    if (!leads.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No leads yet</div><div class="empty-sub">Share your profile link to start receiving leads</div></div>';
+      return;
+    }
+
+    // Lead source breakdown
+    const sources = {};
+    leads.forEach(l => { const s = l.source || 'direct'; sources[s] = (sources[s] || 0) + 1; });
+    const srcEl = document.getElementById('lead-source-list');
+    const srcColors = { profile: '#3b82f6', full_profile: '#6366f1', landing: '#8b5cf6', qr: '#f59e0b', direct: '#71717a' };
+    srcEl.innerHTML = Object.entries(sources).sort((a,b) => b[1]-a[1]).map(([s,c]) => {
+      const color = srcColors[s] || '#71717a';
+      return '<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:' + color + '"></span>' + esc(s) + '</span><span class="ref-count">' + c + '</span></div>';
+    }).join('');
+
+    container.innerHTML = leads.map(l => {
+      const status = l.status || 'new';
+      const statusCls = 'status-' + status;
+      const phone = l.phone || '';
+      const email = l.email || '';
+      const waPhone = phone.replace(/[^0-9]/g, '');
+      const timeAgo = getTimeAgo(l.created_at);
+
+      let actions = '';
+      if (waPhone) {
+        const waMsg = encodeURIComponent('Hi ' + (l.name || '') + ', thanks for reaching out! How can I help you with Dubai properties?');
+        actions += '<a class="lead-btn lead-btn-wa" href="https://wa.me/' + waPhone + '?text=' + waMsg + '" target="_blank">WhatsApp</a>';
+      }
+      if (phone) actions += '<a class="lead-btn lead-btn-call" href="tel:' + esc(phone) + '">Call</a>';
+      if (email) actions += '<a class="lead-btn lead-btn-email" href="mailto:' + esc(email) + '">Email</a>';
+
+      let pills = '';
+      if (l.budget_range) pills += '<span class="lead-pill">' + esc(l.budget_range) + '</span>';
+      if (l.property_type) pills += '<span class="lead-pill">' + esc(l.property_type) + '</span>';
+      if (l.preferred_area) pills += '<span class="lead-pill">' + esc(l.preferred_area) + '</span>';
+      if (l.source) pills += '<span class="lead-pill">' + esc(l.source) + '</span>';
+
+      return '<div class="lead-card">' +
+        '<div class="lead-top">' +
+          '<span class="lead-name">' + esc(l.name) + '</span>' +
+          '<span class="lead-time">' + timeAgo + '</span>' +
+        '</div>' +
+        (pills ? '<div class="lead-details">' + pills + '</div>' : '') +
+        (l.message ? '<div class="lead-msg">"' + esc(l.message) + '"</div>' : '') +
+        '<div class="lead-actions">' + actions +
+          '<select class="status-select ' + statusCls + '" onchange="updateLeadStatus(\'' + l.id + '\', this.value, this)">' +
+            '<option value="new"' + (status==='new'?' selected':'') + '>New</option>' +
+            '<option value="contacted"' + (status==='contacted'?' selected':'') + '>Contacted</option>' +
+            '<option value="qualified"' + (status==='qualified'?' selected':'') + '>Qualified</option>' +
+            '<option value="converted"' + (status==='converted'?' selected':'') + '>Converted</option>' +
+            '<option value="lost"' + (status==='lost'?' selected':'') + '>Lost</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Update Lead Status ──
+  window.updateLeadStatus = async function(leadId, status, selectEl) {
+    selectEl.className = 'status-select status-' + status;
+
+    try {
+      const res = await fetch(SUPABASE_URL + '/functions/v1/update-lead-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken, lead_id: leadId, status: status })
+      });
+      if (res.ok) {
+        showToast('Status updated to ' + status);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || 'Failed to update status');
+      }
+    } catch (e) {
+      showToast('Connection error');
+    }
+  };
+
+  // ── Helpers ──
+  function esc(s) {
+    if (!s) return '';
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function getTimeAgo(dateStr) {
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diff = now - then;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return mins + 'm ago';
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + 'h ago';
+    const days = Math.floor(hours / 24);
+    if (days < 7) return days + 'd ago';
+    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.copyProfileLink = function() {
+    if (!currentAgent) return;
+    const url = 'https://sellingdubai.ae/a/' + currentAgent.slug;
+    // Track share step for onboarding checklist
+    localStorage.setItem('sd_shared_' + currentAgent.id, '1');
+    const obShare = document.getElementById('ob-share');
+    const obShareCheck = document.getElementById('ob-share-check');
+    if (obShare && !obShare.classList.contains('done')) {
+      obShare.classList.add('done');
+      if (obShareCheck) obShareCheck.innerHTML = '✓';
+      const doneCount = document.querySelectorAll('.onboard-step.done').length;
+      document.getElementById('onboard-bar').style.width = ((doneCount / 5) * 100) + '%';
+      if (doneCount >= 5) document.getElementById('onboard-checklist').style.display = 'none';
+    }
+
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('btn-share');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Share Link'; }, 1500);
+    }).catch(() => {
+      // Fallback for older browsers / insecure contexts
+      const tmp = document.createElement('textarea');
+      tmp.value = url;
+      tmp.style.position = 'fixed';
+      tmp.style.opacity = '0';
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      document.body.removeChild(tmp);
+      const btn = document.getElementById('btn-share');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Share Link'; }, 1500);
+    });
+  };
+
+  // ── Referral Section ──
+  function loadReferralSection(referralStats) {
+    if (!currentAgent) return;
+    const code = currentAgent.referral_code || currentAgent.slug;
+    const link = 'https://sellingdubai.ae/join?ref=' + encodeURIComponent(code);
+    document.getElementById('referral-link').value = link;
+
+    // Use referral stats from analytics response (authenticated, bypasses RLS)
+    if (!referralStats || !referralStats.invited) {
+      document.getElementById('referral-count').textContent = '0 invited';
+      return;
+    }
+    const bonus = currentAgent.bonus_listing_slots || 0;
+    document.getElementById('referral-count').textContent = referralStats.invited + ' invited';
+    document.getElementById('ref-invited').textContent = referralStats.invited;
+    document.getElementById('ref-verified').textContent = referralStats.verified || 0;
+    document.getElementById('ref-bonus').textContent = bonus;
+    document.getElementById('referral-stats').style.display = 'block';
+  }
+
+  window.copyReferralLink = function() {
+    const input = document.getElementById('referral-link');
+    if (!input.value) return;
+    navigator.clipboard.writeText(input.value).then(() => {
+      const btn = document.getElementById('referral-copy-btn');
+      btn.textContent = 'Copied!';
+      btn.style.background = '#22c55e';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; }, 1500);
+    }).catch(() => {
+      // Fallback for older browsers
+      input.select();
+      document.execCommand('copy');
+      const btn = document.getElementById('referral-copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  };
+
+  // ── Properties ──
+  const PROP_STATUS_LABELS = {
+    just_listed: 'Just Listed',
+    available: 'Available',
+    under_offer: 'Under Offer',
+    sold: 'Sold',
+    rented: 'Rented',
+  };
+
+  window.scrollToProperties = function() {
+    const el = document.getElementById('props-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  async function loadProperties() {
+    try {
+      const res = await fetch(PROPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken, action: 'list' })
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      propertiesCache = data.properties || [];
+      propLimitReached = data.limit !== null && propertiesCache.length >= data.limit;
+      renderPropertyCards(data.properties || [], data.limit, data.tier);
+      // Update onboarding property step
+      updateOnboardPropertyStep(propertiesCache.length);
+      // Update add button state
+      const addBtn = document.getElementById('btn-add-prop');
+      if (addBtn) addBtn.disabled = propLimitReached;
+    } catch (e) {
+      console.error('loadProperties error:', e);
+    }
+  }
+
+  function renderPropertyCards(props, limit, tier) {
+    const badge = document.getElementById('props-count-badge');
+    const limitNote = document.getElementById('props-limit-note');
+    const limitLabel = limit === null ? '∞' : limit;
+    badge.textContent = props.length + ' / ' + limitLabel;
+
+    if (propLimitReached) {
+      limitNote.textContent = 'Listing limit reached (' + limit + '). Upgrade to Pro or Premium to add more.';
+      limitNote.style.display = 'block';
+    } else {
+      limitNote.style.display = 'none';
+    }
+
+    const container = document.getElementById('props-list');
+    if (!props.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-title">No listings yet</div><div class="empty-sub">Add your first property to showcase it on your profile</div></div>';
+      return;
+    }
+
+    container.innerHTML = props.map((p, idx) => {
+      const status = p.status || 'available';
+      const statusLabel = PROP_STATUS_LABELS[status] || status;
+      const isFirst = idx === 0;
+      const isLast = idx === props.length - 1;
+
+      const thumbHtml = p.image_url
+        ? '<img class="prop-thumb" src="' + esc(p.image_url) + '" alt="">'
+        : '<div class="prop-thumb-placeholder">🏠</div>';
+
+      const metaParts = [];
+      if (p.bedrooms != null) metaParts.push(p.bedrooms + ' bed');
+      if (p.type) metaParts.push(esc(p.type));
+      if (p.location) metaParts.push(esc(p.location));
+      const metaHtml = metaParts.join(' · ');
+
+      return '<div class="prop-card">' +
+        '<div class="prop-reorder">' +
+          '<button class="prop-arrow-btn" onclick="reorderProp(\'' + p.id + '\', -1)"' + (isFirst ? ' disabled' : '') + ' title="Move up">▲</button>' +
+          '<button class="prop-arrow-btn" onclick="reorderProp(\'' + p.id + '\', 1)"' + (isLast ? ' disabled' : '') + ' title="Move down">▼</button>' +
+        '</div>' +
+        thumbHtml +
+        '<div class="prop-body">' +
+          '<div class="prop-title-text">' + esc(p.title) + '</div>' +
+          (p.price ? '<div class="prop-meta">AED ' + esc(p.price) + (metaHtml ? ' · ' + metaHtml : '') + '</div>' : (metaHtml ? '<div class="prop-meta">' + metaHtml + '</div>' : '')) +
+          '<div class="prop-actions">' +
+            '<span class="prop-badge prop-badge-' + status + '">' + statusLabel + '</span>' +
+            '<select class="prop-status-select prop-status-' + status + '" onchange="updatePropStatus(\'' + p.id + '\', this.value, this)">' +
+              Object.entries(PROP_STATUS_LABELS).map(([v, l]) => '<option value="' + v + '"' + (v === status ? ' selected' : '') + '>' + l + '</option>').join('') +
+            '</select>' +
+            '<button class="prop-share-btn" onclick="shareProperty(\'' + p.id + '\')">Share</button>' +
+            '<button class="prop-edit-btn" onclick="openPropModal(\'' + p.id + '\')">Edit</button>' +
+            '<button class="prop-delete-btn" onclick="deletePropertyConfirm(\'' + p.id + '\')">Delete</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.openPropModal = function(propId) {
+    const modal = document.getElementById('prop-modal');
+    const titleEl = document.getElementById('prop-modal-title');
+    const saveBtn = document.getElementById('btn-save-prop');
+
+    // Reset form
+    document.getElementById('prop-title').value = '';
+    document.getElementById('prop-price').value = '';
+    document.getElementById('prop-location').value = '';
+    document.getElementById('prop-bedrooms').value = '';
+    document.getElementById('prop-area').value = '';
+    document.getElementById('prop-type').value = '';
+    document.getElementById('prop-trakheesi').value = '';
+    document.getElementById('prop-external-url').value = '';
+    document.getElementById('prop-image-base64').value = '';
+    document.getElementById('prop-photo-input').value = '';
+    const preview = document.getElementById('prop-thumb-preview');
+    preview.innerHTML = '🏠';
+
+    // Default status
+    const radios = document.querySelectorAll('input[name="prop-status"]');
+    radios.forEach(r => { r.checked = r.value === 'available'; });
+
+    if (propId) {
+      const p = propertiesCache.find(x => x.id === propId);
+      if (!p) return;
+      titleEl.textContent = 'Edit Listing';
+      saveBtn.dataset.editId = propId;
+      document.getElementById('prop-title').value = p.title || '';
+      document.getElementById('prop-price').value = p.price || '';
+      document.getElementById('prop-location').value = p.location || '';
+      document.getElementById('prop-bedrooms').value = p.bedrooms != null ? p.bedrooms : '';
+      document.getElementById('prop-area').value = p.area_sqft != null ? p.area_sqft : '';
+      document.getElementById('prop-type').value = p.type || '';
+      document.getElementById('prop-trakheesi').value = p.trakheesi_permit || '';
+      document.getElementById('prop-external-url').value = p.external_url || '';
+      radios.forEach(r => { r.checked = r.value === (p.status || 'available'); });
+      if (p.image_url) {
+        preview.innerHTML = '<img src="' + esc(p.image_url) + '" alt="">';
+      }
+    } else {
+      titleEl.textContent = 'Add Listing';
+      delete saveBtn.dataset.editId;
+    }
+
+    modal.classList.add('open');
+  };
+
+  window.closePropModal = function() {
+    document.getElementById('prop-modal').classList.remove('open');
+  };
+
+  window.onPropModalPhoto = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('Photo must be under 5 MB'); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('prop-image-base64').value = e.target.result;
+      const preview = document.getElementById('prop-thumb-preview');
+      preview.innerHTML = '<img src="' + e.target.result + '" alt="">';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.savePropModal = async function() {
+    const title = document.getElementById('prop-title').value.trim();
+    if (!title) { showToast('Title is required'); return; }
+
+    const saveBtn = document.getElementById('btn-save-prop');
+    const editId = saveBtn.dataset.editId;
+    const status = document.querySelector('input[name="prop-status"]:checked')?.value || 'available';
+
+    const propData = {
+      title,
+      price: document.getElementById('prop-price').value.trim() || null,
+      location: document.getElementById('prop-location').value.trim() || null,
+      bedrooms: document.getElementById('prop-bedrooms').value !== '' ? parseInt(document.getElementById('prop-bedrooms').value) : null,
+      area_sqft: document.getElementById('prop-area').value !== '' ? parseInt(document.getElementById('prop-area').value) : null,
+      type: document.getElementById('prop-type').value || null,
+      status,
+      trakheesi_permit: document.getElementById('prop-trakheesi').value.trim() || null,
+      external_url: document.getElementById('prop-external-url').value.trim() || null,
+    };
+
+    const imageBase64 = document.getElementById('prop-image-base64').value;
+    if (imageBase64) propData.image_base64 = imageBase64;
+    if (editId) propData.id = editId;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      const payload = { token: authToken, action: editId ? 'update' : 'add', property: propData };
+      const res = await fetch(PROPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.error || 'Failed to save listing');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Listing';
+        return;
+      }
+
+      closePropModal();
+      showToast(editId ? 'Listing updated' : 'Listing added');
+      await loadProperties();
+    } catch (e) {
+      showToast('Connection error');
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Listing';
+  };
+
+  window.deletePropertyConfirm = function(propId) {
+    _pendingDeleteId = propId;
+    const p = propertiesCache.find(x => x.id === propId);
+    document.getElementById('delete-prop-name').textContent = p ? p.title : 'this listing';
+    document.getElementById('delete-prop-modal').classList.add('open');
+  };
+
+  window.closeDeletePropModal = function() {
+    _pendingDeleteId = null;
+    document.getElementById('delete-prop-modal').classList.remove('open');
+  };
+
+  window.confirmDeleteProp = async function() {
+    if (!_pendingDeleteId) return;
+    const propId = _pendingDeleteId;
+    const btn = document.getElementById('btn-confirm-delete');
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+
+    try {
+      const res = await fetch(PROPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken, action: 'delete', property: { id: propId } })
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Failed to delete'); btn.disabled = false; btn.textContent = 'Delete'; return; }
+      closeDeletePropModal();
+      showToast('Listing deleted');
+      await loadProperties();
+    } catch (e) {
+      showToast('Connection error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+  };
+
+  window.updatePropStatus = async function(propId, status, selectEl) {
+    selectEl.className = 'prop-status-select prop-status-' + status;
+    // Update badge in same card
+    const card = selectEl.closest('.prop-card');
+    if (card) {
+      const badge = card.querySelector('.prop-badge');
+      if (badge) {
+        badge.className = 'prop-badge prop-badge-' + status;
+        badge.textContent = PROP_STATUS_LABELS[status] || status;
+      }
+    }
+    try {
+      const res = await fetch(PROPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken, action: 'update', property: { id: propId, status } })
+      });
+      if (res.ok) {
+        const p = propertiesCache.find(x => x.id === propId);
+        if (p) p.status = status;
+        showToast('Status updated');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || 'Failed to update status');
+      }
+    } catch (e) {
+      showToast('Connection error');
+    }
+  };
+
+  window.reorderProp = async function(propId, direction) {
+    const idx = propertiesCache.findIndex(x => x.id === propId);
+    if (idx === -1) return;
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= propertiesCache.length) return;
+
+    // Swap in local cache and re-render immediately for responsiveness
+    const tmp = propertiesCache[idx];
+    propertiesCache[idx] = propertiesCache[swapIdx];
+    propertiesCache[swapIdx] = tmp;
+
+    const limit = parseInt(document.getElementById('props-count-badge').textContent.split('/')[1]) || null;
+    renderPropertyCards(propertiesCache, limit === null || isNaN(limit) ? null : limit, null);
+
+    try {
+      const ids = propertiesCache.map(p => p.id);
+      await fetch(PROPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken, action: 'reorder', ids })
+      });
+    } catch (e) {
+      // Non-critical — re-render from server on next load
+    }
+  };
+
+  window.shareProperty = function(propId) {
+    if (!currentAgent) return;
+    const url = 'https://sellingdubai.ae/a/' + currentAgent.slug + '?open=property&id=' + propId;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Link copied!');
+    }).catch(() => {
+      const tmp = document.createElement('textarea');
+      tmp.value = url;
+      tmp.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      document.body.removeChild(tmp);
+      showToast('Link copied!');
+    });
+  };
+
+  window.logout = function() {
+    localStorage.removeItem('sd_edit_token');
+    authToken = null;
+    currentAgent = null;
+    showAuthOverlay();
+  };
+
+  // Handle Enter key on email input
+  document.getElementById('auth-email').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMagicLink();
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+[build]
+  publish = "."
+  command = "npm install && npm run build"
+
+# Canonical domain: redirect www to bare domain
+[[redirects]]
+  from = "https://www.sellingdubai.ae/*"
+  to = "https://sellingdubai.ae/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.sellingdubai.com/*"
+  to = "https://sellingdubai.ae/:splat"
+  status = 301
+  force = true
+
+[[edge_functions]]
+  path = "/a/*"
+  function = "og-injector"
+
+# Security headers — all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "0"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), payment=(), autoplay=(), fullscreen=(self), display-capture=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com https://js.sentry-cdn.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://pjyorgedaxevxophpfib.supabase.co https://www.google-analytics.com https://connect.facebook.net https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://fonts.googleapis.com https://fonts.gstatic.com https://browser.sentry-cdn.com; frame-src https://maps.google.com https://www.google.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+# HTML pages — always revalidate
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+# HTML pages at root paths (SPA routes)
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+# JS files — short cache with revalidation
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=60, must-revalidate"
+
+# Hashed bundle chunks — immutable, 1 year cache (hash changes on every build)
+[[headers]]
+  for = "/dist/chunks/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# CSS files — short cache with revalidation
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=60, must-revalidate"
+
+# Minified styles — long cache (served from /dist/)
+[[headers]]
+  for = "/dist/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Service worker — never cache
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Content-Type = "application/javascript; charset=utf-8"

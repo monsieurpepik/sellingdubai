@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claim Your Profile | SellingDubai</title>
+<meta name="description" content="Create your verified real estate agent profile on SellingDubai. RERA-licensed, free forever.">
+<meta property="og:title" content="Claim Your Profile | SellingDubai"/>
+<meta property="og:description" content="Verify your broker license and go live in under 2 minutes. RERA-licensed link-in-bio for Dubai real estate agents."/>
+<meta property="og:image" content="https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg"/>
+<meta property="og:url" content="https://sellingdubai.ae/join"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="SellingDubai"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Claim Your Profile | SellingDubai"/>
+<meta name="twitter:description" content="Verify your broker license and go live in under 2 minutes."/>
+<meta name="twitter:image" content="https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
+<style>
+  /* === IDENTICAL base to profile page === */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #0a0a0a;
+    color: #fff;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* Background — same Dubai image + overlay as agent profiles */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url('https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg');
+    background-size: cover; background-position: center top;
+  }
+  .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.28) 65%, rgba(0,0,0,0.40) 100%);
+  }
+  /* Fallback if image fails to load */
+  .bg-fallback {
+    background-image: none;
+    background: linear-gradient(160deg, #0c1929 0%, #1a2744 15%, #1e3555 25%, #2a4a6b 35%, #1a3050 45%, #162540 55%, #0f1c30 65%, #1a2b45 75%, #253d5c 85%, #0c1929 100%);
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column; align-items: center;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .brand {
+    margin-top: 28px; margin-bottom: 40px;
+    font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 800;
+    letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.85);
+  }
+
+  /* Profile header — matches profile page avatar area */
+  .profile { display: flex; flex-direction: column; align-items: center; margin-bottom: 36px; }
+  .profile-icon {
+    width: 100px; height: 100px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.35);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .profile-initials {
+    font-family: 'Manrope', sans-serif; font-size: 32px; font-weight: 700;
+    letter-spacing: -0.5px; color: rgba(255,255,255,0.9);
+  }
+  .name-row { display: flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+  .name { font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .verified svg { display: block; }
+  .bio { font-size: 14px; color: rgba(255,255,255,0.85); text-align: center; line-height: 1.45; max-width: 280px; }
+
+  /* Same button style as profile link buttons */
+  .links {
+    width: 100%; max-width: 420px; padding: 0 24px;
+    display: flex; flex-direction: column; gap: 18px; margin-bottom: 36px;
+  }
+
+  .link-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 18px 24px;
+    background: rgba(255,255,255,0.95); color: #111;
+    border-radius: 16px; font-size: 16px; font-weight: 700;
+    text-decoration: none; letter-spacing: -0.1px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    -webkit-tap-highlight-color: transparent;
+    border: none; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .link-btn:active { transform: scale(0.96); }
+  @media (hover: hover) {
+    .link-btn:hover { transform: scale(1.02); box-shadow: 0 8px 28px rgba(0,0,0,0.12); }
+    .link-btn-wa:hover { box-shadow: 0 8px 28px rgba(37,211,102,0.35); }
+  }
+  .link-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+  .link-btn-wa { background: #25d366; color: #fff; }
+
+  .btn-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+  .btn-ghost {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; padding: 14px; background: none; border: none;
+    color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: color 0.15s;
+  }
+  .btn-ghost:hover { color: rgba(255,255,255,0.9); }
+
+  /* Form inputs — glass style */
+  .field { width: 100%; }
+  .field label {
+    display: block; font-size: 8px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.7); margin-bottom: 8px;
+  }
+  .field input {
+    width: 100%; padding: 18px 20px;
+    border-radius: 16px; background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 16px; font-weight: 500;
+    font-family: 'Inter', sans-serif; outline: none;
+    transition: all 0.2s;
+  }
+  .field input:focus {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.25);
+  }
+  .field input::placeholder { color: rgba(255,255,255,0.45); }
+  .field-hint {
+    font-size: 11px; color: rgba(255,255,255,0.55);
+    margin-top: 6px; line-height: 1.4; text-align: center;
+  }
+  .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.45); font-size: 8px; }
+  .req { font-weight: 600; text-transform: none; letter-spacing: 0; color: #25d366; font-size: 8px; }
+
+  /* Social input rows */
+  .social-field {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+  }
+  .social-icon-box {
+    width: 54px; height: 54px; border-radius: 16px;
+    background: rgba(255,255,255,0.10); display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .social-field input {
+    flex: 1; padding: 16px 16px; border-radius: 16px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 14px; font-family: 'Inter', sans-serif;
+    outline: none; transition: all 0.2s;
+  }
+  .social-field input:focus {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.25);
+  }
+  .social-field input::placeholder { color: rgba(255,255,255,0.45); }
+
+  /* Verified card — glass */
+  .verify-card {
+    width: 100%; border-radius: 16px;
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+    padding: 20px; border: 1px solid rgba(255,255,255,0.12);
+  }
+  .verify-label {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 14px;
+  }
+  .verify-name {
+    font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 700;
+    letter-spacing: -0.3px; margin-bottom: 12px;
+  }
+  .verify-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; padding: 5px 0;
+  }
+  .verify-row .vl { color: rgba(255,255,255,0.6); }
+  .verify-row .vv { color: rgba(255,255,255,0.85); font-weight: 600; }
+  .verify-row .vv.active { color: #25d366; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 12px; font-size: 11px; font-weight: 700;
+    color: #25d366; letter-spacing: 0.02em;
+  }
+
+  /* Photo upload */
+  .photo-upload {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    margin-bottom: 20px; width: 100%;
+  }
+  .photo-circle {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(255,255,255,0.10); border: 2px dashed rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; overflow: hidden; transition: all 0.2s;
+    position: relative;
+  }
+  .photo-circle:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.14); }
+  .photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-circle .photo-icon { color: rgba(255,255,255,0.5); }
+  .photo-label { font-size: 12px; color: rgba(255,255,255,0.55); }
+
+  /* Error */
+  .error-msg {
+    width: 100%; border-radius: 16px;
+    background: rgba(248,113,113,0.06); padding: 16px;
+    font-size: 13px; color: #f87171; display: none; line-height: 1.4;
+    text-align: center;
+  }
+  .error-msg.show { display: block; }
+
+  /* Spinner */
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(17,17,17,0.15);
+    border-top-color: #111; border-radius: 50%;
+    animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle;
+  }
+  .spinner-wa { border-color: rgba(255,255,255,0.2); border-top-color: #fff; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ========== STEP TRANSITIONS ========== */
+  .step {
+    display: none; width: 100%; max-width: 420px;
+    opacity: 0; transform: translateY(16px);
+  }
+  .step.active {
+    display: flex; flex-direction: column; align-items: center;
+    animation: stepIn 0.4s ease-out forwards;
+  }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ========== STEP 3 — PROFILE PREVIEW ========== */
+  .preview-card {
+    width: 100%; border-radius: 20px; overflow: hidden;
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: previewPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes previewPop {
+    from { opacity: 0; transform: scale(0.92) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .preview-bg {
+    height: 120px;
+    background-image: url('https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg');
+    background-size: cover; background-position: center;
+    position: relative;
+  }
+  .preview-bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+  }
+  .preview-body {
+    padding: 0 24px 24px; margin-top: -40px; position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .preview-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.35);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 700;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .preview-name-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+  .preview-name {
+    font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+  }
+  .preview-tagline {
+    font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 16px;
+  }
+  .preview-btn {
+    width: 100%; padding: 12px; border-radius: 12px;
+    background: #25d366; color: #fff; font-size: 13px; font-weight: 700;
+    text-align: center; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .preview-btn-white {
+    background: rgba(255,255,255,0.9); color: #111;
+  }
+  .preview-trust {
+    font-size: 7px; text-transform: uppercase; letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.5); margin-top: 12px; line-height: 1.8;
+  }
+
+  /* Success URL + copy */
+  .url-display {
+    width: 100%; border-radius: 16px;
+    background: rgba(255,255,255,0.08); padding: 20px;
+    font-size: 17px; font-weight: 700; color: #fff;
+    text-align: center; word-break: break-all; letter-spacing: -0.2px;
+  }
+  .btn-copy {
+    background: none; border: none; color: rgba(255,255,255,0.4);
+    padding: 10px; font-size: 8px; cursor: pointer; font-weight: 700;
+    font-family: 'Inter', sans-serif; letter-spacing: 0.18em;
+    text-transform: uppercase; transition: color 0.15s;
+  }
+  .btn-copy:hover { color: rgba(255,255,255,0.7); }
+
+  /* Trust footer — same as profile */
+  .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; opacity: 0.4; }
+  .trust-dld { font-size: 8px; text-transform: uppercase; letter-spacing: 0.18em; line-height: 2.2; margin-bottom: 12px; }
+  .trust-copy { font-size: 7px; text-transform: uppercase; letter-spacing: 0.18em; }
+
+  .hidden { display: none !important; }
+
+  /* Step indicator dots */
+  .step-dots {
+    display: flex; gap: 8px; margin-bottom: 32px;
+  }
+  .step-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); transition: all 0.3s;
+  }
+  .step-dot.active { background: rgba(255,255,255,0.7); transform: scale(1.2); }
+  .step-dot.done { background: #25d366; }
+
+  @media (max-width: 380px) {
+    .brand { margin-top: 20px; margin-bottom: 32px; }
+    .profile-icon { width: 88px; height: 88px; }
+    .name { font-size: 20px; }
+    .links { gap: 14px; padding: 0 18px; }
+    .link-btn { padding: 16px 20px; font-size: 15px; border-radius: 14px; }
+    .field input { padding: 16px 18px; font-size: 15px; border-radius: 14px; }
+    .preview-bg { height: 90px; }
+    .preview-avatar { width: 64px; height: 64px; font-size: 20px; margin-top: -32px; }
+  }
+  @media (min-height: 800px) {
+    .brand { margin-top: 40px; margin-bottom: 48px; }
+    .profile { margin-bottom: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bg" class="bg"></div>
+
+<div class="page">
+  <a href="/" style="text-decoration:none;display:inline-block;"><img src="/sellingdubailogo.png" alt="Selling Dubai" style="height:48px;opacity:0.85;"></a>
+
+  <!-- Step indicator -->
+  <div class="step-dots">
+    <div id="dot-1" class="step-dot active"></div>
+    <div id="dot-2" class="step-dot"></div>
+    <div id="dot-3" class="step-dot"></div>
+  </div>
+
+  <!-- ============ STEP 1: VERIFY ============ -->
+  <div id="step-1" class="step active">
+    <div class="profile">
+      <div class="profile-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="rgba(255,255,255,0.35)"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="name-row">
+        <h1 class="name">Get Verified</h1>
+      </div>
+      <p class="bio">Verify your broker license and go live in under 2 minutes.</p>
+      <p id="referral-badge" style="display:none;margin-top:12px;font-size:13px;color:#4ade80;font-weight:500;"></p>
+    </div>
+
+    <div class="links">
+      <div id="error-1" class="error-msg"></div>
+
+      <div class="field">
+        <label>Broker Number</label>
+        <input type="number" id="broker-number" placeholder="e.g. 66391" inputmode="numeric" autocomplete="off">
+        <p class="field-hint">Your registered broker license number</p>
+      </div>
+
+      <button class="link-btn link-btn-wa" id="btn-verify" onclick="verifyBroker()">
+        <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
+        Verify My License
+      </button>
+
+      <!-- Fallback: manual RERA upload -->
+      <div id="fallback-upload" style="display:none;">
+        <div style="width:100%;height:1px;background:rgba(255,255,255,0.15);margin:8px 0 20px;"></div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:16px;line-height:1.5;">
+          Not in our registry yet? No problem. Upload a photo of your RERA card and we'll verify you manually within 24 hours.
+        </p>
+
+        <div class="field">
+          <label>Your Full Name <span class="req">required</span></label>
+          <input type="text" id="manual-name" placeholder="As shown on your RERA card">
+        </div>
+
+        <div style="margin-top:14px;width:100%;">
+          <label style="display:block;font-size:8px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">RERA Card Photo <span class="req">required</span></label>
+          <div id="rera-upload-area" style="width:100%;padding:28px 20px;border-radius:16px;background:rgba(255,255,255,0.04);border:2px dashed rgba(255,255,255,0.12);text-align:center;cursor:pointer;transition:all 0.2s;" onclick="document.getElementById('file-rera').click()">
+            <div id="rera-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.2)" style="margin-bottom:8px;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <div style="font-size:13px;color:rgba(255,255,255,0.4);font-weight:600;">Tap to upload RERA card</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">JPG, PNG or PDF. Max 5MB.</div>
+            </div>
+            <div id="rera-preview" style="display:none;">
+              <img id="rera-preview-img" style="max-width:100%;max-height:160px;border-radius:8px;">
+              <div style="font-size:11px;color:#25d366;font-weight:600;margin-top:8px;">Card uploaded. Tap to change.</div>
+            </div>
+          </div>
+          <input type="file" id="file-rera" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="previewRera(this)">
+          <input type="hidden" id="rera-photo-data">
+          <input type="hidden" id="rera-file-type">
+        </div>
+
+        <button class="link-btn" id="btn-manual" onclick="manualSubmit()" style="margin-top:18px;background:rgba(255,255,255,0.9);color:#111;">
+          <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
+          Submit for Manual Verification
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STEP 2: CONFIRM + DETAILS ============ -->
+  <div id="step-2" class="step">
+    <div class="profile">
+      <div class="profile-icon" id="step2-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <div class="name-row">
+        <h1 class="name" id="step2-name">Is This You?</h1>
+        <span class="verified">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#60a5fa"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </span>
+      </div>
+      <p class="bio">Complete your profile details</p>
+    </div>
+
+    <div class="links">
+      <div id="error-2" class="error-msg"></div>
+
+      <div class="verify-card">
+        <div class="verify-label">License Registry Match</div>
+        <div id="verify-name" class="verify-name"></div>
+        <div class="verify-row"><span class="vl">Broker #</span><span id="verify-bn" class="vv"></span></div>
+        <div class="verify-row"><span class="vl">Valid Until</span><span id="verify-expiry" class="vv"></span></div>
+        <div class="verify-row"><span class="vl">Status</span><span id="verify-status" class="vv active"></span></div>
+        <div class="badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          License Verified
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Display Name <span class="optional">edit if needed</span></label>
+        <input type="text" id="display-name" placeholder="Your name as shown on your profile">
+      </div>
+
+      <div class="photo-upload">
+        <div class="photo-circle" onclick="document.getElementById('file-photo').click()">
+          <div class="photo-icon" id="photo-placeholder">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <div id="photo-preview" style="display:none;width:100%;height:100%;"></div>
+        </div>
+        <span class="photo-label">Tap to add your photo <span style="color:rgba(255,255,255,0.45);">(optional)</span></span>
+        <input type="file" id="file-photo" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewPhoto(this)">
+        <input type="hidden" id="onboard-photo-data">
+      </div>
+
+      <div class="field">
+        <label>WhatsApp Number <span class="req">required</span></label>
+        <input type="tel" id="whatsapp" placeholder="+971 50 123 4567" inputmode="tel" required>
+        <p class="field-hint">Your #1 button — clients tap to reach you directly</p>
+      </div>
+
+      <div class="field">
+        <label>Email <span class="req">required — needed to edit your profile later</span></label>
+        <input type="email" id="email" placeholder="you@agency.com" required>
+        <p class="field-hint">We'll send a magic link to this email whenever you need to update your profile</p>
+      </div>
+
+      <div class="field">
+        <label>Tagline <span class="optional">optional</span></label>
+        <input type="text" id="tagline" placeholder="e.g. Luxury Specialist | Palm & Downtown" maxlength="80">
+      </div>
+
+      <div class="field">
+        <label>Calendly URL <span class="optional">optional</span></label>
+        <input type="url" id="calendly" placeholder="https://calendly.com/yourname">
+        <p class="field-hint">Clients book consultations directly — no lead form needed</p>
+      </div>
+
+      <div class="field">
+        <label>Socials <span class="optional">optional</span></label>
+      </div>
+
+      <div class="social-field">
+        <div class="social-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </div>
+        <input type="url" id="instagram" placeholder="instagram.com/yourhandle">
+      </div>
+      <div class="social-field">
+        <div class="social-icon-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </div>
+        <input type="url" id="youtube" placeholder="youtube.com/@yourchannel">
+      </div>
+      <div class="social-field">
+        <div class="social-icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg>
+        </div>
+        <input type="url" id="tiktok" placeholder="tiktok.com/@yourhandle">
+      </div>
+      <div class="social-field">
+        <div class="social-icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </div>
+        <input type="url" id="linkedin" placeholder="linkedin.com/in/yourprofile">
+      </div>
+
+      <button class="link-btn link-btn-wa" id="btn-create" onclick="sendOtpAndShow()">Create My Profile</button>
+
+      <!-- OTP Verification (hidden until code is sent) -->
+      <div id="otp-section" style="display:none;width:100%;">
+        <div style="width:100%;height:1px;background:rgba(255,255,255,0.15);margin:8px 0 20px;"></div>
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#25d366;margin-bottom:6px;">CHECK YOUR EMAIL</div>
+          <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;">We sent a 6-digit code to <strong id="otp-email-display" style="color:rgba(255,255,255,0.85);"></strong></p>
+        </div>
+        <div class="field">
+          <label>Verification Code</label>
+          <input type="text" id="otp-code" placeholder="Enter 6-digit code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="text-align:center;font-size:24px;letter-spacing:0.3em;font-weight:700;">
+        </div>
+        <button class="link-btn link-btn-wa" id="btn-verify-otp" onclick="verifyOtpAndCreate()" style="margin-top:12px;">
+          <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
+          Verify &amp; Create Profile
+        </button>
+        <button class="btn-ghost" id="btn-resend-otp" onclick="resendOtp()" style="font-size:12px;">Didn't get it? Resend code</button>
+      </div>
+
+      <button class="btn-ghost" id="btn-back-step1" onclick="goStep(1)">Back</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 3: SUCCESS — PROFILE PREVIEW ============ -->
+  <div id="step-3" class="step">
+    <div class="profile">
+      <div class="profile-icon" style="border-color: rgba(37,211,102,0.5);">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <div class="name-row">
+        <h1 class="name">You're Live</h1>
+      </div>
+      <p class="bio">Here's what your clients will see:</p>
+    </div>
+
+    <div class="links">
+      <!-- Mini profile preview card -->
+      <div class="preview-card" id="preview-card">
+        <div class="preview-bg"></div>
+        <div class="preview-body">
+          <div class="preview-avatar" id="preview-initials"></div>
+          <div class="preview-name-row">
+            <span class="preview-name" id="preview-name"></span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#60a5fa"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          </div>
+          <div class="preview-tagline" id="preview-tagline"></div>
+          <div class="preview-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp Me
+          </div>
+          <div class="preview-btn preview-btn-white">Browse My Listings</div>
+          <div class="preview-trust">
+            Registered Broker <span id="preview-broker"></span><br>
+            &copy; 2026 SellingDubai.com
+          </div>
+        </div>
+      </div>
+
+      <div class="url-display" id="profile-url"></div>
+      <div style="text-align:center;display:flex;gap:8px;justify-content:center;">
+        <button class="btn-copy" onclick="copyUrl()">Copy Link</button>
+        <button class="btn-copy" onclick="shareWhatsApp()" style="background:rgba(37,211,102,0.12);color:#25d366;border-color:rgba(37,211,102,0.25);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Share on WhatsApp
+        </button>
+      </div>
+
+      <a class="link-btn link-btn-wa" id="btn-view" href="#" target="_blank">
+        <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></span>
+        View My Full Profile
+      </a>
+      <a class="link-btn" href="/edit" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.1);">
+        <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
+        Edit My Profile
+      </a>
+    </div>
+  </div>
+
+  <div class="trust">
+    <div class="trust-dld">Broker data sourced from Dubai Open Data</div>
+    <div class="trust-copy">&copy; 2026 SellingDubai.com</div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+const VERIFY_URL = `${SUPABASE_URL}/functions/v1/verify-broker`;
+const CREATE_URL = `${SUPABASE_URL}/functions/v1/create-agent`;
+const OTP_URL = `${SUPABASE_URL}/functions/v1/send-otp`;
+const REFERRAL_URL = `${SUPABASE_URL}/functions/v1/track-referral`;
+
+// Capture referral code from URL (?ref=CODE)
+const _refCode = new URLSearchParams(window.location.search).get('ref');
+
+let verifiedBroker = null;
+let createdSlug = null;
+let otpSent = false;
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`step-${n}`).classList.add('active');
+
+  // Update step dots
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done');
+    if (i === n) dot.classList.add('active');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Show referral badge if ?ref= is present
+if (_refCode) {
+  const badge = document.getElementById('referral-badge');
+  if (badge) {
+    badge.textContent = `Invited by a fellow agent`;
+    badge.style.display = 'block';
+  }
+}
+
+function showError(step, msg) {
+  const el = document.getElementById(`error-${step}`);
+  el.textContent = msg; el.classList.add('show');
+}
+
+function clearError(step) {
+  const el = document.getElementById(`error-${step}`);
+  if (el) { el.textContent = ''; el.classList.remove('show'); }
+}
+
+function setLoading(btnId, loading, text, isWa) {
+  const btn = document.getElementById(btnId);
+  if (loading) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner ${isWa ? 'spinner-wa' : ''}"></span> ${text}`;
+  } else {
+    btn.disabled = false;
+    btn.textContent = text;
+  }
+}
+
+function titleCase(str) {
+  return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+
+async function verifyBroker() {
+  clearError(1);
+  const num = parseInt(document.getElementById('broker-number').value);
+  if (!num || isNaN(num)) { showError(1, 'Please enter a valid broker number.'); return; }
+
+  setLoading('btn-verify', true, 'Checking registry...', true);
+
+  try {
+    const res = await fetch(VERIFY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ broker_number: num })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.verified) {
+      setLoading('btn-verify', false, 'Verify My License');
+      showError(1, data.error || 'Broker number not found in our registry.');
+      // Show fallback upload option
+      document.getElementById('fallback-upload').style.display = 'block';
+      document.getElementById('broker-number').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!data.license_active) {
+      setLoading('btn-verify', false, 'Verify My License');
+      showError(1, `License expired on ${data.broker.license_end}. Renew to register.`);
+      return;
+    }
+
+    verifiedBroker = data.broker;
+    const name = titleCase(data.broker.name_en);
+
+    document.getElementById('verify-name').textContent = name;
+    document.getElementById('verify-bn').textContent = `#${data.broker.broker_number}`;
+    document.getElementById('verify-expiry').textContent = data.broker.license_end;
+    document.getElementById('verify-status').textContent = 'Active';
+    document.getElementById('step2-name').textContent = name;
+    document.getElementById('display-name').value = name;
+
+    setLoading('btn-verify', false, 'Verify My License');
+    goStep(2);
+  } catch (e) {
+    setLoading('btn-verify', false, 'Verify My License');
+    showError(1, 'Connection error. Please try again.');
+  }
+}
+
+// Compress image to max 800px, JPEG quality 0.8
+function compressImage(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showError(2, 'Photo must be under 10MB.'); return; }
+  clearError(2);
+
+  try {
+    const dataUrl = await compressImage(file, 800, 0.8);
+    document.getElementById('photo-placeholder').style.display = 'none';
+    const prev = document.getElementById('photo-preview');
+    prev.style.display = 'block';
+    prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    document.getElementById('onboard-photo-data').value = dataUrl.split(',')[1];
+  } catch (err) {
+    showError(2, 'Failed to process photo. Try a different image.');
+  }
+}
+
+// ========== OTP FLOW ==========
+async function sendOtpAndShow() {
+  clearError(2);
+  const displayName = document.getElementById('display-name').value.trim();
+  if (!displayName) { showError(2, 'Display name is required.'); return; }
+
+  const email = document.getElementById('email').value.trim();
+  if (!email || !email.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
+
+  const wa = document.getElementById('whatsapp').value.trim();
+  if (!wa) { showError(2, 'WhatsApp number is required — it\'s your main contact button.'); return; }
+
+  setLoading('btn-create', true, 'Sending verification code...', true);
+
+  try {
+    const res = await fetch(OTP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        broker_number: verifiedBroker ? verifiedBroker.broker_number : null
+      })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setLoading('btn-create', false, 'Create My Profile');
+      showError(2, data.error || 'Failed to send verification code.');
+      return;
+    }
+
+    otpSent = true;
+    document.getElementById('otp-email-display').textContent = email;
+    document.getElementById('otp-section').style.display = 'block';
+    document.getElementById('btn-create').style.display = 'none';
+    document.getElementById('btn-back-step1').style.display = 'none';
+    document.getElementById('otp-code').focus();
+    setLoading('btn-create', false, 'Create My Profile');
+  } catch (e) {
+    setLoading('btn-create', false, 'Create My Profile');
+    showError(2, 'Connection error. Please try again.');
+  }
+}
+
+async function resendOtp() {
+  clearError(2);
+  const email = document.getElementById('email').value.trim();
+  const btn = document.getElementById('btn-resend-otp');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(OTP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        broker_number: verifiedBroker ? verifiedBroker.broker_number : null
+      })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(2, data.error || 'Failed to resend code.');
+    } else {
+      btn.textContent = 'Code resent!';
+    }
+  } catch (e) {
+    showError(2, 'Connection error.');
+  }
+
+  setTimeout(() => { btn.textContent = "Didn't get it? Resend code"; btn.disabled = false; }, 3000);
+}
+
+async function verifyOtpAndCreate() {
+  clearError(2);
+  const code = document.getElementById('otp-code').value.trim();
+  if (!code || code.length !== 6) { showError(2, 'Please enter the 6-digit code from your email.'); return; }
+
+  setLoading('btn-verify-otp', true, 'Verifying...', true);
+  await createProfile(code);
+}
+
+async function createProfile(otpCode) {
+  clearError(2);
+  const displayName = document.getElementById('display-name').value.trim();
+  if (!displayName) { showError(2, 'Display name is required.'); return; }
+
+  const email = document.getElementById('email').value.trim();
+  if (!email || !email.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
+
+  const wa = document.getElementById('whatsapp').value.trim();
+  if (!wa) { showError(2, 'WhatsApp number is required — it\'s your main contact button.'); return; }
+
+  if (!otpCode) { showError(2, 'Verification code is required.'); return; }
+
+  setLoading('btn-verify-otp', true, 'Creating profile...', true);
+
+  try {
+    const payload = {
+      broker_number: verifiedBroker.broker_number,
+      display_name: displayName,
+      whatsapp: wa,
+      email: email,
+      otp_code: otpCode,
+      tagline: document.getElementById('tagline').value.trim() || null,
+      calendly_url: document.getElementById('calendly').value.trim() || null,
+      instagram_url: document.getElementById('instagram').value.trim() || null,
+      youtube_url: document.getElementById('youtube').value.trim() || null,
+      tiktok_url: document.getElementById('tiktok').value.trim() || null,
+      linkedin_url: document.getElementById('linkedin').value.trim() || null,
+      photo_base64: document.getElementById('onboard-photo-data').value || null,
+    };
+
+    // Manual verification path: include RERA card image and flag
+    if (isManualVerification) {
+      payload.manual_verification = true;
+      payload.rera_image_base64 = verifiedBroker.rera_image_base64 || null;
+      payload.rera_file_type = verifiedBroker.rera_file_type || null;
+    }
+
+    const res = await fetch(CREATE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setLoading('btn-verify-otp', false, 'Verify & Create Profile');
+      showError(2, data.slug
+        ? `This broker already has a profile at sellingdubai.ae/a/${data.slug}`
+        : (data.error || 'Something went wrong. Try again.'));
+      return;
+    }
+
+    createdSlug = data.agent.slug;
+    const editToken = data.edit_token || null;
+
+    // Save token to localStorage for persistent login across edit/dashboard
+    if (editToken) {
+      localStorage.setItem('sd_edit_token', editToken);
+    }
+
+    // Track referral if agent arrived via ?ref=CODE
+    if (_refCode && data.agent.id) {
+      fetch(REFERRAL_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referral_code: _refCode, agent_id: data.agent.id })
+      }).catch(() => {}); // fire-and-forget, don't block signup
+    }
+
+    // Populate the preview card — show photo if uploaded, else initials
+    const photoData = document.getElementById('onboard-photo-data').value;
+    const previewAvatar = document.getElementById('preview-initials');
+    if (photoData) {
+      previewAvatar.innerHTML = `<img src="data:image/jpeg;base64,${photoData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else if (data.agent && data.agent.photo_url) {
+      previewAvatar.innerHTML = `<img src="${data.agent.photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      previewAvatar.textContent = getInitials(displayName);
+    }
+    document.getElementById('preview-name').textContent = displayName;
+    document.getElementById('preview-tagline').textContent =
+      document.getElementById('tagline').value.trim() || 'Licensed Real Estate Broker in Dubai';
+    document.getElementById('preview-broker').textContent = verifiedBroker.broker_number ? `#${verifiedBroker.broker_number}` : 'Pending';
+    document.getElementById('profile-url').textContent = `sellingdubai.ae/a/${createdSlug}`;
+    document.getElementById('btn-view').href = `/a/${createdSlug}`;
+
+    // Token is already in localStorage — edit.html will pick it up automatically
+    // No need to pass token in URL (prevents leakage via browser history/referrer)
+
+    // ALL signups are pending verification — update step 3 messaging
+    if (isManualVerification) {
+      document.querySelector('#step-3 .name').textContent = "You're Almost Live";
+      document.querySelector('#step-3 .bio').textContent = "Your profile is created. We'll verify your RERA card within 24 hours and you'll get the verified badge.";
+    } else {
+      document.querySelector('#step-3 .name').textContent = "You're Live!";
+      document.querySelector('#step-3 .bio').textContent = "Your profile is live. We'll verify your identity within 24 hours and activate the RERA Licensed badge on your profile.";
+    }
+    // Show amber/pending icon for all paths since verification is manual
+    document.querySelector('#step-3 .profile-icon').innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+    document.querySelector('#step-3 .profile-icon').style.borderColor = 'rgba(245,158,11,0.5)';
+
+    setLoading('btn-verify-otp', false, 'Verify & Create Profile');
+    goStep(3);
+  } catch (e) {
+    setLoading('btn-verify-otp', false, 'Verify & Create Profile');
+    showError(2, 'Connection error. Please try again.');
+  }
+}
+
+function copyUrl() {
+  const url = `https://sellingdubai.ae/a/${createdSlug}`;
+  const doCopy = navigator.clipboard && navigator.clipboard.writeText
+    ? navigator.clipboard.writeText(url)
+    : new Promise((resolve, reject) => {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); resolve(); } catch (e) { reject(e); }
+        document.body.removeChild(ta);
+      });
+  doCopy.then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIED'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000);
+  }).catch(() => {});
+}
+
+function shareWhatsApp() {
+  const url = `https://sellingdubai.ae/a/${createdSlug}`;
+  const text = encodeURIComponent(`Check out my verified Dubai real estate profile: ${url}`);
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+// Handle bg image load failure — fallback to gradient
+const bgEl = document.getElementById('bg');
+const bgImg = new Image();
+bgImg.onload = function() { /* image loaded fine */ };
+bgImg.onerror = function() { bgEl.classList.add('bg-fallback'); };
+bgImg.src = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
+
+document.getElementById('broker-number').addEventListener('keydown', e => { if (e.key === 'Enter') verifyBroker(); });
+document.getElementById('otp-code').addEventListener('keydown', e => { if (e.key === 'Enter') verifyOtpAndCreate(); });
+
+// RERA card upload preview
+function previewRera(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showError(1, 'File must be under 5MB.'); return; }
+  clearError(1);
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('rera-photo-data').value = e.target.result.split(',')[1];
+    document.getElementById('rera-file-type').value = file.type;
+
+    if (file.type.startsWith('image/')) {
+      document.getElementById('rera-placeholder').style.display = 'none';
+      const prev = document.getElementById('rera-preview');
+      prev.style.display = 'block';
+      document.getElementById('rera-preview-img').src = e.target.result;
+    } else {
+      // PDF - just show confirmation text
+      document.getElementById('rera-placeholder').innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="#25d366" style="margin-bottom:8px;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+        <div style="font-size:13px;color:#25d366;font-weight:600;">${file.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">Tap to change file</div>
+      `;
+    }
+
+    // Visual feedback
+    document.getElementById('rera-upload-area').style.borderColor = 'rgba(37,211,102,0.3)';
+    document.getElementById('rera-upload-area').style.background = 'rgba(37,211,102,0.04)';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Manual RERA submission - goes to step 2 with pending status
+let isManualVerification = false;
+
+async function manualSubmit() {
+  clearError(1);
+  const name = document.getElementById('manual-name').value.trim();
+  const reraData = document.getElementById('rera-photo-data').value;
+  const brokerNum = document.getElementById('broker-number').value.trim();
+
+  if (!name) { showError(1, 'Please enter your full name.'); return; }
+  if (!reraData) { showError(1, 'Please upload a photo of your RERA card.'); return; }
+
+  isManualVerification = true;
+
+  // Build a synthetic verifiedBroker object for the manual path
+  verifiedBroker = {
+    broker_number: brokerNum || 0,
+    name_en: name,
+    license_end: 'Pending verification',
+    manual_verification: true,
+    rera_image_base64: reraData,
+    rera_file_type: document.getElementById('rera-file-type').value
+  };
+
+  // Populate step 2 for manual flow
+  document.getElementById('verify-name').textContent = name;
+  document.getElementById('verify-bn').textContent = brokerNum ? `#${brokerNum}` : 'Pending';
+  document.getElementById('verify-expiry').textContent = 'Under review';
+  document.getElementById('verify-status').textContent = 'Pending Review';
+  document.getElementById('verify-status').classList.remove('active');
+  document.getElementById('verify-status').style.color = '#f59e0b';
+
+  // Update the badge to show pending
+  const badge = document.querySelector('.verify-card .badge');
+  badge.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    Pending Manual Verification
+  `;
+  badge.style.color = '#f59e0b';
+
+  document.getElementById('step2-name').textContent = name;
+  document.getElementById('display-name').value = name;
+
+  goStep(2);
+}
+</script>
+
+</body>
+</html>
