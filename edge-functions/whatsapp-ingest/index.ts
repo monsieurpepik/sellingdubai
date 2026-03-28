@@ -206,14 +206,16 @@ Rules:
 // ── PDF Brochure Helpers ──
 
 function formatPriceForPDF(price: number): string {
-  if (price >= 1_000_000) {
-    const m = price / 1_000_000;
+  const p = Number(price);
+  if (isNaN(p)) return "AED —";
+  if (p >= 1_000_000) {
+    const m = p / 1_000_000;
     return `AED ${m % 1 === 0 ? m.toFixed(0) : m.toFixed(2)}M`;
   }
-  if (price >= 1_000) {
-    return `AED ${Math.round(price / 1_000)}K`;
+  if (p >= 1_000) {
+    return `AED ${Math.round(p / 1_000)}K`;
   }
-  return `AED ${Math.round(price).toLocaleString()}`;
+  return `AED ${Math.round(p).toLocaleString()}`;
 }
 
 // Strip characters outside Latin-1 (Helvetica only supports Latin-1)
@@ -572,25 +574,28 @@ async function handleShareCommand(
   query: string,
   supabase: ReturnType<typeof createClient>,
 ) {
-  // Fetch full agent profile for brochure
-  const { data: agentFull } = await supabase
-    .from("agents")
-    .select("name, slug, photo_url, broker_number, dld_broker_number, email, phone, whatsapp, agency_name")
-    .eq("id", agentId)
-    .single();
+  // Fetch agent profile and active properties in parallel
+  const [agentResult, propertiesResult] = await Promise.all([
+    supabase
+      .from("agents")
+      .select("name, slug, photo_url, broker_number, dld_broker_number, email, phone, whatsapp, agency_name")
+      .eq("id", agentId)
+      .single(),
+    supabase
+      .from("properties")
+      .select("id, title, price, location, bedrooms, bathrooms, area_sqft, type, property_type, status, image_url, trakheesi_permit, description, features")
+      .eq("agent_id", agentId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const agentFull = agentResult.data;
+  const properties = propertiesResult.data;
 
   if (!agentFull) {
     await sendWhatsAppReply(senderPhone, "Could not fetch your profile. Please try again.");
     return;
   }
-
-  // Fetch active properties
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, title, price, location, bedrooms, bathrooms, area_sqft, type, property_type, status, image_url, trakheesi_permit, description, features")
-    .eq("agent_id", agentId)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
 
   if (!properties || properties.length === 0) {
     await sendWhatsAppReply(senderPhone, "No active listings found. Add a property first.");
@@ -660,10 +665,12 @@ async function downloadAndUploadImage(supabase: ReturnType<typeof createClient>,
   const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${mediaId}`, {
     headers: { Authorization: `Bearer ${WA_TOKEN}` }
   });
+  if (!mediaRes.ok) { console.error("Media metadata fetch failed:", mediaRes.status); return null; }
   const mediaData = await mediaRes.json();
   if (!mediaData.url) return null;
 
   const imgRes = await fetch(mediaData.url, { headers: { Authorization: `Bearer ${WA_TOKEN}` } });
+  if (!imgRes.ok) { console.error("Image download failed:", imgRes.status); return null; }
   const imgBytes = new Uint8Array(await imgRes.arrayBuffer());
   const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
   const ext = contentType.includes('png') ? 'png' : 'jpg';
@@ -824,7 +831,8 @@ async function resolveAgencyContext(
   const { data: members } = await supabase
     .from("agents")
     .select("id, name")
-    .eq("agency_id", agency.id);
+    .eq("agency_id", agency.id)
+    .limit(100);
   if (!members || members.length === 0) return null;
 
   return {
@@ -848,7 +856,8 @@ async function handleGetLeads(
     .from("leads")
     .select("agent_id, name, phone, email, message, preferred_area, property_type, created_at")
     .gte("created_at", todayStart.toISOString())
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(20);
 
   if (agencyCtx) {
     leadsQuery = leadsQuery.in("agent_id", agencyCtx.agentIds);
@@ -918,7 +927,34 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response("OK", { status: 200 });
 
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+
+    // HMAC-SHA256 signature verification (Meta X-Hub-Signature-256)
+    const appSecret = Deno.env.get("WH_APP_SECRET");
+    if (!appSecret) {
+      return new Response("Server misconfiguration.", { status: 500 });
+    }
+    const sigHeader = req.headers.get("x-hub-signature-256") ?? "";
+    const expected = sigHeader.replace(/^sha256=/, "");
+    const keyBytes = new TextEncoder().encode(appSecret);
+    const msgBytes = new TextEncoder().encode(rawBody);
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw", keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+    );
+    const sigBytes = await crypto.subtle.sign("HMAC", cryptoKey, msgBytes);
+    const computed = Array.from(new Uint8Array(sigBytes)).map(b => b.toString(16).padStart(2, "0")).join("");
+    if (computed.length !== expected.length) {
+      return new Response("Forbidden", { status: 403 });
+    }
+    let hmacDiff = 0;
+    for (let i = 0; i < computed.length; i++) {
+      hmacDiff |= computed.charCodeAt(i) ^ expected.charCodeAt(i);
+    }
+    if (hmacDiff !== 0) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    const body = JSON.parse(rawBody);
     const messages = body.entry?.[0]?.changes?.[0]?.value?.messages;
     if (!messages || messages.length === 0) {
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
@@ -936,7 +972,7 @@ Deno.serve(async (req: Request) => {
       .from("agents")
       .select("id, name, slug, whatsapp, tier, stripe_subscription_status, stripe_current_period_end")
       .or(`whatsapp.eq.${cleanPhone},whatsapp.eq.+${cleanPhone},whatsapp.ilike.%${cleanPhone.slice(-9)}`)
-      .single();
+      .maybeSingle();
 
     if (agentErr || !agent) {
       await sendWhatsAppReply(senderPhone, "Hi! Your number isn't registered on SellingDubai yet. Visit sellingdubai-agents.netlify.app/join to create your profile first.");
@@ -1036,6 +1072,11 @@ Deno.serve(async (req: Request) => {
 
       await sendWhatsAppReply(senderPhone, confirmMsg);
 
+      // If AI content failed, let the agent know so they can request it later
+      if (!aiResult) {
+        await sendWhatsAppReply(senderPhone, "⚠️ AI descriptions are temporarily unavailable — your listing was saved with the details you provided. Type *social* anytime to generate Instagram & TikTok captions.");
+      }
+
       // Send Instagram caption
       if (aiResult?.igCaption) {
         await sendWhatsAppReply(senderPhone,
@@ -1102,6 +1143,24 @@ Deno.serve(async (req: Request) => {
         case "add_property": {
           const parsed = parsePropertyCaption(rawText);
           if (parsed.title && parsed.title.length > 3) {
+            // Listing limit enforcement (same as image path)
+            const effectiveTierText = resolveEffectiveTier(agent);
+            const LISTING_LIMITS_TEXT: Record<string, number> = { free: 3, pro: 20, premium: Infinity };
+            const limitText = LISTING_LIMITS_TEXT[effectiveTierText] ?? 3;
+            if (limitText !== Infinity) {
+              const { count: activeCountText } = await supabase
+                .from("properties")
+                .select("id", { count: "exact", head: true })
+                .eq("agent_id", agent.id)
+                .eq("is_active", true);
+              if ((activeCountText ?? 0) >= limitText) {
+                const upgradeMsg = effectiveTierText === "free"
+                  ? `You've reached the ${limitText}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai-agents.netlify.app/pricing`
+                  : `You've reached the ${limitText}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai-agents.netlify.app/pricing`;
+                await sendWhatsAppReply(senderPhone, upgradeMsg);
+                break;
+              }
+            }
             const aiResult = await generateListingWithClaude(parsed, agent.name);
             const finalTitle = aiResult?.title || parsed.title;
             const { error: propErr } = await supabase
@@ -1135,7 +1194,7 @@ Deno.serve(async (req: Request) => {
               .from("properties").select("id, title")
               .eq("agent_id", agent.id).order("created_at", { ascending: false }).limit(1).single();
             if (lastProp) {
-              await supabase.from("properties").delete().eq("id", lastProp.id);
+              await supabase.from("properties").delete().eq("id", lastProp.id).eq("agent_id", agent.id);
               await sendWhatsAppReply(senderPhone, `🗑️ Removed: *${lastProp.title}*`);
             } else {
               await sendWhatsAppReply(senderPhone, "No properties to remove.");
