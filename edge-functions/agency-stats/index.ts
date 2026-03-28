@@ -9,7 +9,7 @@ const ALLOWED_ORIGINS = [
 
 function corsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") ?? "";
-  const ao = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  const ao = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": ao,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -67,8 +67,9 @@ Deno.serve(async (req: Request) => {
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-  const { data: link } = await sb.from("magic_links").select("agent_id, expires_at").eq("token", token).single();
+  const { data: link } = await sb.from("magic_links").select("agent_id, expires_at, used_at").eq("token", token).single();
   if (!link || new Date(link.expires_at) < new Date()) return new Response(JSON.stringify({ error: "Invalid or expired session." }), { status: 401, headers: cors });
+  if (!link.used_at) return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), { status: 401, headers: cors });
   const agentId: string = link.agent_id;
 
   const { data: agency } = await sb.from("agencies").select("id, name, slug, logo_url").eq("owner_agent_id", agentId).maybeSingle();
