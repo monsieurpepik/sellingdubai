@@ -499,11 +499,12 @@ const NETLIFY_IMG_REM = (url, w) =>
 async function loadRemOffplanProjects() {
   const { data: projects, error } = await supabase
     .from('projects')
-    .select('slug, name, cover_image_url, location, district_name, min_price, max_price, property_types, completion_date, status, developers(name)')
+    .select('slug, name, cover_image_url, location, district_name, min_price, max_price, property_types, completion_date, status, developers!projects_developer_id_fkey(name)')
     .order('synced_at', { ascending: false })
     .limit(20);
 
-  if (error || !projects || projects.length === 0) return;
+  if (error) { console.error('[REM off-plan] Supabase error:', error); return; }
+  if (!projects || projects.length === 0) { console.warn('[REM off-plan] No projects returned'); return; }
 
   const statusLabel = (s) => s === 'under_construction' ? 'Under Construction' : 'Off Plan';
   const fmtPrice = (n) => n ? 'AED\u00a0' + Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 }) : null;

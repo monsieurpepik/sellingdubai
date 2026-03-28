@@ -155,7 +155,7 @@
     </div>
     <div class="flex items-center gap-3">
       <a href="/dashboard" class="text-zinc-500 hover:text-zinc-900 transition-colors text-xs font-semibold tracking-tight">Agent Login</a>
-      <a href="/join" class="bg-primary text-on-primary px-5 py-2 rounded-full text-xs font-bold tracking-tight hover:opacity-90 transition-opacity">Claim Your Page</a>
+      <a href="#waitlist" class="bg-primary text-on-primary px-5 py-2 rounded-full text-xs font-bold tracking-tight hover:opacity-90 transition-opacity">Join Waitlist</a>
     </div>
   </div>
 </nav>
@@ -164,16 +164,30 @@
 
 <!-- ======== HERO ======== -->
 <section class="max-w-7xl mx-auto px-6 pt-16 pb-12 text-center">
-  <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">Turn followers into clients</div>
+  <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">Professional Verification Platform — Dubai Real Estate</div>
   <h1 class="font-headline text-5xl md:text-8xl text-on-surface mb-8 tight-tracking leading-[1.1]">
-    <span>Post the reel.<br/>Close the deal.</span>
+    <span>Dubai recorded 180,987 property transactions in 2024. The agents who captured the most valuable share were found, verified, and trusted before the first call.</span>
   </h1>
   <p class="font-body text-base text-on-surface-variant max-w-lg mx-auto mb-10 leading-relaxed" style="font-weight:300;">
-    SellingDubai gives Dubai real estate agents a professional profile page that generates leads via WhatsApp. Your DLD badge builds trust, your listings do the pitch — one tap from follower to conversation.
+    High-net-worth buyers and international investors do not browse portals. They research professionals. Selling Dubai provides the infrastructure: a DLD-verified credential page, live portfolio, and unmediated client access — presented at the standard expected by buyers transacting above AED 5 million.
   </p>
-  <div class="max-w-md mx-auto mb-6 w-full px-4">
-    <a href="/join" class="inline-block bg-primary text-on-primary px-10 py-4 rounded-full text-base font-bold hover:opacity-90 transition-all">Claim Your Page — Free</a>
-    <p class="text-xs text-zinc-400 mt-3">Set up in under 2 minutes. No credit card required.</p>
+  <!-- WAITLIST FORM -->
+  <div id="waitlist" class="max-w-md mx-auto mb-6 w-full px-4">
+    <form id="wl-hero" class="bg-white border border-zinc-100 rounded-2xl p-6 shadow-sm text-left" onsubmit="joinWaitlist(event,this)">
+      <div class="mb-3">
+        <input type="text" name="name" placeholder="Your name" required minlength="2" maxlength="80" class="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-on-surface placeholder-zinc-400 outline-none focus:border-zinc-400 transition-colors">
+      </div>
+      <div class="mb-3">
+        <input type="email" name="email" placeholder="Email address" required class="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-on-surface placeholder-zinc-400 outline-none focus:border-zinc-400 transition-colors">
+      </div>
+      <div class="mb-4">
+        <input type="tel" name="whatsapp" placeholder="WhatsApp number (optional)" class="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-on-surface placeholder-zinc-400 outline-none focus:border-zinc-400 transition-colors">
+      </div>
+      <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Join the Waitlist</button>
+      <p class="text-xs text-zinc-400 mt-3 text-center">No subscription fee. No platform commission. Independent by design.</p>
+    </form>
+    <div id="wl-hero-msg" class="hidden mt-3 text-sm text-center text-red-500"></div>
+    <p class="text-xs text-zinc-400 mt-3 text-center"><span id="waitlist-count-live"></span></p>
   </div>
 
   <!-- Three Phone Stack -->
@@ -405,22 +419,22 @@
       <div class="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-6 border border-zinc-200">
         <span class="material-symbols-outlined text-zinc-700 text-2xl">verified</span>
       </div>
-      <h3 class="font-headline text-lg mb-2 tight-tracking">You're verified.<br/>They see it.</h3>
+      <h3 class="font-headline text-lg mb-2 tight-tracking">Verified before<br/>the first call.</h3>
     </div>
     <div class="flex flex-col items-center">
       <div class="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-6 border border-zinc-200">
         <span class="material-symbols-outlined text-zinc-700 text-2xl">bolt</span>
       </div>
-      <h3 class="font-headline text-lg mb-2 tight-tracking">Live in<br/>5 minutes</h3>
+      <h3 class="font-headline text-lg mb-2 tight-tracking">Active<br/>in minutes</h3>
     </div>
     <div class="flex flex-col items-center">
       <div class="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-6 border border-zinc-200">
         <span class="material-symbols-outlined text-zinc-700 text-2xl">trending_up</span>
       </div>
-      <h3 class="font-headline text-lg mb-2 tight-tracking">Own your<br/>audience</h3>
+      <h3 class="font-headline text-lg mb-2 tight-tracking">Own the client<br/>relationship</h3>
     </div>
   </div>
-  <p class="text-[10px] text-zinc-400 text-center mt-12">*Free forever on the starter plan. No credit card required.</p>
+  <p class="text-[10px] text-zinc-400 text-center mt-12">*No subscription fee on the professional plan. Revenue model designed for agent independence.</p>
 </section>
 
 <!-- ======== TRUST STACKING BAR ======== -->
@@ -433,8 +447,8 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="#25d366"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
         </div>
         <div>
-          <div class="text-sm font-bold text-on-surface">DLD Verified</div>
-          <div class="text-[11px] text-zinc-400" style="font-weight:300;">Dubai Land Department</div>
+          <div class="text-sm font-bold text-on-surface">DLD-Authorised</div>
+          <div class="text-[11px] text-zinc-400" style="font-weight:300;">Verified against the official registry</div>
         </div>
       </div>
       <!-- Divider -->
@@ -445,8 +459,8 @@
           <span class="material-symbols-outlined text-zinc-600 text-xl">group</span>
         </div>
         <div>
-          <div class="text-sm font-bold text-on-surface">Live Now</div>
-          <div class="text-[11px] text-zinc-400" style="font-weight:300;"><span id="agent-count-live">Join</span> verified agents</div>
+          <div class="text-sm font-bold text-on-surface">Active Professionals</div>
+          <div class="text-[11px] text-zinc-400" style="font-weight:300;"><span id="agent-count-live">Join</span> verified in Dubai</div>
         </div>
       </div>
       <!-- Divider -->
@@ -457,8 +471,8 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
         </div>
         <div>
-          <div class="text-sm font-bold text-on-surface">Direct to WhatsApp</div>
-          <div class="text-[11px] text-zinc-400" style="font-weight:300;">Zero middlemen</div>
+          <div class="text-sm font-bold text-on-surface">Direct Client Access</div>
+          <div class="text-[11px] text-zinc-400" style="font-weight:300;">No intermediary. No lead distribution.</div>
         </div>
       </div>
       <!-- Divider -->
@@ -469,8 +483,8 @@
           <span class="material-symbols-outlined text-zinc-600 text-xl">lock_open</span>
         </div>
         <div>
-          <div class="text-sm font-bold text-on-surface">Free Forever</div>
-          <div class="text-[11px] text-zinc-400" style="font-weight:300;">No credit card required</div>
+          <div class="text-sm font-bold text-on-surface">No Subscription Fee</div>
+          <div class="text-[11px] text-zinc-400" style="font-weight:300;">Revenue independence from day one</div>
         </div>
       </div>
     </div>
@@ -481,8 +495,8 @@
 <section id="how-steps" class="py-32 max-w-5xl mx-auto px-6 reveal">
   <div class="text-center mb-20">
     <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">How it works</div>
-    <h2 class="font-headline text-4xl md:text-6xl mb-6 tight-tracking leading-tight">You create the content.<br/>Your page closes the lead.</h2>
-    <p class="text-zinc-500 text-sm max-w-lg mx-auto leading-relaxed" style="font-weight:300;">You're already doing the hardest part — reels, stories, property tours. Here's what happens when someone taps your bio link.</p>
+    <h2 class="font-headline text-4xl md:text-6xl mb-6 tight-tracking leading-tight">From credential verification<br/>to client engagement.</h2>
+    <p class="text-zinc-500 text-sm max-w-lg mx-auto leading-relaxed" style="font-weight:300;">HNW buyers and institutional investors conduct due diligence before making contact. Here is what that process looks like when your professional presence is built correctly.</p>
   </div>
 
   <!-- Numbered Steps -->
@@ -493,8 +507,8 @@
       <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-orange-400 flex items-center justify-center mb-5">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg>
       </div>
-      <h3 class="font-headline text-lg tight-tracking mb-2">You post a reel</h3>
-      <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">10,000 followers see your Dubai Marina penthouse tour. They're interested. They tap your bio link.</p>
+      <h3 class="font-headline text-lg tight-tracking mb-2">Establish your credentials</h3>
+      <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">Your DLD broker number, RERA licence, agency affiliation, and transaction history — verified and presented in a format serious buyers recognise immediately.</p>
     </div>
     <!-- Step 02 -->
     <div class="relative bg-white border border-zinc-100 rounded-2xl p-10 text-left hover:border-zinc-300 transition-colors">
@@ -502,8 +516,8 @@
       <div class="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center mb-5">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
       </div>
-      <h3 class="font-headline text-lg tight-tracking mb-2">They land on your page</h3>
-      <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">DLD verified. Your listings with photos and pricing. Your agency. Your face. Everything a buyer needs to trust you — in one place.</p>
+      <h3 class="font-headline text-lg tight-tracking mb-2">Present your market position</h3>
+      <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">Active listings with full specifications and pricing. Completed deals. Your agency context. A verified professional profile that answers every qualification question before the first call.</p>
     </div>
     <!-- Step 03 -->
     <div class="relative bg-white border border-zinc-100 rounded-2xl p-10 text-left hover:border-zinc-300 transition-colors">
@@ -511,8 +525,8 @@
       <div class="w-12 h-12 rounded-full bg-[#25d366] flex items-center justify-center mb-5">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
       </div>
-      <h3 class="font-headline text-lg tight-tracking mb-2">They tap WhatsApp</h3>
-      <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">No forms. No friction. Your page did the selling. They message you directly, already trusting you. That's how deals start.</p>
+      <h3 class="font-headline text-lg tight-tracking mb-2">Direct client engagement</h3>
+      <p class="text-zinc-500 text-sm leading-relaxed" style="font-weight:300;">No CRM. No platform intermediary. No shared lead pool. The client contacts you directly, having already verified your credentials. That is the difference between a lead and a conversation.</p>
     </div>
   </div>
 
@@ -520,10 +534,10 @@
   <div class="text-center mt-16">
     <div class="inline-flex items-center gap-3 bg-zinc-50 border border-zinc-100 rounded-full px-8 py-4">
       <span class="material-symbols-outlined text-zinc-400 text-lg">trending_up</span>
-      <span class="text-sm text-zinc-600" style="font-weight:300;">Every reel, every story, every follower — now tracked, converted, and in your pipeline.</span>
+      <span class="text-sm text-zinc-600" style="font-weight:300;">Verified credentials. Live portfolio. Direct access. The infrastructure serious agents in Dubai have been missing.</span>
     </div>
     <div class="mt-8">
-      <a href="/join" class="inline-block bg-primary text-on-primary px-8 py-3 rounded-full text-sm font-bold hover:opacity-90 transition-all">Claim Your Page</a>
+      <a href="#waitlist" class="inline-block bg-primary text-on-primary px-8 py-3 rounded-full text-sm font-bold hover:opacity-90 transition-all">Join the Waitlist</a>
     </div>
   </div>
 </section>
@@ -532,29 +546,29 @@
 <section class="py-24 max-w-5xl mx-auto px-6 reveal">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
     <div>
-      <div class="inline-block bg-card-verified px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">You're the brand. Look like it.</div>
-      <h2 class="font-headline text-4xl md:text-5xl mb-6 tight-tracking leading-tight">Your followers already trust you. Your page should prove why.</h2>
-      <p class="text-zinc-500 text-sm leading-relaxed mb-8">In this market, the agent is the brand. Your followers search for you by name. SellingDubai gives you a page that matches the reputation you've built: your face, your DLD number, your agency, your listings. When someone lands here, they see a professional who converts.</p>
+      <div class="inline-block bg-card-verified px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">The Standard</div>
+      <h2 class="font-headline text-4xl md:text-5xl mb-6 tight-tracking leading-tight">Dubai's top-performing agents are not defined by their portal spend.</h2>
+      <p class="text-zinc-500 text-sm leading-relaxed mb-8">Bayut and Property Finder charge AED 40,000–120,000 per year for exposure in a shared marketplace where leads are distributed across competitors and the platform owns the client relationship. SellingDubai is a different category: a verified professional profile where you control the presentation, the data, and the conversation.</p>
       <div class="space-y-4">
         <div class="flex items-start gap-3">
           <span class="material-symbols-outlined text-teal-500 text-lg mt-0.5">check_circle</span>
           <div>
-            <p class="text-sm font-bold text-on-surface">RERA Licensed. Visible to everyone.</p>
-            <p class="text-xs text-zinc-500 mt-0.5">International buyers don't know RERA from DEWA. Your badge says "licensed agent" in one glance. That's your edge.</p>
+            <p class="text-sm font-bold text-on-surface">DLD licence verified and prominently displayed</p>
+            <p class="text-xs text-zinc-500 mt-0.5">International buyers — particularly those making first Dubai acquisitions — conduct licence verification as a standard step. Your DLD broker number is checked, confirmed, and presented with authority.</p>
           </div>
         </div>
         <div class="flex items-start gap-3">
           <span class="material-symbols-outlined text-teal-500 text-lg mt-0.5">check_circle</span>
           <div>
-            <p class="text-sm font-bold text-on-surface">Your face, your brand, your deals</p>
-            <p class="text-xs text-zinc-500 mt-0.5">Your name, your agency, your track record. One page that shows the full picture of who you are and why clients should trust you.</p>
+            <p class="text-sm font-bold text-on-surface">Active listings and completed transaction history</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Current inventory with full specifications, pricing, and location data. Transaction history that demonstrates genuine market experience. The profile of a practitioner, not a prospector.</p>
           </div>
         </div>
         <div class="flex items-start gap-3">
           <span class="material-symbols-outlined text-teal-500 text-lg mt-0.5">check_circle</span>
           <div>
-            <p class="text-sm font-bold text-on-surface">One tap to WhatsApp. No friction.</p>
-            <p class="text-xs text-zinc-500 mt-0.5">Your page does the convincing. WhatsApp starts the conversation. One tap and they're talking to you directly. That's how deals begin.</p>
+            <p class="text-sm font-bold text-on-surface">Unmediated client access</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Direct contact. No lead distribution to competing agents. No platform taking a position in your client relationship. When a buyer reaches you through SellingDubai, the relationship is yours from the first message.</p>
           </div>
         </div>
       </div>
@@ -567,14 +581,14 @@
             <div class="w-6 h-6 rounded bg-zinc-100 flex items-center justify-center"><span class="material-symbols-outlined text-zinc-400 text-sm">close</span></div>
             <span class="text-xs font-bold text-zinc-400">Without SellingDubai</span>
           </div>
-          <p class="text-xs text-zinc-400 leading-relaxed">Generic bio link. No listings. No credentials. They tap, see a blank Linktree, and go back to scrolling. Your properties are buried in PDFs nobody opens.</p>
+          <p class="text-xs text-zinc-400 leading-relaxed">Bayut or Property Finder: AED 40,000–120,000 per year. Your listing appears alongside dozens of competitors. The platform controls the lead distribution. The client relationship belongs to the portal, not to you.</p>
         </div>
         <div class="bg-zinc-900 p-6 rounded-2xl text-white">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-6 h-6 rounded bg-teal-500 flex items-center justify-center"><span class="material-symbols-outlined text-white text-sm">check</span></div>
             <span class="text-xs font-bold text-on-surface">With SellingDubai</span>
           </div>
-          <p class="text-xs text-zinc-300 leading-relaxed">Your own storefront. DLD verified. Listings with photos and specs. They browse, they trust, they tap WhatsApp. One page replaces your Linktree, your PDF brochures, and your business card.</p>
+          <p class="text-xs text-zinc-300 leading-relaxed">SellingDubai: no subscription. Your verified professional profile — DLD licence, active listings, transaction history — presented independently. The client contacts you directly. You own every conversation from the first message.</p>
         </div>
       </div>
     </div>
@@ -643,7 +657,7 @@
   <div class="max-w-7xl mx-auto px-6 text-center">
     <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-6">Everything your page includes</p>
     <h2 class="font-headline text-5xl mb-6 tight-tracking leading-tight">One page.<br/>Everything built in.</h2>
-    <p class="text-zinc-500 text-sm max-w-md mx-auto mb-16">Everything an agent needs to look professional and convert followers — nothing they don't.</p>
+    <p class="text-zinc-500 text-sm max-w-md mx-auto mb-16">Every element a serious Dubai agent needs to present credibly and engage clients directly — nothing superfluous.</p>
     <div class="relative mx-auto max-w-4xl dot-pattern py-16 flex items-center justify-center">
       <div class="flex flex-wrap justify-center gap-4 content-center px-10">
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-zinc-100 shadow-sm">
@@ -696,8 +710,8 @@
       <div class="w-10 h-10 bg-card-leads rounded-lg flex items-center justify-center mb-5">
         <span class="material-symbols-outlined text-zinc-700 text-xl">person_off</span>
       </div>
-      <h3 class="font-headline text-lg mb-3 tight-tracking">More followers become clients</h3>
-      <p class="font-body text-sm text-zinc-500 leading-relaxed" style="font-weight:300;">Someone sees your reel, taps your bio link, and lands on a verified page with your face, your badge, your listings. They trust you instantly and tap WhatsApp to talk. No friction. No forms. Just a conversation that starts because your page did the selling.</p>
+      <h3 class="font-headline text-lg mb-3 tight-tracking">Qualified buyers reach you first</h3>
+      <p class="font-body text-sm text-zinc-500 leading-relaxed" style="font-weight:300;">A prospective buyer searches your name, lands on your verified profile, reviews your credentials and active listings, and contacts you directly. The verification work is done before the first message. That is the difference between a cold inquiry and a qualified conversation.</p>
     </div>
     <div class="bg-white p-8 rounded-2xl border border-zinc-100 shadow-sm text-left">
       <div class="w-10 h-10 bg-card-verified rounded-lg flex items-center justify-center mb-5">
@@ -765,7 +779,7 @@
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
       <div class="faq-answer px-6">
-        <p class="text-sm text-zinc-500 pb-6 leading-relaxed">SellingDubai is the verified link-in-bio built for Dubai real estate agents. Your DLD badge, your listings, direct WhatsApp, visitor analytics, and ad retargeting — all on one page. Put it in your Instagram bio and turn followers into conversations.</p>
+        <p class="text-sm text-zinc-500 pb-6 leading-relaxed">SellingDubai is a verified professional profile platform for Dubai real estate agents. Your DLD broker number is checked against the official registry, your active listings and transaction history are presented, and buyers contact you directly via WhatsApp — no platform intermediary, no subscription fee, no shared leads.</p>
       </div>
     </div>
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
@@ -821,7 +835,7 @@
   <div class="bg-[#242426] rounded-[3rem] p-12 lg:p-24 text-white flex flex-col lg:flex-row items-center gap-16 overflow-hidden relative min-h-[500px]">
     <div class="lg:w-1/2 z-10 text-left">
       <h2 class="font-headline text-4xl md:text-5xl mb-4 tight-tracking leading-tight">Your turn.</h2>
-      <p class="text-sm text-white/50 mb-12 max-w-sm leading-relaxed">Set up your verified agent page in under 2 minutes. Free forever on the starter plan.</p>
+      <p class="text-sm text-white/50 mb-12 max-w-sm leading-relaxed">Your DLD-verified professional profile, active in minutes. No subscription. No platform commission. Independent by design.</p>
       <div class="space-y-4 mb-12 max-w-sm">
         <div class="bg-white/5 p-4 rounded-xl flex items-center gap-4">
           <span class="text-xs font-bold opacity-50">1</span>
@@ -836,7 +850,13 @@
           <span class="text-xs font-bold">Your verified page goes live</span>
         </div>
       </div>
-      <a href="/join" class="inline-block bg-primary text-on-primary px-10 py-4 rounded-full text-base font-bold hover:opacity-90 transition-all">Claim Your Page — Free</a>
+      <form id="wl-dark" class="space-y-3 max-w-sm" onsubmit="joinWaitlist(event,this)">
+        <input type="text" name="name" placeholder="Your name" required minlength="2" maxlength="80" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-white/40 outline-none focus:border-white/40 transition-colors">
+        <input type="email" name="email" placeholder="Email address" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-white/40 outline-none focus:border-white/40 transition-colors">
+        <input type="tel" name="whatsapp" placeholder="WhatsApp number (optional)" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-white/40 outline-none focus:border-white/40 transition-colors">
+        <button type="submit" class="w-full bg-white text-[#242426] py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Join the Waitlist — Free</button>
+      </form>
+      <div id="wl-dark-msg" class="hidden mt-3 text-sm text-red-300"></div>
     </div>
     <div class="lg:w-1/2 relative flex justify-end">
       <div class="phone-frame phone-frame-lg" style="background:#fff;border-color:#d1d5db;">
@@ -899,7 +919,7 @@
     <div>
       <h4 class="text-[11px] font-bold text-white mb-6 uppercase tracking-widest opacity-80">For Agents</h4>
       <ul class="space-y-3">
-        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/join">Claim Your Page</a></li>
+        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#waitlist">Join Waitlist</a></li>
         <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/edit">Edit Profile</a></li>
         <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/dashboard">Dashboard</a></li>
       </ul>
@@ -926,7 +946,7 @@
 
 <!-- ======== STICKY MOBILE CTA ======== -->
 <div class="sticky-cta">
-  <a href="/join" style="display:block;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;text-decoration:none;">Claim Your Page — Free</a>
+  <a href="#waitlist" style="display:block;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;text-decoration:none;">Join the Waitlist — Free</a>
 </div>
 
 <script>
@@ -949,46 +969,48 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // Waitlist submission
-const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+const WAITLIST_FN_URL = 'https://pjyorgedaxevxophpfib.supabase.co/functions/v1/waitlist-join';
 
 function joinWaitlist(e, form) {
   e.preventDefault();
-  const email = form.email.value.trim().toLowerCase();
-  if (!email) return false;
+  const name = (form.name.value || '').trim();
+  const email = (form.email.value || '').trim().toLowerCase();
+  const whatsapp = (form.whatsapp ? form.whatsapp.value : '').trim();
+  const msgId = form.id + '-msg';
+  const msgEl = document.getElementById(msgId);
 
-  const btn = form.querySelector('button');
+  if (msgEl) { msgEl.textContent = ''; msgEl.classList.add('hidden'); }
+  if (!name || name.length < 2) {
+    if (msgEl) { msgEl.textContent = 'Please enter your name.'; msgEl.classList.remove('hidden'); }
+    return false;
+  }
+
+  const btn = form.querySelector('button[type="submit"]');
   const origText = btn.textContent;
   btn.disabled = true;
   btn.textContent = '...';
 
-  // Find the message element (sibling after the form)
-  const msgId = form.id + '-msg';
-  const msgEl = document.getElementById(msgId);
-
-  fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+  fetch(WAITLIST_FN_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_ANON,
-      'Authorization': 'Bearer ' + SUPABASE_ANON,
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({ email: email, source: 'landing' })
-  }).then(res => {
-    if (res.ok || res.status === 409) {
-      // 409 = duplicate email, still show success
-      form.innerHTML = '<p class="text-sm font-bold" style="padding:12px 0;">You\'re on the list. We\'ll be in touch.</p>';
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, whatsapp: whatsapp || null })
+  }).then(res => res.json()).then(data => {
+    if (data.success) {
+      const isDark = form.id === 'wl-dark';
+      const color = isDark ? '#fff' : '#1d1d1f';
+      form.innerHTML = '<p style="padding:14px 0;font-size:15px;font-weight:700;color:' + color + ';">You\'re on the list, ' + name.split(' ')[0] + '. We\'ll be in touch.</p>';
+      // Update count display
+      if (data.count) {
+        const countEl = document.getElementById('waitlist-count-live');
+        if (countEl) countEl.textContent = data.count.toLocaleString() + ' agents already on the waitlist';
+      }
     } else {
-      throw new Error('Failed');
+      throw new Error(data.error || 'Failed');
     }
-  }).catch(() => {
+  }).catch((err) => {
     btn.disabled = false;
     btn.textContent = origText;
-    if (msgEl) {
-      msgEl.textContent = 'Something went wrong. Try again.';
-      msgEl.classList.remove('hidden');
-    }
+    if (msgEl) { msgEl.textContent = err.message || 'Something went wrong. Try again.'; msgEl.classList.remove('hidden'); }
   });
 
   return false;
@@ -1000,6 +1022,7 @@ function joinWaitlist(e, form) {
 (function() {
   var SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+  // Agent count
   fetch(SUPABASE_URL + '/rest/v1/agents?select=id&verification_status=eq.verified', {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
   }).then(function(res) {
@@ -1009,6 +1032,19 @@ function joinWaitlist(e, form) {
       if (!isNaN(total) && total > 0) {
         var el = document.getElementById('agent-count-live');
         if (el) el.textContent = total.toLocaleString();
+      }
+    }
+  }).catch(function() {});
+  // Waitlist count
+  fetch(SUPABASE_URL + '/rest/v1/waitlist?select=id', {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+  }).then(function(res) {
+    var countHeader = res.headers.get('content-range');
+    if (countHeader) {
+      var total = parseInt(countHeader.split('/')[1], 10);
+      if (!isNaN(total) && total > 0) {
+        var el = document.getElementById('waitlist-count-live');
+        if (el) el.textContent = total.toLocaleString() + ' agents already on the waitlist';
       }
     }
   }).catch(function() {});
