@@ -52,6 +52,16 @@
 - Covers: happy path, validation, rate limiting, dedup, honeypot, CORS, enumeration prevention
 - JS module smoke test at `js/test-modules.html`
 
+## 2026-03-29 — Security Hardening Round 2
+
+### Intentional non-obvious choices
+
+**pricing.html has `<meta name="robots" content="noindex, nofollow">`**
+This is intentional. Billing is not yet live (BILLING_LIVE=false). We do not want the pricing page indexed before Stripe is configured and tested in production. Remove the noindex tag and flip BILLING_LIVE to true when billing opens.
+
+**landing.html CTAs point to `#waitlist` anchor**
+Intentional through 2026-04-05 (billing launch date). Once billing opens, update all CTAs on landing.html from `#waitlist` to `/join` and remove the waitlist section.
+
 ### What's next
 
 - Migrate remaining hardcoded colors (non-exact matches) to design tokens

@@ -154,6 +154,7 @@ Deno.serve(async (req: Request) => {
       headers: {
         Authorization: `Bearer ${stripeKey}`,
         "Content-Type": "application/x-www-form-urlencoded",
+        "Idempotency-Key": `checkout-${agentId}-${plan}-${interval}`,
       },
       body: sessionParams,
     });
