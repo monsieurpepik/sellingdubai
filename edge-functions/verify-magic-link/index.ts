@@ -70,15 +70,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Mark as used (first use) — but don't invalidate for session re-verification
-    if (!link.used_at) {
-      await supabase
-        .from("magic_links")
-        .update({ used_at: new Date().toISOString() })
-        .eq("id", link.id);
-    }
-
-    // Fetch full agent data
+    // Fetch full agent data first — only mark token used if agent exists
     const { data: agent, error: agentErr } = await supabase
       .from("agents")
       .select("*")
@@ -90,6 +82,14 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Agent not found or deactivated." }),
         { status: 404, headers: cors }
       );
+    }
+
+    // Mark as used (first use) — but don't invalidate for session re-verification
+    if (!link.used_at) {
+      await supabase
+        .from("magic_links")
+        .update({ used_at: new Date().toISOString() })
+        .eq("id", link.id);
     }
 
     // Return agent data — strip ALL sensitive fields

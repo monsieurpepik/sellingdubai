@@ -32,8 +32,22 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { action, code, agent_id, state } = await req.json();
+    const { action, code, token, state } = await req.json();
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+    // Helper: validate magic link token and return authenticated agent_id
+    async function getAgentIdFromToken(t: string): Promise<string | null> {
+      if (!t || typeof t !== 'string') return null;
+      const { data: link } = await supabase
+        .from('magic_links')
+        .select('agent_id, expires_at, used_at')
+        .eq('token', t)
+        .single();
+      if (!link) return null;
+      if (new Date(link.expires_at) < new Date()) return null;
+      if (!link.used_at) return null; // not yet activated
+      return link.agent_id;
+    }
 
     if (action === 'get_auth_url') {
       const csrfBytes = new Uint8Array(16);
@@ -46,9 +60,15 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'exchange_code') {
-      if (!code || !agent_id) {
-        return new Response(JSON.stringify({ error: 'Missing code or agent_id' }), {
+      if (!code || !token) {
+        return new Response(JSON.stringify({ error: 'Missing code or token' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const agent_id = await getAgentIdFromToken(token);
+      if (!agent_id) {
+        return new Response(JSON.stringify({ error: 'Invalid or expired session.' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
@@ -109,16 +129,22 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'disconnect') {
-      if (!agent_id) {
-        return new Response(JSON.stringify({ error: 'Missing agent_id' }), {
+      if (!token) {
+        return new Response(JSON.stringify({ error: 'Missing token' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
+      const agent_id = await getAgentIdFromToken(token);
+      if (!agent_id) {
+        return new Response(JSON.stringify({ error: 'Invalid or expired session.' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
-      // Delete vault secret
-      const secretName = `agent_${agent_id}_tiktok_token`;
-      await supabase.rpc('sql', {
-        query: `SELECT vault.delete_secret((SELECT id FROM vault.secrets WHERE name = '${secretName}'))`,
+      // Delete vault secret via parameterized RPC (no SQL injection)
+      await supabase.rpc('delete_social_token', {
+        p_agent_id: agent_id,
+        p_provider: 'tiktok',
       }).catch(() => {}); // Ignore if secret doesn't exist
 
       // Clear agent fields

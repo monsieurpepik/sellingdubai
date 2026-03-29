@@ -900,7 +900,7 @@
   };
 
   // ── Send Magic Link ──
-  window.sendMagicLink = async function() {
+  async function sendMagicLink() {
     const errEl = document.getElementById('auth-error');
     const succEl = document.getElementById('auth-success');
     errEl.className = 'auth-msg'; succEl.className = 'auth-msg';
@@ -935,7 +935,8 @@
       btn.disabled = false; btn.textContent = 'Send Magic Link';
       errEl.textContent = 'Connection error.'; errEl.className = 'auth-msg error';
     }
-  };
+  }
+  window.sendMagicLink = sendMagicLink;
 
   // ── Verify Token ──
   async function verifyToken(token) {
@@ -1068,6 +1069,7 @@
       btn.textContent = 'Manage billing';
     }
   }
+  window.openBillingPortal = openBillingPortal;
 
   // ── Onboarding Checklist ──
   function renderOnboarding() {

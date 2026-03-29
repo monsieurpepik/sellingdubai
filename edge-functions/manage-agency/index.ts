@@ -98,8 +98,8 @@ Deno.serve(async (req: Request) => {
         .insert({
           slug,
           name,
-          logo_url: typeof body.logo_url === "string" ? body.logo_url || null : null,
-          website: typeof body.website === "string" ? body.website || null : null,
+          logo_url: typeof body.logo_url === "string" && body.logo_url ? (body.logo_url.startsWith("https://") && !body.logo_url.match(/^https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/) ? body.logo_url : null) : null,
+          website: typeof body.website === "string" && body.website ? (body.website.startsWith("https://") && !body.website.match(/^https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/) ? body.website : null) : null,
           description: typeof body.description === "string" ? body.description || null : null,
           owner_agent_id: agentId,
         })
@@ -124,8 +124,8 @@ Deno.serve(async (req: Request) => {
     if (!agency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
     const updates: Record<string, unknown> = {};
     if ("name" in body) updates.name = typeof body.name === "string" ? body.name.trim() || null : null;
-    if ("logo_url" in body) updates.logo_url = typeof body.logo_url === "string" ? body.logo_url || null : null;
-    if ("website" in body) updates.website = typeof body.website === "string" ? body.website || null : null;
+    if ("logo_url" in body) updates.logo_url = typeof body.logo_url === "string" && body.logo_url ? (body.logo_url.startsWith("https://") && !body.logo_url.match(/^https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/) ? body.logo_url : null) : null;
+    if ("website" in body) updates.website = typeof body.website === "string" && body.website ? (body.website.startsWith("https://") && !body.website.match(/^https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/) ? body.website : null) : null;
     if ("description" in body) updates.description = typeof body.description === "string" ? body.description || null : null;
     if (Object.keys(updates).length === 0) return new Response(JSON.stringify({ error: "No fields to update." }), { status: 400, headers: cors });
     const { data: updated, error: upErr } = await supabase.from("agencies").update(updates).eq("id", agencyId).select("id, slug, name, logo_url, website, description, created_at").single();

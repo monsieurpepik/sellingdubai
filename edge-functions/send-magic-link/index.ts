@@ -61,20 +61,7 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Rate limiting: max 3 magic links per email per 15 minutes
     const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-    const { count: recentCount } = await supabase
-      .from("magic_links")
-      .select("id", { count: "exact", head: true })
-      .gt("created_at", fifteenMinAgo);
-
-    // Global rate limit — 30 links per 15 min across all emails
-    if ((recentCount || 0) > 30) {
-      return new Response(
-        JSON.stringify({ success: true, message: "If this email is registered, you'll receive a magic link." }),
-        { status: 200, headers: cors }
-      );
-    }
 
     // Find agent by email
     const { data: agent, error: agentErr } = await supabase

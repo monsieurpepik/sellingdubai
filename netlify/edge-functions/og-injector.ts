@@ -1,7 +1,7 @@
 import type { Config, Context } from "@netlify/edge-functions";
 
 const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+const SUPABASE_ANON_KEY = Netlify.env.get('SUPABASE_ANON_KEY') || '';
 const DEFAULT_IMAGE = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
 
 // Bot user-agent patterns for SSR prerendering

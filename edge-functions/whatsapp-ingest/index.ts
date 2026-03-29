@@ -919,7 +919,8 @@ Deno.serve(async (req: Request) => {
     const mode = url.searchParams.get("hub.mode");
     const token = url.searchParams.get("hub.verify_token");
     const challenge = url.searchParams.get("hub.challenge");
-    const VERIFY_TOKEN = Deno.env.get("WH_VERIFY_TOKEN") || "SELLING_DUBAI_WH_VERIFY";
+    const VERIFY_TOKEN = Deno.env.get("WH_VERIFY_TOKEN");
+    if (!VERIFY_TOKEN) return new Response("Server misconfiguration.", { status: 500 });
     if (mode === "subscribe" && token === VERIFY_TOKEN) return new Response(challenge, { status: 200 });
     return new Response("Forbidden", { status: 403 });
   }

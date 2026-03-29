@@ -4,15 +4,28 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.sellingdubai.ae",
+  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
+  "https://sellingdubai-agents.netlify.app",
+];
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
-const TEST_BRN = "TEST-0000";
+const TEST_BRN = 0;
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -30,7 +43,7 @@ Deno.serve(async (req: Request) => {
 
     // ── Test mode bypass ──────────────────────────────────────────────────────
     // Only active when ENABLE_TEST_MODE=true is set in the Supabase project env.
-    // Production never sets this flag, so TEST-0000 is rejected there like any
+    // Production never sets this flag, so 0 is rejected there like any
     // unknown BRN.
     if (
       broker_number === TEST_BRN &&

@@ -66,6 +66,29 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // Auth: require CRON_SECRET
+  const cronSecret = Deno.env.get("CRON_SECRET") || Deno.env.get("cron_secret") || "";
+  if (!cronSecret) {
+    return new Response(JSON.stringify({ error: "CRON_SECRET not configured." }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const url = new URL(req.url);
+  const querySecret = url.searchParams.get("secret") || "";
+  const authHeader = req.headers.get("authorization") || "";
+  const cronHeader = req.headers.get("x-cron-secret") || "";
+  const isAuthorized =
+    querySecret === cronSecret ||
+    authHeader === `Bearer ${cronSecret}` ||
+    cronHeader === cronSecret;
+  if (!isAuthorized) {
+    return new Response(JSON.stringify({ error: "Unauthorized." }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const remToken = Deno.env.get("REM_API_TOKEN");
   if (!remToken) {
     return new Response(JSON.stringify({ error: "REM_API_TOKEN not configured." }), {

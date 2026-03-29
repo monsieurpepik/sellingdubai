@@ -404,7 +404,7 @@
 
       <div class="field">
         <label>Broker Number</label>
-        <input type="text" id="broker-number" placeholder="e.g. 66391" inputmode="numeric" autocomplete="off">
+        <input type="number" id="broker-number" placeholder="e.g. 66391" min="0" autocomplete="off">
         <p class="field-hint">Your registered broker license number</p>
         <p class="field-hint" style="margin-top:4px;color:#6b7280;font-size:11px;">🔒 Your DLD number is used for verification only — it is never shown publicly.</p>
       </div>
@@ -619,10 +619,10 @@
         </button>
       </div>
 
-      <a class="link-btn link-btn-wa" id="btn-view" href="#" target="_blank">
+      <button class="link-btn link-btn-wa" id="btn-view" onclick="if(createdSlug)window.location.href='/a/'+createdSlug;">
         <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></span>
-        View My Full Profile
-      </a>
+        Preview Profile
+      </button>
       <a class="link-btn" href="/edit" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.1);">
         <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
         Edit My Profile
@@ -707,10 +707,10 @@ async function verifyBroker() {
   clearError(1);
   const raw = document.getElementById('broker-number').value.trim();
 
-  // TEST-0000 is sent as a string — the edge function handles the bypass when ENABLE_TEST_MODE is set.
-  // In production (where ENABLE_TEST_MODE is unset) the edge function rejects it like any unknown BRN.
-  const isTestBrn = raw === 'TEST-0000';
-  const num = isTestBrn ? null : parseInt(raw, 10);
+  // 00000 normalises to 0 in a number input — sent as integer 0. The edge function handles the bypass
+  // when ENABLE_TEST_MODE is set. In production (where ENABLE_TEST_MODE is unset) 0 is rejected like any unknown BRN.
+  const isTestBrn = raw === '0';
+  const num = isTestBrn ? 0 : parseInt(raw, 10);
   if (!isTestBrn && (!num || isNaN(num))) { showError(1, 'Please enter a valid broker number.'); return; }
 
   setLoading('btn-verify', true, 'Checking registry...', true);
@@ -719,7 +719,7 @@ async function verifyBroker() {
     const res = await fetch(VERIFY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ broker_number: isTestBrn ? raw : num })
+      body: JSON.stringify({ broker_number: num })
     });
     const data = await res.json();
 
@@ -799,6 +799,7 @@ async function previewPhoto(input) {
     showError(2, 'Failed to process photo. Try a different image.');
   }
 }
+window.previewPhoto = previewPhoto;
 
 // ========== OTP FLOW ==========
 async function sendOtpAndShow() {
@@ -823,11 +824,12 @@ async function sendOtpAndShow() {
         broker_number: verifiedBroker ? verifiedBroker.broker_number : null
       })
     });
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
 
     if (!res.ok) {
       setLoading('btn-create', false, 'Create My Profile');
-      showError(2, data.error || 'Failed to send verification code.');
+      showError(2, data.error || `Server error ${res.status} — please try again.`);
       return;
     }
 
@@ -840,7 +842,7 @@ async function sendOtpAndShow() {
     setLoading('btn-create', false, 'Create My Profile');
   } catch (e) {
     setLoading('btn-create', false, 'Create My Profile');
-    showError(2, networkErrorMsg());
+    showError(2, e instanceof TypeError ? networkErrorMsg() : `Error: ${e.message}`);
   }
 }
 
@@ -864,25 +866,27 @@ async function resendOtp() {
 
     if (!res.ok) {
       showError(2, data.error || 'Failed to resend code.');
-    } else {
-      btn.textContent = 'Code resent!';
-    }
-  } catch (e) {
-    showError(2, networkErrorMsg());
-  }
-
-  let countdown = 60;
-  btn.textContent = `Resend code (${countdown}s)`;
-  const countdownTimer = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) {
-      clearInterval(countdownTimer);
       btn.textContent = "Didn't get it? Resend code";
       btn.disabled = false;
     } else {
+      let countdown = 60;
       btn.textContent = `Resend code (${countdown}s)`;
+      const countdownTimer = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(countdownTimer);
+          btn.textContent = "Didn't get it? Resend code";
+          btn.disabled = false;
+        } else {
+          btn.textContent = `Resend code (${countdown}s)`;
+        }
+      }, 1000);
     }
-  }, 1000);
+  } catch (e) {
+    showError(2, networkErrorMsg());
+    btn.textContent = "Didn't get it? Resend code";
+    btn.disabled = false;
+  }
 }
 
 async function verifyOtpAndCreate() {
@@ -939,13 +943,14 @@ async function createProfile(otpCode) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
 
     if (!res.ok) {
       setLoading('btn-verify-otp', false, 'Verify & Create Profile');
       showError(2, data.slug
         ? `This broker already has a profile at sellingdubai.ae/a/${data.slug}`
-        : (data.error || 'Something went wrong. Try again.'));
+        : (data.error || `Server error ${res.status} — please try again or contact support.`));
       return;
     }
 
@@ -972,7 +977,7 @@ async function createProfile(otpCode) {
     if (photoData) {
       previewAvatar.innerHTML = `<img src="data:image/jpeg;base64,${photoData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     } else if (data.agent && data.agent.photo_url) {
-      previewAvatar.innerHTML = `<img src="${data.agent.photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      previewAvatar.innerHTML = `<img src="/.netlify/images?url=${encodeURIComponent(data.agent.photo_url)}&w=80&fm=webp&q=80" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     } else {
       previewAvatar.textContent = getInitials(displayName);
     }
@@ -991,18 +996,19 @@ async function createProfile(otpCode) {
       document.querySelector('#step-3 .name').textContent = "You're Almost Live";
       document.querySelector('#step-3 .bio').textContent = "Your profile is created. We'll verify your RERA card within 24 hours and you'll get the verified badge.";
     } else {
-      document.querySelector('#step-3 .name').textContent = "You're Live!";
-      document.querySelector('#step-3 .bio').textContent = "Your profile is live. We'll verify your identity within 24 hours and activate the RERA Licensed badge on your profile.";
+      document.querySelector('#step-3 .name').textContent = "You're Almost Live";
+      document.querySelector('#step-3 .bio').textContent = "Your profile is created. We'll verify your identity within 24 hours and your profile will go live.";
     }
     // Show amber/pending icon for all paths since verification is manual
     document.querySelector('#step-3 .profile-icon').innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
     document.querySelector('#step-3 .profile-icon').style.borderColor = 'rgba(245,158,11,0.5)';
 
+    clearFormState();
     setLoading('btn-verify-otp', false, 'Verify & Create Profile');
     goStep(3);
   } catch (e) {
     setLoading('btn-verify-otp', false, 'Verify & Create Profile');
-    showError(2, networkErrorMsg());
+    showError(2, e instanceof TypeError ? networkErrorMsg() : `Error: ${e.message}`);
   }
 }
 
@@ -1077,6 +1083,56 @@ function previewRera(input) {
   };
   reader.readAsDataURL(file);
 }
+
+// ========== FORM STATE PERSISTENCE ==========
+const FORM_DRAFT_KEY = 'sd_join_draft';
+
+function saveFormState() {
+  try {
+    localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify({
+      displayName: document.getElementById('display-name').value,
+      email:       document.getElementById('email').value,
+      whatsapp:    document.getElementById('whatsapp').value,
+      tagline:     document.getElementById('tagline').value,
+      calendly:    document.getElementById('calendly').value,
+      instagram:   document.getElementById('instagram').value,
+      youtube:     document.getElementById('youtube').value,
+      tiktok:      document.getElementById('tiktok').value,
+      linkedin:    document.getElementById('linkedin').value,
+    }));
+  } catch(e) {}
+}
+
+function restoreFormState() {
+  try {
+    const raw = localStorage.getItem(FORM_DRAFT_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s.displayName) document.getElementById('display-name').value = s.displayName;
+    if (s.email)       document.getElementById('email').value       = s.email;
+    if (s.whatsapp)    document.getElementById('whatsapp').value    = s.whatsapp;
+    if (s.tagline)     document.getElementById('tagline').value     = s.tagline;
+    if (s.calendly)    document.getElementById('calendly').value    = s.calendly;
+    if (s.instagram)   document.getElementById('instagram').value   = s.instagram;
+    if (s.youtube)     document.getElementById('youtube').value     = s.youtube;
+    if (s.tiktok)      document.getElementById('tiktok').value      = s.tiktok;
+    if (s.linkedin)    document.getElementById('linkedin').value    = s.linkedin;
+  } catch(e) {}
+}
+
+function clearFormState() {
+  try { localStorage.removeItem(FORM_DRAFT_KEY); } catch(e) {}
+}
+
+// Attach save-on-input listeners to all persisted fields
+['display-name','email','whatsapp','tagline','calendly','instagram','youtube','tiktok','linkedin']
+  .forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', saveFormState);
+  });
+
+// Restore any previously saved draft on page load
+restoreFormState();
 
 // Manual RERA submission - goes to step 2 with pending status
 let isManualVerification = false;

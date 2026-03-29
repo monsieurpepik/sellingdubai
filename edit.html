@@ -1041,8 +1041,6 @@
       });
       const data = await res.json();
       if (data.url) {
-        // Store agent_id in localStorage so we can use it after redirect back
-        localStorage.setItem('sd_ig_agent_id', currentAgent.id);
         window.location.href = data.url;
       } else {
         btn.disabled = false;
@@ -1057,8 +1055,7 @@
   };
 
   async function exchangeInstagramCode(code) {
-    const agentId = currentAgent?.id || localStorage.getItem('sd_ig_agent_id');
-    if (!agentId) return;
+    if (!authToken) return;
 
     const btn = document.getElementById('btn-ig-connect');
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Finishing setup...'; }
@@ -1067,7 +1064,7 @@
       const res = await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'exchange_code', code, agent_id: agentId }),
+        body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
       });
       const data = await res.json();
       if (data.success) {
@@ -1075,7 +1072,6 @@
         document.getElementById('ig-connected').style.display = 'block';
         document.getElementById('ig-username').textContent = data.username ? `@${data.username}` : 'Connected';
         if (data.username) document.getElementById('ed-ig').value = `https://instagram.com/${data.username}`;
-        localStorage.removeItem('sd_ig_agent_id');
         const succEl = document.getElementById('save-success');
         succEl.textContent = 'Instagram connected!';
         succEl.classList.add('show');
@@ -1096,7 +1092,7 @@
       await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect', agent_id: currentAgent.id }),
+        body: JSON.stringify({ action: 'disconnect', token: authToken }),
       });
       document.getElementById('ig-disconnected').style.display = 'block';
       document.getElementById('ig-connected').style.display = 'none';
@@ -1121,7 +1117,6 @@
       });
       const data = await res.json();
       if (data.url) {
-        localStorage.setItem('sd_tt_agent_id', currentAgent.id);
         if (data.state) localStorage.setItem('sd_tt_csrf_state', data.state);
         window.location.href = data.url;
       } else {
@@ -1137,8 +1132,7 @@
   };
 
   async function exchangeTikTokCode(code) {
-    const agentId = currentAgent?.id || localStorage.getItem('sd_tt_agent_id');
-    if (!agentId) return;
+    if (!authToken) return;
 
     const btn = document.getElementById('btn-tt-connect');
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Finishing setup...'; }
@@ -1147,7 +1141,7 @@
       const res = await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'exchange_code', code, agent_id: agentId }),
+        body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
       });
       const data = await res.json();
       if (data.success) {
@@ -1156,7 +1150,6 @@
         document.getElementById('tt-username').textContent = data.username ? `@${data.username}` : 'Connected';
         if (data.url) document.getElementById('ed-tt').value = data.url;
         else if (data.username) document.getElementById('ed-tt').value = `https://tiktok.com/@${data.username}`;
-        localStorage.removeItem('sd_tt_agent_id');
         const succEl = document.getElementById('save-success');
         succEl.textContent = 'TikTok connected!';
         succEl.classList.add('show');
@@ -1177,7 +1170,7 @@
       await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect', agent_id: currentAgent.id }),
+        body: JSON.stringify({ action: 'disconnect', token: authToken }),
       });
       document.getElementById('tt-disconnected').style.display = 'block';
       document.getElementById('tt-connected').style.display = 'none';
@@ -1590,26 +1583,27 @@
   } else {
     init();
   }
-})();
 
-function copyProfileLink() {
-  const url = window._profileUrl || window.location.origin;
-  const copyFn = (navigator.clipboard && navigator.clipboard.writeText)
-    ? () => navigator.clipboard.writeText(url)
-    : () => new Promise((resolve, reject) => {
-        const ta = document.createElement('textarea');
-        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); resolve(); } catch(e) { reject(e); }
-        document.body.removeChild(ta);
-      });
-  copyFn().then(() => {
-    const btn = document.getElementById('btn-copy-link');
-    btn.classList.add('copied');
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Copied!`;
-    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Link`; }, 2000);
-  }).catch(() => {});
-}
+  function copyProfileLink() {
+    const url = window._profileUrl || window.location.origin;
+    const copyFn = (navigator.clipboard && navigator.clipboard.writeText)
+      ? () => navigator.clipboard.writeText(url)
+      : () => new Promise((resolve, reject) => {
+          const ta = document.createElement('textarea');
+          ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); resolve(); } catch(e) { reject(e); }
+          document.body.removeChild(ta);
+        });
+    copyFn().then(() => {
+      const btn = document.getElementById('btn-copy-link');
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Copied!`;
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Link`; }, 2000);
+    }).catch(() => {});
+  }
+  window.copyProfileLink = copyProfileLink;
+})();
 </script>
 </body>
 </html>

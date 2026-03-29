@@ -161,11 +161,12 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    if (!emailSent && RESEND_KEY) {
+      return json({ error: "Failed to send verification email. Please try again." }, 502, cors);
+    }
     return json({
       success: true,
-      message: emailSent
-        ? "Verification code sent to your email"
-        : "Verification code generated. Check your email (or contact support if not received).",
+      message: "Verification code sent to your email",
     }, 200, cors);
   } catch (err) {
     console.error("send-otp error:", err);

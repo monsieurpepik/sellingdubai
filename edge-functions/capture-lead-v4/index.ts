@@ -448,7 +448,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Update notification timestamp
+    // Update notification timestamp — must be inside try so errors are caught
     await supabase
       .from("leads")
       .update({ agent_notified_at: new Date().toISOString() })
