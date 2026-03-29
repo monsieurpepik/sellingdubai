@@ -51,7 +51,7 @@ Deno.serve(async (req: Request) => {
     // Verify magic link token
     const { data: link, error: linkErr } = await supabase
       .from("magic_links")
-      .select("agent_id, expires_at")
+      .select("agent_id, expires_at, used_at")
       .eq("token", token)
       .single();
 
@@ -61,6 +61,10 @@ Deno.serve(async (req: Request) => {
 
     if (new Date(link.expires_at) < new Date()) {
       return json({ error: "Session expired. Please log in again." }, 401, cors);
+    }
+
+    if (!link.used_at) {
+      return json({ error: "Session not activated. Please use the login link sent to your email." }, 401, cors);
     }
 
     // Update lead — only if it belongs to this agent

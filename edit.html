@@ -785,6 +785,10 @@
   let currentAgent = null;
   let authToken = null;
 
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   // === CHECK FOR TOKEN IN URL ===
   function init() {
     const params = new URLSearchParams(window.location.search);
@@ -913,7 +917,7 @@
 
     // Header
     if (a.photo_url) {
-      document.getElementById('edit-avatar').innerHTML = `<img src="${a.photo_url}" alt="${a.name}">`;
+      document.getElementById('edit-avatar').innerHTML = `<img src="${esc(a.photo_url)}" alt="${esc(a.name)}">`;
     } else {
       const initials = a.name.split(' ').map(n => n[0]).join('').slice(0, 2);
       document.getElementById('edit-avatar').textContent = initials;
@@ -1007,14 +1011,22 @@
     const ttCallback = params.get('tt_callback');
 
     if (oauthCode && igCallback) {
-      exchangeInstagramCode(oauthCode);
-      const cleanUrl = window.location.pathname + (window.location.search.replace(/[?&]code=[^&]+/, '').replace(/[?&]ig_callback=[^&]+/, '').replace(/^\?$/, '') || '');
+      // Validate CSRF state
+      const igReturnedState = params.get('state');
+      const igStoredState = localStorage.getItem('sd_ig_csrf_state');
+      if (!igStoredState || igReturnedState !== igStoredState) {
+        alert('Instagram authorization failed: state mismatch. Please try again.');
+      } else {
+        exchangeInstagramCode(oauthCode);
+      }
+      localStorage.removeItem('sd_ig_csrf_state');
+      const cleanUrl = window.location.pathname + (window.location.search.replace(/[?&]code=[^&]+/, '').replace(/[?&]ig_callback=[^&]+/, '').replace(/[?&]state=[^&]+/, '').replace(/^\?$/, '') || '');
       window.history.replaceState({}, '', cleanUrl.replace(/\?&/, '?').replace(/\?$/, ''));
     } else if (oauthCode && ttCallback) {
       // Validate CSRF state
       const returnedState = params.get('state');
       const storedState = localStorage.getItem('sd_tt_csrf_state');
-      if (storedState && returnedState !== storedState) {
+      if (!storedState || returnedState !== storedState) {
         alert('TikTok authorization failed: state mismatch. Please try again.');
       } else {
         exchangeTikTokCode(oauthCode);
@@ -1041,6 +1053,7 @@
       });
       const data = await res.json();
       if (data.url) {
+        if (data.state) localStorage.setItem('sd_ig_csrf_state', data.state);
         window.location.href = data.url;
       } else {
         btn.disabled = false;
@@ -1089,11 +1102,16 @@
   window.disconnectInstagram = async function() {
     if (!confirm('Disconnect Instagram?')) return;
     try {
-      await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'disconnect', token: authToken }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
+        return;
+      }
       document.getElementById('ig-disconnected').style.display = 'block';
       document.getElementById('ig-connected').style.display = 'none';
       document.getElementById('ed-ig').value = '';
@@ -1167,11 +1185,16 @@
   window.disconnectTikTok = async function() {
     if (!confirm('Disconnect TikTok?')) return;
     try {
-      await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'disconnect', token: authToken }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
+        return;
+      }
       document.getElementById('tt-disconnected').style.display = 'block';
       document.getElementById('tt-connected').style.display = 'none';
       document.getElementById('ed-tt').value = '';
@@ -1360,15 +1383,27 @@
         return;
       }
 
+      // Validate URL before using — must be a Supabase storage or Netlify CDN URL
+      const allowedUrlPrefixes = [
+        'https://pjyorgedaxevxophpfib.supabase.co/storage/',
+        '/.netlify/images?',
+      ];
+      if (!data.url || !allowedUrlPrefixes.some(p => data.url.startsWith(p))) {
+        document.getElementById(ui.prompt).classList.remove('hidden');
+        alert('Upload returned an unexpected URL. Please try again.');
+        fileInput.value = '';
+        return;
+      }
+
       // Show preview
-      document.getElementById(ui.preview).innerHTML = `<img src="${data.url}" alt="Uploaded image">`;
+      document.getElementById(ui.preview).innerHTML = `<img src="${esc(data.url)}" alt="Uploaded image">`;
       // Update hidden input
       document.getElementById(ui.input).value = data.url;
 
       // Update header avatar if it was an avatar upload
       if (imageType === 'avatar') {
         const safeName = (currentAgent.name || '').replace(/[<>"'&]/g, '');
-        document.getElementById('edit-avatar').innerHTML = `<img src="${data.url}" alt="${safeName}">`;
+        document.getElementById('edit-avatar').innerHTML = `<img src="${esc(data.url)}" alt="${safeName}">`;
       }
 
     } catch (e) {
@@ -1541,8 +1576,8 @@
             }
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.title}</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.35);">${[p.price, p.location].filter(Boolean).join(' — ') || 'No details'}</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.title)}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.35);">${[p.price, p.location].filter(Boolean).map(esc).join(' — ') || 'No details'}</div>
             <span style="display:inline-block;margin-top:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:3px 7px;border-radius:5px;${statusStyle(p.status)}">${statusLabel(p.status)}</span>
           </div>
           <button onclick="deleteProperty('${p.id}')" style="background:none;border:none;cursor:pointer;padding:8px;color:rgba(255,255,255,0.2);flex-shrink:0;" title="Remove">
@@ -1551,7 +1586,7 @@
         </div>
       `).join('');
     } catch (e) {
-      // Silent fail
+      console.error('loadProperties error:', e);
     }
   }
 

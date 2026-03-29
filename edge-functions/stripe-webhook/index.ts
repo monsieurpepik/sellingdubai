@@ -93,7 +93,11 @@ Deno.serve(async (req: Request) => {
 
   const rawBody = await req.text();
   const sigHeader = req.headers.get("stripe-signature") ?? "";
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not configured — rejecting all webhook requests.");
+    return new Response("Service misconfigured.", { status: 500 });
+  }
 
   const valid = await verifyStripeSignature(rawBody, sigHeader, webhookSecret);
   if (!valid) {

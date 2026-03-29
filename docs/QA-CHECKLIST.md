@@ -10,7 +10,7 @@ These bypass real DLD and email infrastructure. They only work when `ENABLE_TEST
 
 | What | Value | Notes |
 |------|-------|-------|
-| Test BRN | `TEST-0000` | Skips DLD registry lookup. Returns Name: `Test Agent`, Agency: `Test Agency`. |
+| Test BRN | `00000` | Skips DLD registry lookup. Returns Name: `Test Agent`, Agency: `Test Agency`. |
 | Test email | `boban@sellingdubai.com` | OTP is always `123456`. No email is sent — code is stored directly in DB. |
 
 To activate: set `ENABLE_TEST_MODE=true` in Supabase Dashboard → Edge Functions → Secrets (applies to all functions).

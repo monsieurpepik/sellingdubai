@@ -39,13 +39,17 @@ Deno.serve(async (req: Request) => {
     const now = new Date().toISOString();
     const { data: link, error: linkErr } = await supabase
       .from("magic_links")
-      .select("agent_id")
+      .select("agent_id, used_at")
       .eq("token", token)
       .gt("expires_at", now)
       .single();
 
     if (linkErr || !link) {
       return new Response(JSON.stringify({ error: "Invalid or expired session" }), { status: 401, headers: cors });
+    }
+
+    if (!link.used_at) {
+      return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), { status: 401, headers: cors });
     }
 
     const agentId = link.agent_id;

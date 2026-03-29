@@ -53,6 +53,8 @@ const ALLOWED_FIELDS = new Set([
   "facebook_pixel_id",
   "facebook_capi_token",
   "ga4_measurement_id",
+  "show_preapproval",
+  "show_golden_visa",
 ]);
 
 Deno.serve(async (req: Request) => {
