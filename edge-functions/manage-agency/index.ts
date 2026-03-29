@@ -128,7 +128,7 @@ Deno.serve(async (req: Request) => {
     if ("website" in body) updates.website = typeof body.website === "string" && body.website ? (body.website.startsWith("https://") && !body.website.match(/^https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/) ? body.website : null) : null;
     if ("description" in body) updates.description = typeof body.description === "string" ? body.description || null : null;
     if (Object.keys(updates).length === 0) return new Response(JSON.stringify({ error: "No fields to update." }), { status: 400, headers: cors });
-    const { data: updated, error: upErr } = await supabase.from("agencies").update(updates).eq("id", agencyId).select("id, slug, name, logo_url, website, description, created_at").single();
+    const { data: updated, error: upErr } = await supabase.from("agencies").update(updates).eq("id", agencyId).eq("owner_agent_id", agentId).select("id, slug, name, logo_url, website, description, created_at").single();
     if (upErr) return new Response(JSON.stringify({ error: "Update failed." }), { status: 500, headers: cors });
     return new Response(JSON.stringify({ agency: updated }), { headers: cors });
   }

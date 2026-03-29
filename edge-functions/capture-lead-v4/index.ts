@@ -355,6 +355,12 @@ Deno.serve(async (req: Request) => {
 
     // 2. Webhook (CRM integration)
     if (agent.webhook_url) {
+      // Re-validate URL at fetch time (defense-in-depth against SSRF)
+      let webhookParsed: URL | null = null;
+      try { webhookParsed = new URL(agent.webhook_url); } catch { /* skip invalid */ }
+      const isPrivate = webhookParsed ? /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(webhookParsed.hostname) : true;
+      const isSafe = webhookParsed && !isPrivate && (webhookParsed.protocol === 'https:' || webhookParsed.protocol === 'http:');
+      if (isSafe) {
       try {
         const controller = new AbortController();
         setTimeout(() => controller.abort(), 5000);
@@ -392,6 +398,7 @@ Deno.serve(async (req: Request) => {
       } catch (e) {
         console.error("Webhook failed:", e);
       }
+      } // end isSafe
     }
 
     // 3. Facebook Conversion API — Server-side Lead event
