@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
 
     if (uploadError) {
       console.error('Storage upload failed');
-      return new Response(JSON.stringify({ error: 'Upload failed: ' + uploadError.message }), {
+      return new Response(JSON.stringify({ error: 'Upload failed. Please try again.' }), {
         status: 500, headers: cors
       });
     }

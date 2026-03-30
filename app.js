@@ -1817,7 +1817,7 @@
   async function renderAgent(agent) {
     currentAgent = agent;
 
-    const DEFAULT_BG = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
+    const DEFAULT_BG = 'https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
     const bg = document.getElementById('bg');
     const bgUrl = safeUrl(agent.background_image_url) || DEFAULT_BG;
     // Double-check the URL doesn't contain CSS-breaking characters

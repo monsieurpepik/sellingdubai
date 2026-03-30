@@ -1,15 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { getCorsHeaders } from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-function json(data: unknown, status = 200) {
+function json(data: unknown, status = 200, cors: Record<string, string> = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
+    headers: { "Content-Type": "application/json", ...cors },
   });
 }
 
@@ -37,8 +33,9 @@ function sanitizeUrl(val: string | undefined | null): string | null {
 }
 
 Deno.serve(async (req: Request) => {
+  const cors = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: cors });
   }
 
   try {
@@ -51,10 +48,10 @@ Deno.serve(async (req: Request) => {
     } = body;
 
     if (!display_name || !email || !whatsapp) {
-      return json({ error: "Name, email, and WhatsApp are required." }, 400);
+      return json({ error: "Name, email, and WhatsApp are required." }, 400, cors);
     }
     if (!otp_code) {
-      return json({ error: "Verification code is required." }, 400);
+      return json({ error: "Verification code is required." }, 400, cors);
     }
 
     const cleanEmail = email.toLowerCase().trim();
@@ -76,7 +73,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (otpError || !otpRecord) {
-      return json({ error: "Invalid or expired verification code. Please request a new one." }, 400);
+      return json({ error: "Invalid or expired verification code. Please request a new one." }, 400, cors);
     }
 
     await supabase
@@ -94,7 +91,7 @@ Deno.serve(async (req: Request) => {
       return json({
         error: "An agent with this email already exists.",
         slug: existingByEmail[0].slug,
-      }, 409);
+      }, 409, cors);
     }
 
     if (broker_number) {
@@ -108,7 +105,7 @@ Deno.serve(async (req: Request) => {
         return json({
           error: "This broker number is already registered.",
           slug: existingByBrn[0].slug,
-        }, 409);
+        }, 409, cors);
       }
     }
 
@@ -187,7 +184,7 @@ Deno.serve(async (req: Request) => {
 
     if (insertError || !agent) {
       console.error("Agent insert error");
-      return json({ error: "Failed to create agent. " + (insertError?.message || "") }, 500);
+      return json({ error: "Registration failed. Please try again." }, 500, cors);
     }
 
     if (photo_base64) {
@@ -347,10 +344,10 @@ Deno.serve(async (req: Request) => {
         verification_status: agent.verification_status,
       },
       edit_token: editToken,
-    }, 201);
+    }, 201, cors);
 
   } catch (err) {
     console.error("create-agent error");
-    return json({ error: "Something went wrong. Please try again." }, 500);
+    return json({ error: "Something went wrong. Please try again." }, 500, cors);
   }
 });

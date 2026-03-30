@@ -204,7 +204,7 @@ Deno.serve(async (req: Request) => {
   const devRows = Array.from(devMap.entries()).map(([slug, d]) => ({ slug, name: d.name, logo_url: d.logo_url }));
   const { error: devErr } = await sb.from("developers").upsert(devRows, { onConflict: "slug", ignoreDuplicates: false });
   if (devErr) {
-    return new Response(JSON.stringify({ error: `Developer upsert failed: ${devErr.message}` }), {
+    return new Response(JSON.stringify({ error: 'Sync error. Check logs.' }), {
       status: 500, headers: { "Content-Type": "application/json" },
     });
   }
@@ -212,7 +212,7 @@ Deno.serve(async (req: Request) => {
   const devSlugs = devRows.map(d => d.slug);
   const { data: devRecords, error: devFetchErr } = await sb.from("developers").select("id, slug").in("slug", devSlugs);
   if (devFetchErr || !devRecords) {
-    return new Response(JSON.stringify({ error: `Developer fetch failed: ${devFetchErr?.message}` }), {
+    return new Response(JSON.stringify({ error: 'Sync error. Check logs.' }), {
       status: 500, headers: { "Content-Type": "application/json" },
     });
   }
@@ -333,7 +333,7 @@ Deno.serve(async (req: Request) => {
     const { error: projErr } = await sb.from("projects").upsert(batch, { onConflict: "rem_id", ignoreDuplicates: false });
     if (projErr) {
       return new Response(
-        JSON.stringify({ error: `Project upsert failed at batch ${offset / BATCH_SIZE + 1}: ${projErr.message}` }),
+        JSON.stringify({ error: 'Sync error. Check logs.' }),
         { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }

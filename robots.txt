@@ -5,6 +5,9 @@ Allow: /
 Sitemap: https://sellingdubai.ae/sitemap.xml
 
 # Disallow internal paths
+Disallow: /dashboard
+Disallow: /join
 Disallow: /edit
+Disallow: /agency-dashboard
 Disallow: /netlify/
 Disallow: /edge-functions/

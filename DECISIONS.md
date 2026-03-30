@@ -13,6 +13,7 @@
 **Build Pipeline**
 - Added esbuild with ESM code splitting: `init.bundle.js` (22.7KB) + lazy-loaded chunks
 - Mortgage calculator (16.2KB) only loads on first "Get Pre-Approved" click
+- `property-detail` chunk intentionally ~20.5KB (exceeds 20KB budget by <3%): contains property detail modal, gallery, and floor-plan viewer — all coupled logic that would require cross-chunk imports if split further, with no meaningful LCP impact as it only loads on user interaction
 - CSS minification via esbuild: `styles.css` → `dist/styles.min.css`
 - Netlify build runs `npm run build` automatically (CSS + JS + styles)
 - Hashed chunk filenames with 1-year immutable cache headers

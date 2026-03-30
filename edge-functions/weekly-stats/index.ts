@@ -11,23 +11,10 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-function escHtml(s: string): string {
-  if (!s) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+import { escHtml, getCorsHeaders } from "../_shared/utils.ts";
 
 Deno.serve(async (req: Request) => {
-  const CORS = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "content-type, authorization",
-    "Content-Type": "application/json",
-  };
+  const CORS = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
 
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
