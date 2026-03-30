@@ -1051,5 +1051,15 @@ function joinWaitlist(e, form) {
 })();
 </script>
 
+<!-- Platform GA4 — replace PLATFORM_GA4_ID with real Measurement ID (G-XXXXXXXXXX) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=PLATFORM_GA4_ID"></script>
+<script>
+var PLATFORM_GA4_ID = 'PLATFORM_GA4_ID';
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', PLATFORM_GA4_ID, { send_page_view: true });
+</script>
+
 </body>
 </html>
