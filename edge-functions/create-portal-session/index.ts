@@ -91,7 +91,7 @@ Deno.serve(async (req: Request) => {
 
     if (!portalRes.ok) {
       const errBody = await portalRes.json();
-      console.error("Stripe portal session creation failed:", errBody);
+      console.error("Stripe portal session creation failed");
       return new Response(JSON.stringify({ error: "Failed to open billing portal." }), { status: 502, headers: cors });
     }
 
@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ url: portalSession.url }), { status: 200, headers: cors });
   } catch (e) {
-    console.error("create-portal-session error:", e);
+    console.error("create-portal-session error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
   }
 });

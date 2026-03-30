@@ -121,7 +121,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (insertErr) {
-      console.error("Failed to insert magic link:", insertErr);
+      console.error("Failed to insert magic link");
       return new Response(
         JSON.stringify({ error: "Failed to create magic link." }),
         { status: 500, headers: cors }
@@ -178,7 +178,7 @@ Deno.serve(async (req: Request) => {
           emailOk = true;
         } else {
           const errBody = await firstRes.text();
-          console.error("Resend attempt 1 failed:", errBody);
+          console.error("Resend attempt 1 failed");
           // Retry after 600ms
           await new Promise(resolve => setTimeout(resolve, 600));
           const retryRes = await sendEmail();
@@ -186,18 +186,18 @@ Deno.serve(async (req: Request) => {
             emailOk = true;
           } else {
             const retryErr = await retryRes.text();
-            console.error("Resend attempt 2 failed:", retryErr);
+            console.error("Resend attempt 2 failed");
           }
         }
       } catch (emailErr) {
-        console.error("Email send threw:", emailErr);
+        console.error("Email send threw");
         // Retry once on network error
         try {
           await new Promise(resolve => setTimeout(resolve, 600));
           const retryRes = await sendEmail();
           if (retryRes.ok) emailOk = true;
         } catch (retryErr) {
-          console.error("Resend retry also threw:", retryErr);
+          console.error("Resend retry also threw");
         }
       }
 
@@ -214,7 +214,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("send-magic-link error:", e);
+    console.error("send-magic-link error");
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }

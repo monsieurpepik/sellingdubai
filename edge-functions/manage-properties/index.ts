@@ -56,7 +56,7 @@ async function uploadPropertyImage(
     .from("agent-images")
     .upload(fileName, bytes, { contentType, upsert: true });
   if (error) {
-    console.error("Image upload error:", error);
+    console.error("Image upload error");
     return null;
   }
   const { data } = supabase.storage.from("agent-images").getPublicUrl(fileName);
@@ -124,7 +124,7 @@ Deno.serve(async (req: Request) => {
         .order("created_at", { ascending: false });
 
       if (propsErr) {
-        console.error("list error:", propsErr);
+        console.error("list error");
         return new Response(JSON.stringify({ error: "Failed to fetch properties." }), { status: 500, headers: cors });
       }
 
@@ -206,7 +206,7 @@ Deno.serve(async (req: Request) => {
         .single();
 
       if (insertErr) {
-        console.error("add error:", insertErr);
+        console.error("add error");
         return new Response(JSON.stringify({ error: "Failed to add property." }), { status: 500, headers: cors });
       }
 
@@ -281,7 +281,7 @@ Deno.serve(async (req: Request) => {
         .single();
 
       if (updateErr) {
-        console.error("update error:", updateErr);
+        console.error("update error");
         return new Response(JSON.stringify({ error: "Failed to update property." }), { status: 500, headers: cors });
       }
 
@@ -302,7 +302,7 @@ Deno.serve(async (req: Request) => {
         .select("id");
 
       if (deleteErr) {
-        console.error("delete error:", deleteErr);
+        console.error("delete error");
         return new Response(JSON.stringify({ error: "Failed to delete property." }), { status: 500, headers: cors });
       }
       if (!deleted || deleted.length === 0) {
@@ -346,7 +346,7 @@ Deno.serve(async (req: Request) => {
 
       const reorderFailed = reorderResults.filter((r) => r.error);
       if (reorderFailed.length > 0) {
-        console.error("Reorder partial failure:", reorderFailed[0].error);
+        console.error("Reorder partial failure");
         return new Response(JSON.stringify({ error: "Reorder partially failed." }), { status: 500, headers: cors });
       }
 
@@ -355,7 +355,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ error: "Unknown action." }), { status: 400, headers: cors });
   } catch (e) {
-    console.error("manage-properties error:", e);
+    console.error("manage-properties error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
   }
 });

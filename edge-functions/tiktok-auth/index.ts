@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
       });
 
       if (vaultError) {
-        console.error('Vault store error:', vaultError);
+        console.error('Vault store error');
         return new Response(JSON.stringify({ error: 'Failed to save token securely' }), {
           status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

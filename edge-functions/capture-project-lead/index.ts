@@ -163,7 +163,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (leadErr) {
-      console.error("Lead insert error:", leadErr);
+      console.error("Lead insert error");
       return new Response(
         JSON.stringify({ error: "Failed to save inquiry" }),
         { status: 500, headers: cors }
@@ -207,7 +207,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("Unexpected error:", e);
+    console.error("Unexpected error");
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: cors }

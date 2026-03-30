@@ -251,7 +251,7 @@ Deno.serve(async (req: Request) => {
         return new Response(JSON.stringify({ error: "Agent not found." }), { status: 404, headers: cors });
       }
       // Any other error is a Supabase infrastructure failure — return 503 so callers can retry
-      console.error("[capture-lead-v4] Supabase error fetching agent:", agentErr.message);
+      console.error("[capture-lead-v4] Supabase error fetching agent");
       return new Response(JSON.stringify({ error: "Service temporarily unavailable." }), { status: 503, headers: cors });
     }
     if (!agent) {
@@ -298,7 +298,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (insertErr) {
-      console.error("Insert error:", insertErr);
+      console.error("Insert error");
       return new Response(JSON.stringify({ error: "Failed to save lead." }), { status: 500, headers: cors });
     }
 
@@ -344,10 +344,10 @@ Deno.serve(async (req: Request) => {
 
         if (!resendRes.ok) {
           const errText = await resendRes.text();
-          console.error("Resend API error:", resendRes.status, errText);
+          console.error("Resend API error");
         }
       } catch (e) {
-        console.error("Email notification failed:", e);
+        console.error("Email notification failed");
       }
     } else {
       console.warn("Email skipped — no RESEND_API_KEY or agent has no email. Agent:", agent.slug);
@@ -396,7 +396,7 @@ Deno.serve(async (req: Request) => {
           }),
         });
       } catch (e) {
-        console.error("Webhook failed:", e);
+        console.error("Webhook failed");
       }
       } // end isSafe
     }
@@ -448,10 +448,10 @@ Deno.serve(async (req: Request) => {
 
         if (!capiRes.ok) {
           const errBody = await capiRes.text();
-          console.error("FB CAPI error:", errBody);
+          console.error("FB CAPI error");
         }
       } catch (e) {
-        console.error("FB CAPI failed:", e);
+        console.error("FB CAPI failed");
       }
     }
 
@@ -470,7 +470,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("capture-lead error:", e);
+    console.error("capture-lead error");
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }

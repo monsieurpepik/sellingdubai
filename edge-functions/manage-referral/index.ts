@@ -32,7 +32,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       subject,
       html,
     }),
-  }).catch((e) => console.error("Email send failed:", e.message));
+  }).catch(() => console.error("Email send failed"));
 }
 
 // Valid state transitions
@@ -216,7 +216,7 @@ Deno.serve(async (req: Request) => {
       .eq("id", referralId);
 
     if (updateErr) {
-      console.error("Update error:", updateErr.message);
+      console.error("Update error");
       return new Response(JSON.stringify({ error: "Failed to update referral" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -284,7 +284,7 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("manage-referral error:", err.message);
+    console.error("manage-referral error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });

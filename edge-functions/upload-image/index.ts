@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (linkErr || !link) {
-      console.error('Token verification failed:', linkErr?.message || 'no matching link');
+      console.error('Token verification failed');
       return new Response(JSON.stringify({ error: 'Invalid or expired token. Please log in again.' }), {
         status: 401, headers: cors
       });
@@ -96,7 +96,7 @@ Deno.serve(async (req: Request) => {
       });
 
     if (uploadError) {
-      console.error('Storage upload failed:', uploadError.message);
+      console.error('Storage upload failed');
       return new Response(JSON.stringify({ error: 'Upload failed: ' + uploadError.message }), {
         status: 500, headers: cors
       });
@@ -123,7 +123,7 @@ Deno.serve(async (req: Request) => {
     });
 
   } catch (e) {
-    console.error('upload-image error:', e);
+    console.error('upload-image error');
     return new Response(JSON.stringify({ error: 'Server error' }), {
       status: 500, headers: getCorsHeaders(req)
     });

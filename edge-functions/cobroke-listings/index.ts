@@ -118,7 +118,7 @@ Deno.serve(async (req: Request) => {
     const { data: listings, error: queryErr } = await query;
 
     if (queryErr) {
-      console.error("Query error:", queryErr.message);
+      console.error("Query error");
       return new Response(JSON.stringify({ error: "Failed to fetch listings" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -133,7 +133,7 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("cobroke-listings error:", err.message);
+    console.error("cobroke-listings error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });

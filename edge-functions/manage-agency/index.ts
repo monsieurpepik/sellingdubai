@@ -181,7 +181,7 @@ Deno.serve(async (req: Request) => {
 
   return new Response(JSON.stringify({ error: "Unknown action." }), { status: 400, headers: cors });
   } catch (e) {
-    console.error("manage-agency error:", e);
+    console.error("manage-agency error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: corsHeaders(req) });
   }
 });

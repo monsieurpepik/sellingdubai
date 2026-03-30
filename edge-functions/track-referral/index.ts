@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (insertErr) {
-      console.error("Referral insert error:", insertErr.message);
+      console.error("Referral insert error");
       // Still return success to not break signup flow
     } else {
       console.log(`Referral tracked: ${referrer.slug} → ${referredAgentId}`);
@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("track-referral error:", err.message);
+    console.error("track-referral error");
     return new Response(JSON.stringify({ ok: true }), {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });

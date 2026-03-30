@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
       .limit(50);
 
     if (leadsErr) {
-      console.error("Query error:", leadsErr);
+      console.error("Query error");
       return new Response(
         JSON.stringify({ error: "Failed to query leads.", detail: leadsErr.message }),
         { status: 500, headers: cors }
@@ -189,7 +189,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("lead-followup-nagger error:", e);
+    console.error("lead-followup-nagger error");
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }

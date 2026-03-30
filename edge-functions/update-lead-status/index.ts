@@ -82,7 +82,7 @@ Deno.serve(async (req: Request) => {
 
     return json({ success: true, lead }, 200, cors);
   } catch (err) {
-    console.error("update-lead-status error:", err);
+    console.error("update-lead-status error");
     return json({ error: "Internal server error" }, 500, getCorsHeaders(req));
   }
 });

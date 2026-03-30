@@ -116,7 +116,7 @@ Deno.serve(async (req: Request) => {
 
       if (!customerRes.ok) {
         const errBody = await customerRes.json();
-        console.error("Stripe customer creation failed:", errBody);
+        console.error("Stripe customer creation failed");
         return new Response(JSON.stringify({ error: "Payment service is temporarily unavailable. Please try again in a moment." }), { status: 502, headers: cors });
       }
 
@@ -128,7 +128,7 @@ Deno.serve(async (req: Request) => {
         .update({ stripe_customer_id: customerId })
         .eq("id", agentId);
       if (updateErr) {
-        console.error("Failed to persist stripe_customer_id:", updateErr);
+        console.error("Failed to persist stripe_customer_id");
         return new Response(JSON.stringify({ error: "Billing setup failed. Please retry." }), { status: 500, headers: cors });
       }
     }
@@ -161,7 +161,7 @@ Deno.serve(async (req: Request) => {
 
     if (!sessionRes.ok) {
       const errBody = await sessionRes.json();
-      console.error("Stripe session creation failed:", errBody);
+      console.error("Stripe session creation failed");
       return new Response(JSON.stringify({ error: "Payment service is temporarily unavailable. Please try again in a moment." }), { status: 502, headers: cors });
     }
 
@@ -169,7 +169,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ url: session.url }), { status: 200, headers: cors });
   } catch (e) {
-    console.error("create-checkout error:", e);
+    console.error("create-checkout error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
   }
 });

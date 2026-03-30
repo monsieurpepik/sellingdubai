@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (linkErr || !link) {
-      console.error("export-leads token verification failed:", linkErr);
+      console.error("export-leads token verification failed");
       return new Response(JSON.stringify({ error: "Invalid or expired token." }), {
         status: 401, headers: { ...cors, "Content-Type": "application/json" }
       });
@@ -90,7 +90,7 @@ Deno.serve(async (req: Request) => {
       .limit(5000);
 
     if (leadsErr) {
-      console.error("export-leads fetch error:", leadsErr);
+      console.error("export-leads fetch error");
       return new Response(JSON.stringify({ error: "Failed to fetch leads." }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" }
       });
@@ -126,7 +126,7 @@ Deno.serve(async (req: Request) => {
       }
     });
   } catch (e) {
-    console.error("export-leads error:", e);
+    console.error("export-leads error");
     return new Response(JSON.stringify({ error: "Internal server error." }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" }
     });

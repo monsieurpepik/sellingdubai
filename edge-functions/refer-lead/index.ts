@@ -25,7 +25,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       subject,
       html,
     }),
-  }).catch((e) => console.error("Email send failed:", e.message));
+  }).catch(() => console.error("Email send failed"));
 }
 
 Deno.serve(async (req: Request) => {
@@ -176,7 +176,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (insertErr) {
-      console.error("Insert error:", insertErr.message);
+      console.error("Insert error");
       return new Response(JSON.stringify({ error: "Failed to create referral" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -217,7 +217,7 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("refer-lead error:", err.message);
+    console.error("refer-lead error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });

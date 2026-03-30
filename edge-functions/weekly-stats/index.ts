@@ -179,7 +179,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: CORS }
     );
   } catch (e) {
-    console.error("weekly-stats error:", e);
+    console.error("weekly-stats error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: CORS });
   }
 });

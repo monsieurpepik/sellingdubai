@@ -223,7 +223,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (appErr || !app) {
-      console.error('Application not found:', appErr);
+      console.error('Application not found');
       return new Response(JSON.stringify({ error: 'Application not found' }), { status: 404, headers: cors });
     }
 
@@ -235,7 +235,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (agentErr || !agent) {
-      console.error('Agent not found:', agentErr);
+      console.error('Agent not found');
       return new Response(JSON.stringify({ error: 'Agent not found' }), { status: 404, headers: cors });
     }
 
@@ -288,8 +288,8 @@ Deno.serve(async (req: Request) => {
               html: agentHtml,
             }),
           }).then(async (res) => {
-            if (!res.ok) console.error('Agent email error:', res.status, await res.text());
-          }).catch((e) => console.error('Agent email failed:', e))
+            if (!res.ok) console.error('Agent email error');
+          }).catch(() => console.error('Agent email failed'))
         );
       }
 
@@ -307,8 +307,8 @@ Deno.serve(async (req: Request) => {
             html: opsHtml,
           }),
         }).then(async (res) => {
-          if (!res.ok) console.error('Ops email error:', res.status, await res.text());
-        }).catch((e) => console.error('Ops email failed:', e))
+          if (!res.ok) console.error('Ops email error');
+        }).catch(() => console.error('Ops email failed'))
       );
 
       await Promise.allSettled(emailPromises);
@@ -343,7 +343,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: cors });
   } catch (e) {
-    console.error('notify-mortgage-lead error:', e);
+    console.error('notify-mortgage-lead error');
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: cors });
   }
 });

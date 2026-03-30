@@ -109,7 +109,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("verify-magic-link error:", e);
+    console.error("verify-magic-link error");
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }

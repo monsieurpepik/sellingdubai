@@ -98,13 +98,13 @@ Deno.serve(async (req: Request) => {
     });
 
     if (error) {
-      console.error("Insert event error:", error);
+      console.error("Insert event error");
       return new Response(JSON.stringify({ error: "Failed to log event" }), { status: 500, headers: CORS });
     }
 
     return new Response(JSON.stringify({ success: true }), { headers: CORS });
   } catch (e) {
-    console.error("log-event error:", e);
+    console.error("log-event error");
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: CORS });
   }
 });

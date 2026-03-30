@@ -149,7 +149,7 @@ Deno.serve(async (req: Request) => {
       referral_stats: referralStats,
     }), { headers: cors });
   } catch (e) {
-    console.error("get-analytics error:", e);
+    console.error("get-analytics error");
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: getCorsHeaders(req) });
   }
 });

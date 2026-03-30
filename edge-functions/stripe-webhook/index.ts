@@ -68,7 +68,7 @@ async function resolveAgentId(
     .single();
   if (error && error.code !== "PGRST116") {
     // PGRST116 = no rows found (expected for unknown customer); anything else is a DB error
-    console.error("[stripe-webhook] DB error resolving agent by customer ID:", error.message, "customerId:", customerId);
+    console.error("[stripe-webhook] DB error resolving agent by customer ID");
   }
   return data?.id ?? null;
 }
@@ -131,7 +131,7 @@ Deno.serve(async (req: Request) => {
         const meta = (data.metadata ?? {}) as Record<string, string>;
         const agentId = await resolveAgentId(supabase, meta, customerId);
         if (!agentId) {
-          console.error("checkout.session.completed: no agent_id found for customer", customerId);
+          console.error("checkout.session.completed: no agent_id found for customer");
           break;
         }
 
@@ -171,7 +171,7 @@ Deno.serve(async (req: Request) => {
         const meta = ((data.metadata ?? {}) as Record<string, string>);
         const agentId = await resolveAgentId(supabase, meta, customerId);
         if (!agentId) {
-          console.error("subscription.updated: no agent_id for customer", customerId);
+          console.error("subscription.updated: no agent_id for customer");
           break;
         }
 
@@ -201,7 +201,7 @@ Deno.serve(async (req: Request) => {
         const meta = ((data.metadata ?? {}) as Record<string, string>);
         const agentId = await resolveAgentId(supabase, meta, customerId);
         if (!agentId) {
-          console.error("subscription.deleted: no agent_id for customer", customerId);
+          console.error("subscription.deleted: no agent_id for customer");
           break;
         }
 
@@ -226,7 +226,7 @@ Deno.serve(async (req: Request) => {
         const meta = ((data.subscription_details as { metadata?: Record<string, string> })?.metadata ?? {});
         const agentId = await resolveAgentId(supabase, meta, customerId);
         if (!agentId) {
-          console.error("invoice.payment_succeeded: no agent_id for customer", customerId);
+          console.error("invoice.payment_succeeded: no agent_id for customer");
           break;
         }
 
@@ -269,7 +269,7 @@ Deno.serve(async (req: Request) => {
         const meta = ((data.subscription_details as { metadata?: Record<string, string> })?.metadata ?? {});
         const agentId = await resolveAgentId(supabase, meta, customerId);
         if (!agentId) {
-          console.error("invoice.payment_failed: no agent_id for customer", customerId);
+          console.error("invoice.payment_failed: no agent_id for customer");
           break;
         }
 

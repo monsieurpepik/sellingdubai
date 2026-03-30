@@ -186,7 +186,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (insertError || !agent) {
-      console.error("Agent insert error:", insertError);
+      console.error("Agent insert error");
       return json({ error: "Failed to create agent. " + (insertError?.message || "") }, 500);
     }
 
@@ -218,10 +218,10 @@ Deno.serve(async (req: Request) => {
 
           agent.photo_url = urlData.publicUrl;
         } else {
-          console.error("Photo upload error:", uploadErr);
+          console.error("Photo upload error");
         }
       } catch (photoErr) {
-        console.error("Photo processing error:", photoErr);
+        console.error("Photo processing error");
       }
     }
 
@@ -253,10 +253,10 @@ Deno.serve(async (req: Request) => {
             .update({ license_image_url: urlData.publicUrl })
             .eq("id", agent.id);
         } else {
-          console.error("RERA upload error:", reraErr);
+          console.error("RERA upload error");
         }
       } catch (reraErr) {
-        console.error("RERA processing error:", reraErr);
+        console.error("RERA processing error");
       }
     }
 
@@ -270,7 +270,7 @@ Deno.serve(async (req: Request) => {
       });
 
     if (tokenError) {
-      console.error("Magic link token error:", tokenError);
+      console.error("Magic link token error");
     }
 
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
@@ -330,9 +330,9 @@ Deno.serve(async (req: Request) => {
             subject,
             html: bodyHtml,
           }),
-        }).catch((e) => console.error("Welcome email failed:", e));
+        }).catch(() => console.error("Welcome email failed"));
       } catch (emailErr) {
-        console.error("Welcome email error:", emailErr);
+        console.error("Welcome email error");
       }
     }
 
@@ -350,7 +350,7 @@ Deno.serve(async (req: Request) => {
     }, 201);
 
   } catch (err) {
-    console.error("create-agent error:", err);
+    console.error("create-agent error");
     return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });

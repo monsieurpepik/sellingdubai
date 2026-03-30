@@ -34,7 +34,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       subject,
       html,
     }),
-  }).catch((e) => console.error("Email send failed:", e.message));
+  }).catch(() => console.error("Email send failed"));
 }
 
 const VALID_TRANSITIONS: Record<string, { from: string[]; by: "listing" | "buying" | "both" }> = {
@@ -279,7 +279,7 @@ Deno.serve(async (req: Request) => {
       .eq("id", dealId);
 
     if (updateErr) {
-      console.error("Update error:", updateErr.message);
+      console.error("Update error");
       return new Response(JSON.stringify({ error: "Failed to update deal" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -299,7 +299,7 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("manage-cobroke error:", err.message);
+    console.error("manage-cobroke error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });

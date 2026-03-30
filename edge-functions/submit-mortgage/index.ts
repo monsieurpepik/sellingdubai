@@ -110,7 +110,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (error) {
-      console.error('Insert error:', error);
+      console.error('Insert error');
       return new Response(JSON.stringify({ error: 'Failed to submit application' }), { status: 500, headers: cors });
     }
 
@@ -131,7 +131,7 @@ Deno.serve(async (req: Request) => {
       headers: cors,
     });
   } catch (e) {
-    console.error('Unexpected error:', e);
+    console.error('Unexpected error');
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: cors });
   }
 });

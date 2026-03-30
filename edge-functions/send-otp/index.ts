@@ -100,7 +100,7 @@ Deno.serve(async (req: Request) => {
       });
 
     if (insertError) {
-      console.error("OTP insert error:", insertError);
+      console.error("OTP insert error");
       return json({ error: "Failed to generate verification code" }, 500, cors);
     }
 
@@ -154,10 +154,10 @@ Deno.serve(async (req: Request) => {
           emailSent = true;
         } else {
           const resendErr = await resendRes.text();
-          console.error("Resend error (non-fatal):", resendRes.status, resendErr);
+          console.error("Resend error (non-fatal)");
         }
       } catch (emailErr) {
-        console.error("Email send failed (non-fatal):", emailErr);
+        console.error("Email send failed (non-fatal)");
       }
     }
 
@@ -169,7 +169,7 @@ Deno.serve(async (req: Request) => {
       message: "Verification code sent to your email",
     }, 200, cors);
   } catch (err) {
-    console.error("send-otp error:", err);
+    console.error("send-otp error");
     return json({ error: "Internal server error" }, 500, getCorsHeaders(req));
   }
 });
