@@ -297,9 +297,11 @@ body {
   line-height: 1.4; max-width: 300px; font-weight: 400;
   letter-spacing: -0.1px;
   animation: fadeUp var(--duration-slow) var(--ease-out-expo) var(--duration-fast) both;
-  /* Clamp to 1 line on mobile */
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
 }
 .bio-long {
   font-size: var(--text-xs); color: rgba(255,255,255,0.55); text-align: center;
