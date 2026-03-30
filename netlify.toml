@@ -31,6 +31,11 @@
   to = "/agency.html"
   status = 200
 
+[[redirects]]
+  from = "/agency-dashboard"
+  to = "/agency-dashboard.html"
+  status = 200
+
 # Security headers — all pages
 [[headers]]
   for = "/*"
