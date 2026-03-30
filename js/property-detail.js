@@ -14,6 +14,8 @@ window.openPropertyById = function(propId) {
   if (!p) return;
   currentDetailProp = p;
   renderDetailView(p);
+  const ctaBar = document.getElementById('detail-cta-bar');
+  if (ctaBar) ctaBar.style.display = '';
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
@@ -25,6 +27,8 @@ window.openPropertyDetail = function(propIndex) {
   if (!p) return;
   currentDetailProp = p;
   renderDetailView(p);
+  const ctaBar = document.getElementById('detail-cta-bar');
+  if (ctaBar) ctaBar.style.display = '';
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
@@ -32,7 +36,9 @@ window.openPropertyDetail = function(propIndex) {
 
 window.closeDetail = function() {
   document.getElementById('detail-overlay').classList.remove('open');
-  document.body.style.overflow = 'hidden'; // prop overlay is still open
+  // Keep scroll locked only if the properties overlay is still open behind this
+  const propOverlayOpen = document.getElementById('prop-overlay')?.classList.contains('open');
+  document.body.style.overflow = propOverlayOpen ? 'hidden' : '';
   currentDetailProp = null;
   if (currentAgent) history.pushState(null, '', '/a/' + currentAgent.slug);
 };

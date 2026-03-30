@@ -149,6 +149,9 @@ export async function openProjectDetail(projectSlug) {
     <div style="text-align:center;padding:80px 24px;color:rgba(255,255,255,0.4);font-size:14px;">Loading project…</div>`;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Hide property-detail's CTA bar — project detail has its own inline sticky bar
+  const ctaBar = document.getElementById('detail-cta-bar');
+  if (ctaBar) ctaBar.style.display = 'none';
 
   const { data: project, error } = await supabase
     .from('projects')
