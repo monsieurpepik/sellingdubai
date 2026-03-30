@@ -109,4 +109,22 @@ ALTER TABLE public.projects
 - Full photo gallery with swipe (from `gallery_images`)
 - Floor plan viewer (from `floor_plan_urls`)
 - Payment plan breakdown cards — booking %, construction instalments %, handover % (replaces "Contact agent" fallback)
+
+## 2026-03-30 — Lightbox, thumb filter, icon amenities in project-detail
+
+### project-detail chunk size: 20.3KB (over 20KB guideline)
+
+The lightbox implementation (inline DOM creation, touch events for swipe + pinch-zoom, render loop) adds ~4KB
+to the `project-detail` chunk (16.2KB → 20.3KB). No suitable way to split it further without adding a new
+round-trip for a feature that fires on first photo tap. Accepted as necessary — all other chunks remain under 20KB.
+
+### Brochure lead gate
+
+Clicking "Get Brochure — Free" opens the lead modal instead of direct PDF link. After submit, `window.open()`
+delivers the PDF. Popup-blocked fallback shows an inline `<a>` link in the success message.
+
+### Thumbnail filter
+
+Filters gallery URLs matching `/[/_-]thumb(nail)?[/_.-]/i` — REM API returns both full-size and thumbnail
+variants; this keeps only full-size images in the gallery and lightbox.
 - Available units table — beds, size, price, availability status (from `available_units`)

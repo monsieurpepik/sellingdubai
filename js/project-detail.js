@@ -26,6 +26,116 @@ const statusLabel = (s) =>
   : s === 'completed' ? 'Completed'
   : 'Off Plan';
 
+// Fix 2: Filter low-quality thumbnail images by URL pattern
+const isThumb = (u) => /[/_-]thumb(nail)?[/_.-]/i.test(u);
+
+// Fix 3: Map facility names to Material Symbols icon strings
+function facilityIcon(name) {
+  const n = (name || '').toLowerCase();
+  if (/pool|swim/.test(n)) return 'pool';
+  if (/gym|gymnasium|fitness/.test(n)) return 'fitness_center';
+  if (/spa|sauna|steam/.test(n)) return 'spa';
+  if (/tennis/.test(n)) return 'sports_tennis';
+  if (/basketball|sport/.test(n)) return 'sports_basketball';
+  if (/park|garden|landscap/.test(n)) return 'park';
+  if (/beach|sea|waterfront/.test(n)) return 'beach_access';
+  if (/security|guard|surveillance/.test(n)) return 'security';
+  if (/parking|garage/.test(n)) return 'local_parking';
+  if (/elevator|lift/.test(n)) return 'elevator';
+  if (/concierge|reception|lobby/.test(n)) return 'concierge';
+  if (/restaurant|dine|dining|cafe|food/.test(n)) return 'restaurant';
+  if (/retail|shop|mall|store/.test(n)) return 'shopping_bag';
+  if (/balcony|terrace/.test(n)) return 'balcony';
+  if (/pet/.test(n)) return 'pets';
+  if (/kids|child|play/.test(n)) return 'child_care';
+  if (/storage/.test(n)) return 'storage';
+  if (/smart|iot/.test(n)) return 'home_iot_device';
+  if (/cctv|camera/.test(n)) return 'videocam';
+  if (/bedroom|master/.test(n)) return 'bedroom_parent';
+  return 'check_circle';
+}
+
+// Fix 1: Full-screen lightbox
+let _lbImgs = [], _lbIdx = 0, _lbScale = 1;
+
+function _lbEnsureCreated() {
+  if (document.getElementById('proj-lb')) return;
+  const el = document.createElement('div');
+  el.id = 'proj-lb';
+  el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:none;flex-direction:column;align-items:stretch;';
+  el.innerHTML = `
+    <div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;z-index:1;background:linear-gradient(#000a,transparent);">
+      <div style="width:44px;"></div>
+      <div id="proj-lb-counter" style="color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;"></div>
+      <button onclick="closeProjLightbox()" aria-label="Close" style="width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x2715;</button>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+      <button onclick="window._lbStep(-1)" aria-label="Previous" id="proj-lb-prev" style="position:absolute;left:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x2039;</button>
+      <img id="proj-lb-img" style="max-width:100%;max-height:100%;object-fit:contain;touch-action:none;" src="" alt="">
+      <button onclick="window._lbStep(1)" aria-label="Next" id="proj-lb-next" style="position:absolute;right:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x203A;</button>
+    </div>`;
+  document.body.appendChild(el);
+  const img = el.querySelector('#proj-lb-img');
+  let _pinching = false, _pinchDist = 0, _touchStartX = 0;
+  img.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      _pinching = true;
+      _pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    } else { _touchStartX = e.touches[0].clientX; _pinching = false; }
+  }, { passive: true });
+  img.addEventListener('touchmove', (e) => {
+    if (_pinching && e.touches.length === 2) {
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      _lbScale = Math.max(1, Math.min(4, _lbScale * (dist / _pinchDist)));
+      _pinchDist = dist;
+      img.style.transform = `scale(${_lbScale})`;
+    }
+  }, { passive: true });
+  img.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) _pinching = false;
+    if (!_pinching && e.changedTouches.length === 1 && _lbScale <= 1.1) {
+      const dx = e.changedTouches[0].clientX - _touchStartX;
+      if (Math.abs(dx) > 50) window._lbStep(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+}
+
+function _lbRender() {
+  const img = document.getElementById('proj-lb-img');
+  const counter = document.getElementById('proj-lb-counter');
+  const prev = document.getElementById('proj-lb-prev');
+  const next = document.getElementById('proj-lb-next');
+  if (!img) return;
+  img.src = NETLIFY_IMG(_lbImgs[_lbIdx], 1200);
+  img.style.transform = `scale(${_lbScale})`;
+  if (counter) counter.textContent = `${_lbIdx + 1} / ${_lbImgs.length}`;
+  const multi = _lbImgs.length > 1;
+  if (prev) prev.style.display = multi ? 'flex' : 'none';
+  if (next) next.style.display = multi ? 'flex' : 'none';
+}
+
+window._lbStep = function(dir) {
+  _lbIdx = (_lbIdx + dir + _lbImgs.length) % _lbImgs.length;
+  _lbScale = 1;
+  _lbRender();
+};
+
+window.openProjLightbox = function(idx) {
+  _lbEnsureCreated();
+  _lbIdx = idx;
+  _lbScale = 1;
+  const lb = document.getElementById('proj-lb');
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  _lbRender();
+};
+
+window.closeProjLightbox = function() {
+  const lb = document.getElementById('proj-lb');
+  if (lb) lb.style.display = 'none';
+  document.body.style.overflow = '';
+};
+
 export async function openProjectDetail(projectSlug) {
   const sheet = document.getElementById('detail-sheet');
   const overlay = document.getElementById('detail-overlay');
@@ -80,6 +190,10 @@ export async function openProjectDetail(projectSlug) {
     const sitePlanUrls = new Set(cat?.general || []);
     galleryImgs = project.gallery_images.filter(u => u && u !== project.cover_image_url && !sitePlanUrls.has(u));
   }
+
+  // Fix 2: Filter thumbnail images; Fix 1: set lightbox array
+  galleryImgs = galleryImgs.filter(u => !isThumb(u));
+  _lbImgs = project.cover_image_url ? [project.cover_image_url, ...galleryImgs] : [...galleryImgs];
 
   // Site plan images (from images_categorized.general, or legacy floor_plan_urls)
   const sitePlanImgs = cat?.general?.filter(Boolean).length
@@ -150,8 +264,8 @@ export async function openProjectDetail(projectSlug) {
     ${imgSrc || galleryImgs.length ? `
     <div style="position:relative;flex-shrink:0;">
       <div id="proj-gallery" style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
-        ${galleryImgs.map((u, i) => `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;" loading="lazy" onerror="handleImgError(this)"></div>`).join('')}
+        ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(0)"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
+        ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(${lbIdx})"><img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" onerror="handleImgError(this)"></div>`; }).join('')}
       </div>
       ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
     </div>` : ''}
@@ -240,9 +354,9 @@ export async function openProjectDetail(projectSlug) {
         <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">Amenities</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           ${facilities.map(f => `
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px;">
-            ${f.image ? `<img src="${escAttr(NETLIFY_IMG(f.image, 80))}" alt="${escAttr(f.name)}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:rgba(255,255,255,0.06);flex-shrink:0;" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.06)';this.style.display='none'">` : `<div style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.06);flex-shrink:0;"></div>`}
-            <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.8);line-height:1.3;">${escHtml(f.name)}</div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 10px;text-align:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:32px;color:#1127D2;line-height:1;">${escHtml(facilityIcon(f.name))}</span>
+            <div style="font-size:11px;color:rgba(255,255,255,0.8);line-height:1.3;">${escHtml(f.name)}</div>
           </div>`).join('')}
         </div>
       </div>` : ''}
