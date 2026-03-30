@@ -292,7 +292,11 @@ export async function renderAgent(agent) {
   ).join('');
 
   // === TRACKING SCRIPTS (Pro/Premium only) ===
-  const safeFbPixel = isPaidTier(agent) ? safeTrackingId(agent.facebook_pixel_id) : null;
+  // Respect cookie consent — skip tracking if the visitor rejected analytics
+  const _cookieConsent = (() => { try { return localStorage.getItem('sd_cookie_consent'); } catch(e) { return null; } })();
+  const _trackingAllowed = _cookieConsent !== 'reject';
+
+  const safeFbPixel = isPaidTier(agent) && _trackingAllowed ? safeTrackingId(agent.facebook_pixel_id) : null;
   if (safeFbPixel) {
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
@@ -302,8 +306,9 @@ export async function renderAgent(agent) {
     fbq('init', safeFbPixel);
     fbq('track', 'PageView');
   }
-  const safeGaId = isPaidTier(agent) ? safeTrackingId(agent.ga4_measurement_id) : null;
+  const safeGaId = isPaidTier(agent) && _trackingAllowed ? safeTrackingId(agent.ga4_measurement_id) : null;
   if (safeGaId) {
+    window.__sd_ga_id = safeGaId; // expose so cookie consent opt-out can disable the correct property
     const gaScript = document.createElement('script');
     gaScript.async = true;
     gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${safeGaId}`;
