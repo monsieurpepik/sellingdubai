@@ -143,9 +143,6 @@ export async function openProjectDetail(projectSlug) {
 
   // Show loading state
   sheet.innerHTML = `
-    <button class="detail-back" onclick="closeDetail()" aria-label="Close">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-    </button>
     <div style="text-align:center;padding:80px 24px;color:rgba(255,255,255,0.4);font-size:14px;">Loading project…</div>`;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -167,9 +164,6 @@ export async function openProjectDetail(projectSlug) {
 
   if (error || !project) {
     sheet.innerHTML = `
-      <button class="detail-back" onclick="closeDetail()" aria-label="Close">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      </button>
       <div style="text-align:center;padding:80px 24px;color:rgba(255,255,255,0.4);font-size:14px;">Project not found.</div>`;
     return;
   }
@@ -266,10 +260,6 @@ export async function openProjectDetail(projectSlug) {
     : null;
 
   sheet.innerHTML = `
-    <button class="detail-back" onclick="closeDetail()" aria-label="Close">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-    </button>
-
     ${imgSrc || galleryImgs.length ? `
     <div style="position:relative;flex-shrink:0;">
       <div id="proj-gallery" style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
@@ -394,7 +384,7 @@ export async function openProjectDetail(projectSlug) {
       <!-- Brochure download (gate behind lead capture) -->
       ${project.brochure_url ? `
       <div style="margin-bottom:20px;">
-        <button data-brochure="${escAttr(project.brochure_url)}" onclick="openLeadForBrochure('${escAttr(project.name)}', this.dataset.brochure)" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-sizing:border-box;">
+        <button data-brochure="${escAttr(project.brochure_url)}" data-name="${escAttr(project.name)}" onclick="openLeadForBrochure(this.dataset.name, this.dataset.brochure)" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-sizing:border-box;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Get Brochure — Free
         </button>
@@ -403,7 +393,7 @@ export async function openProjectDetail(projectSlug) {
     </div>
 
     <div style="display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
-      <button onclick="openLead('${escAttr(project.name)}')" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
+      <button data-name="${escAttr(project.name)}" onclick="openLead(this.dataset.name)" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
       ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
     </div>`;
 

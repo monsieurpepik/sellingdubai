@@ -6,6 +6,13 @@ import { getAgentSlug } from './utils.js';
 import { trackPageView } from './analytics.js';
 import { showPage, renderAgent, injectSchemaOrg, hydrateOgMeta, showEditButtonIfOwner } from './agent-page.js';
 
+// closeDetail stub — available immediately, before property-detail.js lazy-loads.
+// property-detail.js replaces this with its full implementation when it loads.
+window.closeDetail = function() {
+  document.getElementById('detail-overlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+};
+
 // Lazy-load helpers — modules load on first user interaction, not on init
 let _gallery, _propDetail, _leadModal, _filters;
 
