@@ -70,3 +70,32 @@ Intentional through 2026-04-05 (billing launch date). Once billing opens, update
 - Write Deno tests for remaining edge functions (verify-magic-link, update-agent, whatsapp-ingest)
 - Consider dark/light theme toggle using the token system
 - Fix the stray `}` CSS syntax warnings (lines 587, 2386)
+
+## 2026-03-30 — REM Off-Plan: Gallery + Floor Plans via Detail Endpoint
+
+### Decision
+
+Update `sync-rem-offplan` (Supabase Edge Function) to call the REM detail endpoint for each project and store two new fields on `public.projects`:
+
+- `gallery_images JSONB` — array of image URLs from the project detail response
+- `floor_plan_urls TEXT[]` — array of floor plan image URLs
+
+### Why
+
+The current sync only hits the REM list endpoint, which returns summary data (cover image only). The detail endpoint returns the full image gallery and floor plans per project. Without fetching the detail endpoint per project, `project-detail.js` can only show one hero image. Storing these in the DB (rather than fetching at runtime) keeps the detail page fast and avoids CORS issues with the REM API from the browser.
+
+### Schema change required
+
+```sql
+ALTER TABLE public.projects
+  ADD COLUMN IF NOT EXISTS gallery_images JSONB,
+  ADD COLUMN IF NOT EXISTS floor_plan_urls TEXT[];
+```
+
+Apply in Supabase SQL editor before deploying the updated Edge Function.
+
+### What this unlocks
+
+- `project-detail.js` can render a scrollable image gallery from `gallery_images`
+- Floor plans can be shown as a separate section below the description
+- No changes needed to the Supabase query in `project-detail.js` — just add the two columns to the SELECT
