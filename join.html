@@ -39,7 +39,7 @@
   /* Background — same Dubai image + overlay as agent profiles */
   .bg {
     position: fixed; inset: 0; z-index: 0;
-    background-image: url('/dubai-skyline.jpg');
+    background-image: url('/.netlify/images?url=/dubai-skyline.jpg&w=1600&fm=webp&q=80');
     background-size: cover; background-position: center top;
   }
   .bg::after {
@@ -264,7 +264,7 @@
   }
   .preview-bg {
     height: 120px;
-    background-image: url('/dubai-skyline.jpg');
+    background-image: url('/.netlify/images?url=/dubai-skyline.jpg&w=800&fm=webp&q=80');
     background-size: cover; background-position: center;
     position: relative;
   }
@@ -1039,7 +1039,7 @@ const bgEl = document.getElementById('bg');
 const bgImg = new Image();
 bgImg.onload = function() { /* image loaded fine */ };
 bgImg.onerror = function() { bgEl.classList.add('bg-fallback'); };
-bgImg.src = '/dubai-skyline.jpg';
+bgImg.src = '/.netlify/images?url=/dubai-skyline.jpg&w=1600&fm=webp&q=80';
 
 function networkErrorMsg() {
   return navigator.onLine

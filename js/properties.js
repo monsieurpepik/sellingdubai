@@ -97,7 +97,7 @@ export async function loadProperties(agentId) {
     .neq('is_active', false)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
-    .limit(20);
+    .limit(50);
   if (error) {
     console.error('[properties] Failed to load properties:', error.message);
     return [];
@@ -142,7 +142,7 @@ export function renderPropertyCard(p, idx) {
     </div>`;
   } else if (allImages.length === 1) {
     imgSection = `<div class="prop-img-wrap">
-      <img class="prop-img" src="${escAttr(optimizeImg(allImages[0]))}" alt="${safeTitle}" width="800" height="450" loading="lazy" onload="this.classList.add('loaded')" onerror="handleImgError(this)">
+      <img class="prop-img" src="${escAttr(optimizeImg(allImages[0]))}" alt="${safeTitle}" width="800" height="450" loading="${idx === 0 ? 'eager' : 'lazy'}" onload="this.classList.add('loaded')" onerror="handleImgError(this)">
       ${heartBtn}
       <span class="prop-status ${st.css}">${escHtml(st.label)}</span>
     </div>`;
@@ -484,6 +484,12 @@ function renderRemProjectCard(p, devName) {
 // ==========================================
 export async function loadRemProjects(agentSlug, agentId) {
   try {
+    // Show skeleton placeholder while fetching
+    const sectionEl = document.getElementById('rem-projects');
+    if (sectionEl) {
+      sectionEl.innerHTML = `<div class="rem-projects-section"><div class="rem-section-heading">Off-Plan Projects</div><div class="offplan-wrap" style="min-height:220px;"><div class="offplan-carousel"><div class="offplan-track">${renderSkeletonCards(3)}</div></div></div></div>`;
+    }
+
     let projects = [];
 
     if (agentSlug === 'boban-pepic') {
