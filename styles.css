@@ -710,6 +710,9 @@ div[style*="display:flex"] > .modal-btn { width: auto; }
 }
 
 /* REM Projects section (profile page) */
+#rem-projects { width: 100%; }
+.offplan-wrap { width: 100%; }
+.rem-projects-section .offplan-dots { display: flex; }
 .rem-projects-section {
   padding: 16px 0 4px;
 }

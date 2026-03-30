@@ -35,6 +35,12 @@ window.openMortgage = async function openMortgageLazy() {
   }
 };
 
+// project-detail.js is lazy-loaded on first openProjectDetail() call
+window.openProjectDetail = async function(slug) {
+  const m = await import('./project-detail.js');
+  m.openProjectDetail(slug);
+};
+
 // ==========================================
 // KEYBOARD NAVIGATION
 // ==========================================
