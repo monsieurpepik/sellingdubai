@@ -488,7 +488,7 @@ window.searchAgent = async function() {
     ).join('');
   } else {
     resultsEl.style.display = 'block';
-    resultsEl.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:13px;text-align:center;padding:8px;">No agents found — try another name</p>';
+    resultsEl.innerHTML = '<p style="color:rgba(255,255,255,0.55);font-size:13px;text-align:center;padding:8px;">No agents found — try another name</p>';
   }
 };
 
@@ -528,11 +528,11 @@ async function loadRemOffplanProjects() {
           <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">${escHtml(badge)}</span>
         </div>
         <div style="font-weight:700;font-size:15px;margin-bottom:3px;">${escHtml(p.name)}</div>
-        ${devName ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px;">${devName}</div>` : ''}
-        ${loc ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;">📍 ${loc}</div>` : ''}
+        ${devName ? `<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:4px;">${devName}</div>` : ''}
+        ${loc ? `<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:6px;">📍 ${loc}</div>` : ''}
         ${priceStr ? `<div style="font-size:13px;font-weight:600;margin-bottom:4px;">${priceStr}</div>` : ''}
-        ${types ? `<div style="font-size:11px;color:rgba(255,255,255,0.4);">${types}</div>` : ''}
-        ${completion ? `<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">Completion: ${completion}</div>` : ''}
+        ${types ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);">${types}</div>` : ''}
+        ${completion ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:4px;">Completion: ${completion}</div>` : ''}
       </div>
     </a>`;
   }).join('');
