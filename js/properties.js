@@ -498,12 +498,13 @@ export async function loadRemProjects(agentSlug, agentId) {
         'emaar', 'sobha', 'omniyat', 'nakheel', 'ellington',
         'meraas', 'damac', 'binghatti', 'aldar', 'dubai properties'
       ];
-      const { data } = await supabase
+      const { data, error: remErr } = await supabase
         .from('projects')
         .select('id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, developers!projects_developer_id_fkey(name)')
-        .not('status', 'in', '("completed","sold_out")')
+        .not('status', 'in', '(completed,sold_out)')
         .order('min_price', { ascending: false, nullsFirst: false })
         .limit(100);
+      if (remErr) console.error('[rem-projects] query error', remErr);
       const all = data || [];
       const isPriority = p =>
         PRIORITY_DEVS.some(d => (p.developers?.name || '').toLowerCase().includes(d));
@@ -521,7 +522,11 @@ export async function loadRemProjects(agentSlug, agentId) {
       projects = (data || []).map(row => row.projects).filter(Boolean);
     }
 
-    if (!projects.length) return;
+    if (!projects.length) {
+      const sEl = document.getElementById('rem-projects');
+      if (sEl) sEl.innerHTML = '';
+      return;
+    }
 
     const cards = projects.map(p => {
       const devName = p.developers?.name || '';
