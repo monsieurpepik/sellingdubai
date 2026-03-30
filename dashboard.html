@@ -916,7 +916,7 @@
       const res = await fetch(MAGIC_LINK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, destination: '/dashboard' })
       });
       btn.disabled = false;
       btn.textContent = 'Send Magic Link';

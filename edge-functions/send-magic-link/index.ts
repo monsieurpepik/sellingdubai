@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
-    const { email } = await req.json();
+    const { email, destination } = await req.json();
 
     if (!email || typeof email !== "string") {
       return new Response(JSON.stringify({ error: "Email is required." }), {
@@ -104,12 +104,14 @@ Deno.serve(async (req: Request) => {
     // Store token — expires in 15 minutes
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-    // Delete any existing unused tokens for this agent (cleanup)
+    // Delete unused tokens older than 24 hours (preserve recent signup tokens)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     await supabase
       .from("magic_links")
       .delete()
       .eq("agent_id", agent.id)
-      .is("used_at", null);
+      .is("used_at", null)
+      .lt("created_at", twentyFourHoursAgo);
 
     // Insert new token
     const { error: insertErr } = await supabase.from("magic_links").insert({
@@ -126,8 +128,11 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Build magic link URL
-    const editUrl = `https://agents.sellingdubai.ae/edit?token=${token}`;
+    // Build magic link URL — destination defaults to /dashboard
+    const allowedDests = ['/edit', '/dashboard'];
+    const dest = typeof destination === 'string' && allowedDests.includes(destination) ? destination : '/dashboard';
+    const loginUrl = `https://sellingdubai.ae${dest}?token=${token}`;
+    const buttonText = dest === '/dashboard' ? 'Go to My Dashboard' : 'Edit My Profile';
 
     // Send email via Resend (with 1 retry on failure)
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
@@ -146,8 +151,8 @@ Deno.serve(async (req: Request) => {
               Click the button below to sign in and edit your SellingDubai profile. This link expires in 15 minutes.
             </p>
             <div style="text-align:center;margin-bottom:32px;">
-              <a href="${editUrl}" style="display:inline-block;background:#25d366;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">
-                Edit My Profile
+              <a href="${loginUrl}" style="display:inline-block;background:#25d366;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">
+                ${buttonText}
               </a>
             </div>
             <p style="font-size:13px;color:#999;line-height:1.5;">

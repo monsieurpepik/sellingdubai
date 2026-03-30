@@ -1,7 +1,7 @@
 // ==========================================
 // APP INITIALIZATION
 // ==========================================
-import { supabase } from './config.js';
+import { supabase, SUPABASE_URL } from './config.js';
 import { getAgentSlug } from './utils.js';
 import { trackPageView } from './analytics.js';
 import { showPage, renderAgent, injectSchemaOrg, hydrateOgMeta, showEditButtonIfOwner } from './agent-page.js';
@@ -96,9 +96,29 @@ async function init() {
     if (error || !agent) { showPage('error'); return; }
 
     if (agent.verification_status !== 'verified') {
-      document.getElementById('pending-agent-name').textContent = agent.name || 'This agent';
-      showPage('pending');
-      return;
+      // Check if the viewer is the profile owner — owners see their own profile with a banner
+      const ownerToken = localStorage.getItem('sd_edit_token');
+      let isOwner = false;
+      if (ownerToken) {
+        try {
+          const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: ownerToken })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.agent && data.agent.id === agent.id) isOwner = true;
+          }
+        } catch (_e) { /* silently fail — not critical */ }
+      }
+      if (!isOwner) {
+        document.getElementById('pending-agent-name').textContent = agent.name || 'This agent';
+        showPage('pending');
+        return;
+      }
+      // Owner viewing their own pending profile — show banner, continue to render
+      document.getElementById('verification-pending-banner').classList.remove('hidden');
     }
 
     renderAgent(agent);
