@@ -8,7 +8,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const PLATFORM_OPS_EMAIL = 'bobanpepic@gmail.com';
+const PLATFORM_OPS_EMAIL = Deno.env.get('PLATFORM_OPS_EMAIL') || 'bobanpepic@gmail.com';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -186,6 +186,13 @@ function buildOpsEmailHtml(
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req);
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+  // Internal-only endpoint — called by submit-mortgage with service role key
+  const incomingAuth = req.headers.get('authorization') || '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  if (!serviceKey || incomingAuth !== `Bearer ${serviceKey}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: cors });
+  }
 
   try {
     const body = await req.json();

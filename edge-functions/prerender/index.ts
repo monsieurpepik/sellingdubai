@@ -191,7 +191,7 @@ function renderAgentPage(agent: any, properties: any[]): string {
   <footer>
     <p><a href="${SITE_URL}">SellingDubai</a> \u2014 PropTeFi Tech Limited, DIFC, Dubai</p>
   </footer>
-  <script>window.location.href='${pageUrl}';</script>
+  <script>window.location.href=${JSON.stringify(pageUrl)};</script>
 </body>
 </html>`;
 }

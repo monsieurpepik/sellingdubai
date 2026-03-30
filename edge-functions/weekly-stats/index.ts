@@ -39,8 +39,11 @@ Deno.serve(async (req: Request) => {
     const authHeader = req.headers.get("authorization") || "";
     const cronHeader = req.headers.get("x-cron-secret") || "";
 
+    if (!cronSecret) {
+      return new Response(JSON.stringify({ error: "CRON_SECRET not configured." }), { status: 401, headers: CORS });
+    }
+
     const isAuthorized =
-      !cronSecret ||
       querySecret === cronSecret ||
       authHeader === `Bearer ${cronSecret}` ||
       cronHeader === cronSecret;

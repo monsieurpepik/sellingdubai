@@ -1,21 +1,36 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.sellingdubai.ae",
+  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
+  "https://sellingdubai-agents.netlify.app",
+];
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Content-Type": "application/json",
+  };
+}
 
 Deno.serve(async (req: Request) => {
+  const cors = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    return new Response(null, { status: 204, headers: cors });
   }
 
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: cors,
     });
   }
 
@@ -42,28 +57,25 @@ Deno.serve(async (req: Request) => {
     if (!project_slug) {
       return new Response(JSON.stringify({ error: "Project is required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: cors,
       });
     }
     if (!agent_slug) {
       return new Response(JSON.stringify({ error: "Agent is required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: cors,
       });
     }
     if (!name || name.trim().length < 2) {
       return new Response(JSON.stringify({ error: "Name is required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: cors,
       });
     }
     if (!phone && !email) {
       return new Response(
         JSON.stringify({ error: "Phone or email is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 400, headers: cors }
       );
     }
 
@@ -84,7 +96,7 @@ Deno.serve(async (req: Request) => {
     if (projErr || !project) {
       return new Response(JSON.stringify({ error: "Project not found or inactive" }), {
         status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: cors,
       });
     }
 
@@ -99,7 +111,7 @@ Deno.serve(async (req: Request) => {
     if (agentErr || !agent) {
       return new Response(JSON.stringify({ error: "Agent not found" }), {
         status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: cors,
       });
     }
 
@@ -130,10 +142,7 @@ Deno.serve(async (req: Request) => {
       console.error("Lead insert error:", leadErr);
       return new Response(
         JSON.stringify({ error: "Failed to save inquiry" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 500, headers: cors }
       );
     }
 
@@ -152,14 +161,14 @@ Deno.serve(async (req: Request) => {
         .eq("id", assignment.id);
     }
 
-    // Generate WhatsApp deep link for agent follow-up
+    // Generate WhatsApp deep link — opens agent's WhatsApp pre-filled with buyer context
     let wa_lead_link = null;
     if (agent.whatsapp) {
       const waNum = agent.whatsapp.replace(/[^0-9]/g, "");
       const waMsg = encodeURIComponent(
         `Hi ${name}, thanks for your interest in ${project.project_name} by ${project.developer_name}! I'm ${agent.name} from SellingDubai. How can I help you?`
       );
-      wa_lead_link = `https://wa.me/${phone?.replace(/[^0-9]/g, "")}?text=${waMsg}`;
+      wa_lead_link = `https://wa.me/${waNum}?text=${waMsg}`;
     }
 
     return new Response(
@@ -171,19 +180,13 @@ Deno.serve(async (req: Request) => {
         agent_name: agent.name,
         wa_lead_link,
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: cors }
     );
   } catch (e) {
     console.error("Unexpected error:", e);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: cors }
     );
   }
 });

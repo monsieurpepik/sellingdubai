@@ -1,18 +1,32 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+const ALLOWED_ORIGINS = [
+  "https://www.sellingdubai.ae",
+  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
+  "https://sellingdubai-agents.netlify.app",
+];
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json',
+  };
+}
 
 Deno.serve(async (req: Request) => {
+  const cors = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: cors });
   }
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: cors });
   }
 
   try {
@@ -21,7 +35,7 @@ Deno.serve(async (req: Request) => {
     // Validate required fields
     const { buyer_name, buyer_phone, buyer_email } = body;
     if (!buyer_name || (!buyer_phone && !buyer_email)) {
-      return new Response(JSON.stringify({ error: 'Name and at least phone or email required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Name and at least phone or email required' }), { status: 400, headers: cors });
     }
 
     // Validate enums
@@ -29,10 +43,10 @@ Deno.serve(async (req: Request) => {
     const validResidency = ['uae_national', 'uae_resident', 'non_resident'];
 
     if (body.employment_type && !validEmployment.includes(body.employment_type)) {
-      return new Response(JSON.stringify({ error: 'Invalid employment type' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Invalid employment type' }), { status: 400, headers: cors });
     }
     if (body.residency_status && !validResidency.includes(body.residency_status)) {
-      return new Response(JSON.stringify({ error: 'Invalid residency status' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Invalid residency status' }), { status: 400, headers: cors });
     }
 
     // Build insert payload — only include known columns
@@ -73,7 +87,7 @@ Deno.serve(async (req: Request) => {
 
     if (error) {
       console.error('Insert error:', error);
-      return new Response(JSON.stringify({ error: 'Failed to submit application' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Failed to submit application' }), { status: 500, headers: cors });
     }
 
     // Fire-and-forget: notify agent
@@ -90,10 +104,10 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ id: data.id }), {
       status: 201,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: cors,
     });
   } catch (e) {
     console.error('Unexpected error:', e);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: cors });
   }
 });
