@@ -18,6 +18,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
+interface AgentRef { id: string; name: string; slug: string; email: string; }
+interface PropertyRef { id: string; title: string; location: string; price: string; }
+
 const CORS_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.ae",
@@ -172,9 +175,9 @@ Deno.serve(async (req: Request) => {
 
     const now = new Date().toISOString();
     const update: Record<string, any> = { updated_at: now };
-    const listingAgent = deal.listing_agent as any;
-    const buyingAgent = deal.buying_agent as any;
-    const property = deal.property as any;
+    const listingAgent = deal.listing_agent as AgentRef;
+    const buyingAgent = deal.buying_agent as AgentRef;
+    const property = deal.property as PropertyRef;
 
     switch (action) {
       case "accept":

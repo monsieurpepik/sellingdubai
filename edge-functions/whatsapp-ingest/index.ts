@@ -180,7 +180,6 @@ Rules:
     });
 
     if (!res.ok) {
-      console.error("Claude API error:", res.status, await res.text());
       return null;
     }
 
@@ -197,8 +196,7 @@ Rules:
       igCaption: result.igCaption || "",
       tiktokCaption: result.tiktokCaption || "",
     };
-  } catch (e) {
-    console.error("Claude generation error:", e);
+  } catch (_e) {
     return null;
   }
 }
@@ -320,13 +318,9 @@ async function generatePropertyPDF(
           propertyImage = ct.includes("png") || property.image_url.toLowerCase().endsWith(".png")
             ? await pdfDoc.embedPng(imgBytes)
             : await pdfDoc.embedJpg(imgBytes);
-        } catch (e) {
-          console.error("Property image embed error:", e);
-        }
+        } catch (_e) { /* embed failed — skip image */ }
       }
-    } catch (e) {
-      console.error("Property image fetch error:", e);
-    }
+    } catch (_e) { /* fetch failed — skip image */ }
   }
 
   if (propertyImage) {
@@ -449,9 +443,7 @@ async function generatePropertyPDF(
         const qrImage = await pdfDoc.embedPng(qrBytes);
         page.drawImage(qrImage, { x: W - pad - 72, y: curY - 56, width: 72, height: 72 });
       }
-    } catch (e) {
-      console.error("QR code error:", e);
-    }
+    } catch (_e) { /* QR code failed — skip */ }
   }
 
   // ── Footer band (y=0–152) ──
@@ -474,13 +466,9 @@ async function generatePropertyPDF(
           agentPhotoImage = ct.includes("png") || agent.photo_url.toLowerCase().endsWith(".png")
             ? await pdfDoc.embedPng(photoBytes)
             : await pdfDoc.embedJpg(photoBytes);
-        } catch (e) {
-          console.error("Agent photo embed error:", e);
-        }
+        } catch (_e) { /* embed failed — skip photo */ }
       }
-    } catch (e) {
-      console.error("Agent photo fetch error:", e);
-    }
+    } catch (_e) { /* fetch failed — skip photo */ }
   }
 
   if (agentPhotoImage) {
@@ -538,7 +526,6 @@ async function uploadPDFToWhatsApp(pdfBytes: Uint8Array, filename: string): Prom
   });
 
   if (!res.ok) {
-    console.error("WA media upload error:", res.status, await res.text());
     return null;
   }
 
@@ -562,9 +549,7 @@ async function sendWhatsAppDocument(to: string, mediaId: string, filename: strin
         document: { id: mediaId, filename, caption },
       }),
     });
-  } catch (e) {
-    console.error("WA document send error:", e);
-  }
+  } catch (_e) { /* send failed silently */ }
 }
 
 async function handleShareCommand(
@@ -633,8 +618,7 @@ async function handleShareCommand(
     const priceStr = matchedProp.price ? ` | ${formatPriceForPDF(matchedProp.price)}` : "";
     const caption = `${matchedProp.title}${priceStr} | sellingdubai.ae/a/${agentSlug}`;
     await sendWhatsAppDocument(senderPhone, mediaId, filename, caption);
-  } catch (e) {
-    console.error("PDF generation error:", e);
+  } catch (_e) {
     await sendWhatsAppReply(senderPhone, "Failed to generate brochure. Please try again.");
   }
 }
@@ -653,9 +637,7 @@ async function sendWhatsAppReply(to: string, text: string) {
       headers: { Authorization: `Bearer ${WA_TOKEN}`, "Content-Type": "application/json" },
       body: JSON.stringify({ messaging_product: "whatsapp", to, type: "text", text: { body: text } }),
     });
-  } catch (e) {
-    console.error("WhatsApp reply error:", e);
-  }
+  } catch (_e) { /* reply failed silently */ }
 }
 
 async function downloadAndUploadImage(supabase: ReturnType<typeof createClient>, mediaId: string, agentSlug: string): Promise<string | null> {
@@ -665,12 +647,12 @@ async function downloadAndUploadImage(supabase: ReturnType<typeof createClient>,
   const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${mediaId}`, {
     headers: { Authorization: `Bearer ${WA_TOKEN}` }
   });
-  if (!mediaRes.ok) { console.error("Media metadata fetch failed:", mediaRes.status); return null; }
+  if (!mediaRes.ok) { return null; }
   const mediaData = await mediaRes.json();
   if (!mediaData.url) return null;
 
   const imgRes = await fetch(mediaData.url, { headers: { Authorization: `Bearer ${WA_TOKEN}` } });
-  if (!imgRes.ok) { console.error("Image download failed:", imgRes.status); return null; }
+  if (!imgRes.ok) { return null; }
   const imgBytes = new Uint8Array(await imgRes.arrayBuffer());
   const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
   const ext = contentType.includes('png') ? 'png' : 'jpg';
@@ -680,7 +662,7 @@ async function downloadAndUploadImage(supabase: ReturnType<typeof createClient>,
     .from('agent-images')
     .upload(fileName, imgBytes, { contentType, upsert: true });
 
-  if (uploadErr) { console.error("Storage upload error:", uploadErr); return null; }
+  if (uploadErr) { return null; }
 
   const { data: urlData } = supabase.storage.from('agent-images').getPublicUrl(fileName);
   return urlData.publicUrl;
@@ -732,7 +714,6 @@ Return JSON like: {"action":"get_stats"} or {"action":"share_property","query":"
     });
 
     if (!res.ok) {
-      console.error("Intent detection error:", res.status);
       return { action: "unknown" };
     }
 
@@ -746,8 +727,7 @@ Return JSON like: {"action":"get_stats"} or {"action":"share_property","query":"
     if (action === "update_status") return { action, query: parsed.query || "", status: parsed.status || "available" };
     if (["get_leads", "get_stats", "get_help", "add_property", "unknown"].includes(action)) return { action } as IntentResult;
     return { action: "unknown" };
-  } catch (e) {
-    console.error("Intent parse error:", e);
+  } catch (_e) {
     return { action: "unknown" };
   }
 }
@@ -990,7 +970,7 @@ Deno.serve(async (req: Request) => {
       let imageUrl: string | null = null;
       if (imageId) {
         try { imageUrl = await downloadAndUploadImage(supabase, imageId, agent.slug); }
-        catch (e) { console.error("Image download error:", e); }
+        catch (_e) { /* image upload failed — proceed without image */ }
       }
 
       // Send "processing" message immediately so agent knows we got it
@@ -1057,7 +1037,6 @@ Deno.serve(async (req: Request) => {
         .single();
 
       if (propErr) {
-        console.error("Property insert error:", propErr);
         await sendWhatsAppReply(senderPhone, "Sorry, there was an error listing your property. Try again.");
         return new Response(JSON.stringify({ success: true }), { headers: CORS });
       }
@@ -1234,8 +1213,7 @@ Deno.serve(async (req: Request) => {
     }
 
     return new Response(JSON.stringify({ success: true }), { headers: CORS });
-  } catch (e) {
-    console.error("whatsapp-ingest error:", e);
+  } catch (_e) {
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: CORS });
   }
 });

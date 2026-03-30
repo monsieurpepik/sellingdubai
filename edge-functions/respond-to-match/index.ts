@@ -17,6 +17,10 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
+interface AgentRef { id: string; name: string; slug: string; email: string; phone?: string; whatsapp?: string; agency_name?: string; dld_verified?: boolean; }
+interface PropertyRef { id: string; title: string; location: string; price: string; cobroke_commission_split?: number; }
+interface BuyerRequest { id: string; buyer_name?: string; buyer_phone?: string; buyer_nationality?: string; buyer_timeline?: string; additional_notes?: string; }
+
 const CORS_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.ae",
@@ -154,10 +158,10 @@ Deno.serve(async (req: Request) => {
     }
 
     const now = new Date().toISOString();
-    const listingAgent = match.listing_agent as any;
-    const buyingAgent = match.buying_agent as any;
-    const property = match.property as any;
-    const buyerReq = match.buyer_request as any;
+    const listingAgent = match.listing_agent as AgentRef;
+    const buyingAgent = match.buying_agent as AgentRef;
+    const property = match.property as PropertyRef;
+    const buyerReq = match.buyer_request as BuyerRequest;
 
     if (action === "declined") {
       await supabase.from("property_matches").update({

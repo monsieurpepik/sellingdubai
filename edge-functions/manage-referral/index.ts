@@ -17,6 +17,8 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
+interface AgentRef { id: string; name: string; slug: string; email: string; }
+
 const CORS_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.ae",
@@ -239,8 +241,8 @@ Deno.serve(async (req: Request) => {
     }
 
     // Send notifications
-    const referrerAgent = referral.referrer as any;
-    const receiverAgent = referral.receiver as any;
+    const referrerAgent = referral.referrer as AgentRef;
+    const receiverAgent = referral.receiver as AgentRef;
 
     if (action === "accept" && referrerAgent?.email) {
       await sendEmail(
