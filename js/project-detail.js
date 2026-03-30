@@ -152,6 +152,12 @@ export async function openProjectDetail(projectSlug) {
   // Hide property-detail's CTA bar — project detail has its own inline sticky bar
   const ctaBar = document.getElementById('detail-cta-bar');
   if (ctaBar) ctaBar.style.display = 'none';
+  // Hide profile sticky CTA bar (WhatsApp/Contact Me) — save current display to restore on close
+  const stickyCta = document.getElementById('sticky-cta');
+  if (stickyCta) {
+    stickyCta.dataset.prevDisplay = stickyCta.style.display;
+    stickyCta.style.display = 'none';
+  }
 
   const { data: project, error } = await supabase
     .from('projects')

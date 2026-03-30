@@ -39,6 +39,12 @@ window.closeDetail = function() {
   // Keep scroll locked only if the properties overlay is still open behind this
   const propOverlayOpen = document.getElementById('prop-overlay')?.classList.contains('open');
   document.body.style.overflow = propOverlayOpen ? 'hidden' : '';
+  // Restore profile sticky CTA bar if it was hidden by openProjectDetail
+  const stickyCta = document.getElementById('sticky-cta');
+  if (stickyCta && stickyCta.dataset.prevDisplay !== undefined) {
+    stickyCta.style.display = stickyCta.dataset.prevDisplay;
+    delete stickyCta.dataset.prevDisplay;
+  }
   currentDetailProp = null;
   if (currentAgent) history.pushState(null, '', '/a/' + currentAgent.slug);
 };
