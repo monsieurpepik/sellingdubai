@@ -74,17 +74,40 @@ export async function openProjectDetail(projectSlug) {
     ? (Array.isArray(project.available_units) ? project.available_units : project.available_units.units || [])
     : [];
 
-  // Payment plan: prefer payment_plan_detail > payment_plan JSONB > handover_percentage
+  // Payment plan — prefer payment_plan_detail (new_payment_plans array) > legacy payment_plan JSONB > handover_percentage
   let bookingPct = null, constructionPct = null, handoverPct = null;
-  const pp = project.payment_plan_detail || project.payment_plan;
-  if (pp && typeof pp === 'object' && !Array.isArray(pp)) {
-    bookingPct = pp.booking ?? pp.booking_percentage ?? null;
-    constructionPct = pp.construction ?? pp.construction_percentage ?? null;
-    handoverPct = pp.handover ?? pp.handover_percentage ?? null;
-  } else if (project.handover_percentage != null) {
-    handoverPct = project.handover_percentage;
-    bookingPct = 10;
-    constructionPct = Math.max(0, 100 - bookingPct - handoverPct);
+  let paymentPlanTitle = null;
+  let paymentMilestones = null; // full milestone array for detailed view
+
+  const ppDetail = project.payment_plan_detail;
+  // payment_plan_detail is stored as the new_payment_plans array
+  const ppPlan = Array.isArray(ppDetail) && ppDetail.length > 0 ? ppDetail[0] : null;
+
+  if (ppPlan && typeof ppPlan === 'object') {
+    paymentPlanTitle = ppPlan.title || null;
+    paymentMilestones = Array.isArray(ppPlan.milestones) && ppPlan.milestones.length ? ppPlan.milestones : null;
+    const hp = ppPlan.heading_percentages;
+    if (hp && typeof hp === 'object') {
+      // Normalize keys: "On Booking" → booking, "During Construction" → construction, "On Completion" → handover
+      for (const [k, v] of Object.entries(hp)) {
+        const key = k.toLowerCase();
+        const val = v ? parseInt(String(v), 10) : null;
+        if (key.includes('booking')) bookingPct = val;
+        else if (key.includes('construction')) constructionPct = val;
+        else if (key.includes('completion') || key.includes('handover')) handoverPct = val;
+      }
+    }
+  } else {
+    const pp = project.payment_plan;
+    if (pp && typeof pp === 'object' && !Array.isArray(pp)) {
+      bookingPct = pp.booking ?? pp.booking_percentage ?? null;
+      constructionPct = pp.construction ?? pp.construction_percentage ?? null;
+      handoverPct = pp.handover ?? pp.handover_percentage ?? null;
+    } else if (project.handover_percentage != null) {
+      handoverPct = project.handover_percentage;
+      bookingPct = 10;
+      constructionPct = Math.max(0, 100 - bookingPct - handoverPct);
+    }
   }
   const hasPaymentPlan = bookingPct != null || constructionPct != null || handoverPct != null;
 
