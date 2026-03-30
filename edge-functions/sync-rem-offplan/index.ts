@@ -156,8 +156,7 @@ Deno.serve(async (req: Request) => {
     if (!remRes.ok) throw new Error(`REM API returned ${remRes.status}`);
     remData = await remRes.json();
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: `REM API fetch failed: ${msg}` }), {
+    return new Response(JSON.stringify({ error: "REM API fetch failed." }), {
       status: 502, headers: { "Content-Type": "application/json" },
     });
   }

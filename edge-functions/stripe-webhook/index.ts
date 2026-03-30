@@ -288,7 +288,7 @@ Deno.serve(async (req: Request) => {
         console.log(`Unhandled Stripe event: ${eventType}`);
     }
   } catch (e) {
-    console.error(`Error processing ${eventType}:`, e);
+    console.error("Error processing Stripe event.");
     // Return 500 so Stripe retries on transient errors (DB failures, network issues).
     // Stripe uses exponential backoff and will stop after ~3 days.
     return new Response(JSON.stringify({ error: "Processing error — will retry." }), {

@@ -157,7 +157,7 @@ Deno.serve(async (req: Request) => {
 
         sent++;
       } catch (e) {
-        errors.push(`${agent.slug}: ${(e as Error).message}`);
+        errors.push(agent.slug);
       }
     }
 

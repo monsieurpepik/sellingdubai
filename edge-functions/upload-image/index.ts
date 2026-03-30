@@ -1,26 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.com",
-  "https://sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
-];
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Headers": "content-type, authorization",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json",
-  };
-}
+import { getCorsHeaders } from "../_shared/utils.ts";
 
 Deno.serve(async (req: Request) => {
-  const cors = getCorsHeaders(req);
+  const cors = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: cors });
   }
@@ -125,7 +108,7 @@ Deno.serve(async (req: Request) => {
   } catch (e) {
     console.error('upload-image error');
     return new Response(JSON.stringify({ error: 'Server error' }), {
-      status: 500, headers: getCorsHeaders(req)
+      status: 500, headers: cors
     });
   }
 });

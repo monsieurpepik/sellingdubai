@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
     if (leadsErr) {
       console.error("Query error");
       return new Response(
-        JSON.stringify({ error: "Failed to query leads.", detail: leadsErr.message }),
+        JSON.stringify({ error: "Failed to query leads." }),
         { status: 500, headers: cors }
       );
     }
@@ -171,7 +171,7 @@ Deno.serve(async (req: Request) => {
             }),
           });
         } catch (emailErr) {
-          console.error(`Failed to nag for lead ${lead.id}:`, emailErr);
+          console.error("Failed to send nag email.");
         }
       }
 
