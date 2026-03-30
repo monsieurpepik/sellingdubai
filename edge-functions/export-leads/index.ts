@@ -3,7 +3,7 @@
 // ===========================================
 // Authenticated endpoint: agent provides magic link token
 // Returns CSV of all their leads
-// GET /export-leads?token=xxx
+// GET /export-leads (Authorization: Bearer <token>)
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -42,9 +42,12 @@ Deno.serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     const authHeader = req.headers.get("authorization") || "";
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.slice(7).trim()
-      : url.searchParams.get("token");
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Authorization header required." }), {
+        status: 401, headers: { ...cors, "Content-Type": "application/json" }
+      });
+    }
+    const token = authHeader.slice(7).trim();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token required." }), {
