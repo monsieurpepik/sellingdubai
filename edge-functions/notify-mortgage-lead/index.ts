@@ -8,7 +8,10 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const PLATFORM_OPS_EMAIL = Deno.env.get('PLATFORM_OPS_EMAIL') || 'bobanpepic@gmail.com';
+const PLATFORM_OPS_EMAIL = Deno.env.get('PLATFORM_OPS_EMAIL');
+if (!PLATFORM_OPS_EMAIL) {
+  console.error('[notify-mortgage-lead] PLATFORM_OPS_EMAIL env var is not set — cannot start handler');
+}
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -186,6 +189,11 @@ function buildOpsEmailHtml(
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req);
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+  if (!PLATFORM_OPS_EMAIL) {
+    console.error('[notify-mortgage-lead] PLATFORM_OPS_EMAIL is not configured');
+    return new Response(JSON.stringify({ error: 'Server misconfiguration' }), { status: 500, headers: cors });
+  }
 
   // Internal-only endpoint — called by submit-mortgage with service role key
   const incomingAuth = req.headers.get('authorization') || '';

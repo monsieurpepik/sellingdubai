@@ -413,7 +413,7 @@ body {
 }
 
 .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; }
-.trust-copy { font-size: 7px; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); }
+.trust-copy { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); }
 .trust-badges {
   display: flex; align-items: center; justify-content: center; gap: 16px;
   margin-bottom: 10px; flex-wrap: wrap;

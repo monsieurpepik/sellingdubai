@@ -151,12 +151,12 @@ function renderAgentPage(agent: any, properties: any[]): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escHtml(rawName)} \u2014 Dubai Real Estate Agent | SellingDubai</title>
   <meta name="description" content="${escHtml(rawName)} \u2014 ${escHtml(rawTagline || 'Verified Dubai real estate agent')}. Browse ${propCount} properties, off-plan projects, and connect directly.">
-  <link rel="canonical" href="${pageUrl}">
+  <link rel="canonical" href="${escHtml(pageUrl)}">
   <meta property="og:type" content="profile">
   <meta property="og:title" content="${escHtml(rawName)} \u2014 Dubai Real Estate Agent | SellingDubai">
   <meta property="og:description" content="${escHtml(rawTagline || 'Verified Dubai real estate agent')}">
   <meta property="og:image" content="${escHtml(photo)}">
-  <meta property="og:url" content="${pageUrl}">
+  <meta property="og:url" content="${escHtml(pageUrl)}">
   <meta property="og:site_name" content="SellingDubai">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escHtml(rawName)} \u2014 Dubai Real Estate Agent">
