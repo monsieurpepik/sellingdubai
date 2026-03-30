@@ -110,6 +110,19 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Rate limit: 30 co-broke requests per hour per agent
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentRequests } = await supabase
+      .from("co_broke_deals")
+      .select("id", { count: "exact", head: true })
+      .eq("buying_agent_id", buyingAgentId)
+      .gte("created_at", oneHourAgo);
+    if (recentRequests !== null && recentRequests >= 30) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429, headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
     // Get the property
     const { data: property } = await supabase
       .from("properties")

@@ -146,6 +146,19 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Rate limit: 20 referrals per hour per agent
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentReferrals } = await supabase
+      .from("lead_referrals")
+      .select("id", { count: "exact", head: true })
+      .eq("referrer_id", referrer.id)
+      .gte("created_at", oneHourAgo);
+    if (recentReferrals !== null && recentReferrals >= 20) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429, headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
     // Check for duplicate (same referrer → receiver with same lead phone in last 7 days)
     if (leadPhone) {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();

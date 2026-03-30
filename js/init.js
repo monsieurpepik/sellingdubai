@@ -6,20 +6,65 @@ import { getAgentSlug } from './utils.js';
 import { trackPageView } from './analytics.js';
 import { showPage, renderAgent, injectSchemaOrg, hydrateOgMeta, showEditButtonIfOwner } from './agent-page.js';
 
-// Side-effect imports — each wrapped so one failure doesn't kill the app
-async function loadModules() {
-  const modules = [
-    ['gallery',         () => import('./gallery.js')],
-    ['property-detail', () => import('./property-detail.js')],
-    ['lead-modal',      () => import('./lead-modal.js')],
-    ['filters',         () => import('./filters.js')],
-  ];
-  await Promise.all(modules.map(async ([name, load]) => {
-    try { await load(); }
-    catch (e) { console.error(`[${name}] failed to load:`, e); }
-  }));
+// Lazy-load helpers — modules load on first user interaction, not on init
+let _gallery, _propDetail, _leadModal, _filters;
+
+function lazyLoad(promise, name) {
+  return promise.catch(e => { console.error(`[${name}] failed to load:`, e); });
 }
-loadModules();
+
+// gallery.js — loaded on first photo/gallery open
+window.openFullGallery = async function openFullGalleryLazy() {
+  if (!_gallery) _gallery = lazyLoad(import('./gallery.js'), 'gallery');
+  await _gallery;
+  if (window.openFullGallery !== openFullGalleryLazy) window.openFullGallery();
+};
+window.openPhotoViewer = async function openPhotoViewerLazy(idx) {
+  if (!_gallery) _gallery = lazyLoad(import('./gallery.js'), 'gallery');
+  await _gallery;
+  if (window.openPhotoViewer !== openPhotoViewerLazy) window.openPhotoViewer(idx);
+};
+
+// property-detail.js — loaded on first property card open
+window.openPropertyDetail = async function openPropertyDetailLazy(propIndex) {
+  if (!_propDetail) _propDetail = lazyLoad(import('./property-detail.js'), 'property-detail');
+  await _propDetail;
+  if (window.openPropertyDetail !== openPropertyDetailLazy) window.openPropertyDetail(propIndex);
+};
+window.openPropertyById = async function openPropertyByIdLazy(propId) {
+  if (!_propDetail) _propDetail = lazyLoad(import('./property-detail.js'), 'property-detail');
+  await _propDetail;
+  if (window.openPropertyById !== openPropertyByIdLazy) window.openPropertyById(propId);
+};
+
+// lead-modal.js — loaded on first contact/lead open
+window.openLead = async function openLeadLazy() {
+  if (!_leadModal) _leadModal = lazyLoad(import('./lead-modal.js'), 'lead-modal');
+  await _leadModal;
+  if (window.openLead !== openLeadLazy) window.openLead();
+};
+window.openLeadForBrochure = async function openLeadForBrochureLazy(projectName, brochureUrl) {
+  if (!_leadModal) _leadModal = lazyLoad(import('./lead-modal.js'), 'lead-modal');
+  await _leadModal;
+  if (window.openLeadForBrochure !== openLeadForBrochureLazy) window.openLeadForBrochure(projectName, brochureUrl);
+};
+window.openLeadForProperty = async function openLeadForPropertyLazy(propertyTitle) {
+  if (!_leadModal) _leadModal = lazyLoad(import('./lead-modal.js'), 'lead-modal');
+  await _leadModal;
+  if (window.openLeadForProperty !== openLeadForPropertyLazy) window.openLeadForProperty(propertyTitle);
+};
+
+// filters.js — loaded on first filters/properties panel open
+window.openFilters = async function openFiltersLazy() {
+  if (!_filters) _filters = lazyLoad(import('./filters.js'), 'filters');
+  await _filters;
+  if (window.openFilters !== openFiltersLazy) window.openFilters();
+};
+window.openProps = async function openPropsLazy() {
+  if (!_filters) _filters = lazyLoad(import('./filters.js'), 'filters');
+  await _filters;
+  if (window.openProps !== openPropsLazy) window.openProps();
+};
 
 // mortgage.js is lazy-loaded on first openMortgage() call
 // Named so the guard below can detect whether the module replaced it

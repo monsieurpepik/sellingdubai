@@ -114,6 +114,19 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Rate limit: 60 referral actions per hour per agent
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentActions } = await supabase
+      .from("lead_referrals")
+      .select("id", { count: "exact", head: true })
+      .or(`referrer_id.eq.${agentId},receiver_id.eq.${agentId}`)
+      .gte("updated_at", oneHourAgo);
+    if (recentActions !== null && recentActions >= 60) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429, headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
     const transition = VALID_TRANSITIONS[action];
     if (!transition) {
       return new Response(JSON.stringify({ error: `Invalid action: ${action}` }), {

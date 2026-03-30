@@ -104,6 +104,19 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Rate limit: 60 match responses per hour per agent
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentResponses } = await supabase
+      .from("property_matches")
+      .select("id", { count: "exact", head: true })
+      .eq("listing_agent_id", agentId)
+      .gte("listing_agent_responded_at", oneHourAgo);
+    if (recentResponses !== null && recentResponses >= 60) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429, headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
     // Get the match with related data
     const { data: match } = await supabase
       .from("property_matches")
