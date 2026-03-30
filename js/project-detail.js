@@ -11,6 +11,16 @@ const NETLIFY_IMG = (url, w) =>
 const fmtPrice = (n) =>
   n ? 'AED\u00a0' + Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 }) : null;
 
+// Strip dangerous tags from trusted CRM HTML before inserting into DOM.
+const sanitizeHtml = (html) => {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+    .replace(/\s+on\w+="[^"]*"/gi, '')
+    .replace(/\s+on\w+='[^']*'/gi, '');
+};
+
 const statusLabel = (s) =>
   s === 'under_construction' ? 'Under Construction'
   : s === 'completed' ? 'Completed'
@@ -32,7 +42,7 @@ export async function openProjectDetail(projectSlug) {
 
   const { data: project, error } = await supabase
     .from('projects')
-    .select('slug,name,description,location,district_name,area,cover_image_url,min_price,max_price,min_area_sqft,max_area_sqft,completion_date,handover_percentage,payment_plan,payment_plan_detail,gallery_images,floor_plan_urls,available_units,status,property_types,beds,developers(name,logo_url,website)')
+    .select('slug,name,description,location,district_name,area,cover_image_url,min_price,max_price,min_area_sqft,max_area_sqft,completion_date,handover_percentage,payment_plan,payment_plan_detail,gallery_images,floor_plan_urls,available_units,facilities,nearby_locations,brochure_url,images_categorized,status,property_types,beds,developers(name,logo_url,website)')
     .eq('slug', projectSlug)
     .single();
 
@@ -59,17 +69,32 @@ export async function openProjectDetail(projectSlug) {
       ? `From ${Number(project.min_area_sqft).toLocaleString()} sqft`
       : '';
 
-  // Floor plans (must be defined before galleryImgs to allow deduplication)
-  const floorPlans = Array.isArray(project.floor_plan_urls) && project.floor_plan_urls.length
-    ? project.floor_plan_urls.filter(Boolean)
-    : [];
+  // Gallery: prefer images_categorized (interior + exterior), fallback to gallery_images
+  const cat = project.images_categorized;
+  let galleryImgs = [];
+  if (cat && (cat.interior?.length || cat.exterior?.length)) {
+    const combined = [...(cat.interior || []), ...(cat.exterior || [])];
+    galleryImgs = combined.filter(u => u && u !== project.cover_image_url);
+  } else if (Array.isArray(project.gallery_images) && project.gallery_images.length) {
+    // Fallback: old gallery_images minus cover and any site plan URLs
+    const sitePlanUrls = new Set(cat?.general || []);
+    galleryImgs = project.gallery_images.filter(u => u && u !== project.cover_image_url && !sitePlanUrls.has(u));
+  }
 
-  // Gallery images (exclude cover and floor plan URLs — REM stores the site plan in both arrays)
-  const galleryImgs = Array.isArray(project.gallery_images) && project.gallery_images.length
-    ? project.gallery_images.filter(u => u && u !== project.cover_image_url && !floorPlans.includes(u))
-    : [];
+  // Site plan images (from images_categorized.general, or legacy floor_plan_urls)
+  const sitePlanImgs = cat?.general?.filter(Boolean).length
+    ? cat.general.filter(Boolean)
+    : (Array.isArray(project.floor_plan_urls) ? project.floor_plan_urls.filter(Boolean) : []);
 
   const totalSlides = (imgSrc ? 1 : 0) + galleryImgs.length;
+
+  // Facilities (amenities strip)
+  const facilities = Array.isArray(project.facilities) && project.facilities.length
+    ? project.facilities : [];
+
+  // Nearby locations
+  const nearbyLocations = Array.isArray(project.nearby_locations) && project.nearby_locations.length
+    ? project.nearby_locations : [];
 
   // Available units
   const units = project.available_units && typeof project.available_units === 'object'
@@ -200,12 +225,38 @@ export async function openProjectDetail(projectSlug) {
         </div>
       </div>` : ''}
 
-      <!-- Floor plans -->
-      ${floorPlans.length ? `
+      <!-- Site Plan -->
+      ${sitePlanImgs.length ? `
       <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Floor Plans</h3>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Site Plan</h3>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          ${floorPlans.map((u, i) => `<img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="Floor plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" onerror="this.style.display='none'">`).join('')}
+          ${sitePlanImgs.map((u, i) => `<img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="Site plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" onerror="this.style.display='none'">`).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- Facilities -->
+      ${facilities.length ? `
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">Amenities</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          ${facilities.map(f => `
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px;">
+            ${f.image ? `<img src="${escAttr(NETLIFY_IMG(f.image, 80))}" alt="${escAttr(f.name)}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:rgba(255,255,255,0.06);flex-shrink:0;" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.06)';this.style.display='none'">` : `<div style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.06);flex-shrink:0;"></div>`}
+            <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.8);line-height:1.3;">${escHtml(f.name)}</div>
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- Nearby locations -->
+      ${nearbyLocations.length ? `
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Nearby</h3>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          ${nearbyLocations.map((l, i) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;${i < nearbyLocations.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : ''}">
+            <span style="font-size:13px;color:rgba(255,255,255,0.75);">📍 ${escHtml(l.name)}</span>
+            ${l.distance ? `<span style="font-size:12px;color:rgba(255,255,255,0.4);white-space:nowrap;margin-left:8px;">${escHtml(l.distance)}</span>` : ''}
+          </div>`).join('')}
         </div>
       </div>` : ''}
 
@@ -213,12 +264,22 @@ export async function openProjectDetail(projectSlug) {
       ${project.description ? `
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">About</h3>
-        <p style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);">${escHtml(project.description)}</p>
+        <div id="proj-desc" style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${sanitizeHtml(project.description)}</div>
+        <button id="proj-desc-more" onclick="(function(){var d=document.getElementById('proj-desc');d.style.webkitLineClamp='unset';d.style.overflow='visible';d.style.display='block';document.getElementById('proj-desc-more').style.display='none';})()" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:12px;padding:4px 0 0;cursor:pointer;font-family:'Inter',sans-serif;">Read more</button>
+      </div>` : ''}
+
+      <!-- Brochure download -->
+      ${project.brochure_url ? `
+      <div style="margin-bottom:20px;">
+        <a href="${escAttr(project.brochure_url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;box-sizing:border-box;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Brochure
+        </a>
       </div>` : ''}
 
     </div>
 
-    <div style="display:flex;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
+    <div style="display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
       <button onclick="openLead('${escAttr(project.name)}')" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
       ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
     </div>`;

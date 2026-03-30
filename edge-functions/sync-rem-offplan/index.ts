@@ -63,9 +63,18 @@ interface RemProject {
 
 interface RemDetailData {
   all_images?: string[] | null;
-  images?: { general?: string[] | null } | null;
+  images?: {
+    interior?: string[] | null;
+    exterior?: string[] | null;
+    general?:  string[] | null;
+    other?:    string[] | null;
+  } | null;
   new_payment_plans?: unknown[] | null;
   typical_units?: unknown[] | null;
+  description?: string | null;
+  facilities?: { id: number; name: string; description?: string | null; image?: string | null }[] | null;
+  nearby_locations?: { id: number; name: string; distance?: string | null }[] | null;
+  attachments?: { attachment_title?: string; attachment_url?: string; file_type?: string }[] | null;
 }
 
 // Fetch REM detail for a single project; returns null on any failure.
@@ -272,13 +281,34 @@ Deno.serve(async (req: Request) => {
     const availableUnits = Array.isArray(detail?.typical_units) && detail!.typical_units!.length > 0
       ? detail!.typical_units
       : null;
+    const description = detail?.description ?? null;
+    const facilities = Array.isArray(detail?.facilities) && detail!.facilities!.length > 0
+      ? detail!.facilities!.map(f => ({ name: f.name, image: f.image ?? null }))
+      : null;
+    const nearbyLocations = Array.isArray(detail?.nearby_locations) && detail!.nearby_locations!.length > 0
+      ? detail!.nearby_locations!.map(l => ({ name: l.name, distance: l.distance ?? null }))
+      : null;
+    const brochureUrl = Array.isArray(detail?.attachments)
+      ? (detail!.attachments!.find(a => a.file_type === "pdf")?.attachment_url ?? null)
+      : null;
+    const imagesCategorized = {
+      interior: detail?.images?.interior?.filter(Boolean) ?? [],
+      exterior: detail?.images?.exterior?.filter(Boolean) ?? [],
+      general:  detail?.images?.general?.filter(Boolean)  ?? [],
+      other:    detail?.images?.other?.filter(Boolean)    ?? [],
+    };
 
     return {
       ...base,
+      description,
       gallery_images:      galleryImages.length > 0 ? galleryImages : null,
       floor_plan_urls:     floorPlanUrls.length  > 0 ? floorPlanUrls : null,
       payment_plan_detail: paymentPlanDetail,
       available_units:     availableUnits,
+      facilities,
+      nearby_locations:    nearbyLocations,
+      brochure_url:        brochureUrl,
+      images_categorized:  imagesCategorized,
     };
   });
 
