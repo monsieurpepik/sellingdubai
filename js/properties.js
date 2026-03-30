@@ -487,14 +487,23 @@ export async function loadRemProjects(agentSlug, agentId) {
     let projects = [];
 
     if (agentSlug === 'boban-pepic') {
-      // Showcase: show latest 30 projects from global catalog
+      // Showcase: priority developers first (price DESC), fill to 30 from remainder
+      const PRIORITY_DEVS = [
+        'emaar', 'sobha', 'omniyat', 'nakheel', 'ellington',
+        'meraas', 'damac', 'binghatti', 'aldar', 'dubai properties'
+      ];
       const { data } = await supabase
         .from('projects')
         .select('id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, developers!projects_developer_id_fkey(name)')
         .not('status', 'in', '("completed","sold_out")')
-        .order('synced_at', { ascending: false })
-        .limit(30);
-      projects = data || [];
+        .order('min_price', { ascending: false, nullsFirst: false })
+        .limit(100);
+      const all = data || [];
+      const isPriority = p =>
+        PRIORITY_DEVS.some(d => (p.developers?.name || '').toLowerCase().includes(d));
+      const priority = all.filter(isPriority);
+      const rest     = all.filter(p => !isPriority(p));
+      projects = [...priority, ...rest].slice(0, 30);
     } else {
       // Approved only — via junction table
       const { data } = await supabase
