@@ -32,14 +32,16 @@
 <meta name="twitter:title" id="twitter-title" content="SellingDubai — Find Dubai Real Estate Agents">
 <meta name="twitter:description" id="twitter-description" content="Connect with verified Dubai real estate agents. Browse profiles, listings, and contact agents directly.">
 <meta name="twitter:image" id="twitter-image" content="https://sellingdubai.ae/sellingdubailogo.png">
-<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous" async></script>
 <script>
-  Sentry.init({
-    dsn: "https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",
-    environment: /sellingdubai\.(ae|com)$/.test(location.hostname) ? "production" : "development",
-    tracesSampleRate: 0.2,
-    sendDefaultPii: false
-  });
+  if (window.Sentry) {
+    Sentry.init({
+      dsn: "https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",
+      environment: /sellingdubai\.(ae|com)$/.test(location.hostname) ? "production" : "development",
+      tracesSampleRate: 0.2,
+      sendDefaultPii: false
+    });
+  }
 </script>
 <!-- Schema.org structured data — hydrated by app.js -->
 <script type="application/ld+json" id="schema-agent">{"@context":"https://schema.org","@type":"WebSite","name":"SellingDubai","url":"https://sellingdubai.ae/"}</script>

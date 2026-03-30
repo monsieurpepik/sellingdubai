@@ -6,7 +6,7 @@ import { escHtml, escAttr, safeUrl, safeTrackingId } from './utils.js';
 import { ICONS } from './icons.js';
 import { logEvent } from './analytics.js';
 import { currentAgent, setCurrentAgent } from './state.js';
-import { loadProperties, loadRemProjects } from './properties.js';
+import { loadProperties, loadRemProjects, optimizeImg } from './properties.js';
 
 // ==========================================
 // VCARD GENERATOR
@@ -96,7 +96,7 @@ export async function renderAgent(agent) {
   if (agent.photo_url) {
     const img = document.createElement('img');
     img.className = 'avatar' + (isVerified ? ' avatar-verified' : '');
-    img.src = agent.photo_url;
+    img.src = optimizeImg(agent.photo_url, 200);
     img.alt = agent.name || '';
     img.onerror = function() { avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`; };
     avatarContainer.innerHTML = '';
@@ -152,7 +152,7 @@ export async function renderAgent(agent) {
   const agencyEl = document.getElementById('agency-badge');
   if (agent.agency_name || (isPaidTier(agent) && agent.agency_logo_url)) {
     let badgeHTML = '';
-    if (isPaidTier(agent) && agent.agency_logo_url) badgeHTML += `<img class="agency-logo" src="${agent.agency_logo_url}" alt="" onerror="this.style.display='none'">`;
+    if (isPaidTier(agent) && agent.agency_logo_url) badgeHTML += `<img class="agency-logo" src="${escAttr(optimizeImg(agent.agency_logo_url, 120))}" alt="" onerror="this.style.display='none'">`;
     if (agent.agency_name) badgeHTML += `<span class="agency-name">${escHtml(agent.agency_name)}</span>`;
     agencyEl.innerHTML = badgeHTML;
     agencyEl.classList.remove('hidden');
@@ -223,7 +223,7 @@ export async function renderAgent(agent) {
     </a>`;
   } else {
     buttonsHTML += `<button class="link-btn" onclick="openLead()" data-track="consultation">
-      <span class="btn-icon">${ICONS.calendar}</span> Get Free Consultation
+      <span class="btn-icon">${ICONS.calendar}</span> Send an Enquiry
     </button>`;
   }
 

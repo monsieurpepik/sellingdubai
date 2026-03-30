@@ -122,7 +122,7 @@ window.submitLead = async function() {
     document.getElementById('lead-form').classList.add('hidden');
     document.getElementById('lead-success').classList.remove('hidden');
     document.getElementById('success-msg').textContent =
-      `${currentAgent?.name || 'The agent'} has received your inquiry. You'll hear back within 30 minutes during business hours.`;
+      `Your inquiry has been sent to ${currentAgent?.name || 'the agent'} directly. You should receive a response during business hours.`;
     logEvent('lead_submit', { source: 'profile_form' });
 
     if (window.fbq) fbq('track', 'Lead', { content_name: 'SellingDubai Lead', content_category: 'real_estate' });

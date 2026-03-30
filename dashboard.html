@@ -10,8 +10,7 @@
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap&subset=latin" rel="stylesheet"></noscript>
-<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous"></script>
-<script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
@@ -142,7 +141,7 @@
   .leads-section { margin-bottom: 32px; }
   .leads-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .leads-title { font-size: 16px; font-weight: 700; }
-  .leads-count { font-size: 13px; color: rgba(255,255,255,0.35); font-weight: 500; }
+  .leads-count { font-size: 13px; color: rgba(255,255,255,0.70); font-weight: 500; }
 
   /* Lead cards */
   .lead-card {
@@ -200,7 +199,7 @@
   }
   .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
   .empty-title { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
-  .empty-sub { font-size: 13px; color: rgba(255,255,255,0.25); }
+  .empty-sub { font-size: 13px; color: rgba(255,255,255,0.55); }
 
   /* ── Auth Screen ── */
   .auth-overlay {
@@ -212,7 +211,7 @@
   .auth-card { max-width: 360px; width: 100%; text-align: center; }
   .auth-brand { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 40px; }
   .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .auth-sub { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 32px; line-height: 1.5; }
+  .auth-sub { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 32px; line-height: 1.5; }
   .auth-input {
     width: 100%; padding: 14px 16px; border-radius: 10px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
@@ -381,7 +380,7 @@
     font-size: 16px; font-weight: 700; margin-bottom: 4px;
     display: flex; align-items: center; gap: 8px;
   }
-  .onboard-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 18px; line-height: 1.5; }
+  .onboard-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin-bottom: 18px; line-height: 1.5; }
   .onboard-progress {
     height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px;
     margin-bottom: 18px; overflow: hidden;
@@ -542,7 +541,7 @@
     <!-- Onboarding Checklist (hidden when complete) -->
     <div class="onboard" id="onboard-checklist" style="display:none;">
       <button class="onboard-dismiss" onclick="dismissOnboarding()" title="Dismiss" aria-label="Dismiss">&times;</button>
-      <div class="onboard-title">🚀 Get your profile live</div>
+      <div class="onboard-title">Get your profile live</div>
       <div class="onboard-sub">Complete these steps to start getting leads from your SellingDubai profile.</div>
       <div class="onboard-progress"><div class="onboard-bar" id="onboard-bar" style="width:0%"></div></div>
       <div class="onboard-steps" id="onboard-steps">
@@ -553,7 +552,7 @@
         </a>
         <a class="onboard-step" id="ob-bio" href="/edit">
           <span class="onboard-check" id="ob-bio-check"></span>
-          <span class="onboard-step-label">Write a short bio</span>
+          <span class="onboard-step-label">Add your tagline</span>
           <span class="onboard-step-action">Add →</span>
         </a>
         <a class="onboard-step" id="ob-whatsapp" href="/edit">

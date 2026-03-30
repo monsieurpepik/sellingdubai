@@ -3,6 +3,7 @@
 // ==========================================
 import { supabase } from './config.js';
 import { escHtml, escAttr } from './utils.js';
+import { currentAgent } from './state.js';
 
 const NETLIFY_IMG = (url, w) =>
   url ? `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80` : '';
@@ -135,6 +136,12 @@ export async function openProjectDetail(projectSlug) {
         <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">About</h3>
         <p style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);">${escHtml(project.description)}</p>
       </div>` : ''}
+
+      <!-- CTAs -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+        <button onclick="openLead('${escAttr(project.name)}')" style="width:100%;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Send Enquiry</button>
+        ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="display:block;width:100%;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-align:center;text-decoration:none;">WhatsApp Agent</a>` : ''}
+      </div>
 
     </div>`;
 }

@@ -6,7 +6,7 @@ import { escHtml, escAttr } from './utils.js';
 import { allProperties, currentFilters } from './state.js';
 
 // Netlify Image CDN — WebP, max width, quality 80
-function optimizeImg(url, w = 800) {
+export function optimizeImg(url, w = 800) {
   if (!url) return '';
   // Unsplash URLs are not in the Netlify Image CDN allowlist — serve directly
   if (url.includes('images.unsplash.com')) return url;
