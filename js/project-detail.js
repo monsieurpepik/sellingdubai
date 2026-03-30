@@ -32,7 +32,7 @@ export async function openProjectDetail(projectSlug) {
 
   const { data: project, error } = await supabase
     .from('projects')
-    .select('slug,name,description,location,district_name,area,cover_image_url,min_price,max_price,min_area_sqft,max_area_sqft,completion_date,handover_percentage,payment_plan,status,property_types,beds,developers(name,logo_url,website)')
+    .select('slug,name,description,location,district_name,area,cover_image_url,min_price,max_price,min_area_sqft,max_area_sqft,completion_date,handover_percentage,payment_plan,payment_plan_detail,gallery_images,floor_plan_urls,available_units,status,property_types,beds,developers(name,logo_url,website)')
     .eq('slug', projectSlug)
     .single();
 
@@ -59,12 +59,28 @@ export async function openProjectDetail(projectSlug) {
       ? `From ${Number(project.min_area_sqft).toLocaleString()} sqft`
       : '';
 
-  // Payment plan: use handover_percentage if available, else check payment_plan JSONB
+  // Gallery images (exclude cover if already in list)
+  const galleryImgs = Array.isArray(project.gallery_images) && project.gallery_images.length
+    ? project.gallery_images.filter(u => u && u !== project.cover_image_url)
+    : [];
+
+  // Floor plans
+  const floorPlans = Array.isArray(project.floor_plan_urls) && project.floor_plan_urls.length
+    ? project.floor_plan_urls.filter(Boolean)
+    : [];
+
+  // Available units
+  const units = project.available_units && typeof project.available_units === 'object'
+    ? (Array.isArray(project.available_units) ? project.available_units : project.available_units.units || [])
+    : [];
+
+  // Payment plan: prefer payment_plan_detail > payment_plan JSONB > handover_percentage
   let bookingPct = null, constructionPct = null, handoverPct = null;
-  if (project.payment_plan && typeof project.payment_plan === 'object') {
-    bookingPct = project.payment_plan.booking ?? project.payment_plan.booking_percentage ?? null;
-    constructionPct = project.payment_plan.construction ?? project.payment_plan.construction_percentage ?? null;
-    handoverPct = project.payment_plan.handover ?? project.payment_plan.handover_percentage ?? null;
+  const pp = project.payment_plan_detail || project.payment_plan;
+  if (pp && typeof pp === 'object' && !Array.isArray(pp)) {
+    bookingPct = pp.booking ?? pp.booking_percentage ?? null;
+    constructionPct = pp.construction ?? pp.construction_percentage ?? null;
+    handoverPct = pp.handover ?? pp.handover_percentage ?? null;
   } else if (project.handover_percentage != null) {
     handoverPct = project.handover_percentage;
     bookingPct = 10;
@@ -81,7 +97,11 @@ export async function openProjectDetail(projectSlug) {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
     </button>
 
-    ${imgSrc ? `<div style="height:240px;overflow:hidden;background:#111;flex-shrink:0;"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:100%;object-fit:cover;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
+    ${imgSrc || galleryImgs.length ? `
+    <div style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
+      ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
+      ${galleryImgs.map((u, i) => `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;" loading="lazy" onerror="handleImgError(this)"></div>`).join('')}
+    </div>` : ''}
 
     <div class="detail-body" style="padding:20px 20px 40px;">
 
@@ -129,6 +149,31 @@ export async function openProjectDetail(projectSlug) {
         <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Payment Plan</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.45);">Contact the agent for full payment plan details.</div>
       </div>`}
+
+      <!-- Available units -->
+      ${units.length ? `
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Available Units</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${units.map(u => `
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">${escHtml(u.unit_type || u.type || u.name || 'Unit')}</div>
+              ${u.area_sqft || u.area ? `<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">${escHtml(String(u.area_sqft || u.area))} sqft</div>` : ''}
+            </div>
+            ${u.price || u.min_price ? `<div style="font-size:13px;font-weight:700;">AED\u00a0${Number(u.price || u.min_price).toLocaleString('en-AE', {maximumFractionDigits:0})}</div>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- Floor plans -->
+      ${floorPlans.length ? `
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Floor Plans</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${floorPlans.map((u, i) => `<img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="Floor plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" onerror="this.style.display='none'">`).join('')}
+        </div>
+      </div>` : ''}
 
       <!-- Description -->
       ${project.description ? `

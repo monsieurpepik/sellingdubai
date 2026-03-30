@@ -55,6 +55,15 @@ interface RemProject {
   feature_image: string | null;
   meta_description: string | null;
   currency: string;
+  // Enrichment fields — present in some API responses
+  images?: string[] | null;
+  gallery?: string[] | null;
+  floor_plans?: string[] | null;
+  floor_plan_images?: string[] | null;
+  payment_plan?: Record<string, unknown> | null;
+  payment_plan_detail?: Record<string, unknown> | null;
+  units?: unknown[] | null;
+  available_units?: unknown[] | null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -230,6 +239,26 @@ Deno.serve(async (req: Request) => {
 
     const { lat, lng } = parseLatLng(p.lat_long);
 
+    // Gallery: prefer explicit images/gallery array, fall back to null
+    const galleryImages: string[] | null = (
+      Array.isArray(p.images) && p.images.length ? p.images :
+      Array.isArray(p.gallery) && p.gallery.length ? p.gallery :
+      null
+    );
+
+    // Floor plans
+    const floorPlanUrls: string[] | null = (
+      Array.isArray(p.floor_plans) && p.floor_plans.length ? p.floor_plans :
+      Array.isArray(p.floor_plan_images) && p.floor_plan_images.length ? p.floor_plan_images :
+      null
+    );
+
+    // Payment plan detail
+    const paymentPlanDetail = p.payment_plan_detail ?? p.payment_plan ?? null;
+
+    // Available units
+    const availableUnits = p.available_units ?? (Array.isArray(p.units) && p.units.length ? p.units : null);
+
     return {
       rem_id: String(p.id),
       slug,
@@ -240,6 +269,10 @@ Deno.serve(async (req: Request) => {
       area: p.district_name ?? null,
       district_name: p.district_name ?? null,
       cover_image_url: p.feature_image ?? null,
+      gallery_images: galleryImages,
+      floor_plan_urls: floorPlanUrls,
+      payment_plan_detail: paymentPlanDetail,
+      available_units: availableUnits,
       min_price: p.min_price,
       max_price: p.max_price,
       min_area_sqft: p.min_area ? parseFloat(p.min_area) : null,
