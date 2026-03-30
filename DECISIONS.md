@@ -128,3 +128,25 @@ delivers the PDF. Popup-blocked fallback shows an inline `<a>` link in the succe
 Filters gallery URLs matching `/[/_-]thumb(nail)?[/_.-]/i` — REM API returns both full-size and thumbnail
 variants; this keeps only full-size images in the gallery and lightbox.
 - Available units table — beds, size, price, availability status (from `available_units`)
+
+## 2026-03-30 — REM Sync Scheduled Trigger
+
+### sync-rem-offplan cron schedule
+
+`sync-rem-offplan` is a Supabase edge function (not a Netlify function), so it cannot be scheduled via `netlify.toml`. To run it on a daily schedule, enable pg_cron in your Supabase project and add:
+
+```sql
+SELECT cron.schedule(
+  'sync-rem-offplan-daily',
+  '0 3 * * *',  -- 03:00 UTC daily
+  $$
+    SELECT net.http_post(
+      url := current_setting('app.supabase_url') || '/functions/v1/sync-rem-offplan',
+      headers := '{"Authorization": "Bearer ' || current_setting('app.service_role_key') || '", "Content-Type": "application/json"}'::jsonb,
+      body := '{}'::jsonb
+    );
+  $$
+);
+```
+
+Alternatively, use an external cron service (e.g. cron-job.org) to POST to the function URL with the service role key as a Bearer token. The function is idempotent — safe to re-run.
