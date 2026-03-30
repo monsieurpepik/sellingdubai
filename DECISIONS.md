@@ -71,31 +71,42 @@ Intentional through 2026-04-05 (billing launch date). Once billing opens, update
 - Consider dark/light theme toggle using the token system
 - Fix the stray `}` CSS syntax warnings (lines 587, 2386)
 
-## 2026-03-30 — REM Off-Plan: Gallery + Floor Plans via Detail Endpoint
+## 2026-03-30 — REM Off-Plan: Enrich Sync with Detail API
 
 ### Decision
 
-Update `sync-rem-offplan` (Supabase Edge Function) to call the REM detail endpoint for each project and store two new fields on `public.projects`:
+Update `sync-rem-offplan` (Supabase Edge Function) to call the REM detail endpoint for each project after the main list sync:
 
-- `gallery_images JSONB` — array of image URLs from the project detail response
-- `floor_plan_urls TEXT[]` — array of floor plan image URLs
+```
+POST https://my.remapp.ae/api/public/websites_project_detail
+```
+
+Store four new fields on `public.projects`:
+
+- `gallery_images TEXT[]` — array of image URLs from the detail response
+- `floor_plan_urls TEXT[]` — floor plan images
+- `payment_plan_detail JSONB` — full payment plan breakdown (booking %, construction instalments %, handover %)
+- `available_units JSONB` — unit types with availability, sizes, prices
 
 ### Why
 
-The current sync only hits the REM list endpoint, which returns summary data (cover image only). The detail endpoint returns the full image gallery and floor plans per project. Without fetching the detail endpoint per project, `project-detail.js` can only show one hero image. Storing these in the DB (rather than fetching at runtime) keeps the detail page fast and avoids CORS issues with the REM API from the browser.
+The current sync only hits the REM list endpoint, which returns summary data (cover image only). The detail endpoint returns the full gallery, floor plans, structured payment plan, and unit availability per project. Without this enrichment, `project-detail.js` is limited to one hero image and no unit data. Storing at sync time (not at request time) keeps the detail page fast and avoids browser CORS issues with the REM API.
 
 ### Schema change required
 
+Run in Supabase SQL editor before deploying the updated Edge Function:
+
 ```sql
 ALTER TABLE public.projects
-  ADD COLUMN IF NOT EXISTS gallery_images JSONB,
-  ADD COLUMN IF NOT EXISTS floor_plan_urls TEXT[];
+  ADD COLUMN IF NOT EXISTS gallery_images  TEXT[],
+  ADD COLUMN IF NOT EXISTS floor_plan_urls TEXT[],
+  ADD COLUMN IF NOT EXISTS payment_plan_detail JSONB,
+  ADD COLUMN IF NOT EXISTS available_units JSONB;
 ```
 
-Apply in Supabase SQL editor before deploying the updated Edge Function.
+### What this unlocks in project-detail.js
 
-### What this unlocks
-
-- `project-detail.js` can render a scrollable image gallery from `gallery_images`
-- Floor plans can be shown as a separate section below the description
-- No changes needed to the Supabase query in `project-detail.js` — just add the two columns to the SELECT
+- Full photo gallery with swipe (from `gallery_images`)
+- Floor plan viewer (from `floor_plan_urls`)
+- Payment plan breakdown cards — booking %, construction instalments %, handover % (replaces "Contact agent" fallback)
+- Available units table — beds, size, price, availability status (from `available_units`)
