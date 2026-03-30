@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { escHtml, getCorsHeaders } from "../_shared/utils.ts";
 
 /**
  * manage-cobroke
@@ -21,25 +22,6 @@ const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 interface AgentRef { id: string; name: string; slug: string; email: string; }
 interface PropertyRef { id: string; title: string; location: string; price: string; }
 
-const CORS_ORIGINS = [
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.ae",
-  "https://agents.sellingdubai.ae",
-  "https://sellingdubai-agents.netlify.app",
-];
-
-function getCorsHeaders(origin: string | null) {
-  const allowed = origin && CORS_ORIGINS.includes(origin) ? origin : CORS_ORIGINS[0];
-  return {
-    "Access-Control-Allow-Origin": allowed,
-    "Access-Control-Allow-Headers": "authorization, content-type, x-client-info, apikey",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-  };
-}
-
-function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
 
 async function sendEmail(to: string, subject: string, html: string) {
   if (!RESEND_KEY) return;
