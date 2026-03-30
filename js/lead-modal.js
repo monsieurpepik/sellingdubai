@@ -12,6 +12,10 @@ let _previousFocus = null;
 let _lastLeadSubmit = 0;
 const LEAD_COOLDOWN_MS = 30000;
 
+// Brochure-request state: set by openLeadForBrochure, cleared on close/submit
+let _pendingBrochureUrl = null;
+let _pendingSource = 'profile';
+
 window.openLead = function() {
   if (!currentAgent) return;
   _previousFocus = document.activeElement;
@@ -44,6 +48,8 @@ window.closeLead = function() {
   btn.textContent = 'Send My Inquiry';
   document.getElementById('lead-extra').classList.remove('open');
   document.getElementById('lead-expander').classList.remove('open');
+  _pendingBrochureUrl = null;
+  _pendingSource = 'profile';
 };
 
 window.toggleExtra = function() {
@@ -100,7 +106,7 @@ window.submitLead = async function() {
         property_type: document.getElementById('lead-type').value || null,
         preferred_area: document.getElementById('lead-area').value.trim() || null,
         message: document.getElementById('lead-message').value.trim() || null,
-        source: 'profile',
+        source: _pendingSource,
         utm_source: params.get('utm_source'),
         utm_medium: params.get('utm_medium'),
         utm_campaign: params.get('utm_campaign'),
@@ -121,9 +127,35 @@ window.submitLead = async function() {
     _lastLeadSubmit = Date.now();
     document.getElementById('lead-form').classList.add('hidden');
     document.getElementById('lead-success').classList.remove('hidden');
-    document.getElementById('success-msg').textContent =
-      `Your inquiry has been sent to ${currentAgent?.name || 'the agent'} directly. You should receive a response during business hours.`;
-    logEvent('lead_submit', { source: 'profile_form' });
+
+    const submittedSource = _pendingSource;
+    if (_pendingBrochureUrl) {
+      const brochureUrl = _pendingBrochureUrl;
+      _pendingBrochureUrl = null;
+      _pendingSource = 'profile';
+      const opened = window.open(brochureUrl, '_blank');
+      if (opened) {
+        document.getElementById('success-msg').textContent =
+          `Your brochure is opening now. ${currentAgent?.name || 'The agent'} will be in touch shortly.`;
+      } else {
+        // Popup blocked — show fallback link
+        const successMsg = document.getElementById('success-msg');
+        successMsg.innerHTML = 'Request received! ';
+        const link = document.createElement('a');
+        link.href = brochureUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'Click here to open your brochure';
+        link.style.cssText = 'color:#4f9ef8;text-decoration:underline;';
+        successMsg.appendChild(link);
+        successMsg.appendChild(document.createTextNode(`.`));
+      }
+    } else {
+      document.getElementById('success-msg').textContent =
+        `Your inquiry has been sent to ${currentAgent?.name || 'the agent'} directly. You should receive a response during business hours.`;
+    }
+
+    logEvent('lead_submit', { source: submittedSource === 'brochure_request' ? 'brochure_form' : 'profile_form' });
 
     if (window.fbq) fbq('track', 'Lead', { content_name: 'SellingDubai Lead', content_category: 'real_estate' });
     if (window.gtag) gtag('event', 'generate_lead', { event_category: 'lead_capture', event_label: currentAgent.slug });
@@ -135,6 +167,23 @@ window.submitLead = async function() {
       : 'Connection error. Please try again.';
     errEl.classList.add('show');
   }
+};
+
+// Open lead modal pre-filled for a brochure request; opens PDF after successful submit
+window.openLeadForBrochure = function(projectName, brochureUrl) {
+  _pendingBrochureUrl = brochureUrl;
+  _pendingSource = 'brochure_request';
+  window.openLead();
+  setTimeout(() => {
+    const msgEl = document.getElementById('lead-message');
+    if (msgEl) msgEl.value = `I'd like to receive the brochure for ${projectName}`;
+    const extra = document.getElementById('lead-extra');
+    const expander = document.getElementById('lead-expander');
+    if (extra && !extra.classList.contains('open')) {
+      extra.classList.add('open');
+      if (expander) expander.classList.add('open');
+    }
+  }, 150);
 };
 
 // Open lead modal pre-filled with property name
