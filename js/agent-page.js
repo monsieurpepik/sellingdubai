@@ -93,10 +93,12 @@ export async function renderAgent(agent) {
   const avatarContainer = document.getElementById('avatar-container');
   const safeInitials = escHtml((agent.name || '').split(' ').map(n => (n[0] || '')).join('').slice(0, 2));
   const isVerified = agent.verification_status === 'verified' || agent.dld_verified;
+  const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae', 'googleusercontent.com'];
   if (agent.photo_url) {
     const img = document.createElement('img');
     img.className = 'avatar' + (isVerified ? ' avatar-verified' : '');
-    img.src = optimizeImg(agent.photo_url, 200);
+    const canOptimize = SAFE_CDN_DOMAINS.some(d => agent.photo_url.includes(d));
+    img.src = canOptimize ? optimizeImg(agent.photo_url, 200) : agent.photo_url;
     img.alt = agent.name || '';
     img.onerror = function() { avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`; };
     avatarContainer.innerHTML = '';
@@ -152,7 +154,11 @@ export async function renderAgent(agent) {
   const agencyEl = document.getElementById('agency-badge');
   if (agent.agency_name || (isPaidTier(agent) && agent.agency_logo_url)) {
     let badgeHTML = '';
-    if (isPaidTier(agent) && agent.agency_logo_url) badgeHTML += `<img class="agency-logo" src="${escAttr(optimizeImg(agent.agency_logo_url, 120))}" alt="" onerror="this.style.display='none'">`;
+    if (isPaidTier(agent) && agent.agency_logo_url) {
+      const canOptimizeLogo = SAFE_CDN_DOMAINS.some(d => agent.agency_logo_url.includes(d));
+      const logoSrc = canOptimizeLogo ? optimizeImg(agent.agency_logo_url, 120) : agent.agency_logo_url;
+      badgeHTML += `<img class="agency-logo" src="${escAttr(logoSrc)}" alt="" onerror="this.style.display='none'">`;
+    }
     if (agent.agency_name) badgeHTML += `<span class="agency-name">${escHtml(agent.agency_name)}</span>`;
     agencyEl.innerHTML = badgeHTML;
     agencyEl.classList.remove('hidden');

@@ -1,7 +1,8 @@
 [images]
   remote_images = [
     "https://pjyorgedaxevxophpfib\\.supabase\\.co/.*",
-    "https://files\\.remapp\\.ae/.*"
+    "https://files\\.remapp\\.ae/.*",
+    "https://lh3\\.googleusercontent\\.com/.*"
   ]
 
 [build]
