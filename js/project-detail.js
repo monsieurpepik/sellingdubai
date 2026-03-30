@@ -69,6 +69,8 @@ export async function openProjectDetail(projectSlug) {
     ? project.gallery_images.filter(u => u && u !== project.cover_image_url && !floorPlans.includes(u))
     : [];
 
+  const totalSlides = (imgSrc ? 1 : 0) + galleryImgs.length;
+
   // Available units
   const units = project.available_units && typeof project.available_units === 'object'
     ? (Array.isArray(project.available_units) ? project.available_units : project.available_units.units || [])
@@ -121,12 +123,15 @@ export async function openProjectDetail(projectSlug) {
     </button>
 
     ${imgSrc || galleryImgs.length ? `
-    <div style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-      ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
-      ${galleryImgs.map((u, i) => `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;" loading="lazy" onerror="handleImgError(this)"></div>`).join('')}
+    <div style="position:relative;flex-shrink:0;">
+      <div id="proj-gallery" style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
+        ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
+        ${galleryImgs.map((u, i) => `<div style="flex:0 0 100%;scroll-snap-align:start;"><img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;" loading="lazy" onerror="handleImgError(this)"></div>`).join('')}
+      </div>
+      ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
     </div>` : ''}
 
-    <div class="detail-body" style="padding:20px 20px 40px;">
+    <div class="detail-body" style="padding:20px 20px 80px;">
 
       <!-- Status badge + title -->
       <div style="margin-bottom:14px;">
@@ -211,11 +216,22 @@ export async function openProjectDetail(projectSlug) {
         <p style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);">${escHtml(project.description)}</p>
       </div>` : ''}
 
-      <!-- CTAs -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
-        <button onclick="openLead('${escAttr(project.name)}')" style="width:100%;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Send Enquiry</button>
-        ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="display:block;width:100%;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-align:center;text-decoration:none;">WhatsApp Agent</a>` : ''}
-      </div>
+    </div>
 
+    <div style="display:flex;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
+      <button onclick="openLead('${escAttr(project.name)}')" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
+      ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
     </div>`;
+
+  // Gallery scroll counter
+  if (totalSlides > 1) {
+    const galleryEl = document.getElementById('proj-gallery');
+    const counterEl = document.getElementById('proj-gallery-count');
+    if (galleryEl && counterEl) {
+      galleryEl.addEventListener('scroll', () => {
+        const idx = Math.round(galleryEl.scrollLeft / galleryEl.clientWidth);
+        counterEl.textContent = `${idx + 1} / ${totalSlides}`;
+      }, { passive: true });
+    }
+  }
 }
