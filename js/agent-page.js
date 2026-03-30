@@ -6,7 +6,7 @@ import { escHtml, escAttr, safeUrl, safeTrackingId } from './utils.js';
 import { ICONS } from './icons.js';
 import { logEvent } from './analytics.js';
 import { currentAgent, setCurrentAgent } from './state.js';
-import { loadProperties } from './properties.js';
+import { loadProperties, loadRemProjects } from './properties.js';
 
 // ==========================================
 // VCARD GENERATOR
@@ -271,12 +271,7 @@ export async function renderAgent(agent) {
   }
 
   loadProperties(agent.id);
-
-  // === REM OFF-PLAN PROJECTS (boban-pepic test environment only) ===
-  if (agent.slug === 'boban-pepic') {
-    upsertMeta('name', 'robots', 'noindex, nofollow');
-    // loadRemOffplanProjects(); // off-plan section removed; will be rebuilt inside Portfolio
-  }
+  loadRemProjects(agent.slug, agent.id);
 
   // === SOCIAL ICONS ===
   const socialsEl = document.getElementById('socials');

@@ -350,10 +350,10 @@ export function renderPropertyList(props) {
 // ==========================================
 // OFF-PLAN CAROUSEL SWIPE HANDLING
 // ==========================================
-export function initOffPlanCarousel() {
-  const carousel = document.getElementById('offplan-carousel');
+export function initOffPlanCarousel(carouselId = 'offplan-carousel', dotsId = 'offplan-dots') {
+  const carousel = document.getElementById(carouselId);
   const track = carousel?.querySelector('.offplan-track');
-  const dotsContainer = document.getElementById('offplan-dots');
+  const dotsContainer = document.getElementById(dotsId);
   if (!carousel || !track) return;
   // Prevent duplicate listeners on re-renders
   if (carousel._carouselInit) return;
@@ -426,6 +426,114 @@ export function initOffPlanCarousel() {
       updateDots(closest);
     }, 80);
   }, { passive: true });
+}
+
+// ==========================================
+// REM OFF-PLAN PROJECT CARD
+// ==========================================
+function renderRemProjectCard(p, devName) {
+  const safeSlug = escAttr(p.slug);
+  const safeName = escHtml(p.name);
+
+  const statusBadge = p.status === 'under_construction' ? 'UNDER CONSTRUCTION' : 'OFF PLAN';
+  const badgeClass = p.status === 'under_construction' ? 'offplan-badge-launch' : 'offplan-badge-offplan';
+
+  const imgSrc = p.cover_image_url
+    ? `<img class="offplan-img" src="${escAttr(optimizeImg(p.cover_image_url))}" alt="${safeName}" width="800" height="500" loading="lazy" onerror="handleImgError(this)">`
+    : `<div class="offplan-img-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.08)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`;
+
+  let priceHtml = '';
+  if (p.min_price && p.min_price > 0) {
+    const formatted = 'AED ' + Number(p.min_price).toLocaleString('en-AE', { maximumFractionDigits: 0 });
+    priceHtml = `<div class="offplan-price"><span class="offplan-price-label">Starting from</span><span class="offplan-price-value">${formatted}</span></div>`;
+  } else {
+    priceHtml = `<div class="offplan-price"><span class="offplan-price-value">Price on Request</span></div>`;
+  }
+
+  const location = escHtml((p.district_name || p.area || p.location || '').split(',')[0]);
+
+  let handover = '';
+  if (p.completion_date) {
+    const d = new Date(p.completion_date);
+    const q = Math.ceil((d.getMonth() + 1) / 3);
+    handover = `Q${q} ${d.getFullYear()}`;
+  }
+
+  let metaHtml = '';
+  if (handover) {
+    metaHtml = `<div class="offplan-meta"><span class="offplan-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>${handover}</span></div>`;
+  }
+
+  return `<div class="offplan-card" onclick="openProjectDetail('${safeSlug}')">
+    <div class="offplan-img-wrap">
+      ${imgSrc}
+      <span class="offplan-badge ${badgeClass}">${statusBadge}</span>
+    </div>
+    <div class="offplan-body">
+      ${devName ? `<div class="offplan-developer">${escHtml(devName)}</div>` : ''}
+      <div class="offplan-title">${safeName}</div>
+      ${location ? `<div class="offplan-location"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>${location}</div>` : ''}
+      ${priceHtml}
+      ${metaHtml}
+    </div>
+  </div>`;
+}
+
+// ==========================================
+// LOAD REM OFF-PLAN PROJECTS (profile page)
+// ==========================================
+export async function loadRemProjects(agentSlug, agentId) {
+  try {
+    let projects = [];
+
+    if (agentSlug === 'boban-pepic') {
+      // Showcase: show latest 30 projects from global catalog
+      const { data } = await supabase
+        .from('projects')
+        .select('id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, developers!projects_developer_id_fkey(name)')
+        .not('status', 'in', '("completed","sold_out")')
+        .order('synced_at', { ascending: false })
+        .limit(30);
+      projects = data || [];
+    } else {
+      // Approved only — via junction table
+      const { data } = await supabase
+        .from('agent_projects')
+        .select('projects(id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, developers!projects_developer_id_fkey(name))')
+        .eq('agent_id', agentId)
+        .eq('status', 'approved')
+        .limit(12);
+      projects = (data || []).map(row => row.projects).filter(Boolean);
+    }
+
+    if (!projects.length) return;
+
+    const cards = projects.map(p => {
+      const devName = p.developers?.name || '';
+      return renderRemProjectCard(p, devName);
+    }).join('');
+
+    const section = document.getElementById('rem-projects');
+    if (!section) return;
+
+    section.innerHTML = `
+      <div class="rem-projects-section">
+        <div class="rem-section-heading">Off-Plan Projects</div>
+        <div class="offplan-wrap">
+          <div class="offplan-carousel" id="rem-carousel">
+            <div class="offplan-track">${cards}</div>
+          </div>
+          <div class="offplan-dots" id="rem-dots"></div>
+        </div>
+      </div>`;
+
+    if (projects.length > 1) {
+      initOffPlanCarousel('rem-carousel', 'rem-dots');
+    }
+  } catch (e) {
+    // Non-critical — section stays hidden on error
+    console.error('[rem-projects]', e);
+  }
 }
 
 export function renderSkeletonCards(count) {
