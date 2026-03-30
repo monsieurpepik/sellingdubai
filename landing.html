@@ -142,15 +142,6 @@
     outline-offset: 2px;
   }
 
-  /* Product preview — phone glow */
-  @keyframes preview-glow {
-    0%, 100% { box-shadow: 0 0 32px 6px rgba(17,39,210,0.20), 0 32px 56px rgba(0,0,0,0.45); }
-    50%       { box-shadow: 0 0 72px 18px rgba(17,39,210,0.40), 0 32px 56px rgba(0,0,0,0.45); }
-  }
-  .preview-phone {
-    animation: preview-glow 3.5s ease-in-out infinite;
-    border: 2px solid rgba(17,39,210,0.35);
-  }
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"AED"},"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
 </head>
@@ -207,7 +198,7 @@
 </section>
 
 <!-- ======== PRODUCT PREVIEW ======== -->
-<section class="py-24 md:py-36 bg-zinc-950 overflow-hidden reveal" id="preview">
+<section class="py-24 md:py-36 bg-zinc-950 overflow-x-hidden reveal" id="preview">
   <style>
     .callout-chip {
       position: absolute;
