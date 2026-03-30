@@ -351,6 +351,6 @@ Deno.serve(async (req: Request) => {
 
   } catch (err) {
     console.error("create-agent error:", err);
-    return json({ error: "Internal server error: " + String(err) }, 500);
+    return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });
