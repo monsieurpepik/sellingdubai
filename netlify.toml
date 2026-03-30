@@ -63,6 +63,12 @@
   [headers.values]
     Cache-Control = "public, max-age=60, must-revalidate"
 
+# Entry bundle — no hash in name, always revalidate
+[[headers]]
+  for = "/dist/*.js"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
 # Hashed bundle chunks — immutable, 1 year cache (hash changes on every build)
 [[headers]]
   for = "/dist/chunks/*"
