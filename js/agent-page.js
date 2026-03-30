@@ -311,17 +311,7 @@ export async function renderAgent(agent) {
 
   showPage('agent-page');
 
-  // === REFERRAL CTA (free-tier profiles only) ===
-  if (agent.tier === 'free' || !agent.tier) {
-    const refCta = document.getElementById('referral-cta');
-    if (refCta) {
-      const refLink = refCta.querySelector('.referral-cta-link');
-      if (refLink) {
-        refLink.href = '/join?ref=' + encodeURIComponent(agent.referral_code || agent.slug);
-      }
-      refCta.style.display = 'block';
-    }
-  }
+  // Referral CTA intentionally suppressed on public profiles — not the right context for acquisition.
 
   // === STICKY BOTTOM CTA BAR ===
   const stickyCta = document.getElementById('sticky-cta');

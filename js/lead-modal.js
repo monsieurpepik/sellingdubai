@@ -61,7 +61,7 @@ window.submitLead = async function() {
   const now = Date.now();
   if (now - _lastLeadSubmit < LEAD_COOLDOWN_MS) {
     const secs = Math.ceil((LEAD_COOLDOWN_MS - (now - _lastLeadSubmit)) / 1000);
-    errEl.textContent = `Please wait ${secs}s before submitting again.`;
+    errEl.textContent = `Please wait ${secs} seconds before submitting again.`;
     errEl.classList.add('show');
     return;
   }
