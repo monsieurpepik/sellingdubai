@@ -1,6 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
   "https://sellingdubai.ae",
@@ -49,6 +55,29 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'Invalid residency status' }), { status: 400, headers: cors });
     }
 
+    // Rate limiting by IP hash
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-real-ip")
+      || "unknown";
+    const ipHash = await sha256(clientIp + (Deno.env.get("RATE_LIMIT_SALT") || "sd-salt-2026"));
+
+    // Use service role to bypass RLS
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentApps } = await supabase
+      .from("mortgage_applications")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_hash", ipHash)
+      .gt("created_at", oneHourAgo);
+    if (recentApps !== null && recentApps >= 5) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), { status: 429, headers: cors });
+    }
+
     // Build insert payload — only include known columns
     const row: Record<string, unknown> = {
       buyer_name: buyer_name.trim().slice(0, 200),
@@ -71,13 +100,8 @@ Deno.serve(async (req: Request) => {
       assigned_bank: body.assigned_bank || null,
       source: body.source || 'profile_page',
       status: 'new',
+      ip_hash: ipHash,
     };
-
-    // Use service role to bypass RLS
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    );
 
     const { data, error } = await supabase
       .from('mortgage_applications')

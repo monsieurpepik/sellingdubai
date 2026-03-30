@@ -1,6 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
   "https://sellingdubai.ae",
@@ -79,11 +85,28 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Rate limiting by IP hash
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-real-ip")
+      || "unknown";
+    const ipHash = await sha256(clientIp + (Deno.env.get("RATE_LIMIT_SALT") || "sd-salt-2026"));
+
     // Use service role to bypass RLS for lookups
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentLeads } = await supabase
+      .from("project_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_hash", ipHash)
+      .gt("created_at", oneHourAgo);
+    if (recentLeads !== null && recentLeads >= 5) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), { status: 429, headers: cors });
+    }
 
     // Look up the project
     const { data: project, error: projErr } = await supabase
@@ -134,6 +157,7 @@ Deno.serve(async (req: Request) => {
         utm_campaign: utm_campaign || null,
         device_type: device_type || null,
         platform_fee_earned: project.platform_fee_per_lead || 0,
+        ip_hash: ipHash,
       })
       .select("id")
       .single();

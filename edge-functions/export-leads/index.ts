@@ -41,7 +41,10 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
-    const token = url.searchParams.get("token");
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7).trim()
+      : url.searchParams.get("token");
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token required." }), {
