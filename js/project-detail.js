@@ -59,14 +59,14 @@ export async function openProjectDetail(projectSlug) {
       ? `From ${Number(project.min_area_sqft).toLocaleString()} sqft`
       : '';
 
-  // Gallery images (exclude cover if already in list)
-  const galleryImgs = Array.isArray(project.gallery_images) && project.gallery_images.length
-    ? project.gallery_images.filter(u => u && u !== project.cover_image_url)
-    : [];
-
-  // Floor plans
+  // Floor plans (must be defined before galleryImgs to allow deduplication)
   const floorPlans = Array.isArray(project.floor_plan_urls) && project.floor_plan_urls.length
     ? project.floor_plan_urls.filter(Boolean)
+    : [];
+
+  // Gallery images (exclude cover and floor plan URLs — REM stores the site plan in both arrays)
+  const galleryImgs = Array.isArray(project.gallery_images) && project.gallery_images.length
+    ? project.gallery_images.filter(u => u && u !== project.cover_image_url && !floorPlans.includes(u))
     : [];
 
   // Available units
@@ -178,14 +178,20 @@ export async function openProjectDetail(projectSlug) {
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Available Units</h3>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          ${units.map(u => `
-          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <div style="font-size:13px;font-weight:600;">${escHtml(u.unit_type || u.type || u.name || 'Unit')}</div>
-              ${u.area_sqft || u.area ? `<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">${escHtml(String(u.area_sqft || u.area))} sqft</div>` : ''}
+          ${units.map(u => {
+            const bedLabel = u.bedroom ? `${u.bedroom}BR ` : '';
+            const typeLabel = bedLabel + (u.property_types || 'Unit');
+            const areaVal = u.lowest_area || u.area_sqft || u.area;
+            const priceVal = u.lowest_price || u.price || u.min_price;
+            return `
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
+              <div style="font-size:13px;font-weight:600;">${escHtml(typeLabel)}</div>
+              ${priceVal ? `<div style="font-size:13px;font-weight:700;white-space:nowrap;">AED\u00a0${Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0})}</div>` : ''}
             </div>
-            ${u.price || u.min_price ? `<div style="font-size:13px;font-weight:700;">AED\u00a0${Number(u.price || u.min_price).toLocaleString('en-AE', {maximumFractionDigits:0})}</div>` : ''}
-          </div>`).join('')}
+            ${areaVal ? `<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">From ${escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0}))} sqft</div>` : ''}
+          </div>`;
+          }).join('')}
         </div>
       </div>` : ''}
 
