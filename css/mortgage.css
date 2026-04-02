@@ -1,0 +1,325 @@
+/* Cost to Own Calculator */
+.cost-to-own-card {
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: 24px; margin-top: 8px; margin-bottom: 28px;
+  background: rgba(255,255,255,0.02);
+  transition: border-color var(--duration-normal);
+}
+.cost-to-own-title {
+  font-family: 'Manrope', sans-serif; font-size: var(--text-xl-sm); font-weight: 800;
+  color: #fff; margin-bottom: 6px; letter-spacing: -0.3px;
+}
+.cost-to-own-subtitle {
+  font-family: 'Inter', sans-serif; font-size: var(--text-xs); font-weight: 300;
+  color: rgba(255,255,255,0.55); margin-bottom: 20px;
+}
+.cost-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.cost-row:last-child { border-bottom: none; }
+.cost-row-label {
+  font-family: 'Inter', sans-serif; font-size: var(--text-xs-plus); font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  display: flex; align-items: center; gap: 8px;
+}
+.cost-row-label .cost-pct {
+  font-size: var(--text-3xs); font-weight: 500; color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: var(--radius-xs);
+}
+.cost-row-value {
+  font-family: 'Manrope', sans-serif; font-size: var(--text-sm); font-weight: 700;
+  color: rgba(255,255,255,0.9); letter-spacing: -0.3px;
+}
+.cost-divider {
+  width: 100%; height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+.cost-row-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 0 4px;
+}
+.cost-row-total .cost-row-label {
+  font-weight: 600; color: rgba(255,255,255,0.8); font-size: var(--text-xs-plus);
+}
+.cost-row-total .cost-row-value {
+  font-size: var(--text-lg); font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.cost-toggle-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px;
+}
+.cost-toggle-btn {
+  padding: 9px 16px; border-radius: var(--radius-xl); border: 1px solid var(--color-surface-raised);
+  background: transparent; color: rgba(255,255,255,0.55);
+  font-family: 'Inter', sans-serif; font-size: var(--text-xs); font-weight: 500;
+  cursor: pointer; min-height: 38px;
+  transition: transform var(--duration-medium) var(--spring), background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.cost-toggle-btn:active { transform: scale(0.95); transition-duration: var(--duration-instant); }
+.cost-toggle-btn.active {
+  background: var(--color-surface-raised); color: #fff;
+  border-color: rgba(255,255,255,0.55);
+}
+.cost-mortgage-section {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.cost-mortgage-section.hidden { display: none; }
+
+/* Mortgage Rate Cards */
+.mort-rate-card {
+  background: rgba(255,255,255,0.02); border: 1px solid var(--color-surface-raised);
+  border-radius: var(--radius-card); padding: 16px 12px; text-align: center;
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--spring), background var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-normal) var(--spring);
+  -webkit-tap-highlight-color: transparent;
+}
+.mort-rate-card:active { transform: scale(0.96); transition-duration: var(--duration-instant); }
+@media (hover: hover) {
+  .mort-rate-card:hover { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.04); }
+}
+.mort-rate-card.active {
+  background: rgba(77,101,255,0.06); border-color: rgba(77,101,255,0.25);
+  box-shadow: 0 4px 20px rgba(77,101,255,0.08);
+}
+.mort-rate-type {
+  font-family: 'Inter', sans-serif; font-size: var(--text-3xs); font-weight: 500;
+  color: rgba(255,255,255,0.55); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 6px;
+}
+.mort-rate-card.active .mort-rate-type { color: rgba(77,101,255,0.6); }
+.mort-rate-value {
+  font-family: 'Manrope', sans-serif; font-size: var(--text-lg); font-weight: 800;
+  color: #fff; letter-spacing: -0.3px;
+}
+.mort-rate-card.active .mort-rate-value { color: var(--color-brand-light); }
+
+/* Mortgage step indicator — circular numbered */
+.mort-step-bar {
+  display: flex; align-items: center; gap: 0; margin-top: 10px;
+}
+.mort-step-dot {
+  width: 26px; height: 26px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.04); border: 1.5px solid var(--color-border);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background var(--duration-normal) var(--spring), border-color var(--duration-normal) var(--spring), box-shadow var(--duration-normal) var(--spring);
+}
+.mort-step-dot span {
+  font-family: 'Inter', sans-serif; font-size: var(--text-3xs); font-weight: 600;
+  color: rgba(255,255,255,0.55); transition: color var(--duration-normal);
+}
+.mort-step-dot.active {
+  background: rgba(77,101,255,0.12); border-color: var(--color-brand-light);
+  box-shadow: 0 0 12px rgba(77,101,255,0.25);
+}
+.mort-step-dot.active span { color: var(--color-brand-light); font-weight: 700; }
+.mort-step-dot.done {
+  background: var(--color-success); border-color: var(--color-success);
+}
+.mort-step-dot.done span { color: #fff; }
+.mort-step-line {
+  flex: 1; height: 1.5px; min-width: 12px;
+  background: var(--color-border);
+  transition: background var(--duration-normal) var(--spring);
+}
+.mort-step-dot.done + .mort-step-line,
+.mort-step-line:has(+ .mort-step-dot.done),
+.mort-step-line:has(+ .mort-step-dot.active) { background: var(--color-brand-light); }
+
+/* Mortgage bank rate card (full width, horizontal) */
+.mort-bank-card {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px; border-radius: var(--radius-card);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--spring), background var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-normal) var(--spring);
+  -webkit-tap-highlight-color: transparent;
+}
+.mort-bank-card > div:first-child { min-width: 0; flex: 1; }
+.mort-bank-card > div:last-child { flex-shrink: 0; }
+.mort-bank-card:active { transform: scale(0.97); transition-duration: var(--duration-instant); }
+@media (hover: hover) {
+  .mort-bank-card:hover { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.03); }
+}
+.mort-bank-card.active {
+  background: rgba(77,101,255,0.05);
+  border-color: rgba(77,101,255,0.2);
+  box-shadow: 0 4px 20px rgba(77,101,255,0.06);
+}
+.mort-bank-name {
+  font-family: 'Inter', sans-serif; font-size: var(--text-sm); font-weight: 600; color: #fff;
+  letter-spacing: -0.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 100%;
+}
+.mort-bank-product {
+  font-family: 'Inter', sans-serif; font-size: var(--text-2xs); font-weight: 400;
+  color: var(--color-text-muted); margin-top: 3px;
+}
+.mort-bank-rate {
+  font-family: 'Manrope', sans-serif; font-size: var(--text-xl-sm); font-weight: 800;
+  color: #fff; letter-spacing: -0.5px; text-align: right;
+}
+.mort-bank-card.active .mort-bank-rate { color: var(--color-brand-light); }
+.mort-bank-monthly {
+  font-family: 'Inter', sans-serif; font-size: var(--text-2xs); font-weight: 300;
+  color: var(--color-text-muted); text-align: right; margin-top: 3px;
+}
+
+/* Mortgage step container */
+.mort-step {
+  padding: 24px 24px 40px;
+  padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
+  overflow-x: hidden;
+  width: 100%; max-width: 480px; margin: 0 auto;
+}
+/* Ensure lead capture phone input within flex container doesn't break layout */
+.mort-step input[style*="border:none"] {
+  outline: none;
+}
+
+/* Custom range slider — fintech-level */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 2px; border-radius: 1px;
+  background: var(--color-border);
+  outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--spring), box-shadow var(--duration-fast);
+}
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 16px rgba(77,101,255,0.4), 0 0 0 4px rgba(77,101,255,0.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: var(--radius-full);
+  background: #fff; border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-track {
+  height: 2px; border-radius: 1px;
+  background: var(--color-border);
+}
+
+/* Document upload rows */
+.mort-upload-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: var(--radius-card);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--spring), background var(--duration-fast), border-color var(--duration-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.mort-upload-row:active { transform: scale(0.98); transition-duration: var(--duration-instant); }
+@media (hover: hover) {
+  .mort-upload-row:hover { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.03); }
+}
+.mort-upload-row.uploaded {
+  border-color: rgba(37,211,102,0.15);
+  background: rgba(37,211,102,0.03);
+}
+.mort-upload-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-m);
+  background: rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--color-text-muted);
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.mort-upload-row.uploaded .mort-upload-icon { color: var(--color-success); background: rgba(37,211,102,0.08); }
+.mort-upload-info { flex: 1; }
+.mort-upload-label {
+  font-family: 'Inter', sans-serif; font-size: var(--text-xs-plus); font-weight: 600;
+  color: rgba(255,255,255,0.7); display: block;
+}
+.mort-upload-status {
+  font-family: 'Inter', sans-serif; font-size: var(--text-2xs); font-weight: 300;
+  color: rgba(255,255,255,0.55); display: block; margin-top: 3px;
+}
+.mort-upload-row.uploaded .mort-upload-status { color: rgba(37,211,102,0.7); }
+.mort-upload-action { flex-shrink: 0; }
+
+/* Fixed bottom CTA on detail view */
+.detail-cta-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  z-index: 160; width: 100%; max-width: 420px;
+  background: rgba(0,0,0,0.88); backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  padding: 16px 24px; padding-bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex; justify-content: center; gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  animation: fadeUp var(--duration-moderate) var(--spring) var(--duration-fast) both;
+}
+.detail-cta-inquire {
+  flex: 1; max-width: 280px; padding: 16px; border-radius: var(--radius-card); border: none;
+  background: var(--color-brand);
+  color: #fff; font-size: var(--text-base); font-weight: 600;
+  font-family: 'Inter', sans-serif; cursor: pointer;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 var(--color-border);
+  transition: transform var(--duration-medium) var(--spring), box-shadow var(--duration-medium) var(--spring);
+  position: relative; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.detail-cta-inquire::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--color-surface-raised) 0%, transparent 50%);
+  pointer-events: none;
+}
+.detail-cta-inquire:active { transform: scale(0.97); transition-duration: var(--duration-instant); }
+@media (hover: hover) {
+  .detail-cta-inquire:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(17,39,210,0.3), 0 2px 6px rgba(0,0,0,0.2);
+  }
+}
+.detail-cta-wa {
+  width: 52px; height: 52px; border-radius: var(--radius-card); border: none;
+  background: var(--color-success); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform var(--duration-medium) var(--spring), box-shadow var(--duration-medium) var(--spring);
+  -webkit-tap-highlight-color: transparent;
+}
+.detail-cta-wa:active { transform: scale(0.93); transition-duration: var(--duration-instant); }
+@media (hover: hover) {
+  .detail-cta-wa:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(37,211,102,0.25), 0 2px 6px rgba(0,0,0,0.2);
+  }
+}
+
+/* Mortgage amortization bar */
+.mort-amort-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.mort-amort-principal {
+  background: #1127D2;
+}
+
+.mort-amort-interest {
+  background: rgba(255, 80, 80, 0.5);
+}
+
+.mort-amort-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
