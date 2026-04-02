@@ -19,3 +19,17 @@ supabase/functions
 
 # Backup
 app.js.bak
+
+# macOS
+.DS_Store
+
+# Playwright artifacts
+test-results/
+
+# Superpowers plugin cache
+.superpowers/
+
+# Loose image files in repo root
+*.jpeg
+*.jpg
+*.png
