@@ -61,6 +61,13 @@ interface RemProject {
   currency: string;
 }
 
+interface RemPaymentMilestone {
+  phase: string;
+  percentage: number;
+  trigger: string;
+  due_date: string | null;
+}
+
 interface RemDetailData {
   all_images?: string[] | null;
   images?: {
@@ -69,7 +76,7 @@ interface RemDetailData {
     general?:  string[] | null;
     other?:    string[] | null;
   } | null;
-  new_payment_plans?: unknown[] | null;
+  new_payment_plans?: RemPaymentMilestone[] | null;
   typical_units?: unknown[] | null;
   description?: string | null;
   facilities?: { id: number; name: string; description?: string | null; image?: string | null }[] | null;
@@ -254,7 +261,7 @@ Deno.serve(async (req: Request) => {
       district_name:  p.district_name ?? null,
       cover_image_url: p.feature_image ?? null,
       min_price:      p.min_price,
-      max_price:      p.max_price,
+      max_price:      p.max_price || null,
       min_area_sqft:  p.min_area ? parseFloat(p.min_area) : null,
       max_area_sqft:  p.max_area ? parseFloat(p.max_area) : null,
       beds:           p.beds ?? null,
@@ -275,7 +282,12 @@ Deno.serve(async (req: Request) => {
     const galleryImages  = galleryAll.filter(u => u && u !== p.feature_image);
     const floorPlanUrls  = Array.isArray(detail?.images?.general) ? detail!.images!.general!.filter(Boolean) : [];
     const paymentPlanDetail = Array.isArray(detail?.new_payment_plans) && detail!.new_payment_plans!.length > 0
-      ? detail!.new_payment_plans
+      ? detail!.new_payment_plans!.map((plan) => ({
+          phase:      String(plan.phase      ?? 'Phase'),
+          percentage: Number(plan.percentage ?? 0),
+          trigger:    String(plan.trigger    ?? 'on_booking'),
+          due_date:   plan.due_date          ?? null,
+        }))
       : null;
     const availableUnits = Array.isArray(detail?.typical_units) && detail!.typical_units!.length > 0
       ? detail!.typical_units
