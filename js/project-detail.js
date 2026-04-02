@@ -348,6 +348,18 @@ export async function openProjectDetail(projectSlug) {
           ${constructionPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${constructionPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Construction</div></div>` : ''}
           ${handoverPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${handoverPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Handover</div></div>` : ''}
         </div>
+        ${paymentMilestones && paymentMilestones.length ? `
+        <div style="margin-top:12px;position:relative;padding-left:20px;">
+          <div style="position:absolute;left:6px;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,0.08);"></div>
+          ${paymentMilestones.map((m, i) => `
+          <div style="position:relative;margin-bottom:8px;">
+            <div style="position:absolute;left:-17px;top:3px;width:8px;height:8px;border-radius:50%;background:${i === 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)'};"></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-size:11px;color:rgba(255,255,255,0.55);">${escHtml(m.name || '')}</span>
+              <span style="font-size:12px;font-weight:700;">${escHtml(String(m.percentage || ''))}</span>
+            </div>
+          </div>`).join('')}
+        </div>` : ''}
       </div>` : `
       <div style="margin-bottom:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;">
         <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Payment Plan</div>
