@@ -86,8 +86,6 @@
       const properties = await import('./properties.js');
       log('\n✓ properties.js loaded');
       log('  loadProperties: ' + (typeof properties.loadProperties === 'function' ? 'OK' : 'MISSING'));
-      log('  renderPropertyCard: ' + (typeof properties.renderPropertyCard === 'function' ? 'OK' : 'MISSING'));
-      log('  renderOffPlanCard: ' + (typeof properties.renderOffPlanCard === 'function' ? 'OK' : 'MISSING'));
       log('  renderPropertyList: ' + (typeof properties.renderPropertyList === 'function' ? 'OK' : 'MISSING'));
       log('  renderSkeletonCards: ' + (typeof properties.renderSkeletonCards === 'function' ? 'OK' : 'MISSING'));
       log('  initOffPlanCarousel: ' + (typeof properties.initOffPlanCarousel === 'function' ? 'OK' : 'MISSING'));
