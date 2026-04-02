@@ -129,6 +129,7 @@
     border-top: 1px solid rgba(0,0,0,0.06);
   }
   @media (max-width: 768px) { .sticky-cta { display: block; } }
+  @media (max-width: 767px) { .dot-pattern { display: none; } }
 
   /* Language switcher */
 
@@ -911,6 +912,10 @@ function joinWaitlist(e, form) {
   if (msgEl) { msgEl.textContent = ''; msgEl.classList.add('hidden'); }
   if (!name || name.length < 2) {
     if (msgEl) { msgEl.textContent = 'Please enter your name.'; msgEl.classList.remove('hidden'); }
+    return false;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (msgEl) { msgEl.textContent = 'Please enter a valid email address.'; msgEl.classList.remove('hidden'); }
     return false;
   }
 
