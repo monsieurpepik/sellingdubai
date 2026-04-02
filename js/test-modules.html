@@ -36,6 +36,8 @@
       log('  getAgentSlug: ' + (typeof utils.getAgentSlug === 'function' ? 'OK' : 'MISSING'));
       log('  optimizeImg: ' + (typeof utils.optimizeImg === 'function' ? 'OK' : 'MISSING'));
       log('  optimizeImg CDN: ' + (utils.optimizeImg('https://pjyorgedaxevxophpfib.supabase.co/img.jpg', 400).includes('/.netlify/images') ? 'OK' : 'FAIL'));
+      log('  optimizeImg(empty): ' + (utils.optimizeImg('') === '' ? 'OK' : 'FAIL'));
+      log('  optimizeImg(unsplash): ' + (utils.optimizeImg('https://images.unsplash.com/photo-123') === 'https://images.unsplash.com/photo-123' ? 'OK' : 'FAIL'));
 
       // Test icons.js
       const icons = await import('./icons.js');
