@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../js/config.js"],
-  "sourcesContent": ["// ==========================================\n// CONFIGURATION\n// ==========================================\nexport const DEMO_MODE = false;\nexport const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';\nexport const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';\nexport const CAPTURE_URL = `${SUPABASE_URL}/functions/v1/capture-lead`;\nexport const LOG_EVENT_URL = SUPABASE_URL + '/functions/v1/log-event';\n\nexport const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);\n"],
-  "mappings": "AAGO,IAAMA,EAAY,GACZC,EAAe,2CACfC,EAAoB,mNACpBC,EAAc,GAAGF,CAAY,6BAC7BG,EAAgBH,EAAe,0BAE/BI,EAAW,OAAO,SAAS,aAAaJ,EAAcC,CAAiB",
-  "names": ["DEMO_MODE", "SUPABASE_URL", "SUPABASE_ANON_KEY", "CAPTURE_URL", "LOG_EVENT_URL", "supabase"]
-}

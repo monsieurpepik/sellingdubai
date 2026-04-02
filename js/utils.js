@@ -49,3 +49,14 @@ export function getAgentSlug() {
   const params = new URLSearchParams(window.location.search);
   return params.get('agent') || null;
 }
+
+// ==========================================
+// IMAGE OPTIMIZATION
+// ==========================================
+// Netlify Image CDN — WebP, max width, quality 80
+// Unsplash URLs are not allowlisted — served directly
+export function optimizeImg(url, w = 800) {
+  if (!url) return '';
+  if (url.includes('images.unsplash.com')) return url;
+  return `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&q=80&fm=webp`;
+}

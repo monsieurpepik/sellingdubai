@@ -34,6 +34,8 @@
       log('  handleImgError: ' + (typeof utils.handleImgError === 'function' ? 'OK' : 'MISSING'));
       log('  window.handleImgError: ' + (typeof window.handleImgError === 'function' ? 'OK' : 'MISSING'));
       log('  getAgentSlug: ' + (typeof utils.getAgentSlug === 'function' ? 'OK' : 'MISSING'));
+      log('  optimizeImg: ' + (typeof utils.optimizeImg === 'function' ? 'OK' : 'MISSING'));
+      log('  optimizeImg CDN: ' + (utils.optimizeImg('https://pjyorgedaxevxophpfib.supabase.co/img.jpg', 400).includes('/.netlify/images') ? 'OK' : 'FAIL'));
 
       // Test icons.js
       const icons = await import('./icons.js');
@@ -197,7 +199,7 @@
       }
 
       log('\n=============================');
-      log('ALL 12 MODULES PASSED');
+      log('ALL MODULES PASSED');
     } catch (e) {
       log('\n✗ ERROR: ' + e.message);
       log('  Stack: ' + e.stack);

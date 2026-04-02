@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../js/state.js"],
-  "sourcesContent": ["// ==========================================\n// SHARED MUTABLE STATE\n// ==========================================\nexport let currentAgent = null;\nexport let allProperties = [];\nexport let currentFilters = { search: '', priceMin: 0, priceMax: 0, beds: 0, baths: 0, furnishing: 'all', areaMin: 0, areaMax: 0, amenities: [] };\n\nexport function setCurrentAgent(agent) {\n  currentAgent = agent;\n}\n\nexport function setAllProperties(props) {\n  allProperties = props;\n}\n\nexport function setCurrentFilters(filters) {\n  currentFilters = filters;\n}\n\nexport function resetCurrentFilters() {\n  currentFilters = { search: '', priceMin: 0, priceMax: 0, beds: 0, baths: 0, furnishing: 'all', areaMin: 0, areaMax: 0, amenities: [] };\n}\n"],
-  "mappings": "AAGO,IAAIA,EAAe,KACfC,EAAgB,CAAC,EACjBC,EAAiB,CAAE,OAAQ,GAAI,SAAU,EAAG,SAAU,EAAG,KAAM,EAAG,MAAO,EAAG,WAAY,MAAO,QAAS,EAAG,QAAS,EAAG,UAAW,CAAC,CAAE,EAEzI,SAASC,EAAgBC,EAAO,CACrCJ,EAAeI,CACjB,CAEO,SAASC,EAAiBC,EAAO,CACtCL,EAAgBK,CAClB,CAMO,SAASC,GAAsB,CACpCC,EAAiB,CAAE,OAAQ,GAAI,SAAU,EAAG,SAAU,EAAG,KAAM,EAAG,MAAO,EAAG,WAAY,MAAO,QAAS,EAAG,QAAS,EAAG,UAAW,CAAC,CAAE,CACvI",
-  "names": ["currentAgent", "allProperties", "currentFilters", "setCurrentAgent", "agent", "setAllProperties", "props", "resetCurrentFilters", "currentFilters"]
-}
