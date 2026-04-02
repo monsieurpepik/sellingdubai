@@ -300,12 +300,36 @@ function renderRemProjectCard(p, devName) {
     ? `<img class="offplan-img" src="${escAttr(optimizeImg(p.cover_image_url))}" alt="${safeName}" width="800" height="500" loading="lazy" onerror="handleImgError(this)">`
     : `<div class="offplan-img-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.08)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`;
 
+  const devLogoUrl = p.developers?.logo_url || null;
+  const devNameSafe = devName ? escHtml(devName) : '';
+  const devHtml = devNameSafe
+    ? devLogoUrl
+      ? `<div class="offplan-developer">
+          <img class="offplan-dev-logo" src="${escAttr(optimizeImg(devLogoUrl, 60))}" alt="${devNameSafe}" width="60" height="24" loading="lazy" onerror="this.style.display='none'">
+          <span class="offplan-dev-name">${devNameSafe}</span>
+         </div>`
+      : `<div class="offplan-developer">${devNameSafe}</div>`
+    : '';
+
   let priceHtml = '';
   if (p.min_price && p.min_price > 0) {
     const formatted = 'AED ' + Number(p.min_price).toLocaleString('en-AE', { maximumFractionDigits: 0 });
     priceHtml = `<div class="offplan-price"><span class="offplan-price-label">Starting from</span><span class="offplan-price-value">${formatted}</span></div>`;
   } else {
     priceHtml = `<div class="offplan-price"><span class="offplan-price-value">Price on Request</span></div>`;
+  }
+
+  let availHtml = '';
+  if (Array.isArray(p.available_units) && p.available_units.length > 0) {
+    const total = p.available_units.length;
+    const available = p.available_units.filter(u => !u.status || u.status === 'available').length;
+    const pct = Math.max(10, Math.round((available / total) * 100));
+    availHtml = `<div class="offplan-avail">
+      <div class="offplan-avail-bar">
+        <div class="offplan-avail-fill" style="width:${pct}%"></div>
+      </div>
+      <span class="offplan-avail-label">${available} unit${available !== 1 ? 's' : ''} available</span>
+    </div>`;
   }
 
   const location = escHtml((p.district_name || p.area || p.location || '').split(',')[0]);
@@ -328,10 +352,11 @@ function renderRemProjectCard(p, devName) {
       <span class="offplan-badge ${badgeClass}">${statusBadge}</span>
     </div>
     <div class="offplan-body">
-      ${devName ? `<div class="offplan-developer">${escHtml(devName)}</div>` : ''}
+      ${devHtml}
       <div class="offplan-title">${safeName}</div>
       ${location ? `<div class="offplan-location"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>${location}</div>` : ''}
       ${priceHtml}
+      ${availHtml}
       ${metaHtml}
     </div>
   </div>`;
@@ -358,7 +383,7 @@ export async function loadRemProjects(agentSlug, agentId) {
       ];
       const { data, error: remErr } = await supabase
         .from('projects')
-        .select('id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, developers!projects_developer_id_fkey(name)')
+        .select('id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, available_units, developers!projects_developer_id_fkey(name, logo_url)')
         .not('status', 'in', '(completed,sold_out)')
         .order('min_price', { ascending: false, nullsFirst: false })
         .limit(100);
@@ -373,7 +398,7 @@ export async function loadRemProjects(agentSlug, agentId) {
       // Approved only — via junction table
       const { data } = await supabase
         .from('agent_projects')
-        .select('projects(id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, developers!projects_developer_id_fkey(name))')
+        .select('projects(id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, available_units, developers!projects_developer_id_fkey(name, logo_url))')
         .eq('agent_id', agentId)
         .eq('status', 'approved')
         .limit(12);
