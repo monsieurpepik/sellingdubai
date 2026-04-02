@@ -2,25 +2,32 @@
 // OFF-PLAN PROJECT DETAIL (lazy loaded)
 // ==========================================
 import { supabase } from './config.js';
-import { escHtml, escAttr } from './utils.js';
+import { escHtml, escAttr, optimizeImg } from './utils.js';
 import { currentAgent } from './state.js';
 
 let _detailProject = null;
 
-const NETLIFY_IMG = (url, w) =>
-  url ? `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80` : '';
-
 const fmtPrice = (n) =>
   n ? 'AED\u00a0' + Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 }) : null;
 
-// Strip dangerous tags from trusted CRM HTML before inserting into DOM.
+// Strip dangerous tags from trusted CRM HTML using the browser's own HTML parser.
+// DOM-based approach handles javascript: URLs, SVG XSS, and malformed markup that
+// regex patterns miss.
 const sanitizeHtml = (html) => {
   if (!html) return '';
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
-    .replace(/\s+on\w+="[^"]*"/gi, '')
-    .replace(/\s+on\w+='[^']*'/gi, '');
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  tpl.content.querySelectorAll('script,iframe,object,embed,form,base').forEach(el => el.remove());
+  tpl.content.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(attr => {
+      if (/^on/i.test(attr.name)) { el.removeAttribute(attr.name); return; }
+      if (/^(href|src|action|formaction)$/i.test(attr.name) && /^\s*(javascript|data):/i.test(attr.value))
+        el.removeAttribute(attr.name);
+    });
+  });
+  const wrap = document.createElement('div');
+  wrap.appendChild(tpl.content.cloneNode(true));
+  return wrap.innerHTML;
 };
 
 const statusLabel = (s) =>
@@ -108,7 +115,7 @@ function _lbRender() {
   const prev = document.getElementById('proj-lb-prev');
   const next = document.getElementById('proj-lb-next');
   if (!img) return;
-  img.src = NETLIFY_IMG(_lbImgs[_lbIdx], 1200);
+  img.src = optimizeImg(_lbImgs[_lbIdx], 1200);
   img.style.transform = `scale(${_lbScale})`;
   if (counter) counter.textContent = `${_lbIdx + 1} / ${_lbImgs.length}`;
   const multi = _lbImgs.length > 1;
@@ -137,6 +144,38 @@ window.closeProjLightbox = function() {
   if (lb) lb.style.display = 'none';
   document.body.style.overflow = '';
 };
+
+function _injectProjectSchema(project) {
+  document.querySelector('script[data-sd-project-ld]')?.remove();
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'ApartmentComplex',
+    'name': project.name || '',
+    'url': window.location.href,
+    'address': {
+      '@type': 'PostalAddress',
+      'addressLocality': project.district_name || project.location || project.area || 'Dubai',
+      'addressCountry': 'AE',
+    },
+  };
+  if (project.description) schema.description = project.description.slice(0, 200);
+  if (project.cover_image_url) schema.image = optimizeImg(project.cover_image_url, 800);
+  if (project.min_price) {
+    schema.priceRange = project.max_price
+      ? `AED ${Number(project.min_price).toLocaleString()} – AED ${Number(project.max_price).toLocaleString()}`
+      : `From AED ${Number(project.min_price).toLocaleString()}`;
+  }
+  if (project.beds) schema.numberOfRooms = String(project.beds);
+  if (project.min_area_sqft) {
+    schema.floorSize = { '@type': 'QuantitativeValue', 'minValue': project.min_area_sqft, 'unitText': 'SqFt' };
+    if (project.max_area_sqft) schema.floorSize.maxValue = project.max_area_sqft;
+  }
+  const el = document.createElement('script');
+  el.type = 'application/ld+json';
+  el.setAttribute('data-sd-project-ld', '1');
+  el.textContent = JSON.stringify(schema);
+  document.head.appendChild(el);
+}
 
 export async function openProjectDetail(projectSlug) {
   const sheet = document.getElementById('detail-sheet');
@@ -172,6 +211,7 @@ export async function openProjectDetail(projectSlug) {
 
   const dev = project.developers || {};
   _detailProject = project;
+  _injectProjectSchema(project);
   window._openProjectMortgage = function() {
     if (!_detailProject) return;
     if (typeof window.initMortModal === 'function') {
@@ -186,7 +226,7 @@ export async function openProjectDetail(projectSlug) {
       });
     }
   };
-  const imgSrc = project.cover_image_url ? NETLIFY_IMG(project.cover_image_url, 800) : '';
+  const imgSrc = project.cover_image_url ? optimizeImg(project.cover_image_url, 800) : '';
   const minP = fmtPrice(project.min_price);
   const maxP = fmtPrice(project.max_price);
   const priceStr = minP && maxP ? `${minP} – ${maxP}` : minP ? `From ${minP}` : (maxP || '');
@@ -281,7 +321,7 @@ export async function openProjectDetail(projectSlug) {
     <div style="position:relative;flex-shrink:0;">
       <div id="proj-gallery" style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
         ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(0)"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
-        ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(${lbIdx})"><img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" onerror="handleImgError(this)"></div>`; }).join('')}
+        ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(${lbIdx})"><img src="${escAttr(optimizeImg(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" onerror="handleImgError(this)"></div>`; }).join('')}
       </div>
       ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
     </div>` : ''}
@@ -310,7 +350,7 @@ export async function openProjectDetail(projectSlug) {
       <!-- Developer card -->
       ${dev.name ? `
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
-        ${dev.logo_url ? `<img src="${escAttr(NETLIFY_IMG(dev.logo_url, 80))}" alt="${escAttr(dev.name)}" style="width:44px;height:44px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,0.08);flex-shrink:0;" onerror="handleImgError(this)">` : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏗️</div>`}
+        ${dev.logo_url ? `<img src="${escAttr(optimizeImg(dev.logo_url, 80))}" alt="${escAttr(dev.name)}" style="width:44px;height:44px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,0.08);flex-shrink:0;" onerror="handleImgError(this)">` : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏗️</div>`}
         <div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:2px;">Developer</div>
           <div style="font-weight:600;font-size:14px;">${escHtml(dev.name)}</div>
@@ -360,7 +400,7 @@ export async function openProjectDetail(projectSlug) {
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Site Plan</h3>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          ${sitePlanImgs.map((u, i) => `<img src="${escAttr(NETLIFY_IMG(u, 800))}" alt="Site plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" onerror="this.style.display='none'">`).join('')}
+          ${sitePlanImgs.map((u, i) => `<img src="${escAttr(optimizeImg(u, 800))}" alt="Site plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" onerror="this.style.display='none'">`).join('')}
         </div>
       </div>` : ''}
 
