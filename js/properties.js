@@ -305,7 +305,7 @@ function renderRemProjectCard(p, devName) {
   const devHtml = devNameSafe
     ? devLogoUrl
       ? `<div class="offplan-developer">
-          <img class="offplan-dev-logo" src="${escAttr(optimizeImg(devLogoUrl, 60))}" alt="${devNameSafe}" width="60" height="24" loading="lazy" onerror="this.style.display='none'">
+          <img class="offplan-dev-logo" src="${escAttr(optimizeImg(devLogoUrl, 60))}" alt="${devNameSafe}" width="60" height="24" loading="lazy" onerror="handleImgError(this)">
           <span class="offplan-dev-name">${devNameSafe}</span>
          </div>`
       : `<div class="offplan-developer">${devNameSafe}</div>`
