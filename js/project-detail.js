@@ -286,9 +286,6 @@ export async function openProjectDetail(projectSlug) {
   }
   const hasPaymentPlan = bookingPct != null || constructionPct != null || handoverPct != null;
 
-  const completionStr = project.completion_date
-    ? new Date(project.completion_date).toLocaleDateString('en-AE', { month: 'long', year: 'numeric' })
-    : null;
   const completionShort = project.completion_date
     ? new Date(project.completion_date).toLocaleDateString('en-AE', { month: 'short', year: 'numeric' })
     : null;
