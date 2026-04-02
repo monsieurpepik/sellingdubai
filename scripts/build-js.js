@@ -41,3 +41,22 @@ esbuild.build({
     __SUPABASE_ANON_KEY__: JSON.stringify(key),
   },
 }).catch(() => process.exit(1));
+
+// Patch pricing.html BILLING_LIVE flag from build-time env var.
+// pricing.html is served directly from root (publish = ".") and is not
+// processed by esbuild, so we do a string replacement here instead.
+// Safe to run in-place: Netlify CI starts from a fresh clone each deploy.
+// Locally, BILLING_LIVE defaults to false so this is a no-op.
+const billingLive = process.env.BILLING_LIVE === 'true';
+const pricingPath = 'pricing.html';
+const pricingHtml = fs.readFileSync(pricingPath, 'utf8');
+const pricingPatched = pricingHtml.replace(
+  'const BILLING_LIVE = false;',
+  `const BILLING_LIVE = ${billingLive};`
+);
+if (pricingPatched === pricingHtml && billingLive) {
+  console.error('build-js: BILLING_LIVE patch failed — target string not found in pricing.html');
+  process.exit(1);
+}
+fs.writeFileSync(pricingPath, pricingPatched, 'utf8');
+console.log(`build-js: pricing.html BILLING_LIVE patched to ${billingLive}`);
