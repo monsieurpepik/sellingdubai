@@ -175,7 +175,7 @@ export function renderOffPlanCard(p) {
 //   statusLabels — PROP_STATUS_LABELS map from dashboard.js
 // ==========================================
 export function renderAdminCard(p, idx, total, statusLabels) {
-  const safeTitle = escHtml(p.title || '');
+  const safeTitle = escAttr(p.title || '');
   const safeId = escAttr(String(p.id));
   const status = p.status || 'available';
   const statusLabel = statusLabels[status] || status;
