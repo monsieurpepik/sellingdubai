@@ -91,6 +91,13 @@ function _lbEnsureCreated() {
       <button onclick="window._lbStep(1)" aria-label="Next" id="proj-lb-next" style="position:absolute;right:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x203A;</button>
     </div>`;
   document.body.appendChild(el);
+  document.addEventListener('keydown', function _lbKey(e) {
+    const lb = document.getElementById('proj-lb');
+    if (!lb || lb.style.display === 'none') return;
+    if (e.key === 'Escape') closeProjLightbox();
+    else if (e.key === 'ArrowLeft') window._lbStep(-1);
+    else if (e.key === 'ArrowRight') window._lbStep(1);
+  });
   const img = el.querySelector('#proj-lb-img');
   let _pinching = false, _pinchDist = 0, _touchStartX = 0;
   img.addEventListener('touchstart', (e) => {
@@ -307,7 +314,7 @@ export async function openProjectDetail(projectSlug) {
         ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(0)"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
         ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(${lbIdx})"><img src="${escAttr(optimizeImg(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" onerror="handleImgError(this)"></div>`; }).join('')}
       </div>
-      ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
+      ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
     </div>` : ''}
 
     ${showStatsBar ? `
@@ -356,21 +363,21 @@ export async function openProjectDetail(projectSlug) {
             <div style="position:absolute;left:-17px;top:3px;width:8px;height:8px;border-radius:50%;background:${i === 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)'};"></div>
             <div style="display:flex;justify-content:space-between;align-items:baseline;">
               <span style="font-size:11px;color:rgba(255,255,255,0.55);">${escHtml(m.name || '')}</span>
-              <span style="font-size:12px;font-weight:700;">${escHtml(String(m.percentage || ''))}</span>
+              <span style="font-size:13px;font-weight:700;">${escHtml(String(m.percentage || ''))}</span>
             </div>
           </div>`).join('')}
         </div>` : ''}
       </div>` : `
       <div style="margin-bottom:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;">
         <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Payment Plan</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.45);">Contact the agent for full payment plan details.</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.45);">Contact the agent for full payment plan details.</div>
       </div>`}
 
       <!-- Available units -->
       ${units.length ? `
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Available Units</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:2px;padding:0 2px 6px;font-size:9px;color:rgba(255,255,255,0.25);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:2px;padding:0 2px 6px;font-size:10px;color:rgba(255,255,255,0.25);">
           <span>Type</span><span>Size</span><span>From</span><span style="text-align:right;">Avail.</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;">
@@ -390,7 +397,7 @@ export async function openProjectDetail(projectSlug) {
             <div style="font-size:11px;font-weight:700;">${escHtml(typeLabel)}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.5);">${areaVal ? escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0})) + '\u00a0sqft' : ''}</div>
             <div style="font-size:11px;font-weight:600;">${priceVal ? 'AED\u00a0' + Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0}) : ''}</div>
-            <div style="font-size:9px;font-weight:600;text-align:right;color:${availColor};">${availText}</div>
+            <div style="font-size:10px;font-weight:600;text-align:right;color:${availColor};">${availText}</div>
           </div>`;
           }).join('')}
         </div>
@@ -412,7 +419,7 @@ export async function openProjectDetail(projectSlug) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           ${facilities.map(f => `
           <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 10px;text-align:center;gap:6px;">
-            <span class="material-symbols-outlined" style="font-size:32px;color:#1127D2;line-height:1;">${escHtml(facilityIcon(f.name))}</span>
+            <span class="material-symbols-outlined" style="font-size:32px;color:rgba(255,255,255,0.55);line-height:1;">${escHtml(facilityIcon(f.name))}</span>
             <div style="font-size:11px;color:rgba(255,255,255,0.8);line-height:1.3;">${escHtml(f.name)}</div>
           </div>`).join('')}
         </div>
@@ -426,7 +433,7 @@ export async function openProjectDetail(projectSlug) {
           ${nearbyLocations.map((l, i) => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;${i < nearbyLocations.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : ''}">
             <span style="font-size:13px;color:rgba(255,255,255,0.75);">📍 ${escHtml(l.name)}</span>
-            ${l.distance ? `<span style="font-size:12px;color:rgba(255,255,255,0.4);white-space:nowrap;margin-left:8px;">${escHtml(l.distance)}</span>` : ''}
+            ${l.distance ? `<span style="font-size:13px;color:rgba(255,255,255,0.4);white-space:nowrap;margin-left:8px;">${escHtml(l.distance)}</span>` : ''}
           </div>`).join('')}
         </div>
       </div>` : ''}
@@ -436,7 +443,7 @@ export async function openProjectDetail(projectSlug) {
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">About</h3>
         <div id="proj-desc" style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${sanitizeHtml(project.description)}</div>
-        <button id="proj-desc-more" onclick="(function(){var d=document.getElementById('proj-desc');d.style.webkitLineClamp='unset';d.style.overflow='visible';d.style.display='block';document.getElementById('proj-desc-more').style.display='none';})()" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:12px;padding:4px 0 0;cursor:pointer;font-family:'Inter',sans-serif;">Read more</button>
+        <button id="proj-desc-more" onclick="(function(){var d=document.getElementById('proj-desc');d.style.webkitLineClamp='unset';d.style.overflow='visible';d.style.display='block';document.getElementById('proj-desc-more').style.display='none';})()" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:13px;padding:4px 0 0;cursor:pointer;font-family:'Inter',sans-serif;">Read more</button>
       </div>` : ''}
 
       <!-- Brochure download (gate behind lead capture) -->
