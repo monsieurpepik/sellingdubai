@@ -5,6 +5,8 @@ import { supabase } from './config.js';
 import { escHtml, escAttr } from './utils.js';
 import { currentAgent } from './state.js';
 
+let _detailProject = null;
+
 const NETLIFY_IMG = (url, w) =>
   url ? `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80` : '';
 
@@ -169,10 +171,25 @@ export async function openProjectDetail(projectSlug) {
   }
 
   const dev = project.developers || {};
+  _detailProject = project;
+  window._openProjectMortgage = function() {
+    if (!_detailProject) return;
+    if (typeof window.initMortModal === 'function') {
+      window.initMortModal({
+        mode: 'offplan',
+        project: {
+          name:           _detailProject.name,
+          minPrice:       _detailProject.min_price,
+          milestones:     _detailProject.payment_plan_detail,
+          completionDate: _detailProject.completion_date,
+        },
+      });
+    }
+  };
   const imgSrc = project.cover_image_url ? NETLIFY_IMG(project.cover_image_url, 800) : '';
   const minP = fmtPrice(project.min_price);
   const maxP = fmtPrice(project.max_price);
-  const priceStr = minP && maxP ? `${minP} – ${maxP}` : (minP || maxP || '');
+  const priceStr = minP && maxP ? `${minP} – ${maxP}` : minP ? `From ${minP}` : (maxP || '');
   const loc = project.district_name || project.location || project.area || '';
   const types = Array.isArray(project.property_types) && project.property_types.length
     ? project.property_types.join(', ') : '';
@@ -394,6 +411,7 @@ export async function openProjectDetail(projectSlug) {
 
     <div style="display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
       <button data-name="${escAttr(project.name)}" onclick="openLead(this.dataset.name)" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
+      <button onclick="_openProjectMortgage()" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Mortgage</button>
       ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
     </div>`;
 
@@ -408,4 +426,5 @@ export async function openProjectDetail(projectSlug) {
       }, { passive: true });
     }
   }
+
 }

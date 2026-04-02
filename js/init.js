@@ -17,7 +17,25 @@ window.closeDetail = function() {
 let _gallery, _propDetail, _leadModal, _filters;
 
 function lazyLoad(promise, name) {
-  return promise.catch(e => { console.error(`[${name}] failed to load:`, e); });
+  return promise.catch(e => {
+    console.error(`[${name}] failed to load:`, e);
+    showFeatureError(name);
+  });
+}
+
+function showFeatureError(featureName) {
+  let toast = document.getElementById('feature-error-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'feature-error-toast';
+    toast.setAttribute('role', 'alert');
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;background:#1d1d1f;color:#fff;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 20px;font-family:Inter,sans-serif;font-size:13px;font-weight:500;box-shadow:0 4px 24px rgba(0,0,0,0.4);pointer-events:none;opacity:0;transition:opacity 0.2s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = `${featureName} couldn't load — please refresh the page.`;
+  toast.style.opacity = '1';
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
 }
 
 // gallery.js — loaded on first photo/gallery open
@@ -84,6 +102,19 @@ window.openMortgage = async function openMortgageLazy() {
     if (window.openMortgage !== openMortgageLazy) window.openMortgage();
   } catch (e) {
     console.error('[mortgage] failed to load:', e);
+    showFeatureError('Mortgage calculator');
+  }
+};
+
+// initMortModal — off-plan mode entry point; shares same lazy load as openMortgage
+window.initMortModal = async function initMortModalLazy(opts) {
+  try {
+    await import('./mortgage.js');
+    // mortgage.js registers window.initMortModal as a side-effect.
+    if (window.initMortModal !== initMortModalLazy) window.initMortModal(opts);
+  } catch (e) {
+    console.error('[mortgage] failed to load:', e);
+    showFeatureError('Mortgage calculator');
   }
 };
 
@@ -143,7 +174,7 @@ async function init() {
   const timeout = setTimeout(() => { showPage('error'); }, 10000);
 
   try {
-    const { data: agent, error } = await supabase
+    const { data: agent, error } = await supabase // await-ok: single primary fetch, nothing to parallelize
       .from('agents')
       .select('id,slug,name,photo_url,background_image_url,verification_status,tagline,bio,phone,dld_broker_number,broker_number,dld_total_deals,dld_total_volume_aed,dld_verified,agency_name,agency_logo_url,whatsapp,email,calendly_url,custom_link_1_url,custom_link_1_label,custom_link_2_url,custom_link_2_label,instagram_url,youtube_url,tiktok_url,linkedin_url,facebook_pixel_id,ga4_measurement_id,show_golden_visa,show_preapproval,tier,referral_code,stripe_subscription_status,stripe_current_period_end')
       .eq('slug', slug)
@@ -159,7 +190,7 @@ async function init() {
       let isOwner = false;
       if (ownerToken) {
         try {
-          const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', {
+          const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', { // await-ok: conditional on ownerToken, depends on agent.id from prior query
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: ownerToken })
