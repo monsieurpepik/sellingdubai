@@ -73,8 +73,8 @@ window.initMortModal = function(opts = {}) {
   // Merge opts over defaults; deep-clone data to avoid mutation
   _mortState = {
     ..._mortStateDefaults,
-    data: { ..._mortStateDefaults.data },
     ...opts,
+    data: { ..._mortStateDefaults.data, ...(opts.data || {}) },
   };
   _mortRatesLoadFailed = false;
   modal.classList.add('open');
