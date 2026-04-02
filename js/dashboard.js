@@ -620,6 +620,10 @@
       return;
     }
 
+    if (typeof window.renderAdminCard !== 'function') {
+      console.error('[dashboard] renderAdminCard bridge not ready — components.js may not have loaded');
+      return;
+    }
     container.innerHTML = props.map((p, idx) => window.renderAdminCard(p, idx, props.length, PROP_STATUS_LABELS)).join('');
   }
 
