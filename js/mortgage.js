@@ -669,6 +669,26 @@ function injectMortgageSuccessCta(payload) {
     </div>
   </div>`;
 
+  // Amortization bar — only if we have calculated values stored in _mortState.data
+  const loanAmt    = _mortState.data.loanAmt        || 0;
+  const totalInt   = _mortState.data.totalInterest   || 0;
+  const totalPaid  = loanAmt + totalInt;
+  if (totalPaid > 0) {
+    const principalPct = Math.round((loanAmt   / totalPaid) * 100);
+    const interestPct  = 100 - principalPct;
+    html += `<div style="margin-bottom:16px;">
+    <div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Loan Cost Breakdown</div>
+    <div class="mort-amort-bar" style="display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:8px;">
+      <div class="mort-amort-principal" style="width:${principalPct}%;background:#1127D2;"></div>
+      <div class="mort-amort-interest"  style="width:${interestPct}%;background:rgba(255,80,80,0.5);"></div>
+    </div>
+    <div class="mort-amort-labels" style="display:flex;justify-content:space-between;">
+      <span style="font-size:11px;color:rgba(255,255,255,0.45);">Principal: <strong style="color:#fff;">${fmtAEDMort(loanAmt)}</strong></span>
+      <span style="font-size:11px;color:rgba(255,255,255,0.45);">Total interest: <strong style="color:rgba(255,120,120,0.85);">${fmtAEDMort(totalInt)}</strong></span>
+    </div>
+  </div>`;
+  }
+
   injectEl.innerHTML = html;
   if (doneBtn) step4.insertBefore(injectEl, doneBtn);
 }
