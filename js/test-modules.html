@@ -200,6 +200,25 @@
         log('\n✗ init.js parse error: ' + e.message);
       }
 
+      // Test components.js
+      const components = await import('./components.js');
+      log('\n✓ components.js loaded');
+      log('  renderPropertyCard: ' + (typeof components.renderPropertyCard === 'function' ? 'OK' : 'MISSING'));
+      log('  renderOffPlanCard: ' + (typeof components.renderOffPlanCard === 'function' ? 'OK' : 'MISSING'));
+      log('  renderAdminCard: ' + (typeof components.renderAdminCard === 'function' ? 'OK' : 'MISSING'));
+      // renderPropertyCard output checks
+      const card = components.renderPropertyCard({ id: 'c1', title: 'Palm Villa', price: 'AED 5,000,000', bedrooms: 4, bathrooms: 3, area_sqft: 3200, property_type: 'Villa', location: 'Palm Jumeirah', status: 'available' }, 0);
+      log('  renderPropertyCard has prop-card: ' + (card.includes('prop-card') ? 'OK' : 'FAIL'));
+      log('  renderPropertyCard has View details link: ' + (card.includes('prop-view-link') ? 'OK' : 'FAIL'));
+      log('  renderPropertyCard aria-label: ' + (card.includes('View details for Palm Villa') ? 'OK' : 'FAIL'));
+      log('  renderPropertyCard alt tag: ' + (card.includes('alt="Palm Villa"') ? 'OK' : 'FAIL'));
+      // renderAdminCard output checks
+      const STATUS_LABELS = { available: 'Available', just_listed: 'Just Listed', sold: 'Sold', rented: 'Rented', under_offer: 'Under Offer', just_sold: 'Just Sold', open_house: 'Open House' };
+      const adminCard = components.renderAdminCard({ id: 'a1', title: 'Marina Apt', price: '2,500,000', status: 'available', bedrooms: 2, property_type: 'Apartment', location: 'Dubai Marina', image_url: null }, 0, 1, STATUS_LABELS);
+      log('  renderAdminCard has prop-card: ' + (adminCard.includes('prop-card') ? 'OK' : 'FAIL'));
+      log('  renderAdminCard Edit aria-label: ' + (adminCard.includes('aria-label="Edit Marina Apt"') ? 'OK' : 'FAIL'));
+      log('  renderAdminCard Delete aria-label: ' + (adminCard.includes('aria-label="Delete Marina Apt"') ? 'OK' : 'FAIL'));
+
       log('\n=============================');
       log('ALL MODULES PASSED');
     } catch (e) {
