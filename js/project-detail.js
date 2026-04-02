@@ -9,6 +9,13 @@ let _detailProject = null;
 
 const fmtPrice = (n) =>
   n ? 'AED\u00a0' + Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 }) : null;
+const fmtCompact = (n) => {
+  if (!n) return null;
+  const num = Number(n);
+  if (num >= 1_000_000) return 'AED\u00a0' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1_000) return 'AED\u00a0' + Math.round(num / 1_000) + 'K';
+  return 'AED\u00a0' + num.toLocaleString('en-AE', { maximumFractionDigits: 0 });
+};
 
 // Strip dangerous tags from trusted CRM HTML using the browser's own HTML parser.
 // DOM-based approach handles javascript: URLs, SVG XSS, and malformed markup that
@@ -282,6 +289,19 @@ export async function openProjectDetail(projectSlug) {
   const completionStr = project.completion_date
     ? new Date(project.completion_date).toLocaleDateString('en-AE', { month: 'long', year: 'numeric' })
     : null;
+  const completionShort = project.completion_date
+    ? new Date(project.completion_date).toLocaleDateString('en-AE', { month: 'short', year: 'numeric' })
+    : null;
+
+  const statCells = [];
+  if (project.min_price) statCells.push({ label: 'From', value: fmtCompact(project.min_price) });
+  if (completionShort) statCells.push({ label: 'Handover', value: completionShort });
+  if (project.min_area_sqft) statCells.push({ label: 'Size from', value: Number(project.min_area_sqft).toLocaleString('en-AE', { maximumFractionDigits: 0 }) + '\u00a0sqft' });
+  if (hasPaymentPlan) {
+    const parts = [bookingPct, constructionPct, handoverPct].filter(v => v != null);
+    statCells.push({ label: 'Pay plan', value: parts.join('/') });
+  }
+  const showStatsBar = statCells.length >= 2;
 
   sheet.innerHTML = `
     ${imgSrc || galleryImgs.length ? `
@@ -293,6 +313,15 @@ export async function openProjectDetail(projectSlug) {
       ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
     </div>` : ''}
 
+    ${showStatsBar ? `
+    <div style="display:grid;grid-template-columns:repeat(${statCells.length},1fr);border-bottom:1px solid rgba(255,255,255,0.06);">
+      ${statCells.map((c, i) => `
+      <div style="padding:10px 12px;${i < statCells.length - 1 ? 'border-right:1px solid rgba(255,255,255,0.06);' : ''}">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:3px;">${escHtml(c.label)}</div>
+        <div style="font-size:13px;font-weight:700;">${escHtml(c.value)}</div>
+      </div>`).join('')}
+    </div>` : ''}
+
     <div class="detail-body" style="padding:20px 20px 80px;">
 
       <!-- Status badge + title -->
@@ -301,18 +330,6 @@ export async function openProjectDetail(projectSlug) {
         <h2 style="font-family:'Manrope',sans-serif;font-size:22px;font-weight:800;line-height:1.2;margin-top:8px;">${escHtml(project.name)}</h2>
         ${loc ? `<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;">📍 ${escHtml(loc)}</div>` : ''}
       </div>
-
-      <!-- Price -->
-      ${priceStr ? `<div style="font-size:20px;font-weight:700;font-family:'Manrope',sans-serif;margin-bottom:16px;">${escHtml(priceStr)}</div>` : ''}
-
-      <!-- Specs row -->
-      ${(types || project.beds || areaStr || completionStr) ? `
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
-        ${types ? `<div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:8px 12px;font-size:12px;"><span style="color:rgba(255,255,255,0.45);display:block;margin-bottom:2px;">Unit Types</span><span style="font-weight:600;">${escHtml(types)}</span></div>` : ''}
-        ${project.beds ? `<div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:8px 12px;font-size:12px;"><span style="color:rgba(255,255,255,0.45);display:block;margin-bottom:2px;">Beds</span><span style="font-weight:600;">${escHtml(project.beds)}</span></div>` : ''}
-        ${areaStr ? `<div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:8px 12px;font-size:12px;"><span style="color:rgba(255,255,255,0.45);display:block;margin-bottom:2px;">Area</span><span style="font-weight:600;">${escHtml(areaStr)}</span></div>` : ''}
-        ${completionStr ? `<div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:8px 12px;font-size:12px;"><span style="color:rgba(255,255,255,0.45);display:block;margin-bottom:2px;">Completion</span><span style="font-weight:600;">${escHtml(completionStr)}</span></div>` : ''}
-      </div>` : ''}
 
       <!-- Developer card -->
       ${dev.name ? `
