@@ -145,38 +145,6 @@ window.closeProjLightbox = function() {
   document.body.style.overflow = '';
 };
 
-function _injectProjectSchema(project) {
-  document.querySelector('script[data-sd-project-ld]')?.remove();
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'ApartmentComplex',
-    'name': project.name || '',
-    'url': window.location.href,
-    'address': {
-      '@type': 'PostalAddress',
-      'addressLocality': project.district_name || project.location || project.area || 'Dubai',
-      'addressCountry': 'AE',
-    },
-  };
-  if (project.description) schema.description = project.description.slice(0, 200);
-  if (project.cover_image_url) schema.image = optimizeImg(project.cover_image_url, 800);
-  if (project.min_price) {
-    schema.priceRange = project.max_price
-      ? `AED ${Number(project.min_price).toLocaleString()} – AED ${Number(project.max_price).toLocaleString()}`
-      : `From AED ${Number(project.min_price).toLocaleString()}`;
-  }
-  if (project.beds) schema.numberOfRooms = String(project.beds);
-  if (project.min_area_sqft) {
-    schema.floorSize = { '@type': 'QuantitativeValue', 'minValue': project.min_area_sqft, 'unitText': 'SqFt' };
-    if (project.max_area_sqft) schema.floorSize.maxValue = project.max_area_sqft;
-  }
-  const el = document.createElement('script');
-  el.type = 'application/ld+json';
-  el.setAttribute('data-sd-project-ld', '1');
-  el.textContent = JSON.stringify(schema);
-  document.head.appendChild(el);
-}
-
 export async function openProjectDetail(projectSlug) {
   const sheet = document.getElementById('detail-sheet');
   const overlay = document.getElementById('detail-overlay');
@@ -211,7 +179,6 @@ export async function openProjectDetail(projectSlug) {
 
   const dev = project.developers || {};
   _detailProject = project;
-  _injectProjectSchema(project);
   window._openProjectMortgage = function() {
     if (!_detailProject) return;
     if (typeof window.initMortModal === 'function') {
