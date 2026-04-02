@@ -99,6 +99,12 @@ export async function renderAgent(agent) {
     img.className = 'avatar' + (isVerified ? ' avatar-verified' : '');
     const canOptimize = SAFE_CDN_DOMAINS.some(d => agent.photo_url.includes(d));
     img.src = canOptimize ? optimizeImg(agent.photo_url, 200) : agent.photo_url;
+    if (canOptimize) {
+      img.srcset = `${optimizeImg(agent.photo_url, 80)} 80w, ${optimizeImg(agent.photo_url, 160)} 160w`;
+      img.sizes = '80px';
+    }
+    img.width = 80;
+    img.height = 80;
     img.alt = agent.name || '';
     img.onerror = function() { avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`; };
     avatarContainer.innerHTML = '';
@@ -510,7 +516,7 @@ async function loadRemOffplanProjects() {
     const loc = escHtml(p.district_name || p.location || '');
     const minP = fmtPrice(p.min_price);
     const maxP = fmtPrice(p.max_price);
-    const priceStr = minP && maxP ? `${minP} \u2013 ${maxP}` : (minP || maxP || '');
+    const priceStr = minP && maxP ? `${minP} \u2013 ${maxP}` : minP ? `From ${minP}` : (maxP || '');
     const types = Array.isArray(p.property_types) && p.property_types.length
       ? escHtml(p.property_types.join(', '))
       : '';

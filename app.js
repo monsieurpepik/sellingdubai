@@ -9,6 +9,8 @@
   // CONFIGURATION
   // ==========================================
   const DEMO_MODE = false; // Set to true to inject fake photos/amenities/descriptions for preview
+  // NOTE: app.js is not actively loaded (see index.html — dist/init.bundle.js is used instead).
+  // If re-activated, load js/sd-config.js first and use window.SD_CONFIG here.
   const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
   const CAPTURE_URL = `${SUPABASE_URL}/functions/v1/capture-lead`;
@@ -1150,6 +1152,7 @@
   window._mortData = { employment: 'salaried', residency: 'uae_resident' };
   window._mortRates = [];
   window._mortAppId = null;
+  window._mortEditToken = null;
 
   const fmtAEDMort = (n) => 'AED ' + Math.round(n).toLocaleString();
 
@@ -1532,6 +1535,7 @@
       if (res.ok) {
         const data = await res.json();
         window._mortAppId = data?.id || null;
+        window._mortEditToken = data?.edit_token || null;
         mortGoStep(4);
         injectMortgageSuccessCta(payload);
         logEvent('mortgage_application_submitted', { agent: currentAgent?.slug, bank: payload.assigned_bank });
@@ -1620,11 +1624,11 @@
         if (row) row.classList.add('uploaded');
         const checkEl = document.getElementById('mort-doc-' + docType + '-check');
         if (checkEl) checkEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
-        if (window._mortAppId) {
-          await fetch(SUPABASE_URL + '/rest/v1/mortgage_applications?id=eq.' + window._mortAppId, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
-            body: JSON.stringify({ ['docs_' + docType]: path })
+        if (window._mortAppId && window._mortEditToken) {
+          await fetch(SUPABASE_URL + '/functions/v1/update-mortgage-docs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+            body: JSON.stringify({ id: window._mortAppId, edit_token: window._mortEditToken, doc_type: docType, path })
           });
         }
         logEvent('mortgage_doc_uploaded', { type: docType });

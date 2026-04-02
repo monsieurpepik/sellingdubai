@@ -17,6 +17,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isBlockedSsrfUrl } from "../_shared/utils.ts";
 
 const FB_GRAPH_API_VERSION = "v21.0";
 
@@ -202,7 +203,12 @@ Deno.serve(async (req: Request) => {
       || req.headers.get("x-real-ip")
       || "unknown";
     // Hash the IP for privacy (don't store raw IPs)
-    const ipHash = await sha256(clientIp + (Deno.env.get("RATE_LIMIT_SALT") || "sd-salt-2026"));
+    const rateLimitSalt = Deno.env.get("RATE_LIMIT_SALT");
+    if (!rateLimitSalt) {
+      console.error("RATE_LIMIT_SALT env var not set");
+      return new Response(JSON.stringify({ error: "Configuration error" }), { status: 500, headers: cors });
+    }
+    const ipHash = await sha256(clientIp + rateLimitSalt);
 
     // === INPUT LENGTH LIMITS (prevent abuse) ===
     const MAX_LENGTHS: Record<string, number> = {
@@ -356,10 +362,7 @@ Deno.serve(async (req: Request) => {
     // 2. Webhook (CRM integration)
     if (agent.webhook_url) {
       // Re-validate URL at fetch time (defense-in-depth against SSRF)
-      let webhookParsed: URL | null = null;
-      try { webhookParsed = new URL(agent.webhook_url); } catch { /* skip invalid */ }
-      const isPrivate = webhookParsed ? /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(webhookParsed.hostname) : true;
-      const isSafe = webhookParsed && !isPrivate && (webhookParsed.protocol === 'https:' || webhookParsed.protocol === 'http:');
+      const isSafe = !isBlockedSsrfUrl(agent.webhook_url);
       if (isSafe) {
       try {
         const controller = new AbortController();

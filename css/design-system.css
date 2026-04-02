@@ -1,0 +1,132 @@
+/* ========== SELLING DUBAI — Agent Profile Styles ========== */
+/* Design System: Manrope 800 headings, Inter 400 body, Playfair Display italic logo */
+/* Brand blue: var(--color-brand) | Black bg: #000 | Muted text: #aaa */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html {
+  height: 100%; overflow: hidden;
+}
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background: #000;
+  color: #fff;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  /* NO body-level safe-area padding — each component handles its own */
+  position: relative;
+  width: 100%;
+}
+
+/* ========== AIRBNB/APPLE-LEVEL POLISH ========== */
+/* Spring easing for everything that moves */
+:root {
+  /* Easing */
+  --spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-instant: 0.1s;
+  --duration-quick: 0.15s;
+  --duration-fast: 0.2s;
+  --duration-medium: 0.25s;
+  --duration-normal: 0.3s;
+  --duration-moderate: 0.4s;
+  --duration-slow: 0.5s;
+  --duration-entrance: 0.6s;
+  /* Colors */
+  --color-bg: #000;
+  --color-surface: #111;
+  --color-surface-elevated: #1a1a1a;
+  --color-surface-raised: rgba(255,255,255,0.06);
+  --color-border: rgba(255,255,255,0.08);
+  --color-border-strong: rgba(255,255,255,0.15);
+  --color-overlay: rgba(0,0,0,0.8);
+  --color-text-primary: #fff;
+  --color-text-secondary: rgba(255,255,255,0.75);
+  --color-text-muted: rgba(255,255,255,0.55);
+  --color-brand: #1127d2;
+  --color-brand-light: #4d65ff;
+  --color-success: #25d366;
+  --color-warning: #fbbf24;
+  /* Spacing (Fibonacci-inspired) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 48px;
+  /* Radii */
+  --radius-2xs: 2px;
+  --radius-xs: 4px;
+  --radius-s: 6px;
+  --radius-sm: 8px;
+  --radius-m: 10px;
+  --radius-md: 12px;
+  --radius-card: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-pill: 100px;
+  --radius-full: 50%;
+  /* Typography */
+  --text-4xs: 9px;
+  --text-3xs: 10px;
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-xs-plus: 13px;
+  --text-sm: 14px;
+  --text-base: 15px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl-sm: 20px;
+  --text-xl: 22px;
+  --text-2xl: 24px;
+  --text-3xl: 26px;
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-sheet: 0 -4px 24px rgba(0,0,0,0.5);
+}
+
+/* Entrance animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(2px); }
+}
+@keyframes fadeScale {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes softReveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); opacity: 0.8; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Global focus states — accessibility with style */
+:focus-visible {
+  outline: 2px solid rgba(77,101,255,0.8);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
+/* Smooth scrolling with rubber band physics */
+.page, .prop-sheet, .detail-sheet, .modal, .filters-body {
+  scroll-behavior: smooth;
+}
+

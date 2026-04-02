@@ -4,7 +4,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SITE_URL = 'https://sellingdubai.ae';
-const DEFAULT_IMAGE = 'https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
+const DEFAULT_IMAGE = `https://sellingdubai.ae/.netlify/images?url=${encodeURIComponent(SUPABASE_URL + '/storage/v1/object/public/agent-images/dubai-skyline.jpg')}&w=1200&fm=webp&q=80`;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 

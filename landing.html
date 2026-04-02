@@ -17,7 +17,7 @@
 <meta name="twitter:title" content="SellingDubai | The Verified Page for Dubai Agents"/>
 <meta name="twitter:description" content="The DLD-verified link-in-bio for Dubai real estate agents. Your badge, listings, direct WhatsApp, analytics. Free."/>
 <meta name="twitter:image" content="https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80"/>
-<link rel="stylesheet" href="/landing-output.css"/>
+<link rel="stylesheet" href="/landing-output.css">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
@@ -26,7 +26,7 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap&subset=latin" rel="stylesheet"/></noscript>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" rel="stylesheet"/></noscript>
-<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
 <style>
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
@@ -144,9 +144,11 @@
 
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"AED"},"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
+<style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}</style>
 </head>
 
 <body class="bg-surface font-body text-on-surface antialiased overflow-x-hidden">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <!-- ======== NAVBAR (no logo — agent is the brand) ======== -->
 <nav class="sticky top-0 w-full z-50 border-b border-zinc-100 bg-white/80 backdrop-blur-md">
@@ -164,7 +166,7 @@
   </div>
 </nav>
 
-<main>
+<main id="main-content">
 
 <!-- ======== HERO ======== -->
 <section class="max-w-7xl mx-auto px-6 pt-16 pb-12 text-center">
@@ -296,12 +298,15 @@
       </div>
 
       <img
-        src="/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/landing/desktop-screenshot.jpeg&w=2200&fm=webp&q=85"
+        src="/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/landing/desktop-screenshot.jpeg&w=800&fm=webp&q=85"
+        srcset="/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/landing/desktop-screenshot.jpeg&w=400&fm=webp&q=80 400w,
+          /.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/landing/desktop-screenshot.jpeg&w=800&fm=webp&q=85 800w"
+        sizes="(max-width: 768px) 100vw, 637px"
         alt="Selling Dubai agent profile"
-        width="1100"
-        height="700"
-        style="width:100%;height:auto;display:block;border-radius:16px;box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.06);"
-      />
+        width="800"
+        height="416"
+        fetchpriority="high"
+        style="width:100%;height:auto;display:block;border-radius:16px;box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.06);">
     </div>
 
     <p class="text-white/30 text-sm leading-relaxed mx-auto mt-10" style="font-weight:300;">
@@ -824,7 +829,7 @@
 <!-- ======== BRAND REVEAL (the stage, not the star) ======== -->
 <section class="py-24 text-center reveal">
   <a href="/" style="text-decoration:none;display:inline-block;">
-    <img src="/sellingdubailogo.png" alt="Selling Dubai" style="height:64px;opacity:0.7;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+    <img src="/sellingdubailogo.png" alt="Selling Dubai" width="286" height="64" style="height:64px;opacity:0.7;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
   </a>
   <p class="text-zinc-400 text-xs mt-4 tracking-wide">The stage for Dubai's best agents.</p>
 </section>
@@ -864,7 +869,7 @@
     </div>
   </div>
   <div class="relative">
-    <div class="text-center opacity-[0.04] -mb-10 pointer-events-none select-none"><img src="/sellingdubailogo.png" alt="" style="height:18vw;display:inline-block;"></div>
+    <div class="text-center opacity-[0.04] -mb-10 pointer-events-none select-none"><img src="/sellingdubailogo.png" alt="" width="286" height="64" style="height:18vw;display:inline-block;"></div>
   </div>
 </footer>
 
@@ -942,10 +947,12 @@ function joinWaitlist(e, form) {
 
 </script>
 
+<script src="/js/sd-config.js"></script>
 <script>
 (function() {
-  var SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+  // Credentials loaded from js/sd-config.js — update that file when rotating keys
+  var SUPABASE_URL = window.SD_CONFIG.SUPABASE_URL;
+  var SUPABASE_ANON_KEY = window.SD_CONFIG.SUPABASE_ANON_KEY;
   // Agent count
   fetch(SUPABASE_URL + '/rest/v1/agents?select=id&verification_status=eq.verified', {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
@@ -975,7 +982,20 @@ function joinWaitlist(e, form) {
 })();
 </script>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
+<script>
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1';
+    s.async = true;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BXMRWM9ZM1');
+  }, 2000);
+});
+</script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
 
 </body>

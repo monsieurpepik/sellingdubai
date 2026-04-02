@@ -28,9 +28,13 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.com",
   "https://sellingdubai-agents.netlify.app",
 ];
+const IS_LOCAL_DEV = (Deno.env.get("SUPABASE_URL") ?? "").startsWith("http://127.0.0.1");
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const isLocalOrigin = IS_LOCAL_DEV &&
+    (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
+  const allowedOrigin = isLocalOrigin ? origin
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]);
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers": "content-type, authorization",
@@ -131,14 +135,15 @@ Deno.serve(async (req: Request) => {
     // Build magic link URL — destination defaults to /dashboard
     const allowedDests = ['/edit', '/dashboard'];
     const dest = typeof destination === 'string' && allowedDests.includes(destination) ? destination : '/dashboard';
-    const loginUrl = `https://sellingdubai.ae${dest}?token=${token}`;
+    const siteUrl = Deno.env.get("SITE_URL") || "https://sellingdubai.ae";
+    const loginUrl = `${siteUrl}${dest}?token=${token}`;
     const buttonText = dest === '/dashboard' ? 'Go to My Dashboard' : 'Edit My Profile';
 
     // Send email via Resend (with 1 retry on failure)
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
     if (RESEND_KEY) {
       const emailPayload = {
-        from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
+        from: Deno.env.get("RESEND_FROM") || "Boban at SellingDubai <boban@sellingdubai.com>",
         to: [agent.email],
         subject: "Sign in to edit your SellingDubai profile",
         html: `
@@ -178,7 +183,7 @@ Deno.serve(async (req: Request) => {
           emailOk = true;
         } else {
           const errBody = await firstRes.text();
-          console.error("Resend attempt 1 failed");
+          console.error("Resend attempt 1 failed:", errBody);
           // Retry after 600ms
           await new Promise(resolve => setTimeout(resolve, 600));
           const retryRes = await sendEmail();
@@ -186,11 +191,11 @@ Deno.serve(async (req: Request) => {
             emailOk = true;
           } else {
             const retryErr = await retryRes.text();
-            console.error("Resend attempt 2 failed");
+            console.error("Resend attempt 2 failed:", retryErr);
           }
         }
       } catch (emailErr) {
-        console.error("Email send threw");
+        console.error("Email send threw:", emailErr);
         // Retry once on network error
         try {
           await new Promise(resolve => setTimeout(resolve, 600));
@@ -214,7 +219,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("send-magic-link error");
+    console.error("send-magic-link error:", e instanceof Error ? e.stack : String(e));
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }

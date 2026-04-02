@@ -67,10 +67,33 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Verify agent_id belongs to a real verified agent — prevents fake analytics injection
+    const { count: agentCount } = await supabase
+      .from("agents")
+      .select("id", { count: "exact", head: true })
+      .eq("id", agent_id)
+      .eq("verification_status", "verified");
+
+    if (!agentCount || agentCount === 0) {
+      return new Response(JSON.stringify({ error: "Invalid agent" }), { status: 400, headers: CORS });
+    }
+
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
                      req.headers.get("x-real-ip") || "unknown";
     const ipHash = hashIP(clientIP);
     const userAgent = req.headers.get("user-agent") || "";
+
+    // Rate limit: max 60 events per IP per hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await supabase
+      .from("page_events")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_hash", ipHash)
+      .gt("created_at", oneHourAgo);
+
+    if (recentCount !== null && recentCount >= 60) {
+      return new Response(JSON.stringify({ success: true, rate_limited: true }), { headers: CORS });
+    }
 
     // Dedup: skip if same agent+event+ip in last 30 seconds
     if (event_type === 'view') {

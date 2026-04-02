@@ -58,6 +58,7 @@ Deno.serve(async (req: Request) => {
       .from("magic_links")
       .select("agent_id, expires_at, used_at")
       .eq("token", token)
+      .is("revoked_at", null)
       .single();
 
     if (linkErr || !linkRow) {

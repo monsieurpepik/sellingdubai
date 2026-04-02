@@ -78,8 +78,13 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), { status: 429, headers: cors });
     }
 
+    // Generate a single-session edit token so the client can update docs
+    // without a permissive anon RLS policy on the table.
+    const editToken = crypto.randomUUID();
+
     // Build insert payload — only include known columns
     const row: Record<string, unknown> = {
+      edit_token: editToken,
       buyer_name: buyer_name.trim().slice(0, 200),
       buyer_phone: buyer_phone || null,
       buyer_email: buyer_email || null,
@@ -122,11 +127,11 @@ Deno.serve(async (req: Request) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') },
           body: JSON.stringify({ application_id: data.id }),
-        }).catch(() => {});
-      } catch (_) {}
+        }).catch((err) => { console.error('[submit-mortgage] notify-mortgage-lead fetch failed:', err); });
+      } catch (notifyErr) { console.error('[submit-mortgage] Could not dispatch notification:', notifyErr); }
     }
 
-    return new Response(JSON.stringify({ id: data.id }), {
+    return new Response(JSON.stringify({ id: data.id, edit_token: editToken }), {
       status: 201,
       headers: cors,
     });

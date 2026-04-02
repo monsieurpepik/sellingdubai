@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { getCorsHeaders } from "../_shared/utils.ts";
+import { getCorsHeaders, isValidImageBytes } from "../_shared/utils.ts";
 
 Deno.serve(async (req: Request) => {
   const cors = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
@@ -29,6 +29,7 @@ Deno.serve(async (req: Request) => {
       .select('agent_id, used_at')
       .eq('token', token)
       .gt('expires_at', new Date().toISOString())
+      .is('revoked_at', null)
       .single();
 
     if (linkErr || !link) {
@@ -57,6 +58,14 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Validate file type — reject SVG and non-image bytes for image uploads
+    const isPdf = file_type === 'application/pdf';
+    if (!isPdf && !isValidImageBytes(image_base64)) {
+      return new Response(JSON.stringify({ error: 'Invalid image format. Only JPEG, PNG, GIF, and WebP are allowed.' }), {
+        status: 400, headers: cors
+      });
+    }
+
     // Decode base64 — handle both image and PDF (for license)
     const base64Data = image_base64.replace(/^data:[^;]+;base64,/, '');
     const bytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
@@ -70,11 +79,21 @@ Deno.serve(async (req: Request) => {
     const type = image_type || 'avatar';
     const fileName = `${agent.slug}/${type}-${Date.now()}.${ext}`;
 
+    // Allowlist content types — never pass caller-supplied file_type directly to storage
+    const SAFE_TYPES: Record<string, string> = {
+      'image/jpeg': 'image/jpeg',
+      'image/png': 'image/png',
+      'image/webp': 'image/webp',
+      'image/gif': 'image/gif',
+      'application/pdf': 'application/pdf',
+    };
+    const safeContentType = SAFE_TYPES[file_type] || 'image/jpeg';
+
     // Upload to storage
     const { data: upload, error: uploadError } = await supabase.storage
       .from('agent-images')
       .upload(fileName, bytes, {
-        contentType: file_type || 'image/jpeg',
+        contentType: safeContentType,
         upsert: true,
       });
 

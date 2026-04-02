@@ -41,6 +41,9 @@ function tierLimit(tier: string): number | null {
   return 3;
 }
 
+const PROP_SELECT =
+  "id, title, price, location, bedrooms, area_sqft, property_type, status, image_url, dld_permit, external_url, sort_order, created_at, additional_photos, is_active";
+
 async function uploadPropertyImage(
   supabase: ReturnType<typeof createClient>,
   agentId: string,
@@ -51,7 +54,8 @@ async function uploadPropertyImage(
   const contentType = match[1];
   const ext = contentType.includes("png") ? "png" : "jpg";
   const bytes = Uint8Array.from(atob(match[3]), (c) => c.charCodeAt(0));
-  const fileName = `${agentId}/property-${Date.now()}.${ext}`;
+  const rand = Math.random().toString(36).slice(2, 8);
+  const fileName = `${agentId}/property-${Date.now()}-${rand}.${ext}`;
   const { error } = await supabase.storage
     .from("agent-images")
     .upload(fileName, bytes, { contentType, upsert: true });
@@ -61,6 +65,38 @@ async function uploadPropertyImage(
   }
   const { data } = supabase.storage.from("agent-images").getPublicUrl(fileName);
   return data.publicUrl;
+}
+
+async function uploadAdditionalPhotos(
+  supabase: ReturnType<typeof createClient>,
+  agentId: string,
+  base64Array: string[],
+): Promise<string[]> {
+  const results: string[] = [];
+  for (const b64 of base64Array) {
+    const url = await uploadPropertyImage(supabase, agentId, b64);
+    if (url) results.push(url);
+  }
+  return results;
+}
+
+function storagePathFromUrl(url: string): string | null {
+  const marker = "/object/public/agent-images/";
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  return url.slice(idx + marker.length);
+}
+
+async function deleteOrphanedImages(
+  supabase: ReturnType<typeof createClient>,
+  urls: (string | null | undefined)[],
+): Promise<void> {
+  const paths = urls
+    .filter((u): u is string => typeof u === "string" && u.length > 0)
+    .map(storagePathFromUrl)
+    .filter((p): p is string => p !== null);
+  if (paths.length === 0) return;
+  await supabase.storage.from("agent-images").remove(paths);
 }
 
 Deno.serve(async (req: Request) => {
@@ -91,6 +127,7 @@ Deno.serve(async (req: Request) => {
       .from("magic_links")
       .select("agent_id, expires_at, used_at")
       .eq("token", token)
+      .is("revoked_at", null)
       .single();
 
     if (linkErr || !linkRow) {
@@ -118,7 +155,7 @@ Deno.serve(async (req: Request) => {
 
       const { data: properties, error: propsErr } = await supabase
         .from("properties")
-        .select("id, title, price, location, bedrooms, area_sqft, type, status, image_url, trakheesi_permit, external_url, sort_order, created_at")
+        .select(PROP_SELECT)
         .eq("agent_id", agentId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
@@ -167,10 +204,17 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      // Upload image if provided
+      // Upload cover image if provided
       let imageUrl: string | null = null;
       if (property.image_base64) {
         imageUrl = await uploadPropertyImage(supabase, agentId, property.image_base64);
+      }
+
+      // Upload additional photos
+      const additionalUrls: string[] = [];
+      if (Array.isArray(property.additional_photos) && property.additional_photos.length > 0) {
+        const uploaded = await uploadAdditionalPhotos(supabase, agentId, property.additional_photos);
+        additionalUrls.push(...uploaded);
       }
 
       // Get max sort_order
@@ -183,6 +227,7 @@ Deno.serve(async (req: Request) => {
         .single();
       const nextOrder = maxRow ? (maxRow.sort_order ?? 0) + 1 : 0;
 
+      const dldPermit = property.dld_permit || null;
       const insert: Record<string, unknown> = {
         agent_id: agentId,
         title: property.title,
@@ -190,19 +235,20 @@ Deno.serve(async (req: Request) => {
         location: property.location || null,
         bedrooms: property.bedrooms != null ? Number(property.bedrooms) : null,
         area_sqft: property.area_sqft != null ? Number(property.area_sqft) : null,
-        type: property.type || null,
+        property_type: property.property_type || null,
         status: property.status || "available",
-        trakheesi_permit: property.trakheesi_permit || null,
+        dld_permit: dldPermit,
+        is_active: !!dldPermit,
         external_url: property.external_url || null,
         sort_order: nextOrder,
-        is_active: true,
+        additional_photos: additionalUrls,
       };
       if (imageUrl) insert.image_url = imageUrl;
 
       const { data: newProp, error: insertErr } = await supabase
         .from("properties")
         .insert(insert)
-        .select("id, title, price, location, bedrooms, area_sqft, type, status, image_url, trakheesi_permit, external_url, sort_order, created_at")
+        .select(PROP_SELECT)
         .single();
 
       if (insertErr) {
@@ -234,10 +280,10 @@ Deno.serve(async (req: Request) => {
         return new Response(JSON.stringify({ error: "Missing property id." }), { status: 400, headers: cors });
       }
 
-      // Verify ownership
+      // Verify ownership and fetch current image URLs
       const { data: existing, error: fetchErr } = await supabase
         .from("properties")
-        .select("id, agent_id, image_url")
+        .select("id, agent_id, image_url, additional_photos")
         .eq("id", property.id)
         .single();
 
@@ -248,11 +294,41 @@ Deno.serve(async (req: Request) => {
         return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
       }
 
-      // Upload new image if provided
-      let imageUrl: string | undefined;
+      // Handle cover image: new upload OR keep existing URL OR clear
+      let imageUrl: string | null | undefined;
       if (property.image_base64) {
         const uploaded = await uploadPropertyImage(supabase, agentId, property.image_base64);
-        if (uploaded) imageUrl = uploaded;
+        if (uploaded) {
+          imageUrl = uploaded;
+          // Delete old cover if replaced
+          if (existing.image_url) await deleteOrphanedImages(supabase, [existing.image_url]);
+        }
+      } else if ("keep_cover_url" in property) {
+        imageUrl = property.keep_cover_url || null;
+        // Delete old cover if cleared
+        if (!property.keep_cover_url && existing.image_url) {
+          await deleteOrphanedImages(supabase, [existing.image_url]);
+        }
+      }
+
+      // Handle additional photos
+      let newAdditionalUrls: string[] | undefined;
+      if (Array.isArray(property.additional_photos) || Array.isArray(property.retained_additional_photos)) {
+        const retained: string[] = Array.isArray(property.retained_additional_photos)
+          ? property.retained_additional_photos
+          : [];
+        const newUploaded =
+          Array.isArray(property.additional_photos) && property.additional_photos.length > 0
+            ? await uploadAdditionalPhotos(supabase, agentId, property.additional_photos)
+            : [];
+        newAdditionalUrls = [...retained, ...newUploaded];
+
+        // Delete orphaned additional photos
+        const existingAdditional: string[] = Array.isArray(existing.additional_photos)
+          ? existing.additional_photos
+          : [];
+        const orphaned = existingAdditional.filter((u: string) => !retained.includes(u));
+        if (orphaned.length > 0) await deleteOrphanedImages(supabase, orphaned);
       }
 
       // Build updates from defined fields only
@@ -262,11 +338,15 @@ Deno.serve(async (req: Request) => {
       if (property.location !== undefined) updates.location = property.location || null;
       if (property.bedrooms !== undefined) updates.bedrooms = property.bedrooms != null ? Number(property.bedrooms) : null;
       if (property.area_sqft !== undefined) updates.area_sqft = property.area_sqft != null ? Number(property.area_sqft) : null;
-      if (property.type !== undefined) updates.type = property.type || null;
+      if (property.property_type !== undefined) updates.property_type = property.property_type || null;
       if (property.status !== undefined) updates.status = property.status;
-      if (property.trakheesi_permit !== undefined) updates.trakheesi_permit = property.trakheesi_permit || null;
+      if (property.dld_permit !== undefined) {
+        updates.dld_permit = property.dld_permit || null;
+        updates.is_active = !!property.dld_permit;
+      }
       if (property.external_url !== undefined) updates.external_url = property.external_url || null;
-      if (imageUrl) updates.image_url = imageUrl;
+      if (imageUrl !== undefined) updates.image_url = imageUrl;
+      if (newAdditionalUrls !== undefined) updates.additional_photos = newAdditionalUrls;
 
       if (Object.keys(updates).length === 0) {
         return new Response(JSON.stringify({ error: "No fields to update." }), { status: 400, headers: cors });
@@ -277,7 +357,7 @@ Deno.serve(async (req: Request) => {
         .update(updates)
         .eq("id", property.id)
         .eq("agent_id", agentId)
-        .select("id, title, price, location, bedrooms, area_sqft, type, status, image_url, trakheesi_permit, external_url, sort_order, created_at")
+        .select(PROP_SELECT)
         .single();
 
       if (updateErr) {
@@ -294,6 +374,14 @@ Deno.serve(async (req: Request) => {
         return new Response(JSON.stringify({ error: "Missing property id." }), { status: 400, headers: cors });
       }
 
+      // Fetch image URLs before deleting
+      const { data: toDelete } = await supabase
+        .from("properties")
+        .select("id, agent_id, image_url, additional_photos")
+        .eq("id", property.id)
+        .eq("agent_id", agentId)
+        .single();
+
       const { data: deleted, error: deleteErr } = await supabase
         .from("properties")
         .delete()
@@ -307,6 +395,14 @@ Deno.serve(async (req: Request) => {
       }
       if (!deleted || deleted.length === 0) {
         return new Response(JSON.stringify({ error: "Property not found." }), { status: 404, headers: cors });
+      }
+
+      // Clean up storage after successful delete
+      if (toDelete) {
+        const toRemove: string[] = [];
+        if (toDelete.image_url) toRemove.push(toDelete.image_url);
+        if (Array.isArray(toDelete.additional_photos)) toRemove.push(...toDelete.additional_photos);
+        if (toRemove.length > 0) await deleteOrphanedImages(supabase, toRemove);
       }
 
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: cors });

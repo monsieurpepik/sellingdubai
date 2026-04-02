@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agency — SellingDubai</title>
+  <meta name="description" content="Browse real estate agents and teams in Dubai. Verified DLD brokers with active listings, off-plan projects, and direct contact.">
   <meta property="og:title" content="Agency — SellingDubai">
   <meta property="og:description" content="Real estate agents in Dubai">
   <meta property="og:image" content="https://sellingdubai.ae/sellingdubailogo.png">
@@ -15,8 +16,8 @@
   <link rel="icon" href="data:image/svg+xml,🏠">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
-  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" integrity="sha384-2zrRDgDHSYB/GN3nFW3fsZXoxEhKIr3N2h63Tc6DEOB9JJdFIu8xMJT2Cph/gBil" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #0a0a0a; color: #fff; font-family: "Inter", sans-serif; min-height: 100vh; }
@@ -47,10 +48,12 @@
     #error-state { display: none; color: rgba(255,255,255,0.4); font-size: 15px; padding: 60px 0; text-align: center; }
     .page-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; }
     .page-footer img { height: 24px; filter: invert(1); opacity: 0.5; }
+    .skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}
   </style>
 </head>
 <body>
-  <div class="container">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+  <main class="container" id="main-content">
     <a href="/" class="back-link">← Back to SellingDubai</a>
 
     <div id="skeleton">
@@ -91,9 +94,9 @@
     <div id="error-state"></div>
 
     <div class="page-footer">
-      <a href="/"><img src="/sellingdubailogo.png" alt="SellingDubai"></a>
+      <a href="/"><img src="/sellingdubailogo.png" alt="SellingDubai" width="300" height="67"></a>
     </div>
-  </div>
+  </main>
 
   <script type="module" src="/js/agency-page.js"></script>
 </body>

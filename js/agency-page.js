@@ -34,8 +34,29 @@ async function init() {
     console.error('Failed to load agents:', agentsErr);
   }
 
-  document.title = agency.name + ' — SELLING DUBAI';
-  document.querySelector('meta[property="og:title"]').setAttribute('content', agency.name + ' — SELLING DUBAI');
+  document.title = agency.name + ' — SellingDubai';
+  const canonicalEl = document.createElement('link');
+  canonicalEl.rel = 'canonical';
+  canonicalEl.href = `https://sellingdubai.ae/agency/${encodeURIComponent(agency.slug)}`;
+  document.head.appendChild(canonicalEl);
+  document.querySelector('meta[property="og:title"]').setAttribute('content', agency.name + ' — SellingDubai');
+  const agencyDesc = agency.description || `${agency.name} — verified DLD real estate agency in Dubai. Browse agent profiles, listings, and contact directly.`;
+  document.querySelector('meta[name="description"]')?.setAttribute('content', agencyDesc);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', agencyDesc);
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    'name': agency.name,
+    'url': window.location.href,
+    'address': { '@type': 'PostalAddress', 'addressLocality': 'Dubai', 'addressCountry': 'AE' }
+  };
+  if (agency.description) jsonLd.description = agency.description;
+  if (agency.website) { const sw = safeUrl(agency.website); if (sw) jsonLd.sameAs = sw; }
+  const ldScript = document.createElement('script');
+  ldScript.type = 'application/ld+json';
+  ldScript.textContent = JSON.stringify(jsonLd);
+  document.head.appendChild(ldScript);
+
   const safeLogoUrl = safeImgUrl(agency.logo_url);
   if (safeLogoUrl) {
     const ogImageUrl = 'https://sellingdubai.ae' + NETLIFY_IMG(safeLogoUrl, 400);
@@ -83,7 +104,7 @@ async function init() {
     const initials = (a.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const safePhoto = safeImgUrl(a.photo_url);
     const avatarHtml = safePhoto
-      ? `<img src="${escAttr(NETLIFY_IMG(safePhoto, 112))}" alt="${escAttr(a.name)}" style="width:100%;height:100%;object-fit:cover;">`
+      ? `<img src="${escAttr(NETLIFY_IMG(safePhoto, 112))}" srcset="${escAttr(NETLIFY_IMG(safePhoto, 80))} 80w, ${escAttr(NETLIFY_IMG(safePhoto, 160))} 160w" sizes="80px" width="56" height="56" alt="${escAttr(a.name)}" style="width:100%;height:100%;object-fit:cover;">`
       : `<span style="font-size:20px;font-weight:700;">${escHtml(initials)}</span>`;
     return `
       <a href="/a/${encodeURIComponent(a.slug)}" class="agent-card">

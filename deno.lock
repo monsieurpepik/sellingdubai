@@ -44,6 +44,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@playwright/test@^1.58.2",
         "npm:@tailwindcss/container-queries@~0.1.1",
         "npm:@tailwindcss/forms@~0.5.9",
         "npm:esbuild@~0.27.4",

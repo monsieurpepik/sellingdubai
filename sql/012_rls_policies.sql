@@ -213,11 +213,14 @@ EXCEPTION WHEN undefined_table THEN NULL;
 END $$;
 
 DO $$ BEGIN
+  -- Anon UPDATE is intentionally blocked (USING (false)).
+  -- Document path writes go through the update-mortgage-docs edge function,
+  -- which validates the edit_token issued at insert time and uses the service role.
   EXECUTE 'CREATE POLICY "anon_update_mortgage_docs" ON public.mortgage_applications
     FOR UPDATE
     TO anon
-    USING (true)
-    WITH CHECK (true)';
+    USING (false)
+    WITH CHECK (false)';
 EXCEPTION WHEN undefined_table THEN NULL;
 END $$;
 

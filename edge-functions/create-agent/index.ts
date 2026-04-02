@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { getCorsHeaders } from "../_shared/utils.ts";
+import { getCorsHeaders, isValidImageBytes } from "../_shared/utils.ts";
 
 function json(data: unknown, status = 200, cors: Record<string, string> = {}) {
   return new Response(JSON.stringify(data), {
@@ -189,6 +189,10 @@ Deno.serve(async (req: Request) => {
 
     if (photo_base64) {
       try {
+        if (!isValidImageBytes(photo_base64)) {
+          console.error("Photo upload rejected: invalid image bytes");
+          // Non-fatal — skip photo upload rather than blocking registration
+        } else {
         const binaryStr = atob(photo_base64);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) {
@@ -217,6 +221,7 @@ Deno.serve(async (req: Request) => {
         } else {
           console.error("Photo upload error");
         }
+        } // end isValidImageBytes else
       } catch (photoErr) {
         console.error("Photo processing error");
       }
@@ -224,13 +229,23 @@ Deno.serve(async (req: Request) => {
 
     if (manual_verification && rera_image_base64) {
       try {
+        const isPdf = rera_file_type === "application/pdf";
+        if (!isPdf && !isValidImageBytes(rera_image_base64)) {
+          console.error("RERA upload rejected: invalid image bytes");
+          // Non-fatal — skip RERA upload rather than blocking registration
+        } else {
         const binaryStr = atob(rera_image_base64);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) {
           bytes[i] = binaryStr.charCodeAt(i);
         }
-        const ext = rera_file_type === "application/pdf" ? "pdf" : "jpg";
-        const contentType = rera_file_type || "image/jpeg";
+        const ext = isPdf ? "pdf" : "jpg";
+        // Allowlist content type — never pass caller-supplied value directly
+        const SAFE_RERA_TYPES: Record<string, string> = {
+          'image/jpeg': 'image/jpeg', 'image/png': 'image/png',
+          'image/webp': 'image/webp', 'application/pdf': 'application/pdf',
+        };
+        const contentType = SAFE_RERA_TYPES[rera_file_type] || "image/jpeg";
         const reraPath = `agents/${agent.id}/rera-card.${ext}`;
 
         const { error: reraErr } = await supabase.storage
@@ -252,6 +267,7 @@ Deno.serve(async (req: Request) => {
         } else {
           console.error("RERA upload error");
         }
+        } // end isValidImageBytes else
       } catch (reraErr) {
         console.error("RERA processing error");
       }

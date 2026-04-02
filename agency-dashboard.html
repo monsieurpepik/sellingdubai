@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agency Dashboard — SellingDubai</title>
+  <meta name="robots" content="noindex, nofollow">
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="icon" href="data:image/svg+xml,🏠">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
-  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+  <link rel="stylesheet" href="/css/dashboard.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #09090b; color: #fff; font-family: "Inter", sans-serif; min-height: 100vh; }
@@ -74,8 +76,6 @@
     .banner-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #4ade80; }
     .profile-link { font-size: 12px; color: rgba(255,255,255,0.4); }
     .profile-link a { color: rgba(255,255,255,0.6); text-decoration: underline; }
-    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
     .loading-state { text-align: center; padding: 60px; color: rgba(255,255,255,0.3); }
     #dashboard-section { display: none; }
     #create-section { display: none; }
@@ -293,8 +293,11 @@
         const photoSrc = a.photo_url && a.photo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
           ? `/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=64&fm=webp&q=80`
           : a.photo_url;
+        const photoSrcset = a.photo_url && a.photo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
+          ? escapeHtml(`/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=80&fm=webp&q=80 80w, /.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=160&fm=webp&q=80 160w`)
+          : '';
         const avatar = photoSrc
-          ? `<img src="${escapeHtml(photoSrc)}" alt="">`
+          ? `<img src="${escapeHtml(photoSrc)}"${photoSrcset ? ` srcset="${photoSrcset}" sizes="80px"` : ''} width="80" height="80" alt="">`
           : escapeHtml(initials);
         const tierBadge = a.tier === 'premium' ? '<span class="badge badge-premium">Premium</span>'
           : a.tier === 'pro' ? '<span class="badge badge-pro">Pro</span>'

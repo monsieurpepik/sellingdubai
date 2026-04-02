@@ -42,6 +42,7 @@ Deno.serve(async (req: Request) => {
       .select("agent_id, used_at")
       .eq("token", token)
       .gt("expires_at", now)
+      .is("revoked_at", null)
       .single();
 
     if (linkErr || !link) {

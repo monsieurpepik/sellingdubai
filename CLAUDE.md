@@ -26,9 +26,37 @@ These rules exist because the site has been optimized from Performance 56 → 82
 - If icons are needed, extend the existing Material Symbols request with `&icon_names=` — do not add a second icon font.
 - System font fallback stack: `-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`.
 
+## Local Development
+
+Never test edge functions against production. Use the local emulator.
+
+```bash
+npm run dev           # start Supabase local stack (runs scripts/dev.sh)
+npm run check         # run pre-deploy gate (runs scripts/pre-deploy-check.sh)
+```
+
+First-time setup:
+1. `brew install supabase/tap/supabase`
+2. `supabase login && supabase link --project-ref pjyorgedaxevxophpfib`
+3. `supabase db pull` — pulls prod schema into `supabase/migrations/`
+4. Copy `supabase/.env.example` → `supabase/.env` and fill in local values
+5. `npm run dev`
+
+Then in a second terminal:
+```bash
+supabase functions serve --env-file ./supabase/.env --no-verify-jwt
+```
+
+Local URLs after `npm run dev`:
+- API: `http://127.0.0.1:54321`
+- Studio: `http://127.0.0.1:54323`
+- Email inbox (all magic links): `http://127.0.0.1:54324`
+
+**Prod guard**: `scripts/dev.sh` aborts if `supabase/.env` contains the production `SUPABASE_URL`. The edge runtime injects the correct local URL automatically — never set it manually.
+
 ## Pre-Deploy Checklist
 
-Run these checks before every deploy, in order. These rules exist because each one maps to a real bug or revenue regression found in production.
+Run `npm run check` — it automates all checks below. Fix any errors before deploying.
 
 ### Build
 - [ ] `npm run build` passes with no new errors

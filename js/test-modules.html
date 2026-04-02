@@ -95,9 +95,6 @@
       // Test renderSkeletonCards output
       const skeletons = properties.renderSkeletonCards(2);
       log('  renderSkeletonCards(2): ' + (skeletons.includes('skeleton-card') ? 'OK' : 'FAIL'));
-      // Test renderPropertyCard with mock data
-      const mockCard = properties.renderPropertyCard({ id: 'test-1', title: 'Test Villa', price: 'AED 1,500,000', bedrooms: 3, bathrooms: 2, area_sqft: 2000, property_type: 'Villa', location: 'Dubai Marina', status: 'available' }, 0);
-      log('  renderPropertyCard: ' + (mockCard.includes('Test Villa') && mockCard.includes('prop-card') ? 'OK' : 'FAIL'));
 
       // Test filters.js
       const filters = await import('./filters.js');
@@ -205,7 +202,7 @@
       log('  renderOffPlanCard: ' + (typeof components.renderOffPlanCard === 'function' ? 'OK' : 'MISSING'));
       log('  renderAdminCard: ' + (typeof components.renderAdminCard === 'function' ? 'OK' : 'MISSING'));
       // renderPropertyCard output checks
-      const card = components.renderPropertyCard({ id: 'c1', title: 'Palm Villa', price: 'AED 5,000,000', bedrooms: 4, bathrooms: 3, area_sqft: 3200, property_type: 'Villa', location: 'Palm Jumeirah', status: 'available' }, 0);
+      const card = components.renderPropertyCard({ id: 'c1', title: 'Palm Villa', price: 'AED 5,000,000', bedrooms: 4, bathrooms: 3, area_sqft: 3200, property_type: 'Villa', location: 'Palm Jumeirah', status: 'available', image_url: 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/property-images/test.jpg' }, 0);
       log('  renderPropertyCard has prop-card: ' + (card.includes('prop-card') ? 'OK' : 'FAIL'));
       log('  renderPropertyCard has View details link: ' + (card.includes('prop-view-link') ? 'OK' : 'FAIL'));
       log('  renderPropertyCard aria-label: ' + (card.includes('View details for Palm Villa') ? 'OK' : 'FAIL'));

@@ -88,6 +88,7 @@ Deno.serve(async (req: Request) => {
       .from("magic_links")
       .select("*")
       .eq("token", token)
+      .is("revoked_at", null)
       .single();
 
     if (linkErr || !link) {

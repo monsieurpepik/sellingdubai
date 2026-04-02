@@ -1,0 +1,69 @@
+/* ========== REFERRAL CTA ========== */
+#rem-offplan-container {
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.referral-cta {
+  width: 100%; padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(17,39,210,0.08), rgba(17,39,210,0.03));
+  border-top: 1px solid rgba(17,39,210,0.15);
+  text-align: center;
+}
+.referral-cta-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: rgba(147,163,248,0.8); font-size: var(--text-sm); font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  transition: color var(--duration-medium), transform var(--duration-normal) var(--spring);
+  -webkit-tap-highlight-color: transparent;
+}
+.referral-cta-link:active { transform: scale(0.97); }
+.referral-cta-link:hover { color: #fff; }
+
+/* ========== FOOTER (whisper-quiet — agent is the brand) ========== */
+.sd-footer {
+  width: 100%; padding: 32px 24px 28px;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 10px; margin-top: 24px;
+}
+.sd-footer-powered {
+  display: inline-block; text-decoration: none;
+}
+.sd-footer-powered:hover img { opacity: 0.5 !important; }
+.sd-footer-legal {
+  font-family: 'Inter', sans-serif; font-size: var(--text-3xs); color: rgba(255,255,255,0.55);
+}
+.sd-footer-legal a { color: var(--color-text-muted); text-decoration: none; }
+.sd-footer-legal a:hover { color: rgba(255,255,255,0.55); }
+.sd-footer-difc {
+  font-family: 'Inter', sans-serif; font-size: var(--text-4xs); color: rgba(255,255,255,0.55);
+  margin-top: 4px; letter-spacing: 0.02em;
+}
+
+/* ========== COOKIE CONSENT ========== */
+.cookie-banner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 99998;
+  background: rgba(10,10,10,0.97); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-border);
+  padding: 16px 20px; display: flex; align-items: center; justify-content: center;
+  gap: 16px; flex-wrap: wrap;
+  font-family: 'Inter', sans-serif;
+  transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.cookie-banner.show { transform: translateY(0); }
+.cookie-banner-text {
+  font-size: var(--text-xs); color: rgba(255,255,255,0.65); line-height: 1.5; max-width: 560px;
+}
+.cookie-banner-text a { color: rgba(255,255,255,0.8); text-decoration: underline; }
+.cookie-banner-btns { display: flex; gap: 8px; flex-shrink: 0; }
+.cookie-btn {
+  font-family: 'Inter', sans-serif; font-size: var(--text-xs); font-weight: 600;
+  padding: 8px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: all var(--duration-fast);
+  min-height: 36px;
+}
+.cookie-btn-accept { background: #fff; color: #000; }
+.cookie-btn-accept:hover { background: rgba(255,255,255,0.85); }
+.cookie-btn-reject { background: var(--color-border); color: rgba(255,255,255,0.6); }
+.cookie-btn-reject:hover { background: rgba(255,255,255,0.12); }
+

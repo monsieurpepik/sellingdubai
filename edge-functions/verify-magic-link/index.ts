@@ -18,9 +18,13 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.com",
   "https://sellingdubai-agents.netlify.app",
 ];
+const IS_LOCAL_DEV = (Deno.env.get("SUPABASE_URL") ?? "").startsWith("http://127.0.0.1");
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const isLocalOrigin = IS_LOCAL_DEV &&
+    (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
+  const allowedOrigin = isLocalOrigin ? origin
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]);
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers": "content-type, authorization",
@@ -53,6 +57,7 @@ Deno.serve(async (req: Request) => {
       .from("magic_links")
       .select("*")
       .eq("token", token)
+      .is("revoked_at", null)
       .single();
 
     if (linkErr || !link) {
@@ -92,16 +97,30 @@ Deno.serve(async (req: Request) => {
         .eq("id", link.id);
     }
 
-    // Return agent data — strip ALL sensitive fields
-    const SENSITIVE_FIELDS = [
-      'instagram_access_token', 'instagram_user_id',
-      'tiktok_access_token', 'tiktok_user_id',
-      'facebook_capi_token',
-      'created_at', 'updated_at',
+    // Return agent data — allowlist only the fields the dashboard needs
+    const DASHBOARD_FIELDS = [
+      'id', 'slug', 'full_name', 'name', 'email', 'phone',
+      'photo_url', 'profile_photo_url', 'cover_photo_url', 'background_image_url',
+      'agency_name', 'agency_logo_url', 'bio', 'tagline',
+      'title', 'dld_number', 'rera_number', 'brn_number', 'broker_number',
+      'dld_broker_number', 'dld_broker_id', 'license_image_url',
+      'verification_status', 'tier', 'is_active', 'email_verified',
+      'onboarding_complete', 'profile_complete',
+      'whatsapp', 'whatsapp_number', 'languages', 'specializations', 'areas',
+      'instagram_handle', 'tiktok_handle', 'linkedin_url', 'youtube_url',
+      'instagram_url', 'tiktok_url',
+      'website_url', 'calendly_url',
+      'custom_link_1_label', 'custom_link_1_url',
+      'custom_link_2_label', 'custom_link_2_url',
+      'show_mortgage_calculator', 'show_properties', 'show_off_plan',
+      'show_preapproval', 'show_golden_visa',
+      'property_order', 'link_buttons',
+      'referral_code', 'referral_count',
+      'webhook_url', 'facebook_pixel_id', 'ga4_measurement_id',
     ];
-    const safeAgent = { ...agent };
-    for (const field of SENSITIVE_FIELDS) {
-      delete safeAgent[field];
+    const safeAgent: Record<string, unknown> = {};
+    for (const field of DASHBOARD_FIELDS) {
+      if (field in agent) safeAgent[field] = agent[field];
     }
 
     return new Response(
@@ -109,7 +128,7 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("verify-magic-link error");
+    console.error("verify-magic-link error:", e instanceof Error ? e.stack : String(e));
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }
