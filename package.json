@@ -9,7 +9,9 @@
     "clean": "rm -rf dist",
     "build": "npm run build:css && npm run build:js && npm run build:styles",
     "dev": "bash scripts/dev.sh",
-    "check": "bash scripts/pre-deploy-check.sh"
+    "check": "bash scripts/pre-deploy-check.sh",
+    "test:functions": "deno test --allow-net --allow-env --allow-read supabase/functions/*/test.ts",
+    "test": "npm run test:functions"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

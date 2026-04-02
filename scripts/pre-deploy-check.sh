@@ -173,6 +173,15 @@ if grep -q "SUPABASE_URL=${PROD_URL}" supabase/.env 2>/dev/null; then
 fi
 echo ""
 
+# ── 9. Integration test reminder ─────────────────────────────────────────────
+echo -e "${BOLD}9. Integration tests${NC}"
+if grep -q "127.0.0.1" supabase/.env 2>/dev/null; then
+  warn "Local env detected — run 'npm run test:functions' against the local stack before deploying"
+else
+  pass "Integration test reminder: run 'npm run test:functions' if local stack is running"
+fi
+echo ""
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo "══════════════════════════════════════"
 if [ "$ERRORS" -gt 0 ]; then
