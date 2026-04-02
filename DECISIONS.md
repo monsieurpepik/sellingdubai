@@ -1,5 +1,30 @@
 # Architecture Decisions Log
 
+## 2026-04-02 — Luxury Off-Plan & Mortgage Refactor: chunk size increases
+
+### mortgage chunk: ~18.2KB → ~23.2KB
+
+`dist/chunks/mortgage-*.js` now exceeds the 20KB soft limit by ~3.2KB.
+
+Three additions drove the increase:
+- **Off-plan Step 1** (`renderMortOffPlanStep1`): milestone cost breakdown table, DLD fee row, agent commission checkbox, total cash and loan amount summary, "Calculate Mortgage Payments" CTA (~3KB of new rendering logic).
+- **State consolidation**: `_mortState` object + `_mortStateDefaults` const replacing 8 `window._mort*` globals — minor size impact but cleaner coupling.
+- **Amortization bar**: principal vs total interest bar injected into the pre-qualified result screen (~0.8KB of inline HTML generation).
+
+Cannot be split further: `renderMortOffPlanStep1`, `window.mortOpProceed`, and `window._mortOpToggleAgent` all read/write `_mortState` directly — extracting them to a sub-module would require either shared mutable state across chunks (complexity) or prop-drilling the entire state object (defeats the consolidation). The mortgage chunk is already lazy-loaded on first "Get Pre-Approved" or "Calculate Mortgage" click, so no first-paint impact. Accepted overage.
+
+### project-detail chunk: 20.3KB (unchanged from 2026-03-30 entry)
+
+No new code added in this sprint. The 20.3KB figure is the same overage previously accepted. Carried forward for completeness.
+
+## 2026-03-30 — project-detail chunk at 23.1KB (DLD async section)
+
+`dist/chunks/project-detail-*.js` is 23.1KB, 3.1KB over the 20KB soft limit.
+Added async DLD official data fetch: second Supabase query after project render, client-side name-overlap scoring across up to 20 candidates, and inline HTML for status/progress/completion card.
+Cannot be split further — the DLD logic is tightly coupled to the project object and the DOM element rendered inline. The async pattern (fire-and-forget IIFE after sheet.innerHTML) keeps it non-blocking so no first-paint impact. Acceptable overage.
+
+Previous entry (now superseded): Added `percent_completed` SELECT field and construction progress bar HTML (~0.8KB). That field and bar have been removed; the DLD section replaces them.
+
 ## 2026-03-27 — Modular JS Extraction + Performance + Design System
 
 ### What we did
