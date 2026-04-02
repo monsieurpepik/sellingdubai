@@ -1,10 +1,9 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test('Pricing page has noindex meta tag', async ({ page }) => {
+test('Pricing page does not have noindex meta tag', async ({ page }) => {
   await page.goto('/pricing.html');
-  const robots = await page.locator('meta[name="robots"]').getAttribute('content');
-  expect(robots).toContain('noindex');
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
 });
 
 test('Pricing page upgrade buttons are visible', async ({ page }) => {
