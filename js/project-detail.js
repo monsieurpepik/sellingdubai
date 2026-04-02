@@ -370,19 +370,27 @@ export async function openProjectDetail(projectSlug) {
       ${units.length ? `
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Available Units</h3>
-        <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:2px;padding:0 2px 6px;font-size:9px;color:rgba(255,255,255,0.25);">
+          <span>Type</span><span>Size</span><span>From</span><span style="text-align:right;">Avail.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
           ${units.map(u => {
-            const bedLabel = u.bedroom ? `${u.bedroom}BR ` : '';
-            const typeLabel = bedLabel + (u.property_types || 'Unit');
+            const typeLabel = u.bedroom ? `${u.bedroom}\u00a0BR` : (u.property_types || 'Unit');
             const areaVal = u.lowest_area || u.area_sqft || u.area;
             const priceVal = u.lowest_price || u.price || u.min_price;
+            const avail = u.available_units_count;
+            let availColor = '', availText = '';
+            if (avail != null) {
+              if (avail === 0) { availColor = 'rgba(255,255,255,0.3)'; availText = 'Sold out'; }
+              else if (avail <= 5) { availColor = '#f59e0b'; availText = avail + ' left'; }
+              else { availColor = '#4ade80'; availText = avail + ' left'; }
+            }
             return `
-          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
-              <div style="font-size:13px;font-weight:600;">${escHtml(typeLabel)}</div>
-              ${priceVal ? `<div style="font-size:13px;font-weight:700;white-space:nowrap;">AED\u00a0${Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0})}</div>` : ''}
-            </div>
-            ${areaVal ? `<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">From ${escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0}))} sqft</div>` : ''}
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:4px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:700;">${escHtml(typeLabel)}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);">${areaVal ? escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0})) + '\u00a0sqft' : ''}</div>
+            <div style="font-size:11px;font-weight:600;">${priceVal ? 'AED\u00a0' + Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0}) : ''}</div>
+            <div style="font-size:9px;font-weight:600;text-align:right;color:${availColor};">${availText}</div>
           </div>`;
           }).join('')}
         </div>
