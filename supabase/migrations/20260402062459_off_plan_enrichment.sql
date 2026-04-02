@@ -15,7 +15,8 @@ ALTER TABLE public.projects
 
 -- GIN index for array containment queries on gallery_images
 CREATE INDEX IF NOT EXISTS idx_projects_gallery_images
-  ON public.projects USING GIN (gallery_images);
+  ON public.projects USING GIN (gallery_images)
+  WHERE gallery_images IS NOT NULL;
 
 COMMENT ON COLUMN public.projects.payment_plan_detail IS
   'Typed milestone array: [{phase, percentage, trigger, due_date}]. Populated by sync-rem-offplan for top-30 priority projects.';
