@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   ci:
     name: Build & Test
@@ -68,8 +75,7 @@ jobs:
           BILLING_LIVE: ${{ secrets.BILLING_LIVE }}
 
       - name: Deploy to Netlify
-        run: |
-          npx netlify-cli deploy \
-            --prod \
-            --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} \
-            --site=${{ secrets.NETLIFY_SITE_ID }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npx netlify-cli deploy --prod
