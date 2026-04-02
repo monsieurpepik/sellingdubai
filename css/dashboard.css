@@ -107,7 +107,7 @@
     min-height: 2px; transition: background 0.15s; position: relative;
   }
   .chart-bar:hover { background: rgba(255,255,255,0.2); }
-  .chart-bar-fill { background: #3b82f6; border-radius: 4px 4px 0 0; }
+  .chart-bar-fill { background: #4d65ff; border-radius: 4px 4px 0 0; }
 
   /* ── Referrers ── */
   .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
@@ -157,8 +157,8 @@
   }
   .lead-btn-wa { background: rgba(37,211,102,0.12); color: #25d366; }
   .lead-btn-wa:hover { background: rgba(37,211,102,0.2); }
-  .lead-btn-call { background: rgba(59,130,246,0.12); color: #3b82f6; }
-  .lead-btn-call:hover { background: rgba(59,130,246,0.2); }
+  .lead-btn-call { background: rgba(17,39,210,0.12); color: #1127d2; }
+  .lead-btn-call:hover { background: rgba(17,39,210,0.2); }
   .lead-btn-email { background: rgba(168,85,247,0.12); color: #a855f7; }
   .lead-btn-email:hover { background: rgba(168,85,247,0.2); }
 
@@ -170,7 +170,7 @@
     -webkit-appearance: none; margin-left: auto;
     min-height: 40px;
   }
-  .status-new { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .status-new { background: rgba(77,101,255,0.15); color: #4d65ff; }
   .status-contacted { background: rgba(245,158,11,0.15); color: #f59e0b; }
   .status-qualified { background: rgba(34,197,94,0.15); color: #22c55e; }
   .status-lost { background: rgba(239,68,68,0.15); color: #ef4444; }
@@ -266,7 +266,7 @@
   .prop-title-text { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .prop-meta { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
   .prop-badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
-  .prop-badge-just_listed { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .prop-badge-just_listed { background: rgba(77,101,255,0.15); color: #4d65ff; }
   .prop-badge-available { background: rgba(34,197,94,0.15); color: #22c55e; }
   .prop-badge-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
   .prop-badge-sold { background: rgba(239,68,68,0.15); color: #ef4444; }
@@ -275,7 +275,7 @@
   .prop-badge-hidden { background: rgba(245,158,11,0.15); color: #f59e0b; }
   .prop-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .prop-status-select { padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
-  .prop-status-just_listed { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .prop-status-just_listed { background: rgba(77,101,255,0.15); color: #4d65ff; }
   .prop-status-available { background: rgba(34,197,94,0.15); color: #22c55e; }
   .prop-status-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
   .prop-status-sold { background: rgba(239,68,68,0.15); color: #ef4444; }
@@ -360,7 +360,7 @@
 
   /* ── Onboarding Checklist ── */
   .onboard {
-    background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.06) 100%);
+    background: linear-gradient(135deg, rgba(77,101,255,0.08) 0%, rgba(99,102,241,0.06) 100%);
     border: 1px solid rgba(99,102,241,0.15);
     border-radius: 14px; padding: 24px; margin-bottom: 28px;
     position: relative;
@@ -380,7 +380,7 @@
     height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px;
     margin-bottom: 18px; overflow: hidden;
   }
-  .onboard-bar { height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.5s ease; }
+  .onboard-bar { height: 100%; background: #4d65ff; border-radius: 4px; transition: width 0.5s ease; }
   .onboard-steps { display: flex; flex-direction: column; gap: 10px; }
   .onboard-step {
     display: flex; align-items: center; gap: 12px;
@@ -402,7 +402,7 @@
   .onboard-step.done { color: rgba(255,255,255,0.3); text-decoration: line-through; }
   .onboard-step-label { flex: 1; }
   .onboard-step-action {
-    font-size: 11px; font-weight: 700; color: #3b82f6;
+    font-size: 11px; font-weight: 700; color: #1127d2;
     text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
   }
   .onboard-step.done .onboard-step-action { display: none; }
@@ -430,6 +430,7 @@
       position: fixed; bottom: 0; left: 0; right: 0;
       background: #09090b; border-top: 1px solid rgba(255,255,255,0.08);
       padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
       z-index: 50; justify-content: space-around;
     }
     .mobile-nav a, .mobile-nav button {
