@@ -119,8 +119,9 @@ window.initMortModal = async function initMortModalLazy(opts) {
 };
 
 // project-detail.js is lazy-loaded on first openProjectDetail() call
-window.openProjectDetail = async function(slug) {
+window.openProjectDetail = async function openProjectDetailLazy(slug) {
   const m = await import('./project-detail.js');
+  window.openProjectDetail = m.openProjectDetail;
   m.openProjectDetail(slug);
 };
 
@@ -176,7 +177,7 @@ async function init() {
   try {
     const { data: agent, error } = await supabase // await-ok: single primary fetch, nothing to parallelize
       .from('agents')
-      .select('id,slug,name,photo_url,background_image_url,verification_status,tagline,bio,phone,dld_broker_number,broker_number,dld_total_deals,dld_total_volume_aed,dld_verified,agency_name,agency_logo_url,whatsapp,email,calendly_url,custom_link_1_url,custom_link_1_label,custom_link_2_url,custom_link_2_label,instagram_url,youtube_url,tiktok_url,linkedin_url,facebook_pixel_id,ga4_measurement_id,show_golden_visa,show_preapproval,tier,referral_code,stripe_subscription_status,stripe_current_period_end')
+      .select('id,slug,name,photo_url,background_image_url,verification_status,tagline,phone,dld_broker_number,broker_number,dld_total_deals,dld_total_volume_aed,dld_verified,agency_name,agency_logo_url,whatsapp,email,calendly_url,custom_link_1_url,custom_link_1_label,custom_link_2_url,custom_link_2_label,instagram_url,youtube_url,tiktok_url,linkedin_url,facebook_pixel_id,ga4_measurement_id,show_golden_visa,show_preapproval,tier,referral_code,stripe_subscription_status,stripe_current_period_end')
       .eq('slug', slug)
       .single();
 
