@@ -58,5 +58,10 @@ if (pricingPatched === pricingHtml && billingLive) {
   console.error('build-js: BILLING_LIVE patch failed — target string not found in pricing.html');
   process.exit(1);
 }
-fs.writeFileSync(pricingPath, pricingPatched, 'utf8');
-console.log(`build-js: pricing.html BILLING_LIVE patched to ${billingLive}`);
+// Only write + log when a change was actually made (billingLive=false is a no-op).
+// Running locally with BILLING_LIVE=true modifies pricing.html in-place;
+// reset with: git checkout pricing.html
+if (pricingPatched !== pricingHtml) {
+  fs.writeFileSync(pricingPath, pricingPatched, 'utf8');
+  console.log(`build-js: pricing.html BILLING_LIVE patched to ${billingLive}`);
+}
