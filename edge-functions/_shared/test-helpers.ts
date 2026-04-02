@@ -40,11 +40,6 @@ export async function cleanupAgent(id: string): Promise<void> {
   const supabase = getSupabase();
   await supabase.from("magic_links").delete().eq("agent_id", id);
   await supabase.from("leads").delete().eq("agent_id", id);
-  try {
-    await supabase.from("rate_limits").delete().eq("agent_id", id);
-  } catch {
-    // rate_limits table may not exist, silently ignore
-  }
   await supabase.from("agents").delete().eq("id", id);
 }
 
