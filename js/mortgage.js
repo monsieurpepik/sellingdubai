@@ -6,53 +6,89 @@ import { escHtml, escAttr } from './utils.js';
 import { logEvent } from './analytics.js';
 import { currentAgent } from './state.js';
 
-window._mortTerm = 25;
-window._mortRate = 3.99;
-window._mortStep = 1;
-window._mortData = { employment: 'salaried', residency: 'uae_resident' };
-window._mortRates = [];
-window._mortAppId = null;
-window._eiborRate = null;  // { rate: number, spread: number } once loaded
+const _mortStateDefaults = {
+  mode:      'standard',   // 'standard' | 'offplan'
+  step:      1,
+  term:      25,
+  rate:      3.99,
+  appId:     null,
+  editToken: null,
+  project:   null,         // { name, minPrice, milestones, completionDate } — offplan only
+  data: {
+    employment: 'salaried',
+    residency:  'uae_resident',
+  },
+  rates:     [],
+};
+
+let _mortState = { ..._mortStateDefaults, data: { ..._mortStateDefaults.data } };
+
+// _eiborRate stays separate — it's cached external data, not per-session state
+let _eiborRate = null;
 
 const fmtAEDMort = (n) => 'AED ' + Math.round(n).toLocaleString();
 
 window.openMortgage = function() {
   const modal = document.getElementById('mortgage-modal');
   if (!modal) return;
+  // Reset to standard mode on direct open
+  _mortState = { ..._mortStateDefaults, data: { ..._mortStateDefaults.data } };
+  _mortRatesLoadFailed = false;
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   mortGoStep(1);
   loadMortgageRates();
   loadEiborRate();
-  // Reset lead capture and check button state
   const leadCapture = document.getElementById('mort-lead-capture');
   if (leadCapture) leadCapture.style.display = 'none';
   const checkBtn = document.getElementById('mort-check-btn');
   if (checkBtn) checkBtn.style.display = '';
   const eligResult = document.getElementById('mort-elig-result');
   if (eligResult) eligResult.style.display = 'none';
-  // Auto-fill property value if we have a current property
+  // Auto-fill property value from current property
   if (window._currentProperty) {
     const p = window._currentProperty;
     const priceNum = parseFloat(String(p.price || '').replace(/[^0-9.]/g, ''));
     if (priceNum > 0) {
       const valInput = document.getElementById('mort-value');
       if (valInput) valInput.value = Math.round(priceNum).toLocaleString('en-US');
-      // Also set the down payment slider based on residency
       const dpSlider = document.getElementById('mort-dp-slider');
       if (dpSlider) {
-        const minDp = window._mortData.residency === 'uae_national' ? 15 : (window._mortData.residency === 'non_resident' ? 50 : 20);
+        const minDp = _mortState.data.residency === 'uae_national' ? 15 : (_mortState.data.residency === 'non_resident' ? 50 : 20);
         dpSlider.min = minDp;
         dpSlider.value = minDp;
         const dpPctEl = document.getElementById('mort-dp-pct');
         if (dpPctEl) dpPctEl.textContent = minDp + '%';
-        // Update the min label
         const minLabel = dpSlider.parentElement?.querySelector('span');
         if (minLabel) minLabel.textContent = minDp + '%';
       }
     }
   }
   logEvent('mortgage_calc_open', { property: window._currentProperty?.title || null });
+};
+
+window.initMortModal = function(opts = {}) {
+  const modal = document.getElementById('mortgage-modal');
+  if (!modal) return;
+  // Merge opts over defaults; deep-clone data to avoid mutation
+  _mortState = {
+    ..._mortStateDefaults,
+    data: { ..._mortStateDefaults.data },
+    ...opts,
+  };
+  _mortRatesLoadFailed = false;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  mortGoStep(1);
+  loadMortgageRates();
+  loadEiborRate();
+  const leadCapture = document.getElementById('mort-lead-capture');
+  if (leadCapture) leadCapture.style.display = 'none';
+  const checkBtn = document.getElementById('mort-check-btn');
+  if (checkBtn) checkBtn.style.display = '';
+  const eligResult = document.getElementById('mort-elig-result');
+  if (eligResult) eligResult.style.display = 'none';
+  logEvent('mortgage_calc_open', { mode: _mortState.mode, project: _mortState.project?.name || null });
 };
 
 window.closeMortgage = function() {
@@ -63,7 +99,7 @@ window.closeMortgage = function() {
 };
 
 window.mortGoStep = function(step) {
-  window._mortStep = step;
+  _mortState.step = step;
   document.querySelectorAll('.mort-step').forEach(s => s.style.display = 'none');
   const el = document.getElementById('mort-step-' + step);
   if (el) el.style.display = 'block';
@@ -83,7 +119,7 @@ window.mortGoStep = function(step) {
     // Sync down payment slider to residency LTV rules
     const dpSlider = document.getElementById('mort-dp-slider');
     if (dpSlider) {
-      const minDp = window._mortData.residency === 'uae_national' ? 15 : (window._mortData.residency === 'non_resident' ? 50 : 20);
+      const minDp = _mortState.data.residency === 'uae_national' ? 15 : (_mortState.data.residency === 'non_resident' ? 50 : 20);
       dpSlider.min = minDp;
       if (parseInt(dpSlider.value) < minDp) dpSlider.value = minDp;
       const dpPctEl = document.getElementById('mort-dp-pct');
@@ -98,27 +134,39 @@ window.mortGoStep = function(step) {
 };
 
 window.setMortField = function(btn, field, value) {
-  window._mortData[field] = value;
+  _mortState.data[field] = value;
   btn.parentElement.querySelectorAll('.cost-toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 };
 
 window.setMortTerm = function(btn, years) {
-  window._mortTerm = years;
+  _mortState.term = years;
   btn.parentElement.querySelectorAll('.cost-toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderBankCards();
   calcMortgage();
 };
 
+let _mortRatesLoadFailed = false;
+
 async function loadMortgageRates() {
-  if (window._mortRates.length > 0) return;
+  if (_mortState.rates.length > 0) return;
+  _mortRatesLoadFailed = false;
   try {
     const res = await fetch(SUPABASE_URL + '/rest/v1/mortgage_rates?is_active=eq.true&order=rate_pct.asc', {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
     });
-    if (res.ok) window._mortRates = await res.json();
-  } catch (e) { console.error('Failed to load mortgage rates:', e); }
+    if (res.ok) {
+      _mortState.rates = await res.json();
+    } else {
+      console.error('[mortgage] rates fetch failed:', res.status);
+      _mortRatesLoadFailed = true;
+    }
+  } catch (e) {
+    console.error('Failed to load mortgage rates:', e);
+    _mortRatesLoadFailed = true;
+  }
+  renderBankCards();
 }
 
 async function loadEiborRate() {
@@ -126,13 +174,13 @@ async function loadEiborRate() {
     const res = await fetch(SUPABASE_URL + '/functions/v1/fetch-eibor', {
       headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
     });
-    if (!res.ok) return;
+    if (!res.ok) { console.warn('[eibor] fetch returned', res.status, '— using fallback rate'); return; }
     const data = await res.json();
     if (data.rate > 0) {
-      window._eiborRate = { rate: data.rate, spread: 1.5 };
+      _eiborRate = { rate: data.rate, spread: 1.5 };
       renderEiborBadge();
       // Update the default rate used before a bank is selected
-      if (window._mortRate === 3.99) window._mortRate = +(data.rate + 1.5).toFixed(2);
+      if (_mortState.rate === 3.99) _mortState.rate = +(data.rate + 1.5).toFixed(2);
     }
   } catch (e) {
     console.warn('EIBOR fetch failed, using hardcoded fallback rate:', e);
@@ -140,7 +188,7 @@ async function loadEiborRate() {
 }
 
 function renderEiborBadge() {
-  const r = window._eiborRate;
+  const r = _eiborRate;
   if (!r) return;
   const total = (r.rate + r.spread).toFixed(2);
   const badgeHtml = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:rgba(17,39,210,0.08);border:1px solid rgba(17,39,210,0.18);border-radius:8px;">
@@ -174,9 +222,9 @@ function renderEiborBadge() {
 }
 
 function filterRatesForProfile(rates) {
-  const income = window._mortData.income || 0;
-  const residency = window._mortData.residency || 'uae_resident';
-  const employment = window._mortData.employment || 'salaried';
+  const income = _mortState.data.income || 0;
+  const residency = _mortState.data.residency || 'uae_resident';
+  const employment = _mortState.data.employment || 'salaried';
   const maxLtv = residency === 'uae_national' ? 85 : (residency === 'non_resident' ? 50 : 80);
 
   return rates.filter(r => {
@@ -185,8 +233,8 @@ function filterRatesForProfile(rates) {
     // Filter by LTV compatibility
     if (r.max_ltv_pct && r.max_ltv_pct < maxLtv) return false;
     // Filter by term range
-    if (r.min_term_years && window._mortTerm < r.min_term_years) return false;
-    if (r.max_term_years && window._mortTerm > r.max_term_years) return false;
+    if (r.min_term_years && _mortState.term < r.min_term_years) return false;
+    if (r.max_term_years && _mortState.term > r.max_term_years) return false;
     return true;
   });
 }
@@ -194,9 +242,11 @@ function filterRatesForProfile(rates) {
 function renderBankCards() {
   const container = document.getElementById('mort-bank-cards');
   if (!container) return;
-  const allRates = window._mortRates;
+  const allRates = _mortState.rates;
   if (!allRates.length) {
-    container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading rates...</div>';
+    container.innerHTML = _mortRatesLoadFailed
+      ? '<div style="text-align:center;padding:20px;color:rgba(255,100,100,0.4);font-size:12px;">Rates temporarily unavailable — close and reopen to retry.</div>'
+      : '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading rates...</div>';
     return;
   }
   // Apply smart filtering based on buyer profile
@@ -234,11 +284,11 @@ function renderBankCards() {
   let html = '';
 
   // "Matched to you" badge if we have profile data
-  if (window._mortData.income > 0) {
+  if (_mortState.data.income > 0) {
     const residencyLabel = { uae_national: 'UAE National', uae_resident: 'Resident', non_resident: 'Non-Resident' };
     html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:10px;color:rgba(77,101,255,0.8);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Matched to your profile</span>
-      <span style="font-size:9px;color:rgba(255,255,255,0.2);font-weight:300;">${residencyLabel[window._mortData.residency] || ''} · ${window._mortData.employment === 'salaried' ? 'Salaried' : window._mortData.employment === 'self_employed' ? 'Self-Employed' : 'Business Owner'}</span>
+      <span style="font-size:9px;color:rgba(255,255,255,0.2);font-weight:300;">${residencyLabel[_mortState.data.residency] || ''} · ${_mortState.data.employment === 'salaried' ? 'Salaried' : _mortState.data.employment === 'self_employed' ? 'Self-Employed' : 'Business Owner'}</span>
     </div>`;
   }
 
@@ -258,7 +308,7 @@ function renderBankCards() {
     let monthlyStr = '';
     if (loanAmt > 0) {
       const mr = (r.rate_pct / 100) / 12;
-      const np = window._mortTerm * 12;
+      const np = _mortState.term * 12;
       const mp = loanAmt * (mr * Math.pow(1 + mr, np)) / (Math.pow(1 + mr, np) - 1);
       monthlyStr = fmtAEDMort(mp) + '/mo';
     }
@@ -279,12 +329,12 @@ function renderBankCards() {
   }
 
   container.innerHTML = html;
-  if (best.length > 0) window._mortRate = best[0].rate_pct;
+  if (best.length > 0) _mortState.rate = best[0].rate_pct;
 }
 
 window.selectBankRate = function(card, rate, bankName) {
-  window._mortRate = rate;
-  window._mortData.selectedBank = bankName;
+  _mortState.rate = rate;
+  _mortState.data.selectedBank = bankName;
   card.parentElement.querySelectorAll('.mort-bank-card').forEach(c => c.classList.remove('active'));
   card.classList.add('active');
   calcMortgage();
@@ -301,10 +351,13 @@ window.calcMortgage = function() {
   if (dpPctEl) dpPctEl.textContent = dpSlider.value + '%';
   if (!rawVal || rawVal <= 0) { if (resultsEl) resultsEl.style.display = 'none'; renderBankCards(); return; }
   const loanAmt = rawVal * (1 - dpPct);
-  const monthlyRate = (window._mortRate / 100) / 12;
-  const numPayments = window._mortTerm * 12;
+  const monthlyRate = (_mortState.rate / 100) / 12;
+  const numPayments = _mortState.term * 12;
   const monthlyPayment = loanAmt * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
   const totalInterest = (monthlyPayment * numPayments) - loanAmt;
+  _mortState.data.loanAmt        = loanAmt;
+  _mortState.data.monthlyPayment = monthlyPayment;
+  _mortState.data.totalInterest  = totalInterest;
   const me = document.getElementById('mort-monthly');
   const le = document.getElementById('mort-loan');
   const ie = document.getElementById('mort-interest');
@@ -339,7 +392,7 @@ window.mortCheckEligibility = function() {
   }
   incomeInput.style.borderColor = '';
   const debt = parseFloat((debtInput?.value || '0').replace(/[^0-9.]/g, '')) || 0;
-  const isNational = window._mortData.residency === 'uae_national';
+  const isNational = _mortState.data.residency === 'uae_national';
   const maxMonthly = (income * 0.50) - debt;
   if (maxMonthly <= 0) {
     document.getElementById('mort-max-loan').textContent = 'AED 0';
@@ -348,14 +401,14 @@ window.mortCheckEligibility = function() {
     return;
   }
   // Stress rate: live 3-month EIBOR + 0.5% margin (falls back to 4.18% if not yet loaded)
-  const stressRate = window._eiborRate ? (window._eiborRate.rate + 0.5) / 100 : 0.0418;
+  const stressRate = _eiborRate ? (_eiborRate.rate + 0.5) / 100 : 0.0418;
   const mr = stressRate / 12;
   const np = 25 * 12;
   const maxLoan = maxMonthly * (Math.pow(1 + mr, np) - 1) / (mr * Math.pow(1 + mr, np));
-  window._mortData.maxLoan = maxLoan;
-  window._mortData.maxMonthly = maxMonthly;
-  window._mortData.income = income;
-  window._mortData.debt = debt;
+  _mortState.data.maxLoan = maxLoan;
+  _mortState.data.maxMonthly = maxMonthly;
+  _mortState.data.income = income;
+  _mortState.data.debt = debt;
   document.getElementById('mort-max-loan').textContent = fmtAEDMort(maxLoan);
   document.getElementById('mort-max-monthly').textContent = `Max monthly payment: ${fmtAEDMort(maxMonthly)} · Based on ${isNational ? '85%' : '80%'} LTV`;
   document.getElementById('mort-elig-result').style.display = 'block';
@@ -388,8 +441,8 @@ window.mortCaptureAndProceed = async function() {
   if (errEl) errEl.style.display = 'none';
   // Format phone with +971
   const phone = '+971' + rawPhone;
-  window._mortData.leadName = name;
-  window._mortData.leadPhone = phone;
+  _mortState.data.leadName = name;
+  _mortState.data.leadPhone = phone;
   // Pre-fill Step 3 fields
   const step3Name = document.getElementById('mort-name');
   const step3Phone = document.getElementById('mort-phone');
@@ -404,11 +457,11 @@ window.mortCaptureAndProceed = async function() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         agent_id: agentId, name: name, phone: phone,
-        source: 'mortgage_calculator', message: 'Mortgage pre-qualification — Max loan: ' + fmtAEDMort(window._mortData.maxLoan || 0) + (propTitle ? ' — Property: ' + propTitle : ''),
+        source: 'mortgage_calculator', message: 'Mortgage pre-qualification — Max loan: ' + fmtAEDMort(_mortState.data.maxLoan || 0) + (propTitle ? ' — Property: ' + propTitle : ''),
         property_title: propTitle
       })
-    }).catch(() => {});
-  } catch (e) {}
+    }).catch((err) => { console.error('[mortgage] lead capture fetch failed:', err); });
+  } catch (e) { console.error('[mortgage] lead capture failed:', e); }
   logEvent('mortgage_lead_captured', { agent: currentAgent?.slug, name: name });
   mortGoStep(2);
 };
@@ -416,7 +469,7 @@ window.mortCaptureAndProceed = async function() {
 window.mortSubmitApplication = async function() {
   const name = document.getElementById('mort-name')?.value?.trim();
   const rawPhone = document.getElementById('mort-phone')?.value?.trim().replace(/[^0-9]/g, '') || '';
-  const phone = rawPhone ? '+971' + rawPhone : (window._mortData.leadPhone || null);
+  const phone = rawPhone ? '+971' + rawPhone : (_mortState.data.leadPhone || null);
   const email = document.getElementById('mort-email')?.value?.trim();
   const errEl = document.getElementById('mort-submit-error');
   const btn = document.getElementById('mort-submit-btn');
@@ -430,14 +483,14 @@ window.mortSubmitApplication = async function() {
   const dpPct = document.getElementById('mort-dp-slider') ? parseInt(document.getElementById('mort-dp-slider').value) : 20;
   const payload = {
     buyer_name: name, buyer_phone: phone || null, buyer_email: email || null,
-    monthly_income: window._mortData.income || null, employment_type: window._mortData.employment || null,
-    residency_status: window._mortData.residency || null, existing_debt_monthly: window._mortData.debt || 0,
-    property_value: propVal, down_payment_pct: dpPct, preferred_term_years: window._mortTerm,
-    preferred_rate_type: window._mortRate + '%', max_loan_amount: window._mortData.maxLoan || null,
-    estimated_monthly: window._mortData.maxMonthly || null,
+    monthly_income: _mortState.data.income || null, employment_type: _mortState.data.employment || null,
+    residency_status: _mortState.data.residency || null, existing_debt_monthly: _mortState.data.debt || 0,
+    property_value: propVal, down_payment_pct: dpPct, preferred_term_years: _mortState.term,
+    preferred_rate_type: _mortState.rate + '%', max_loan_amount: _mortState.data.maxLoan || null,
+    estimated_monthly: _mortState.data.maxMonthly || null,
     agent_id: currentAgent?.id || null, agent_slug: currentAgent?.slug || null,
     property_id: window._currentProperty?.id || null, property_title: window._currentProperty?.title || null,
-    assigned_bank: window._mortData.selectedBank || null, source: 'profile_page', status: 'new'
+    assigned_bank: _mortState.data.selectedBank || null, source: 'profile_page', status: 'new'
   };
   try {
     const res = await fetch(SUPABASE_URL + '/functions/v1/submit-mortgage', {
@@ -447,7 +500,8 @@ window.mortSubmitApplication = async function() {
     });
     if (res.ok) {
       const data = await res.json();
-      window._mortAppId = data?.id || null;
+      _mortState.appId = data?.id || null;
+      _mortState.editToken = data?.edit_token || null;
       mortGoStep(4);
       injectMortgageSuccessCta(payload);
       logEvent('mortgage_application_submitted', { agent: currentAgent?.slug, bank: payload.assigned_bank });
@@ -523,7 +577,7 @@ window.mortDocUploaded = async function(input, docType) {
   if (statusEl) statusEl.textContent = 'Uploading...';
   try {
     const ext = file.name.split('.').pop()?.toLowerCase() || 'pdf';
-    const path = `${window._mortAppId || 'pending'}/${docType}_${Date.now()}.${ext}`;
+    const path = `${_mortState.appId || 'pending'}/${docType}_${Date.now()}.${ext}`;
     const res = await fetch(SUPABASE_URL + '/storage/v1/object/mortgage-docs/' + path, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': file.type, 'x-upsert': 'true' },
@@ -534,11 +588,11 @@ window.mortDocUploaded = async function(input, docType) {
       if (row) row.classList.add('uploaded');
       const checkEl = document.getElementById('mort-doc-' + docType + '-check');
       if (checkEl) checkEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
-      if (window._mortAppId) {
-        await fetch(SUPABASE_URL + '/rest/v1/mortgage_applications?id=eq.' + window._mortAppId, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ ['docs_' + docType]: path })
+      if (_mortState.appId && _mortState.editToken) {
+        await fetch(SUPABASE_URL + '/functions/v1/update-mortgage-docs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ id: _mortState.appId, edit_token: _mortState.editToken, doc_type: docType, path })
         });
       }
       logEvent('mortgage_doc_uploaded', { type: docType });
