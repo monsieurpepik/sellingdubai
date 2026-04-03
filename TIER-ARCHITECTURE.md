@@ -1,113 +1,97 @@
-# SellingDubai — Premium Tier Architecture
+# SellingDubai — Tier Architecture
 
-> **PRICING OUTDATED — DO NOT USE FOR INVESTOR OR CUSTOMER COMMUNICATIONS**
-> The pricing figures in this document (AED 149/month Pro, AED 499/month Enterprise) are **archived early-stage projections** and no longer reflect the live product.
->
-> **Current live pricing (as of 2026-04-02):**
-> - Free: AED 0/month
-> - Pro: AED 299/month (AED 2,990/year)
-> - Premium: AED 799/month (AED 7,990/year)
->
-> The tier names have also changed: "Enterprise" is now "Premium". Revenue projections below are based on old prices and should be recalculated against current pricing before use in any pitch deck or financial model.
+**Last updated: 2026-04-03**
+**Status: Billing live. Stripe fully integrated. Gating enforced.**
 
 ---
 
-## CURRENT STATE: Everything is free
-The `tier` column defaults to `'free'` for all agents. No gates are enforced yet.
-When you have 20-50 active agents and see which features they actually use, flip on gating.
+## Current Live Pricing
+
+| Tier | Monthly | Annual |
+|------|---------|--------|
+| Free | AED 0 | — |
+| Pro | AED 299/month | AED 2,990/year |
+| Premium | AED 799/month | AED 7,990/year |
 
 ---
 
-## Tier Structure (Ready to Activate)
+## Tier Feature Matrix
 
 ### FREE — "Get Started"
-- Verified DLD profile page
-- WhatsApp button
-- Lead capture form (no Calendly)
-- Email notifications (leads)
-- 1 custom link
-- Social links (all platforms)
-- Basic SEO (auto-generated og:tags)
+- DLD-verified agent profile page
+- WhatsApp lead button
+- Lead capture form
+- Up to 3 property listings
+- Basic analytics (views, taps)
+- Social links
+- "Powered by SellingDubai" badge
+- Email lead notifications
 
-### PRO — ~~AED 149/month~~ **AED 299/month** (live pricing)
+### PRO — AED 299/month
 Everything in Free, plus:
+- Up to 20 property listings
+- Advanced analytics (source attribution, conversion rate)
+- Lead CRM with pipeline management
+- Remove SellingDubai branding
+- Custom background image
+- Facebook Pixel & GA4 integration
 - Calendly consultation integration
-- Facebook Pixel + Conversion API (server-side)
-- Google Analytics GA4
-- CRM webhook integration (Zapier, Make, HubSpot)
-- 2 custom links
-- Agency logo badge
-- Background image customization
-- Follow-up nagger emails (30-min reminders)
-- Custom backhalf URL (choose your slug)
-- Priority in agent directory (future)
+- Priority support
+- Weekly performance email
 
-### PREMIUM — ~~AED 499/month (was "Enterprise")~~ **AED 799/month** (live pricing)
+### PREMIUM — AED 799/month
 Everything in Pro, plus:
-- Multiple agent profiles under one brokerage
-- Brokerage-wide lead dashboard
-- Brokerage-level analytics
-- White-label option (remove SellingDubai branding)
-- API access for custom integrations
-- Dedicated webhook with retry logic
-- Team lead routing (round-robin assignment)
+- Unlimited property listings
+- Lead export to CSV
+- Featured agent badge
+- Co-brokerage network *(in development)*
+- Property matching engine *(in development)*
+- Webhook/CRM integration *(in development)*
+- Dedicated account manager *(in development)*
 
 ---
 
-## Implementation (when ready)
+## Technical Implementation
 
 ### Database
-The `tier` column is already added: `ALTER TABLE agents ADD COLUMN tier TEXT DEFAULT 'free'`
-
-### Feature Gating in Edge Functions
-```typescript
-// In capture-lead — gate FB CAPI on pro tier
-if (agent.facebook_pixel_id && agent.facebook_capi_token && agent.tier !== 'free') {
-  // Fire FB CAPI event
-}
+```sql
+-- tier column: 'free' | 'pro' | 'premium'
+-- subscription_status: 'active' | 'past_due' | 'canceled' | null
+ALTER TABLE agents ADD COLUMN tier TEXT DEFAULT 'free';
+ALTER TABLE agents ADD COLUMN subscription_status TEXT;
+ALTER TABLE agents ADD COLUMN stripe_customer_id TEXT;
+ALTER TABLE agents ADD COLUMN stripe_subscription_id TEXT;
 ```
 
-### Feature Gating in Frontend (index.html)
+### Feature Gating (frontend)
 ```javascript
-// Gate Calendly on pro tier
-if (agent.calendly_url && agent.tier !== 'free') {
-  // Show Calendly button
-} else {
-  // Show lead form button
-}
+// isPaidTier() in utils.js — includes 7-day grace on past_due
+const isPro = agent.tier === 'pro' || agent.tier === 'premium';
+const isPremium = agent.tier === 'premium';
 ```
 
-### Stripe Integration (when ready)
-1. Create Stripe products + prices for PRO and ENTERPRISE
-2. Build `/billing` page with Stripe Checkout
-3. Edge function `create-checkout-session` → Stripe Checkout
-4. Stripe webhook → update agent `tier` column on payment
-5. Stripe Customer Portal for self-service billing management
-
-### Stripe Webhook Flow
+### Billing Flow
 ```
-Agent clicks "Upgrade to Pro" →
+Agent clicks "Upgrade" on /pricing →
+POST /functions/v1/create-checkout (token, plan, interval) →
 Stripe Checkout Session created →
 Agent pays →
-Stripe fires `checkout.session.completed` webhook →
-Edge function updates agents.tier = 'pro' →
-Features unlocked instantly
+Stripe fires checkout.session.completed webhook →
+/functions/v1/stripe-webhook → agents.tier updated →
+Features unlocked
 ```
 
-### Revenue Projections (ARCHIVED — based on old pricing, do not use)
-> These figures used the old AED 149/149 Pro and AED 499 Enterprise prices. Recalculate using current live pricing (Pro AED 299, Premium AED 799) before including in any pitch or financial model.
-- ~~50 agents × 30% conversion to Pro = 15 × AED 149 = AED 2,235/month~~
-- ~~100 agents × 30% conversion = 30 × AED 149 = AED 4,470/month~~
-- ~~500 agents × 25% conversion = 125 × AED 149 = AED 18,625/month~~
-- ~~Enterprise: 5 brokerages × AED 499 = AED 2,495/month~~
+### Key edge functions
+- `create-checkout` — creates Stripe Checkout session
+- `stripe-webhook` — handles checkout, subscription updates, cancellation
+- `create-portal-session` — Stripe Customer Portal for self-service billing
 
 ---
 
-## DO NOT BUILD UNTIL:
-1. You have 20+ active agents sharing their profiles
-2. You've received organic leads through the platform
-3. At least 3 agents have asked about a feature that's gated
-4. You know your activation rate (% of signups who share their link)
+## Revenue Projections (current pricing)
 
-The tier column is in the database. The gate checks are 2 lines of code.
-Building Stripe checkout before you have paying intent is wasting weeks.
+| Scenario | Pro agents | Premium agents | MRR |
+|----------|-----------|---------------|-----|
+| Early | 10 | 2 | AED 4,590 |
+| Growth | 50 | 10 | AED 22,940 |
+| Scale | 200 | 40 | AED 91,760 |
