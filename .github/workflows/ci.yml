@@ -42,13 +42,11 @@ jobs:
           deno-version: v2.x
 
       - name: Run edge function tests
-        run: |
-          deno test --allow-env --allow-net \
-            edge-functions/capture-lead-v4/index.test.ts \
-            edge-functions/send-magic-link/index.test.ts
+        run: npm test
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
   deploy:
     name: Deploy to Production
