@@ -5,6 +5,7 @@ import { supabase, SUPABASE_URL } from './config.js';
 import { getAgentSlug } from './utils.js';
 import { trackPageView } from './analytics.js';
 import { showPage, renderAgent, injectSchemaOrg, hydrateOgMeta, showEditButtonIfOwner } from './agent-page.js';
+import './event-delegation.js';
 
 // closeDetail stub — available immediately, before property-detail.js lazy-loads.
 // property-detail.js replaces this with its full implementation when it loads.
@@ -132,12 +133,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const mortModal = document.getElementById('mortgage-modal');
     if (mortModal && mortModal.classList.contains('open')) { if (typeof closeMortgage === 'function') closeMortgage(); return; }
-    if (document.getElementById('photo-viewer').classList.contains('open')) { if (typeof closePhotoViewer === 'function') closePhotoViewer(); return; }
-    if (document.getElementById('gallery-overlay').classList.contains('open')) { if (typeof closeFullGallery === 'function') closeFullGallery(); return; }
-    if (document.getElementById('detail-overlay').classList.contains('open')) { if (typeof closeDetail === 'function') closeDetail(); return; }
-    if (document.getElementById('filters-overlay').classList.contains('open')) { if (typeof closeFilters === 'function') closeFilters(); return; }
-    if (document.getElementById('prop-overlay').classList.contains('open')) { if (typeof closeProps === 'function') closeProps(); }
-    if (document.getElementById('lead-modal').classList.contains('open')) { if (typeof closeLead === 'function') closeLead(); }
+    const photoViewer = document.getElementById('photo-viewer');
+    if (photoViewer?.classList.contains('open')) { if (typeof closePhotoViewer === 'function') closePhotoViewer(); return; }
+    const galleryOverlay = document.getElementById('gallery-overlay');
+    if (galleryOverlay?.classList.contains('open')) { if (typeof closeFullGallery === 'function') closeFullGallery(); return; }
+    const detailOverlay = document.getElementById('detail-overlay');
+    if (detailOverlay?.classList.contains('open')) { if (typeof closeDetail === 'function') closeDetail(); return; }
+    const filtersOverlay = document.getElementById('filters-overlay');
+    if (filtersOverlay?.classList.contains('open')) { if (typeof closeFilters === 'function') closeFilters(); return; }
+    const propOverlay = document.getElementById('prop-overlay');
+    if (propOverlay?.classList.contains('open')) { if (typeof closeProps === 'function') closeProps(); }
+    const leadModal = document.getElementById('lead-modal');
+    if (leadModal?.classList.contains('open')) { if (typeof closeLead === 'function') closeLead(); }
   }
 });
 
@@ -227,7 +234,10 @@ async function init() {
     // pathParts: ['a', 'agent-slug', 'project', 'project-slug']
     if (pathParts[2] === 'project' && pathParts[3]) {
       const projectSlug = decodeURIComponent(pathParts[3]);
-      setTimeout(() => import('./project-detail.js').then(m => m.openProjectDetail(projectSlug)), 100);
+      setTimeout(() => import('./project-detail.js').then(m => m.openProjectDetail(projectSlug)).catch(e => {
+        console.error('[project-detail] sub-path load failed:', e);
+        showFeatureError('project-detail');
+      }), 100);
     }
 
     const params = new URLSearchParams(window.location.search);

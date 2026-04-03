@@ -29,11 +29,11 @@ export function renderPropertyCard(p, idx) {
   const allImages = p.image_url ? [p.image_url, ...extras.slice(0, 4)] : [];
   let imgSection = '';
 
-  const heartBtn = `<button class="prop-heart" onclick="event.stopPropagation();toggleHeart(this)" aria-label="Save property"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>`;
+  const heartBtn = `<button class="prop-heart" data-action="toggleHeart" aria-label="Save property"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>`;
 
   if (allImages.length > 1) {
     const slides = allImages.map((url, i) =>
-      `<img src="${escAttr(optimizeImg(url))}" alt="${safeTitle}" width="800" height="450" loading="${i === 0 ? 'eager' : 'lazy'}" onload="this.classList.add('loaded')" onerror="handleImgError(this)">`
+      `<img src="${escAttr(optimizeImg(url))}" alt="${safeTitle}" width="800" height="450" loading="${i === 0 ? 'eager' : 'lazy'}" data-managed>`
     ).join('');
     const dots = allImages.map((_, i) =>
       `<div class="prop-carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></div>`
@@ -41,14 +41,14 @@ export function renderPropertyCard(p, idx) {
     imgSection = `<div class="prop-carousel" data-card-id="${propId}">
       <div class="prop-carousel-track">${slides}</div>
       <div class="prop-carousel-dots">${dots}</div>
-      <button class="prop-carousel-nav prev" onclick="event.stopPropagation();slideCarousel('${propId}',-1)" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <button class="prop-carousel-nav next" onclick="event.stopPropagation();slideCarousel('${propId}',1)" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+      <button class="prop-carousel-nav prev" data-action="slideCarousel" data-prop-id="${propId}" data-dir="-1" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="prop-carousel-nav next" data-action="slideCarousel" data-prop-id="${propId}" data-dir="1" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
       ${heartBtn}
       <span class="prop-status ${st.css}">${escHtml(st.label)}</span>
     </div>`;
   } else if (allImages.length === 1) {
     imgSection = `<div class="prop-img-wrap">
-      <img class="prop-img" src="${escAttr(optimizeImg(allImages[0]))}" alt="${safeTitle}" width="800" height="450" loading="${idx === 0 ? 'eager' : 'lazy'}" onload="this.classList.add('loaded')" onerror="handleImgError(this)">
+      <img class="prop-img" src="${escAttr(optimizeImg(allImages[0]))}" alt="${safeTitle}" width="800" height="450" loading="${idx === 0 ? 'eager' : 'lazy'}" data-managed>
       ${heartBtn}
       <span class="prop-status ${st.css}">${escHtml(st.label)}</span>
     </div>`;
@@ -95,9 +95,9 @@ export function renderPropertyCard(p, idx) {
     : '';
 
   // Visually-hidden link for screen readers and keyboard navigation
-  const viewLink = `<a class="prop-view-link" href="#" onclick="event.preventDefault();openPropertyById('${propId}')" aria-label="View details for ${safeTitle}">View details</a>`;
+  const viewLink = `<a class="prop-view-link" href="#" data-action="openProperty" data-prop-id="${propId}" aria-label="View details for ${safeTitle}">View details</a>`;
 
-  return `<div class="prop-card" data-title="${safeTitle}" data-id="${propId}" onclick="openPropertyById('${propId}')">
+  return `<div class="prop-card" data-title="${safeTitle}" data-id="${propId}" data-action="openProperty" data-prop-id="${propId}">
     ${imgSection}
     <div class="prop-body">
       ${locationHtml}
@@ -129,7 +129,7 @@ export function renderOffPlanCard(p) {
   }
 
   const imgSrc = p.image_url
-    ? `<img class="offplan-img" src="${escAttr(optimizeImg(p.image_url))}" alt="${safeTitle}" width="800" height="500" loading="lazy" onerror="handleImgError(this)">`
+    ? `<img class="offplan-img" src="${escAttr(optimizeImg(p.image_url))}" alt="${safeTitle}" width="800" height="500" loading="lazy" data-managed>`
     : `<div class="offplan-img-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.08)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`;
 
   const locationText = p.location ? escHtml(p.location.split(',')[0]) : '';
@@ -146,9 +146,9 @@ export function renderOffPlanCard(p) {
   }
 
   // Visually-hidden link for screen readers and keyboard navigation
-  const viewLink = `<a class="prop-view-link" href="#" onclick="event.preventDefault();openPropertyById('${propId}')" aria-label="View details for ${safeTitle}">View details</a>`;
+  const viewLink = `<a class="prop-view-link" href="#" data-action="openProperty" data-prop-id="${propId}" aria-label="View details for ${safeTitle}">View details</a>`;
 
-  return `<div class="offplan-card" data-id="${propId}" onclick="openPropertyById('${propId}')">
+  return `<div class="offplan-card" data-id="${propId}" data-action="openProperty" data-prop-id="${propId}">
     <div class="offplan-img-wrap">
       ${imgSrc}
       <span class="offplan-badge ${typeClass}">${typeLabel}</span>
@@ -198,8 +198,8 @@ export function renderAdminCard(p, idx, total, statusLabels) {
 
   return `<div class="prop-card">` +
     `<div class="prop-reorder">` +
-      `<button class="prop-arrow-btn" onclick="reorderProp('${safeId}', -1)"${isFirst ? ' disabled' : ''} title="Move up" aria-label="Move ${safeTitle} up">▲</button>` +
-      `<button class="prop-arrow-btn" onclick="reorderProp('${safeId}', 1)"${isLast ? ' disabled' : ''} title="Move down" aria-label="Move ${safeTitle} down">▼</button>` +
+      `<button class="prop-arrow-btn" data-action="reorderProp" data-prop-id="${safeId}" data-dir="-1"${isFirst ? ' disabled' : ''} title="Move up" aria-label="Move ${safeTitle} up">▲</button>` +
+      `<button class="prop-arrow-btn" data-action="reorderProp" data-prop-id="${safeId}" data-dir="1"${isLast ? ' disabled' : ''} title="Move down" aria-label="Move ${safeTitle} down">▼</button>` +
     `</div>` +
     thumbHtml +
     `<div class="prop-body">` +
@@ -208,10 +208,10 @@ export function renderAdminCard(p, idx, total, statusLabels) {
       `<div class="prop-actions">` +
         (p.is_active ? '<span class="prop-badge prop-badge-live">Live</span>' : '<span class="prop-badge prop-badge-hidden">Hidden · Add DLD Permit to publish</span>') +
         `<span class="prop-badge prop-badge-${escAttr(status)}">${escHtml(statusLabel)}</span>` +
-        `<select class="prop-status-select prop-status-${escAttr(status)}" onchange="updatePropStatus('${safeId}', this.value, this)">${statusOptions}</select>` +
-        `<button class="prop-share-btn" onclick="shareProperty('${safeId}')" aria-label="Share ${safeTitle}">Share</button>` +
-        `<button class="prop-edit-btn" onclick="openPropModal('${safeId}')" aria-label="Edit ${safeTitle}">Edit</button>` +
-        `<button class="prop-delete-btn" onclick="deletePropertyConfirm('${safeId}')" aria-label="Delete ${safeTitle}">Delete</button>` +
+        `<select class="prop-status-select prop-status-${escAttr(status)}" data-action-change="updatePropStatus" data-prop-id="${safeId}">${statusOptions}</select>` +
+        `<button class="prop-share-btn" data-action="shareProperty" data-prop-id="${safeId}" aria-label="Share ${safeTitle}">Share</button>` +
+        `<button class="prop-edit-btn" data-action="openPropModal" data-prop-id="${safeId}" aria-label="Edit ${safeTitle}">Edit</button>` +
+        `<button class="prop-delete-btn" data-action="deleteProp" data-prop-id="${safeId}" aria-label="Delete ${safeTitle}">Delete</button>` +
       `</div>` +
     `</div>` +
   `</div>`;

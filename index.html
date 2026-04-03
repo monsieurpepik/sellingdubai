@@ -12,9 +12,9 @@
 <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" as="script" crossorigin="anonymous">
-<link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="/css/fonts.css" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=balcony,beach_access,bedroom_parent,check_circle,child_care,concierge,elevator,fitness_center,home_iot_device,local_parking,park,pets,pool,restaurant,security,shopping_bag,spa,sports_basketball,sports_tennis,storage,videocam&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=balcony,beach_access,bedroom_parent,check_circle,child_care,concierge,elevator,fitness_center,home_iot_device,local_parking,park,pets,pool,restaurant,security,shopping_bag,spa,sports_basketball,sports_tennis,storage,videocam&display=swap" as="style" data-async-css>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=balcony,beach_access,bedroom_parent,check_circle,child_care,concierge,elevator,fitness_center,home_iot_device,local_parking,park,pets,pool,restaurant,security,shopping_bag,spa,sports_basketball,sports_tennis,storage,videocam&display=swap" rel="stylesheet"></noscript>
 <style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle;}</style>
 <link rel="stylesheet" href="/dist/styles.min.css">
@@ -36,18 +36,10 @@
 <meta name="twitter:description" id="twitter-description" content="Connect with verified Dubai real estate agents. Browse profiles, listings, and contact agents directly.">
 <meta name="twitter:image" id="twitter-image" content="https://sellingdubai.ae/sellingdubailogo.png">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
-<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" async></script>
-<script>
-  if (window.Sentry) {
-    Sentry.init({
-      dsn: "https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",
-      environment: /sellingdubai\.(ae|com)$/.test(location.hostname) ? "production" : "development",
-      tracesSampleRate: 0.2,
-      sendDefaultPii: false
-    });
-  }
-</script>
+<script src="/js/gtag-init.js" defer></script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+<script src="/js/sentry-init.js" defer></script>
+<script src="/js/async-css.js" defer></script>
 <!-- Schema.org structured data — hydrated by app.js -->
 <script type="application/ld+json" id="schema-agent">{"@context":"https://schema.org","@type":"WebSite","name":"SellingDubai","url":"https://sellingdubai.ae/"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"SellingDubai","url":"https://sellingdubai.ae","description":"Verified profiles for Dubai real estate agents — DLD badge, listings, WhatsApp, and analytics.","areaServed":{"@type":"City","name":"Dubai"}}</script>
@@ -136,7 +128,7 @@
         <a id="nav-edit-btn" href="/edit" class="nav-share hidden" aria-label="Edit profile" style="text-decoration:none;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </a>
-        <button id="nav-share-btn" class="nav-share" onclick="nativeShare()" aria-label="Share this profile">
+        <button id="nav-share-btn" class="nav-share" data-action="nativeShare" aria-label="Share this profile">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
         </button>
         <a href="/join" class="nav-claim" id="nav-claim-btn">Get Your Page</a>
@@ -208,7 +200,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.4 0-4.637-.85-6.366-2.266l-.447-.355-2.948.988.988-2.948-.355-.447A9.965 9.965 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
       WhatsApp
     </button>
-    <button class="sticky-btn sticky-btn-contact" onclick="openLead()">
+    <button class="sticky-btn sticky-btn-contact" data-action="openLead">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       Contact Me
     </button>
@@ -216,11 +208,11 @@
 </div>
 
 <!-- ========== LEAD CAPTURE MODAL ========== -->
-<div id="lead-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Contact agent" onclick="if(event.target===this)closeLead()">
+<div id="lead-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Contact agent" data-action="closeLeadIfBackdrop">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title" id="modal-title">Free Consultation</span>
-      <button class="modal-close" onclick="closeLead()" aria-label="Close">&times;</button>
+      <button class="modal-close" data-action="closeLead" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
       <div id="lead-form">
@@ -242,7 +234,7 @@
           <label for="lead-email">Email</label>
           <input type="email" id="lead-email" placeholder="you@email.com" autocomplete="email" maxlength="254">
         </div>
-        <button type="button" class="modal-expander" id="lead-expander" onclick="toggleExtra()">
+        <button type="button" class="modal-expander" id="lead-expander" data-action="toggleExtra">
           <span>Tell us more (optional)</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -283,7 +275,7 @@
         </div>
         </div>
         <div class="modal-hint">Your details go directly to <span id="modal-agent-name"></span></div>
-        <button class="modal-btn" id="btn-lead" onclick="submitLead()">Send My Inquiry</button>
+        <button class="modal-btn" id="btn-lead" data-action="submitLead">Send My Inquiry</button>
       </div>
       <div id="lead-success" class="modal-success hidden">
         <div class="modal-success-icon">
@@ -297,7 +289,7 @@
 </div>
 
 <!-- ========== PROPERTY POPUP ========== -->
-<div id="prop-overlay" class="prop-overlay" role="dialog" aria-modal="true" aria-label="Property portfolio" onclick="if(event.target===this)closeProps()">
+<div id="prop-overlay" class="prop-overlay" role="dialog" aria-modal="true" aria-label="Property portfolio" data-action="closePropsIfBackdrop">
   <div class="prop-sheet">
     <div class="prop-header">
       <div style="display:flex;align-items:baseline;">
@@ -305,10 +297,10 @@
         <span class="prop-header-count" id="prop-count"></span>
       </div>
       <div style="display:flex;align-items:center;">
-        <button class="prop-filter-btn" id="filter-toggle-btn" onclick="event.stopPropagation();openFilters()" title="Filters">
+        <button class="prop-filter-btn" id="filter-toggle-btn" data-action="openFilters" title="Filters">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/><circle cx="6" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/></svg>
         </button>
-        <button class="prop-close" onclick="closeProps()" aria-label="Close">&times;</button>
+        <button class="prop-close" data-action="closeProps" aria-label="Close">&times;</button>
       </div>
     </div>
     <div class="prop-sheet-body">
@@ -316,44 +308,44 @@
       <aside class="prop-filters-sidebar" id="sidebar-filters">
         <div class="sidebar-section">
           <label class="sidebar-label">Search</label>
-          <input class="sidebar-search" type="text" id="sidebar-search" placeholder="City, location..." oninput="sidebarFilterChanged()">
+          <input class="sidebar-search" type="text" id="sidebar-search" placeholder="City, location..." data-action-input="sidebarFilterChanged">
         </div>
         <div class="sidebar-section">
           <label class="sidebar-label">Price (AED)</label>
           <div class="sidebar-row">
-            <input class="sidebar-input" type="number" id="sidebar-price-min" placeholder="Min" oninput="sidebarFilterChanged()">
-            <input class="sidebar-input" type="number" id="sidebar-price-max" placeholder="Max" oninput="sidebarFilterChanged()">
+            <input class="sidebar-input" type="number" id="sidebar-price-min" placeholder="Min" data-action-input="sidebarFilterChanged">
+            <input class="sidebar-input" type="number" id="sidebar-price-max" placeholder="Max" data-action-input="sidebarFilterChanged">
           </div>
         </div>
         <div class="sidebar-section">
           <label class="sidebar-label">Beds</label>
           <div class="sidebar-pills" id="sidebar-beds">
-            <button class="sidebar-pill" data-val="1" onclick="toggleSidebarPill(this,'sidebar-beds')">1+</button>
-            <button class="sidebar-pill" data-val="2" onclick="toggleSidebarPill(this,'sidebar-beds')">2+</button>
-            <button class="sidebar-pill" data-val="3" onclick="toggleSidebarPill(this,'sidebar-beds')">3+</button>
-            <button class="sidebar-pill" data-val="4" onclick="toggleSidebarPill(this,'sidebar-beds')">4+</button>
-            <button class="sidebar-pill" data-val="5" onclick="toggleSidebarPill(this,'sidebar-beds')">5+</button>
+            <button class="sidebar-pill" data-val="1" data-action="toggleSidebarPill" data-group="sidebar-beds">1+</button>
+            <button class="sidebar-pill" data-val="2" data-action="toggleSidebarPill" data-group="sidebar-beds">2+</button>
+            <button class="sidebar-pill" data-val="3" data-action="toggleSidebarPill" data-group="sidebar-beds">3+</button>
+            <button class="sidebar-pill" data-val="4" data-action="toggleSidebarPill" data-group="sidebar-beds">4+</button>
+            <button class="sidebar-pill" data-val="5" data-action="toggleSidebarPill" data-group="sidebar-beds">5+</button>
           </div>
         </div>
         <div class="sidebar-section">
           <label class="sidebar-label">Baths</label>
           <div class="sidebar-pills" id="sidebar-baths">
-            <button class="sidebar-pill" data-val="1" onclick="toggleSidebarPill(this,'sidebar-baths')">1+</button>
-            <button class="sidebar-pill" data-val="2" onclick="toggleSidebarPill(this,'sidebar-baths')">2+</button>
-            <button class="sidebar-pill" data-val="3" onclick="toggleSidebarPill(this,'sidebar-baths')">3+</button>
-            <button class="sidebar-pill" data-val="4" onclick="toggleSidebarPill(this,'sidebar-baths')">4+</button>
+            <button class="sidebar-pill" data-val="1" data-action="toggleSidebarPill" data-group="sidebar-baths">1+</button>
+            <button class="sidebar-pill" data-val="2" data-action="toggleSidebarPill" data-group="sidebar-baths">2+</button>
+            <button class="sidebar-pill" data-val="3" data-action="toggleSidebarPill" data-group="sidebar-baths">3+</button>
+            <button class="sidebar-pill" data-val="4" data-action="toggleSidebarPill" data-group="sidebar-baths">4+</button>
           </div>
         </div>
         <div class="sidebar-section">
           <label class="sidebar-label">Area (sqft)</label>
           <div class="sidebar-row">
-            <input class="sidebar-input" type="number" id="sidebar-area-min" placeholder="Min" oninput="sidebarFilterChanged()">
-            <input class="sidebar-input" type="number" id="sidebar-area-max" placeholder="Max" oninput="sidebarFilterChanged()">
+            <input class="sidebar-input" type="number" id="sidebar-area-min" placeholder="Min" data-action-input="sidebarFilterChanged">
+            <input class="sidebar-input" type="number" id="sidebar-area-max" placeholder="Max" data-action-input="sidebarFilterChanged">
           </div>
         </div>
         <div class="sidebar-actions">
-          <button class="sidebar-clear" onclick="clearSidebarFilters()">Clear</button>
-          <button class="sidebar-apply" onclick="applySidebarFilters()">Apply</button>
+          <button class="sidebar-clear" data-action="clearSidebarFilters">Clear</button>
+          <button class="sidebar-apply" data-action="applySidebarFilters">Apply</button>
         </div>
       </aside>
       <!-- Main content column -->
@@ -367,11 +359,11 @@
 </div>
 
 <!-- ========== FILTERS OVERLAY ========== -->
-<div id="filters-overlay" class="filters-overlay" role="dialog" aria-modal="true" aria-label="Property filters" onclick="if(event.target===this)closeFilters()">
+<div id="filters-overlay" class="filters-overlay" role="dialog" aria-modal="true" aria-label="Property filters" data-action="closeFiltersIfBackdrop">
   <div class="filters-sheet">
     <div class="filters-header">
       <span class="filters-title">Filters</span>
-      <button class="prop-close" onclick="closeFilters()" aria-label="Close">&times;</button>
+      <button class="prop-close" data-action="closeFilters" aria-label="Close">&times;</button>
     </div>
     <div class="filters-body">
       <div class="filters-section">
@@ -440,8 +432,8 @@
       </div>
     </div>
     <div class="filters-footer">
-      <button class="filters-clear" onclick="clearAllFilters()">Clear all</button>
-      <button class="filters-apply" onclick="applyFilters()">APPLY</button>
+      <button class="filters-clear" data-action="clearAllFilters">Clear all</button>
+      <button class="filters-apply" data-action="applyFilters">APPLY</button>
     </div>
   </div>
 </div>
@@ -449,7 +441,7 @@
 <!-- ========== PROPERTY DETAIL VIEW ========== -->
 <div id="detail-overlay" class="detail-overlay" role="dialog" aria-modal="true" aria-label="Property details">
   <div class="detail-sheet" id="detail-sheet"></div>
-  <button class="detail-back" id="detail-back-btn" onclick="closeDetail()">
+  <button class="detail-back" id="detail-back-btn" data-action="closeDetail">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
   </button>
   <div class="detail-cta-bar" id="detail-cta-bar">
@@ -464,7 +456,7 @@
 <div id="gallery-overlay" class="gallery-overlay" role="dialog" aria-modal="true" aria-label="Photo gallery">
   <div class="gallery-overlay-header">
     <span class="gallery-overlay-title" id="gallery-count"></span>
-    <button class="gallery-overlay-close" onclick="closeFullGallery()">
+    <button class="gallery-overlay-close" data-action="closeFullGallery">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
     </button>
   </div>
@@ -472,25 +464,25 @@
 </div>
 
 <!-- ========== SINGLE PHOTO VIEWER ========== -->
-<div id="photo-viewer" class="photo-viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" onclick="if(event.target===this)closePhotoViewer()">
+<div id="photo-viewer" class="photo-viewer" role="dialog" aria-modal="true" aria-label="Photo viewer" data-action="closePhotoViewerIfBackdrop">
   <div class="photo-viewer-stage" id="photo-viewer-stage">
     <img id="photo-viewer-img-a" class="photo-viewer-layer active" src="" alt="">
     <img id="photo-viewer-img-b" class="photo-viewer-layer" src="" alt="">
   </div>
-  <button class="photo-viewer-close" onclick="closePhotoViewer()">
+  <button class="photo-viewer-close" data-action="closePhotoViewer">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
   </button>
-  <button class="photo-viewer-nav photo-viewer-prev" onclick="navPhoto(-1)">
+  <button class="photo-viewer-nav photo-viewer-prev" data-action="navPhoto" data-dir="-1">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
-  <button class="photo-viewer-nav photo-viewer-next" onclick="navPhoto(1)">
+  <button class="photo-viewer-nav photo-viewer-next" data-action="navPhoto" data-dir="1">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
   </button>
   <div class="photo-viewer-counter" id="photo-viewer-counter"></div>
 </div>
 
 <!-- ========== MORTGAGE FLOW MODAL (Multi-step) ========== -->
-<div id="mortgage-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Mortgage pre-approval" onclick="if(event.target===this)closeMortgage()">
+<div id="mortgage-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Mortgage pre-approval" data-action="closeMortgageIfBackdrop">
   <div class="modal" style="max-width:440px;">
     <div class="modal-header">
       <div>
@@ -505,7 +497,7 @@
           <div class="mort-step-dot"><span>4</span></div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeMortgage()" aria-label="Close">&times;</button>
+      <button class="modal-close" data-action="closeMortgage" aria-label="Close">&times;</button>
     </div>
 
     <!-- ===== STEP 1: Eligibility ===== -->
@@ -524,18 +516,18 @@
       <div class="modal-field">
         <label>Employment Type <span class="modal-req">*</span></label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="cost-toggle-btn active" onclick="setMortField(this,'employment','salaried')">Salaried</button>
-          <button class="cost-toggle-btn" onclick="setMortField(this,'employment','self_employed')">Self-Employed</button>
-          <button class="cost-toggle-btn" onclick="setMortField(this,'employment','business_owner')">Business Owner</button>
+          <button class="cost-toggle-btn active" data-action="setMortField" data-field="employment" data-val="salaried">Salaried</button>
+          <button class="cost-toggle-btn" data-action="setMortField" data-field="employment" data-val="self_employed">Self-Employed</button>
+          <button class="cost-toggle-btn" data-action="setMortField" data-field="employment" data-val="business_owner">Business Owner</button>
         </div>
       </div>
 
       <div class="modal-field">
         <label>Residency Status <span class="modal-req">*</span></label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="cost-toggle-btn" onclick="setMortField(this,'residency','uae_national')">UAE National</button>
-          <button class="cost-toggle-btn active" onclick="setMortField(this,'residency','uae_resident')">UAE Resident</button>
-          <button class="cost-toggle-btn" onclick="setMortField(this,'residency','non_resident')">Non-Resident</button>
+          <button class="cost-toggle-btn" data-action="setMortField" data-field="residency" data-val="uae_national">UAE National</button>
+          <button class="cost-toggle-btn active" data-action="setMortField" data-field="residency" data-val="uae_resident">UAE Resident</button>
+          <button class="cost-toggle-btn" data-action="setMortField" data-field="residency" data-val="non_resident">Non-Resident</button>
         </div>
       </div>
 
@@ -551,7 +543,7 @@
         <div id="mort-max-monthly" style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:300;margin-top:4px;"></div>
       </div>
 
-      <button class="modal-btn" id="mort-check-btn" onclick="mortCheckEligibility()">Check Eligibility</button>
+      <button class="modal-btn" id="mort-check-btn" data-action="mortCheckEligibility">Check Eligibility</button>
 
       <!-- Lead capture — shown after eligibility result -->
       <div id="mort-lead-capture" style="display:none;margin-top:16px;padding:20px;background:rgba(37,211,102,0.04);border:1px solid rgba(37,211,102,0.12);border-radius:14px;">
@@ -566,7 +558,7 @@
           </div>
         </div>
         <div id="mort-lead-error" style="display:none;font-size:11px;color:rgba(255,80,80,0.8);margin-top:6px;font-weight:500;"></div>
-        <button class="modal-btn" onclick="mortCaptureAndProceed()" style="margin-top:12px;">Compare Rates →</button>
+        <button class="modal-btn" data-action="mortCaptureAndProceed" style="margin-top:12px;">Compare Rates →</button>
         <div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-top:8px;font-weight:300;">Your details go to the agent. No spam, no obligation.</div>
       </div>
     </div>
@@ -575,7 +567,7 @@
     <div class="mort-step" id="mort-step-2" style="display:none;">
       <div class="modal-field">
         <label>Property Value (AED) <span class="modal-req">*</span></label>
-        <input type="text" id="mort-value" placeholder="e.g. 2,500,000" inputmode="numeric" style="font-family:Manrope,sans-serif;font-weight:700;font-size:16px;" oninput="calcMortgage()">
+        <input type="text" id="mort-value" placeholder="e.g. 2,500,000" inputmode="numeric" style="font-family:Manrope,sans-serif;font-weight:700;font-size:16px;" data-action-input="calcMortgage">
       </div>
 
       <div style="margin-bottom:16px;">
@@ -583,7 +575,7 @@
           <label style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;">Down Payment</label>
           <span id="mort-dp-pct" style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#fff;">20%</span>
         </div>
-        <input type="range" id="mort-dp-slider" min="20" max="80" value="20" step="5" style="width:100%;" oninput="calcMortgage()">
+        <input type="range" id="mort-dp-slider" min="20" max="80" value="20" step="5" style="width:100%;" data-action-input="calcMortgage">
         <div style="display:flex;justify-content:space-between;">
           <span style="font-size:10px;color:rgba(255,255,255,0.2);">20%</span>
           <span style="font-size:10px;color:rgba(255,255,255,0.2);">80%</span>
@@ -593,9 +585,9 @@
       <div style="margin-bottom:16px;">
         <label style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;display:block;margin-bottom:8px;">Loan Term</label>
         <div style="display:flex;gap:6px;">
-          <button class="cost-toggle-btn" onclick="setMortTerm(this,15)">15 yrs</button>
-          <button class="cost-toggle-btn active" onclick="setMortTerm(this,25)">25 yrs</button>
-          <button class="cost-toggle-btn" onclick="setMortTerm(this,30)">30 yrs</button>
+          <button class="cost-toggle-btn" data-action="setMortTerm" data-term="15">15 yrs</button>
+          <button class="cost-toggle-btn active" data-action="setMortTerm" data-term="25">25 yrs</button>
+          <button class="cost-toggle-btn" data-action="setMortTerm" data-term="30">30 yrs</button>
         </div>
       </div>
 
@@ -626,8 +618,8 @@
       </div>
 
       <div style="display:flex;gap:8px;">
-        <button class="modal-btn" onclick="mortGoStep(1)" style="flex:0 0 auto;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:14px 18px;">←</button>
-        <button class="modal-btn" onclick="mortGoStep(3)" style="flex:1;">Get Pre-Approved →</button>
+        <button class="modal-btn" data-action="mortGoStep" data-step="1" style="flex:0 0 auto;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:14px 18px;">←</button>
+        <button class="modal-btn" data-action="mortGoStep" data-step="3" style="flex:1;">Get Pre-Approved →</button>
       </div>
     </div>
 
@@ -655,8 +647,8 @@
       <div id="mort-submit-error" class="modal-error" style="display:none;"></div>
 
       <div style="display:flex;gap:8px;">
-        <button class="modal-btn" onclick="mortGoStep(2)" style="flex:0 0 auto;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:14px 18px;">←</button>
-        <button class="modal-btn" id="mort-submit-btn" onclick="mortSubmitApplication()" style="flex:1;">Get My Pre-Approval</button>
+        <button class="modal-btn" data-action="mortGoStep" data-step="2" style="flex:0 0 auto;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:14px 18px;">←</button>
+        <button class="modal-btn" id="mort-submit-btn" data-action="mortSubmitApplication" style="flex:1;">Get My Pre-Approval</button>
       </div>
 
       <div style="margin-top:16px;padding:14px;border-radius:10px;background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.12);">
@@ -706,7 +698,7 @@
         </div>
       </div>
 
-      <button class="modal-btn" onclick="closeMortgage()" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Done</button>
+      <button class="modal-btn" data-action="closeMortgage" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Done</button>
     </div>
 
   </div>
@@ -718,30 +710,11 @@
 <div id="cookie-banner" class="cookie-banner" role="dialog" aria-label="Cookie consent">
   <p class="cookie-banner-text">We use essential cookies to run SellingDubai and analytics cookies to improve our service. By continuing, you accept our <a href="/privacy">Privacy Policy</a>.</p>
   <div class="cookie-banner-btns">
-    <button class="cookie-btn cookie-btn-reject" onclick="window.__sdCookieConsent('reject')">Reject</button>
-    <button class="cookie-btn cookie-btn-accept" onclick="window.__sdCookieConsent('accept')">Accept</button>
+    <button class="cookie-btn cookie-btn-reject" data-action="cookieConsent" data-choice="reject">Reject</button>
+    <button class="cookie-btn cookie-btn-accept" data-action="cookieConsent" data-choice="accept">Accept</button>
   </div>
 </div>
-<script>
-(function(){
-  var CONSENT_KEY = 'sd_cookie_consent';
-  var stored = null;
-  try { stored = localStorage.getItem(CONSENT_KEY); } catch(e){}
-  if (!stored) {
-    setTimeout(function(){ document.getElementById('cookie-banner').classList.add('show'); }, 1200);
-  }
-  window.__sdCookieConsent = function(choice) {
-    try { localStorage.setItem(CONSENT_KEY, choice); } catch(e){}
-    document.getElementById('cookie-banner').classList.remove('show');
-    if (choice === 'reject') {
-      // Disable non-essential tracking — use the actual GA4 property ID loaded per-agent
-      var gaId = window.__sd_ga_id;
-      if (gaId) window['ga-disable-' + gaId] = true;
-      if (window.fbq) window.fbq('consent', 'revoke');
-    }
-  };
-})();
-</script>
+<script src="/js/cookie-consent.js"></script>
 
 <!-- ========== SCRIPTS ========== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

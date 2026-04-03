@@ -65,6 +65,58 @@ export async function seedMagicLink(
   return data;
 }
 
+export async function seedOtp(
+  email: string,
+  code = "123456",
+  overrides?: Partial<Record<string, unknown>>,
+): Promise<Record<string, unknown>> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("email_verification_codes")
+    .insert({
+      email: email.toLowerCase().trim(),
+      code,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      verified: false,
+      ip_address: "127.0.0.1",
+      ...overrides,
+    })
+    .select()
+    .single();
+  if (error) throw new Error(`seedOtp: ${error.message}`);
+  return data;
+}
+
+export async function cleanupOtp(email: string): Promise<void> {
+  const supabase = getSupabase();
+  await supabase
+    .from("email_verification_codes")
+    .delete()
+    .eq("email", email.toLowerCase().trim());
+}
+
+export async function seedUsedMagicLink(
+  agentId: string,
+  overrides?: Partial<Record<string, unknown>>,
+): Promise<Record<string, unknown>> {
+  const supabase = getSupabase();
+  const token = crypto.randomUUID();
+  const { data, error } = await supabase
+    .from("magic_links")
+    .insert({
+      agent_id: agentId,
+      token,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      used_at: new Date().toISOString(),
+      revoked_at: null,
+      ...overrides,
+    })
+    .select()
+    .single();
+  if (error) throw new Error(`seedUsedMagicLink: ${error.message}`);
+  return data;
+}
+
 export async function signStripePayload(
   body: string,
   secret: string,

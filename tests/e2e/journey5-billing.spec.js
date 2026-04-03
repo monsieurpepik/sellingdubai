@@ -15,6 +15,16 @@ test('Pricing page upgrade buttons are visible', async ({ page }) => {
 test('Billing gate blocks create-checkout when BILLING_LIVE=false', async ({ page }) => {
   const checkoutCalled = { value: false };
 
+  // Force BILLING_LIVE=false regardless of source file state (may be patched to true by Netlify deploy)
+  await page.route('**/js/pricing.js', async route => {
+    const response = await route.fetch();
+    const text = await response.text();
+    await route.fulfill({
+      ...response,
+      body: text.replace(/var BILLING_LIVE = (true|false);/, 'var BILLING_LIVE = false;')
+    });
+  });
+
   await page.route('**/create-checkout**', route => {
     checkoutCalled.value = true;
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: 'https://example.com' }) });

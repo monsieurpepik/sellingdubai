@@ -33,7 +33,7 @@ console.log(`build-js: SUPABASE_URL=${url.slice(0, 40)}... (context: ${context})
 fs.mkdirSync('dist', { recursive: true });
 
 esbuild.build({
-  entryPoints: ['js/init.js'],
+  entryPoints: ['js/init.js', 'js/agency-page.js'],
   bundle: true,
   minify: true,
   sourcemap: true,
@@ -48,26 +48,23 @@ esbuild.build({
   },
 }).catch(() => process.exit(1));
 
-// Patch pricing.html BILLING_LIVE flag from build-time env var.
-// pricing.html is served directly from root (publish = ".") and is not
-// processed by esbuild, so we do a string replacement here instead.
+// Patch js/pricing.js BILLING_LIVE flag from build-time env var.
+// The source file defaults to false; Netlify sets BILLING_LIVE=true in production.
 // Safe to run in-place: Netlify CI starts from a fresh clone each deploy.
 // Locally, BILLING_LIVE defaults to false so this is a no-op.
 const billingLive = process.env.BILLING_LIVE === 'true';
-const pricingPath = 'pricing.html';
-const pricingHtml = fs.readFileSync(pricingPath, 'utf8');
-const pricingPatched = pricingHtml.replace(
-  'const BILLING_LIVE = false;',
-  `const BILLING_LIVE = ${billingLive};`
+const pricingPath = 'js/pricing.js';
+const pricingSource = fs.readFileSync(pricingPath, 'utf8');
+// Replace whichever boolean is currently present — idempotent for repeated local builds.
+const pricingPatched = pricingSource.replace(
+  /var BILLING_LIVE = (true|false);/,
+  `var BILLING_LIVE = ${billingLive};`
 );
-if (pricingPatched === pricingHtml && billingLive) {
-  console.error('build-js: BILLING_LIVE patch failed — target string not found in pricing.html');
+if (pricingPatched === pricingSource && !/var BILLING_LIVE = (true|false);/.test(pricingSource)) {
+  console.error('build-js: BILLING_LIVE patch failed — declaration not found in js/pricing.js');
   process.exit(1);
 }
-// Only write + log when a change was actually made (billingLive=false is a no-op).
-// Running locally with BILLING_LIVE=true modifies pricing.html in-place;
-// reset with: git checkout pricing.html
-if (pricingPatched !== pricingHtml) {
+if (pricingPatched !== pricingSource) {
   fs.writeFileSync(pricingPath, pricingPatched, 'utf8');
-  console.log(`build-js: pricing.html BILLING_LIVE patched to ${billingLive}`);
+  console.log(`build-js: js/pricing.js BILLING_LIVE patched to ${billingLive}`);
 }

@@ -15,7 +15,7 @@ window._loadDetailMap = function(container) {
   if (!mapQ) return;
   container.innerHTML =
     '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14000!2d55.27!3d25.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z' + mapQ + '!5e0!3m2!1sen!2sae!4v1" class="detail-map-iframe" allowfullscreen loading="lazy"></iframe>' +
-    '<div class="detail-map-overlay" onclick="window.open(\'' + mapsUrl + '\',\'_blank\')" style="cursor:pointer;">' +
+    '<div class="detail-map-overlay" data-action="openMapUrl" data-url="' + mapsUrl + '" style="cursor:pointer;">' +
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
     '<span class="detail-map-label">Open in Maps</span></div>';
 };
@@ -72,12 +72,12 @@ function renderDetailView(p) {
   // Gallery
   let galleryHtml = '';
   if (allImages.length > 0) {
-    const heroImg = `<img id="detail-hero-img" class="detail-hero" src="${escAttr(allImages[0])}" alt="${escAttr(p.title)}" loading="lazy" onclick="openPhotoViewer(window._currentDetailHeroIdx||0)" style="cursor:pointer" onerror="handleImgError(this)">`;
+    const heroImg = `<img id="detail-hero-img" class="detail-hero" src="${escAttr(allImages[0])}" alt="${escAttr(p.title)}" loading="lazy" data-action="openDetailHero" style="cursor:pointer" data-managed>`;
     if (allImages.length > 1) {
       const gridImgs = allImages.slice(1, 5).map((url, i) =>
-        `<img src="${escAttr(url)}" alt="" loading="lazy" onclick="swapDetailHero(${i + 1})" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:pointer" onerror="handleImgError(this)">`
+        `<img src="${escAttr(url)}" alt="" loading="lazy" data-action="swapDetailHero" data-dir="${i + 1}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:pointer" data-managed>`
       ).join('');
-      const showAllBtn = `<button class="detail-show-all" onclick="openFullGallery()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>SHOW ALL PHOTOS</button>`;
+      const showAllBtn = `<button class="detail-show-all" data-action="openFullGallery"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>SHOW ALL PHOTOS</button>`;
       galleryHtml = `<div class="detail-gallery-wrap">${heroImg}<div class="detail-gallery">${gridImgs}</div>${showAllBtn}</div>`;
     } else {
       galleryHtml = heroImg;
@@ -147,7 +147,7 @@ function renderDetailView(p) {
     locationHtml = `<div class="detail-location-card"><div class="detail-section-title">Location</div>
       <div class="detail-location-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a96e" style="vertical-align:-2px;margin-right:6px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>${escHtml(p.location)}, Dubai, UAE</div>
       <div class="detail-map" data-mapq="${escAttr(mapQ)}" data-mapsurl="${escAttr(mapsUrl)}">
-        <button class="show-map-btn" onclick="window._loadDetailMap(this.parentElement)" style="width:100%;height:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.55);font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button class="show-map-btn" data-action="loadDetailMap" style="width:100%;height:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.55);font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
           Show Map
         </button>
@@ -192,8 +192,8 @@ function renderDetailView(p) {
         <div class="cost-to-own-title">Cost to Own</div>
         <div class="cost-to-own-subtitle">Estimated transaction costs for this property</div>
         <div class="cost-toggle-row">
-          <button class="cost-toggle-btn active" onclick="toggleCostMode(this,'cash')">Cash Purchase</button>
-          <button class="cost-toggle-btn" onclick="toggleCostMode(this,'mortgage')">With Mortgage</button>
+          <button class="cost-toggle-btn active" data-action="toggleCostMode" data-mode="cash">Cash Purchase</button>
+          <button class="cost-toggle-btn" data-action="toggleCostMode" data-mode="mortgage">With Mortgage</button>
         </div>
         <div class="cost-row">
           <span class="cost-row-label">DLD Transfer Fee <span class="cost-pct">4%</span></span>
@@ -242,7 +242,7 @@ function renderDetailView(p) {
   }
 
   // Share button
-  const shareHtml = `<button class="detail-share-btn" onclick="if(navigator.share)navigator.share({title:'${escAttr(p.title||'')}',url:window.location.href});else if(navigator.clipboard)navigator.clipboard.writeText(window.location.href).then(()=>this.textContent='Link Copied!')">
+  const shareHtml = `<button class="detail-share-btn" data-action="shareDetail" data-title="${escAttr(p.title||'')} ">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share
   </button>`;
 

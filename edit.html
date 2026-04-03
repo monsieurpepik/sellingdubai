@@ -8,13 +8,15 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="/css/fonts.css" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
-<script async src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+<script src="/js/gtag-init.js" defer></script>
+<script src="/js/async-css.js" defer></script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+<script src="/js/sentry-init.js" defer></script>
 <link rel="stylesheet" href="/css/edit.css">
-<style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}</style>
+<style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}.analytics-hover:hover{background:rgba(255,255,255,0.12)!important;}</style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -39,7 +41,7 @@
         <label>Email Address <span class="req">*</span></label>
         <input type="email" id="auth-email" placeholder="you@agency.com" autocomplete="email">
       </div>
-      <button class="link-btn link-btn-wa" id="btn-magic" onclick="sendMagicLink()">
+      <button class="link-btn link-btn-wa" id="btn-magic" data-action="sendMagicLink">
         <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
         Send Magic Link
       </button>
@@ -55,7 +57,7 @@
     <p class="auth-sub">We sent a magic link to <strong id="sent-email"></strong>. Click it to edit your profile.</p>
 
     <div class="card">
-      <button class="link-btn link-btn-ghost" onclick="showAuth()">Use a different email</button>
+      <button class="link-btn link-btn-ghost" data-action="showAuth">Use a different email</button>
     </div>
   </div>
 
@@ -75,11 +77,11 @@
       <div class="edit-name" id="edit-name"></div>
       <div class="edit-slug" id="edit-slug"></div>
       <div class="share-row hidden" id="share-row">
-        <button class="share-row-btn share-row-copy" id="btn-copy-link" onclick="copyProfileLink()">
+        <button class="share-row-btn share-row-copy" id="btn-copy-link" data-action="copyProfileLink">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           Copy Link
         </button>
-        <a class="share-row-btn share-row-view" id="btn-view-profile" href="javascript:void(0)" target="_blank">
+        <a class="share-row-btn share-row-view" id="btn-view-profile" href="" target="_blank">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           View Profile
         </a>
@@ -88,7 +90,7 @@
 
     <!-- Analytics — redirects to dashboard -->
     <div class="card" id="analytics-section" style="display:none;">
-      <a href="/dashboard" class="section" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background=''">
+      <a href="/dashboard" class="section analytics-hover" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:#fff;cursor:pointer;transition:background 0.2s;">
         <div>
           <div class="section-title" style="margin-bottom:4px;">Analytics &amp; Leads</div>
           <div style="font-size:13px;color:rgba(255,255,255,0.5);">View your stats, leads, and traffic sources</div>
@@ -146,7 +148,7 @@
         <div class="field">
           <label>Profile Photo</label>
           <input type="hidden" id="ed-photo" value="">
-          <button type="button" class="upload-zone" id="upload-avatar" onclick="document.getElementById('file-avatar').click()" aria-label="Upload profile photo">
+          <button type="button" class="upload-zone" id="upload-avatar" data-action="triggerInput" data-target="file-avatar" aria-label="Upload profile photo">
             <div class="upload-preview" id="preview-avatar"></div>
             <div class="upload-prompt" id="prompt-avatar">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -154,12 +156,12 @@
             </div>
             <div class="upload-loading hidden" id="loading-avatar"><span class="spinner"></span></div>
           </button>
-          <input type="file" id="file-avatar" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="cropThenUpload(this, 'avatar')">
+          <input type="file" id="file-avatar" accept="image/jpeg,image/png,image/webp" style="display:none" data-action-change="cropThenUpload" data-upload-type="avatar">
         </div>
         <div class="field">
           <label>Background Image</label>
           <input type="hidden" id="ed-bg" value="">
-          <button type="button" class="upload-zone upload-zone-wide" id="upload-bg" onclick="document.getElementById('file-bg').click()" aria-label="Upload background image">
+          <button type="button" class="upload-zone upload-zone-wide" id="upload-bg" data-action="triggerInput" data-target="file-bg" aria-label="Upload background image">
             <div class="upload-preview" id="preview-bg"></div>
             <div class="upload-prompt" id="prompt-bg">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -167,7 +169,7 @@
             </div>
             <div class="upload-loading hidden" id="loading-bg"><span class="spinner"></span></div>
           </button>
-          <input type="file" id="file-bg" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadImage(this, 'background')">
+          <input type="file" id="file-bg" accept="image/jpeg,image/png,image/webp" style="display:none" data-action-change="uploadImage" data-upload-type="background">
         </div>
       </div>
 
@@ -181,7 +183,7 @@
         <div class="field">
           <label>Agency Logo</label>
           <input type="hidden" id="ed-agency-logo" value="">
-          <button type="button" class="upload-zone upload-zone-small" id="upload-logo" onclick="document.getElementById('file-logo').click()" aria-label="Upload agency logo">
+          <button type="button" class="upload-zone upload-zone-small" id="upload-logo" data-action="triggerInput" data-target="file-logo" aria-label="Upload agency logo">
             <div class="upload-preview" id="preview-logo"></div>
             <div class="upload-prompt" id="prompt-logo">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -189,7 +191,7 @@
             </div>
             <div class="upload-loading hidden" id="loading-logo"><span class="spinner"></span></div>
           </button>
-          <input type="file" id="file-logo" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadImage(this, 'agency_logo')">
+          <input type="file" id="file-logo" accept="image/jpeg,image/png,image/webp" style="display:none" data-action-change="uploadImage" data-upload-type="agency_logo">
           <div class="field-hint">Small square logo — shown as a badge under your name</div>
         </div>
       </div>
@@ -204,7 +206,7 @@
         <div class="field">
           <label>Upload DLD / RERA License</label>
           <input type="hidden" id="ed-license-img" value="">
-          <button type="button" class="upload-zone upload-zone-wide" id="upload-license" onclick="document.getElementById('file-license').click()" aria-label="Upload RERA license photo">
+          <button type="button" class="upload-zone upload-zone-wide" id="upload-license" data-action="triggerInput" data-target="file-license" aria-label="Upload RERA license photo">
             <div class="upload-preview" id="preview-license"></div>
             <div class="upload-prompt" id="prompt-license">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
@@ -212,7 +214,7 @@
             </div>
             <div class="upload-loading hidden" id="loading-license"><span class="spinner"></span></div>
           </button>
-          <input type="file" id="file-license" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="uploadImage(this, 'license')">
+          <input type="file" id="file-license" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" data-action-change="uploadImage" data-upload-type="license">
           <div class="field-hint">Upload a photo of your DLD broker card or RERA certificate. This speeds up verification from 48hrs to same-day.</div>
         </div>
       </div>
@@ -289,22 +291,22 @@
           </div>
           <div class="field">
             <label>Photo</label>
-            <button type="button" class="upload-zone upload-zone-wide" onclick="document.getElementById('file-prop').click()" aria-label="Upload property photo">
+            <button type="button" class="upload-zone upload-zone-wide" data-action="triggerInput" data-target="file-prop" aria-label="Upload property photo">
               <div class="upload-preview" id="preview-prop"></div>
               <div class="upload-prompt" id="prompt-prop">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                 <span>Tap to upload property photo</span>
               </div>
             </button>
-            <input type="file" id="file-prop" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewPropPhoto(this)">
+            <input type="file" id="file-prop" accept="image/jpeg,image/png,image/webp" style="display:none" data-action-change="previewPropPhoto">
             <input type="hidden" id="prop-image-data" value="">
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;">
-            <button class="link-btn link-btn-wa" onclick="addProperty()" id="btn-add-prop-submit" style="flex:1;padding:14px;">Add Property</button>
-            <button class="link-btn" onclick="cancelPropForm()" style="flex:0;padding:14px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);">Cancel</button>
+            <button class="link-btn link-btn-wa" data-action="addProperty" id="btn-add-prop-submit" style="flex:1;padding:14px;">Add Property</button>
+            <button class="link-btn" data-action="cancelPropForm" style="flex:0;padding:14px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);">Cancel</button>
           </div>
         </div>
-        <button class="link-btn" id="btn-show-prop-form" onclick="showPropForm()" style="margin-top:12px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);padding:14px;">
+        <button class="link-btn" id="btn-show-prop-form" data-action="showPropForm" style="margin-top:12px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);padding:14px;">
           + Add Property
         </button>
         <div class="field-hint" style="margin-top:8px;">Properties appear when visitors tap "Portfolio" on your link page. Paste your Property Finder or Bayut URL to link out.</div>
@@ -340,7 +342,7 @@
 
         <!-- Instagram -->
         <div id="ig-disconnected" style="margin-bottom:10px;">
-          <button class="link-btn" id="btn-ig-connect" onclick="connectInstagram()" style="background:linear-gradient(135deg, #833AB4, #E1306C, #F77737);color:#fff;border:none;padding:14px 18px;font-size:14px;">
+          <button class="link-btn" id="btn-ig-connect" data-action="connectInstagram" style="background:linear-gradient(135deg, #833AB4, #E1306C, #F77737);color:#fff;border:none;padding:14px 18px;font-size:14px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
             Connect Instagram
           </button>
@@ -352,13 +354,13 @@
               <div style="font-size:13px;font-weight:600;color:#E1306C;" id="ig-username">@username</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            <button onclick="disconnectInstagram()" aria-label="Disconnect Instagram" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
+            <button data-action="disconnectInstagram" aria-label="Disconnect Instagram" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
           </div>
         </div>
 
         <!-- TikTok -->
         <div id="tt-disconnected" style="margin-bottom:10px;">
-          <button class="link-btn" id="btn-tt-connect" onclick="connectTikTok()" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.15);padding:14px 18px;font-size:14px;">
+          <button class="link-btn" id="btn-tt-connect" data-action="connectTikTok" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.15);padding:14px 18px;font-size:14px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg>
             Connect TikTok
           </button>
@@ -370,7 +372,7 @@
               <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);" id="tt-username">@username</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-            <button onclick="disconnectTikTok()" aria-label="Disconnect TikTok" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
+            <button data-action="disconnectTikTok" aria-label="Disconnect TikTok" style="background:none;border:none;color:rgba(255,255,255,0.3);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;">×</button>
           </div>
         </div>
 
@@ -473,13 +475,13 @@
       </div>
 
       <!-- SAVE -->
-      <button class="link-btn link-btn-wa" id="btn-save" onclick="saveProfile()" style="margin-bottom:12px;">
+      <button class="link-btn link-btn-wa" id="btn-save" data-action="saveProfile" style="margin-bottom:12px;">
         Save Changes
       </button>
-      <a id="btn-view-profile" class="link-btn" href="javascript:void(0)" target="_blank" style="margin-bottom:12px;">
+      <a id="btn-view-profile" class="link-btn" href="" target="_blank" style="margin-bottom:12px;">
         Preview Link Page
       </a>
-      <button class="link-btn link-btn-ghost" onclick="logout()">Sign Out</button>
+      <button class="link-btn link-btn-ghost" data-action="logout">Sign Out</button>
     </div>
   </div>
 
@@ -496,12 +498,13 @@
   </div>
   <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:10px;font-family:'Inter',sans-serif;">Drag to reposition</div>
   <div style="margin-top:16px;display:flex;gap:12px;">
-    <button onclick="cancelCrop()" style="padding:14px 28px;border-radius:12px;background:rgba(255,255,255,0.12);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancel</button>
-    <button onclick="confirmCrop()" style="padding:14px 28px;border-radius:12px;background:#25d366;color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Use Photo</button>
+    <button data-action="cancelCrop" style="padding:14px 28px;border-radius:12px;background:rgba(255,255,255,0.12);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancel</button>
+    <button data-action="confirmCrop" style="padding:14px 28px;border-radius:12px;background:#25d366;color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Use Photo</button>
   </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/js/event-delegation.js" defer></script>
 <script src="/js/edit.js" defer></script>
 </body>
 </html>

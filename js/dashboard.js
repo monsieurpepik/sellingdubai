@@ -424,7 +424,7 @@
         (pills ? '<div class="lead-details">' + pills + '</div>' : '') +
         (l.message ? '<div class="lead-msg">"' + esc(l.message) + '"</div>' : '') +
         '<div class="lead-actions">' + actions +
-          '<select class="status-select ' + statusCls + '" onchange="updateLeadStatus(\'' + l.id + '\', this.value, this)">' +
+          '<select class="status-select ' + statusCls + '" data-action-change="updateLeadStatus" data-lead-id="\'' + l.id + '\'">' +
             '<option value="new"' + (status==='new'?' selected':'') + '>New</option>' +
             '<option value="contacted"' + (status==='contacted'?' selected':'') + '>Contacted</option>' +
             '<option value="qualified"' + (status==='qualified'?' selected':'') + '>Qualified</option>' +
@@ -690,12 +690,12 @@
       const imgSrc = photo.url ? cdnImg(photo.url, 200) : photo.base64;
       html += '<div class="photo-grid-item">' +
         '<img src="' + imgSrc + '" alt="">' +
-        '<button type="button" class="photo-remove" onclick="removePropPhoto(' + idx + ')" aria-label="Remove photo">\u00d7</button>' +
+        '<button type="button" class="photo-remove" data-action="removePropPhoto" data-prop-id="' + idx + '" aria-label="Remove photo">\u00d7</button>' +
         (idx === 0 ? '<span class="photo-cover-badge">Cover</span>' : '') +
         '</div>';
     });
     if (propPhotos.length < 15) {
-      html += '<button type="button" class="photo-add-btn" onclick="document.getElementById(\'prop-photo-input\').click()" aria-label="Add photo">+</button>';
+      html += '<button type="button" class="photo-add-btn" data-action="triggerPhotoInput" aria-label="Add photo">+</button>';
     }
     grid.innerHTML = html;
   }

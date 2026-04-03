@@ -50,7 +50,7 @@ export function renderOffPlanBreakdown(proj) {
         <div style="display:flex;justify-content:space-between;padding:6px 0;margin-top:4px;">
           <label style="font-size:12px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="checkbox" id="mort-op-agent-check" checked
-              onchange="_mortOpToggleAgent(this.checked)"
+              data-action-change="mortOpToggleAgent"
               style="accent-color:#4d65ff;width:14px;height:14px;">
             Agent commission (2%)
           </label>
@@ -70,7 +70,7 @@ export function renderOffPlanBreakdown(proj) {
       </div>
     </div>
 
-    <button class="modal-btn" onclick="mortOpProceed()"
+    <button class="modal-btn" data-action="mortOpProceed"
       style="width:100%;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">
       Calculate Mortgage Payments
     </button>`;

@@ -83,12 +83,12 @@ function _lbEnsureCreated() {
     <div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;z-index:1;background:linear-gradient(#000a,transparent);">
       <div style="width:44px;"></div>
       <div id="proj-lb-counter" style="color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;"></div>
-      <button onclick="closeProjLightbox()" aria-label="Close" style="width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x2715;</button>
+      <button data-action="closeProjLightbox" aria-label="Close" style="width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x2715;</button>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
-      <button onclick="window._lbStep(-1)" aria-label="Previous" id="proj-lb-prev" style="position:absolute;left:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x2039;</button>
+      <button data-action="lbStep" data-dir="-1" aria-label="Previous" id="proj-lb-prev" style="position:absolute;left:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x2039;</button>
       <img id="proj-lb-img" style="max-width:100%;max-height:100%;object-fit:contain;touch-action:none;" src="" alt="">
-      <button onclick="window._lbStep(1)" aria-label="Next" id="proj-lb-next" style="position:absolute;right:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x203A;</button>
+      <button data-action="lbStep" data-dir="1" aria-label="Next" id="proj-lb-next" style="position:absolute;right:12px;z-index:2;width:44px;height:44px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&#x203A;</button>
     </div>`;
   document.body.appendChild(el);
   document.addEventListener('keydown', function _lbKey(e) {
@@ -322,8 +322,8 @@ export async function openProjectDetail(projectSlug) {
     ${imgSrc || galleryImgs.length ? `
     <div style="position:relative;flex-shrink:0;">
       <div id="proj-gallery" style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(0)"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="eager" onerror="handleImgError(this)"></div>` : ''}
-        ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" onclick="openProjLightbox(${lbIdx})"><img src="${escAttr(optimizeImg(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" onerror="handleImgError(this)"></div>`; }).join('')}
+        ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" data-action="openProjLightbox" data-dir="0"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name)}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="eager" data-managed></div>` : ''}
+        ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" data-action="openProjLightbox" data-dir="${lbIdx}"><img src="${escAttr(optimizeImg(u, 800))}" alt="${escAttr(project.name)} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" data-managed></div>`; }).join('')}
       </div>
       ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
     </div>` : ''}
@@ -349,7 +349,7 @@ export async function openProjectDetail(projectSlug) {
       <!-- Developer card -->
       ${dev.name ? `
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
-        ${dev.logo_url ? `<img src="${escAttr(optimizeImg(dev.logo_url, 80))}" alt="${escAttr(dev.name)}" style="width:44px;height:44px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,0.08);flex-shrink:0;" onerror="handleImgError(this)">` : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏗️</div>`}
+        ${dev.logo_url ? `<img src="${escAttr(optimizeImg(dev.logo_url, 80))}" alt="${escAttr(dev.name)}" style="width:44px;height:44px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,0.08);flex-shrink:0;" data-managed>` : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏗️</div>`}
         <div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:2px;">Developer</div>
           <div style="font-weight:600;font-size:14px;">${escHtml(dev.name)}</div>
@@ -419,7 +419,7 @@ export async function openProjectDetail(projectSlug) {
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Site Plan</h3>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          ${sitePlanImgs.map((u, i) => `<img src="${escAttr(optimizeImg(u, 800))}" alt="Site plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" onerror="this.style.display='none'">`).join('')}
+          ${sitePlanImgs.map((u, i) => `<img src="${escAttr(optimizeImg(u, 800))}" alt="Site plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" data-managed data-onerror="hide">`).join('')}
         </div>
       </div>` : ''}
 
@@ -452,7 +452,7 @@ export async function openProjectDetail(projectSlug) {
       <!-- Map (lazy-loaded) -->
       ${(project.lat && project.lng) ? `
       <div data-mapq="${escAttr(encodeURIComponent((project.name || '') + ' ' + (project.district_name || project.location || project.area || '') + ' Dubai'))}" data-maplat="${escAttr(String(project.lat))}" data-maplng="${escAttr(String(project.lng))}" style="margin-bottom:20px;">
-        <button onclick="window._loadDetailMap && window._loadDetailMap(this.parentElement)" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;text-align:center;color:rgba(255,255,255,0.55);font-size:13px;cursor:pointer;width:100%;margin-bottom:0;">📍 Show Map</button>
+        <button data-action="loadDetailMap" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;text-align:center;color:rgba(255,255,255,0.55);font-size:13px;cursor:pointer;width:100%;margin-bottom:0;">📍 Show Map</button>
       </div>` : ''}
 
       <!-- Description -->
@@ -460,13 +460,13 @@ export async function openProjectDetail(projectSlug) {
       <div style="margin-bottom:20px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">About</h3>
         <div id="proj-desc" style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${sanitizeHtml(project.description)}</div>
-        <button id="proj-desc-more" onclick="(function(){var d=document.getElementById('proj-desc');d.style.webkitLineClamp='unset';d.style.overflow='visible';d.style.display='block';document.getElementById('proj-desc-more').style.display='none';})()" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:13px;padding:4px 0 0;cursor:pointer;font-family:'Inter',sans-serif;">Read more</button>
+        <button id="proj-desc-more" data-action="expandDesc" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:13px;padding:4px 0 0;cursor:pointer;font-family:'Inter',sans-serif;">Read more</button>
       </div>` : ''}
 
       <!-- Brochure download (gate behind lead capture) -->
       ${project.brochure_url ? `
       <div style="margin-bottom:20px;">
-        <button data-brochure="${escAttr(project.brochure_url)}" data-name="${escAttr(project.name)}" onclick="openLeadForBrochure(this.dataset.name, this.dataset.brochure)" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-sizing:border-box;">
+        <button data-brochure="${escAttr(project.brochure_url)}" data-name="${escAttr(project.name)}" data-action="openLeadForBrochure" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-sizing:border-box;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Get Brochure — Free
         </button>
@@ -475,8 +475,8 @@ export async function openProjectDetail(projectSlug) {
     </div>
 
     <div style="display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
-      <button data-name="${escAttr(project.name)}" onclick="openLead(this.dataset.name)" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
-      <button onclick="_openProjectMortgage()" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Mortgage</button>
+      <button data-name="${escAttr(project.name)}" data-action="openLeadForProperty" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
+      <button data-action="openProjectMortgage" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Mortgage</button>
       ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
     </div>`;
 

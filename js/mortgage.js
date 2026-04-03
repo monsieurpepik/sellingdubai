@@ -355,7 +355,7 @@ function renderBankCards() {
     const bgColor = bankColors[r.bank_name] || '#4d65ff';
     const abbrev = bankAbbrev[r.bank_name] || r.bank_name.slice(0, 2).toUpperCase();
     const logoBadge = `<div style="width:28px;height:28px;border-radius:6px;background:${bgColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;"><span style="font-size:9px;font-weight:800;color:#fff;letter-spacing:-0.3px;">${abbrev}</span></div>`;
-    return `<div class="mort-bank-card${i === 0 ? ' active' : ''}" onclick="selectBankRate(this,${r.rate_pct},'${escAttr(r.bank_name)}')" style="display:flex;align-items:center;">
+    return `<div class="mort-bank-card${i === 0 ? ' active' : ''}" data-action="selectBankRate" data-rate="${r.rate_pct}" data-bank="${escAttr(r.bank_name)}" style="display:flex;align-items:center;">
       ${logoBadge}
       <div style="flex:1;min-width:0;"><div class="mort-bank-name">${escHtml(r.bank_name)}${bestTag}</div><div class="mort-bank-product">${typeLabels[r.product_type] || r.product_type}${r.is_islamic ? ' · Sharia' : ''}</div></div>
       <div style="text-align:right;"><div class="mort-bank-rate">${r.rate_pct}%</div>${monthlyStr ? `<div class="mort-bank-monthly">${monthlyStr}</div>` : ''}</div>

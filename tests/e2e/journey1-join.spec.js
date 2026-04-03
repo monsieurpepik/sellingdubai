@@ -1,39 +1,20 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test('Landing page hero waitlist form shows validation error on empty name', async ({ page }) => {
+test('Landing page loads and primary CTAs point to /join', async ({ page }) => {
   await page.goto('/landing.html');
-  const form = page.locator('#wl-hero');
-  await expect(form).toBeVisible({ timeout: 8000 });
-
-  // Fill name with only spaces — passes HTML5 required+minlength but fails JS trim() check
-  await form.locator('[name="name"]').fill('  ');
-  await form.locator('[name="email"]').fill('test@example.com');
-  await form.locator('button[type="submit"]').click();
-
-  const msg = page.locator('#wl-hero-msg');
-  await expect(msg).toBeVisible({ timeout: 3000 });
-  await expect(msg).toHaveText('Please enter your name.');
+  await page.waitForLoadState('domcontentloaded');
+  const ctaLinks = page.locator('a[href="/join"]');
+  await expect(ctaLinks.first()).toBeVisible({ timeout: 8000 });
+  const count = await ctaLinks.count();
+  expect(count).toBeGreaterThanOrEqual(1);
 });
 
-test('Landing page hero waitlist form submits successfully with valid data', async ({ page }) => {
-  await page.route('**/waitlist-join**', route => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ ok: true })
-  }));
-
+test('Landing page has no broken waitlist anchors on primary CTAs', async ({ page }) => {
   await page.goto('/landing.html');
-  const form = page.locator('#wl-hero');
-  await expect(form).toBeVisible({ timeout: 8000 });
-
-  await form.locator('[name="name"]').fill('Test Agent');
-  await form.locator('[name="email"]').fill('test@example.com');
-  await form.locator('button[type="submit"]').click();
-
-  // After successful submit, error msg should stay hidden
-  await page.waitForTimeout(1000);
-  await expect(page.locator('#wl-hero-msg')).not.toHaveText('Please enter your name.');
+  await page.waitForLoadState('domcontentloaded');
+  const staleAnchors = page.locator('a[href*="waitlist"]');
+  await expect(staleAnchors).toHaveCount(0);
 });
 
 test('Join page shows step-1 broker verification on load', async ({ page }) => {

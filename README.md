@@ -1,5 +1,7 @@
 # SellingDubai
 
+[![CI/CD](https://github.com/monsieurpepik/sellingdubai/actions/workflows/ci.yml/badge.svg)](https://github.com/monsieurpepik/sellingdubai/actions/workflows/ci.yml)
+
 Verified profile platform for RERA-licensed real estate agents in Dubai.
 
 ## Stack
@@ -60,6 +62,36 @@ Set all env vars in Supabase project settings (for edge functions) and in Netlif
 - **BRN verify bypass** (join flow): prefix BRN with `TEST-` in test mode (see `join.html` test mode logic)
 - **OTP bypass** (join flow): use OTP `000000` in test mode
 - Test mode is only active on non-production hostnames
+
+## Branch Protection
+
+`main` requires the following status checks to pass before merging:
+
+| Check | Job | Why |
+|-------|-----|-----|
+| Build & Test | `ci` | Pre-deploy gate + edge function tests |
+| E2E Tests | `e2e` | Playwright journey specs (chromium) |
+
+Configure in GitHub → Settings → Branches → Add rule for `main`:
+- [x] Require status checks to pass before merging
+- [x] Require branches to be up to date before merging
+- Status checks: `Build & Test`, `E2E Tests`
+- [x] Require linear history (prevents merge commits)
+
+The `bundle-size` job posts a PR comment but is not a required check — it is advisory only.
+
+## CI Secrets
+
+All secrets are set in GitHub → Settings → Secrets and variables → Actions:
+
+| Secret | Used by |
+|--------|---------|
+| `SUPABASE_URL` | ci, bundle-size, e2e, deploy |
+| `SUPABASE_ANON_KEY` | ci, bundle-size, e2e, deploy |
+| `SUPABASE_SERVICE_ROLE_KEY` | ci (edge function tests) |
+| `NETLIFY_AUTH_TOKEN` | deploy |
+| `NETLIFY_SITE_ID` | deploy |
+| `BILLING_LIVE` | ci, deploy |
 
 ## REM Sync
 

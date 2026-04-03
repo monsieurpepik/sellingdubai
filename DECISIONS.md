@@ -189,3 +189,33 @@ SELECT cron.schedule(
 ```
 
 Alternatively, use an external cron service (e.g. cron-job.org) to POST to the function URL with the service role key as a Bearer token. The function is idempotent — safe to re-run.
+
+## 2026-04-03 — Migration Reconstruction Strategy (Phase 3)
+
+### Why migrations were reconstructed rather than pulled
+
+`supabase db pull` requires a live database connection. The project uses Netlify for the frontend and Supabase for the backend, but there is no local tunnel or direct DB access available during this engineering pass. The schema was instead reconstructed from two authoritative sources:
+
+1. **`sql/` directory** — 14 SQL files (`sql/001` through `sql/014`) that record schema changes made after the initial deploy. These were the primary source for all ALTER TABLE and CREATE TABLE statements.
+
+2. **Edge function source code** — The `supabase/functions/` directory contains the ground truth for table shapes that predate the `sql/` tracking system. Column names, types, CHECK constraints, and FK relationships were inferred from INSERT/SELECT statements in each function.
+
+### What was discovered
+
+Nine tables existed in production with no corresponding `sql/` migration: `email_verification_codes`, `dld_brokers`, `lead_referrals`, `co_broke_deals`, `buyer_requests`, `property_matches`, `referrals`, `featured_projects`, `project_agent_assignments`. These were reconstructed entirely from edge function source code.
+
+The five foundation tables (`agents`, `properties`, `leads`, `page_events`, `mortgage_applications`) also had no CREATE TABLE in any `sql/` file — they predate the tracking system and were reconstructed into `20240101000000_base_schema.sql`.
+
+### Migration ordering
+
+Timestamps were assigned by feature dependency order, not by wall-clock creation date. All timestamps use `YYYYMM01000000` format for clarity. The one exception is `20260402062459_off_plan_enrichment.sql`, which was already present with a real timestamp and was not modified.
+
+### Trade-offs
+
+- **Risk:** The reconstructed base schema may have minor column-level discrepancies (e.g. a constraint present in prod but not in any function). The definitive fix is `supabase db pull` after establishing DB access.
+- **Benefit:** `supabase db reset` now runs cleanly from scratch, enabling local development and CI schema validation.
+- **Idempotency:** All migrations use `IF NOT EXISTS` guards, so running them against a prod-like schema that already has the tables is safe — they will no-op.
+
+### Next step
+
+Once DB access is available, run `supabase db pull` and diff the output against these migrations. Any gaps become a new `2026xxxx_schema_corrections.sql` migration.

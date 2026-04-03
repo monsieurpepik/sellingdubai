@@ -542,3 +542,15 @@ async function manualSubmit() {
 
   goStep(2);
 }
+
+// Expose functions needed by event-delegation.js
+window.verifyBroker = verifyBroker;
+window.manualSubmit = manualSubmit;
+window.previewRera = previewRera;
+// window.previewPhoto already exported above
+window.sendOtpAndShow = sendOtpAndShow;
+window.verifyOtpAndCreate = verifyOtpAndCreate;
+window.resendOtp = resendOtp;
+window.goStep = goStep;
+window.copyUrl = copyUrl;
+window.shareWhatsApp = shareWhatsApp;

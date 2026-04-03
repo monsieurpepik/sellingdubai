@@ -165,7 +165,7 @@ export function renderPropertyList(props) {
       <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="${isFilterEmpty ? 'M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' : 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'}"/></svg>
       <p style="color:rgba(255,255,255,0.6);font-size:15px;font-weight:500;">${isFilterEmpty ? 'No properties match your filters' : 'Portfolio coming soon'}</p>
       <p style="color:rgba(255,255,255,0.35);font-size:13px;margin-top:8px;">${isFilterEmpty ? 'Try adjusting your search or clearing filters' : 'New listings are being added — check back shortly'}</p>
-      ${isFilterEmpty ? '<button onclick="resetFilters()" style="margin-top:16px;padding:10px 24px;border-radius:100px;background:rgba(77,101,255,0.15);border:1px solid rgba(77,101,255,0.3);color:#fff;font-size:14px;font-weight:500;cursor:pointer;">Clear All Filters</button>' : ''}
+      ${isFilterEmpty ? '<button data-action="resetFilters" style="margin-top:16px;padding:10px 24px;border-radius:100px;background:rgba(77,101,255,0.15);border:1px solid rgba(77,101,255,0.3);color:#fff;font-size:14px;font-weight:500;cursor:pointer;">Clear All Filters</button>' : ''}
     </div>`;
     countEl.textContent = '';
     return;
@@ -297,7 +297,7 @@ function renderRemProjectCard(p, devName) {
   const badgeClass = p.status === 'under_construction' ? 'offplan-badge-launch' : 'offplan-badge-offplan';
 
   const imgSrc = p.cover_image_url
-    ? `<img class="offplan-img" src="${escAttr(optimizeImg(p.cover_image_url))}" alt="${safeName}" width="800" height="500" loading="lazy" onerror="handleImgError(this)">`
+    ? `<img class="offplan-img" src="${escAttr(optimizeImg(p.cover_image_url))}" alt="${safeName}" width="800" height="500" loading="lazy" data-managed>`
     : `<div class="offplan-img-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.08)"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`;
 
   const devLogoUrl = p.developers?.logo_url || null;
@@ -305,7 +305,7 @@ function renderRemProjectCard(p, devName) {
   const devHtml = devNameSafe
     ? devLogoUrl
       ? `<div class="offplan-developer">
-          <img class="offplan-dev-logo" src="${escAttr(optimizeImg(devLogoUrl, 60))}" alt="${devNameSafe}" width="60" height="24" loading="lazy" onerror="handleImgError(this)">
+          <img class="offplan-dev-logo" src="${escAttr(optimizeImg(devLogoUrl, 60))}" alt="${devNameSafe}" width="60" height="24" loading="lazy" data-managed data-onerror="hide">
           <span class="offplan-dev-name">${devNameSafe}</span>
          </div>`
       : `<div class="offplan-developer">${devNameSafe}</div>`
@@ -346,7 +346,7 @@ function renderRemProjectCard(p, devName) {
     metaHtml = `<div class="offplan-meta"><span class="offplan-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>${handover}</span></div>`;
   }
 
-  return `<div class="offplan-card" onclick="openProjectDetail('${safeSlug}')">
+  return `<div class="offplan-card" data-action="openProjectDetail" data-slug="${safeSlug}">
     <div class="offplan-img-wrap">
       ${imgSrc}
       <span class="offplan-badge ${badgeClass}">${statusBadge}</span>

@@ -15,10 +15,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Pricing — SellingDubai">
   <meta name="twitter:description" content="Simple, transparent pricing for Dubai real estate agents. Free forever with Pro and Premium plans.">
-  <link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="/css/fonts.css" as="style" data-async-css>
   <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
+  <script src="/js/gtag-init.js" defer></script>
+  <script src="/js/async-css.js" defer></script>
   <link rel="stylesheet" href="/css/pricing.css">
 </head>
 <body>
@@ -190,110 +191,8 @@
     </div>
   </footer>
 
-  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous"></script>
-<script>Sentry.init({dsn:"https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360",environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?"production":"development"});</script>
-  <script>
-    // Billing toggle
-    const toggle = document.getElementById('billing-toggle');
-    const monthlyEls = document.querySelectorAll('.price-monthly');
-    const yearlyEls = document.querySelectorAll('.price-yearly');
-    const saveBadges = document.querySelectorAll('.price-save');
-    const intervalInputs = document.querySelectorAll('[data-interval]');
-
-    if (toggle) {
-      toggle.addEventListener('change', () => {
-        const isYearly = toggle.checked;
-        monthlyEls.forEach(el => el.style.display = isYearly ? 'none' : 'block');
-        yearlyEls.forEach(el => el.style.display = isYearly ? 'block' : 'none');
-        saveBadges.forEach(el => el.style.display = isYearly ? 'block' : 'none');
-        intervalInputs.forEach(el => el.dataset.interval = isYearly ? 'yearly' : 'monthly');
-      });
-    }
-
-    // FAQ toggle
-    document.querySelectorAll('.faq-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const isActive = item.classList.contains('active');
-        document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
-        if (!isActive) {
-          item.classList.add('active');
-        }
-      });
-    });
-
-    // Flip to true once Stripe price IDs are confirmed in production env vars
-    const BILLING_LIVE = true;
-
-    // Redirect to /edit for re-auth, preserving plan+interval for retry on return
-    function redirectToAuth(plan, interval) {
-      sessionStorage.setItem('sd_pending_checkout', JSON.stringify({ plan, interval }));
-      window.location.href = '/edit?return=/pricing';
-    }
-
-    async function startCheckout(plan, interval, btn) {
-      if (!BILLING_LIVE) {
-        if (btn) {
-          const original = btn.textContent;
-          btn.textContent = 'Billing coming soon';
-          setTimeout(() => { btn.textContent = original; }, 2000);
-        }
-        return;
-      }
-
-      const token = localStorage.getItem('sd_edit_token');
-
-      if (!token) {
-        redirectToAuth(plan, interval);
-        return;
-      }
-
-      if (btn) { btn.textContent = 'Loading...'; btn.disabled = true; }
-
-      try {
-        const res = await fetch('https://pjyorgedaxevxophpfib.supabase.co/functions/v1/create-checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, plan, interval })
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else if (res.status === 409 && data.error === 'already_on_plan') {
-          if (btn) { btn.textContent = 'Already on this plan'; btn.disabled = false; }
-        } else if (res.status === 401 || (data.error && data.error.toLowerCase().includes('session'))) {
-          // Token expired — re-auth then retry
-          localStorage.removeItem('sd_edit_token');
-          redirectToAuth(plan, interval);
-        } else {
-          alert(data.error || 'Failed to start checkout.');
-          if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
-        }
-      } catch (e) {
-        alert('Something went wrong. Please try again.');
-        if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
-      }
-    }
-
-    // On return from /edit after re-auth, auto-retry the pending checkout
-    const pending = sessionStorage.getItem('sd_pending_checkout');
-    if (pending && localStorage.getItem('sd_edit_token') && BILLING_LIVE) {
-      sessionStorage.removeItem('sd_pending_checkout');
-      try {
-        const { plan, interval } = JSON.parse(pending);
-        // Highlight the right button so the user sees what's happening
-        const matchingBtn = document.querySelector(`.upgrade-btn[data-plan="${plan}"]`);
-        startCheckout(plan, interval, matchingBtn);
-      } catch (e) { /* malformed sessionStorage value — ignore */ }
-    }
-
-    // Upgrade buttons
-    document.querySelectorAll('.upgrade-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const plan = btn.dataset.plan;
-        const interval = btn.dataset.interval || 'monthly';
-        startCheckout(plan, interval, btn);
-      });
-    });
-  </script>
+  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+  <script src="/js/sentry-init.js" defer></script>
+  <script src="/js/pricing.js" defer></script>
 </body>
 </html>

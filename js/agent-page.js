@@ -163,7 +163,7 @@ export async function renderAgent(agent) {
     if (isPaidTier(agent) && agent.agency_logo_url) {
       const canOptimizeLogo = SAFE_CDN_DOMAINS.some(d => agent.agency_logo_url.includes(d));
       const logoSrc = canOptimizeLogo ? optimizeImg(agent.agency_logo_url, 120) : agent.agency_logo_url;
-      badgeHTML += `<img class="agency-logo" src="${escAttr(logoSrc)}" alt="" onerror="this.style.display='none'">`;
+      badgeHTML += `<img class="agency-logo" src="${escAttr(logoSrc)}" alt="" data-managed data-onerror="hide">`;
     }
     if (agent.agency_name) badgeHTML += `<span class="agency-name">${escHtml(agent.agency_name)}</span>`;
     agencyEl.innerHTML = badgeHTML;
@@ -213,7 +213,7 @@ export async function renderAgent(agent) {
       <span class="btn-icon">${ICONS.calendar}</span> Get Free Consultation
     </a>`;
   } else {
-    buttonsHTML += `<button class="link-btn" onclick="openLead()" data-track="consultation">
+    buttonsHTML += `<button class="link-btn" data-action="openLead" data-track="consultation">
       <span class="btn-icon">${ICONS.calendar}</span> Send an Enquiry
     </button>`;
   }
@@ -221,17 +221,17 @@ export async function renderAgent(agent) {
   const showPreapproval = agent.show_preapproval !== false;
   if (showPreapproval) {
     buttonsHTML += `<div class="btn-grid">
-      <button class="link-btn link-btn-glass" onclick="openProps()" data-track="listings">
+      <button class="link-btn link-btn-glass" data-action="openProps" data-track="listings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.7"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
         Portfolio
       </button>
-      <button class="link-btn link-btn-glass" onclick="openMortgage()" data-track="mortgage" style="border:none;cursor:pointer;">
+      <button class="link-btn link-btn-glass" data-action="openMortgage" data-track="mortgage" style="border:none;cursor:pointer;">
         <span class="btn-icon" style="width:16px;height:16px;">${ICONS.shield}</span>
         Get Pre-Approved
       </button>
     </div>`;
   } else {
-    buttonsHTML += `<button class="link-btn link-btn-glass" onclick="openProps()" data-track="listings" style="width:100%">
+    buttonsHTML += `<button class="link-btn link-btn-glass" data-action="openProps" data-track="listings" style="width:100%">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.7"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
       Portfolio
     </button>`;
@@ -251,7 +251,7 @@ export async function renderAgent(agent) {
     </a>`;
   }
 
-  buttonsHTML += `<button class="link-btn link-btn-ghost" onclick="saveContact()" data-track="save_contact">
+  buttonsHTML += `<button class="link-btn link-btn-ghost" data-action="saveContact" data-track="save_contact">
     <span class="btn-icon" style="width:16px;height:16px;opacity:0.6">${ICONS.contact}</span> Save My Contact
   </button>`;
 

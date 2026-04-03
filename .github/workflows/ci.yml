@@ -48,10 +48,172 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+  bundle-size:
+    name: Bundle Size
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base-branch
+
+      - uses: actions/checkout@v4
+        with:
+          path: pr-branch
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install & build base branch
+        working-directory: base-branch
+        run: npm ci && npm run build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          BILLING_LIVE: 'false'
+
+      - name: Install & build PR branch
+        working-directory: pr-branch
+        run: npm ci && npm run build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          BILLING_LIVE: 'false'
+
+      - name: Post bundle size comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            function getBundleSizes(dir) {
+              const sizes = {};
+              const distDir = path.join(dir, 'dist');
+              if (!fs.existsSync(distDir)) return sizes;
+              for (const f of fs.readdirSync(distDir)) {
+                if (f.endsWith('.js')) sizes[f] = fs.statSync(path.join(distDir, f)).size;
+              }
+              const chunksDir = path.join(distDir, 'chunks');
+              if (fs.existsSync(chunksDir)) {
+                for (const f of fs.readdirSync(chunksDir)) {
+                  if (f.endsWith('.js')) sizes['chunks/' + f] = fs.statSync(path.join(chunksDir, f)).size;
+                }
+              }
+              return sizes;
+            }
+
+            const base = getBundleSizes('base-branch');
+            const pr = getBundleSizes('pr-branch');
+            const allKeys = [...new Set([...Object.keys(base), ...Object.keys(pr)])].sort();
+
+            const INIT_BUDGET = 30 * 1024;
+            const CHUNK_BUDGET = 20 * 1024;
+            const fmt = b => (b / 1024).toFixed(1) + ' KB';
+            const budgetFor = k => k === 'init.bundle.js' ? INIT_BUDGET : CHUNK_BUDGET;
+
+            let rows = '';
+            let anyOver = false;
+            for (const k of allKeys) {
+              const b = base[k] ?? null;
+              const p = pr[k] ?? null;
+              const over = p !== null && p > budgetFor(k);
+              if (over) anyOver = true;
+              const bStr = b !== null ? fmt(b) : '(new)';
+              const pStr = p !== null ? fmt(p) : '(removed)';
+              const diff = (b !== null && p !== null) ? p - b : null;
+              const diffStr = diff === null ? '—' : (diff === 0 ? '—' : (diff > 0 ? `+${fmt(diff)}` : `-${fmt(-diff)}`));
+              const icon = over ? ' ⚠️' : '';
+              rows += `| \`${k}\` | ${bStr} | ${pStr} | ${diffStr} |${icon}\n`;
+            }
+
+            const title = anyOver
+              ? '### Bundle Size ⚠️ Over Budget'
+              : '### Bundle Size ✅ Within Budget';
+            const body = [
+              title,
+              '',
+              '| File | Base | PR | Diff | |',
+              '|------|------|----|------|---|',
+              rows.trimEnd(),
+              '',
+              '_Budgets: `init.bundle.js` ≤ 30 KB · chunks ≤ 20 KB_',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(
+              c => c.user.type === 'Bot' && c.body.includes('### Bundle Size')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          BILLING_LIVE: 'false'
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          CI: 'true'
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: ci
+    needs: [ci, e2e]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -77,3 +239,9 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: npx netlify-cli deploy --prod
+
+      - name: Post-deploy smoke test
+        run: bash scripts/smoke-test.sh
+        env:
+          SMOKE_BASE_URL: https://sellingdubai.ae
+          SMOKE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

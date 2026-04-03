@@ -22,11 +22,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
 <link rel="preload" as="image" fetchpriority="high" href="/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg&w=800&fm=webp&q=80">
-<link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="/css/fonts.css" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" as="style" data-async-css/>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" rel="stylesheet"/></noscript>
-<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+<script src="/js/sentry-init.js" defer></script>
+<script src="/js/async-css.js" defer></script>
 <style>
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
@@ -300,31 +302,6 @@
     </p>
   </div>
 
-  <script>
-    (function() {
-      var chips = [
-        document.getElementById('chip-dld'),
-        document.getElementById('chip-wa'),
-        document.getElementById('chip-stats')
-      ];
-      var wrap = document.getElementById('showcase-wrap');
-      if (!wrap || !window.IntersectionObserver) {
-        chips.forEach(function(c) { if (c) c.classList.add('chip-visible'); });
-        return;
-      }
-      var triggered = false;
-      var observer = new IntersectionObserver(function(entries) {
-        if (triggered || !entries[0].isIntersecting) return;
-        triggered = true;
-        chips.forEach(function(c, i) {
-          if (!c) return;
-          setTimeout(function() { c.classList.add('chip-visible'); }, i * 220);
-        });
-        observer.disconnect();
-      }, { threshold: 0.2 });
-      observer.observe(wrap);
-    })();
-  </script>
 </section>
 
 <!-- ======== BENEFIT ICONS ======== -->
@@ -689,7 +666,7 @@
   <h2 class="font-headline text-5xl mb-16 tight-tracking leading-tight">Got questions?<br/>Here are the answers.</h2>
   <div class="space-y-3" id="faq-list">
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
-      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" data-action="toggleFaq" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">What is SellingDubai?</h4>
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
@@ -698,7 +675,7 @@
       </div>
     </div>
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
-      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" data-action="toggleFaq" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">Is it really free?</h4>
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
@@ -707,7 +684,7 @@
       </div>
     </div>
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
-      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" data-action="toggleFaq" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">How does verification work?</h4>
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
@@ -716,7 +693,7 @@
       </div>
     </div>
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
-      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" data-action="toggleFaq" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">How does WhatsApp work on my page?</h4>
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
@@ -725,7 +702,7 @@
       </div>
     </div>
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
-      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" data-action="toggleFaq" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">Can I add my own listings?</h4>
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
@@ -734,7 +711,7 @@
       </div>
     </div>
     <div class="faq-item bg-white border border-zinc-100 rounded-xl text-left hover:bg-zinc-50 transition-colors">
-      <button type="button" class="w-full p-6 flex justify-between items-center text-left" onclick="toggleFaq(this.closest('.faq-item'))" aria-expanded="false">
+      <button type="button" class="w-full p-6 flex justify-between items-center text-left" data-action="toggleFaq" aria-expanded="false">
         <h4 class="text-xs font-bold text-on-surface">What about tracking and analytics?</h4>
         <span class="material-symbols-outlined text-zinc-300 faq-icon" aria-hidden="true">add_circle</span>
       </button>
@@ -858,65 +835,9 @@
   <a href="/join" style="display:block;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;text-decoration:none;">Get Your Page — Free</a>
 </div>
 
-<script>
-// FAQ toggle
-function toggleFaq(el) {
-  const wasOpen = el.classList.contains('open');
-  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-  if (!wasOpen) el.classList.add('open');
-}
-
-// Scroll reveal
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-
-</script>
-
 <script src="/js/sd-config.js"></script>
-<script>
-(function() {
-  // Credentials loaded from js/sd-config.js — update that file when rotating keys
-  var SUPABASE_URL = window.SD_CONFIG.SUPABASE_URL;
-  var SUPABASE_ANON_KEY = window.SD_CONFIG.SUPABASE_ANON_KEY;
-  // Agent count
-  fetch(SUPABASE_URL + '/rest/v1/agents?select=id&verification_status=eq.verified', {
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
-  }).then(function(res) {
-    var countHeader = res.headers.get('content-range');
-    if (countHeader) {
-      var total = parseInt(countHeader.split('/')[1], 10);
-      if (!isNaN(total) && total > 0) {
-        var el = document.getElementById('agent-count-live');
-        if (el) el.textContent = total.toLocaleString();
-      }
-    }
-  }).catch(function() {});
-})();
-</script>
-
-<script>
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var s = document.createElement('script');
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1';
-    s.async = true;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-BXMRWM9ZM1');
-  }, 2000);
-});
-</script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
+<script src="/js/landing-chip-anim.js" defer></script>
+<script src="/js/landing-behavior.js" defer></script>
 
 </body>
 </html>

@@ -819,7 +819,7 @@
             <div style="font-size:12px;color:rgba(255,255,255,0.35);">${[p.price, p.location].filter(Boolean).map(esc).join(' — ') || 'No details'}</div>
             <span style="display:inline-block;margin-top:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:3px 7px;border-radius:5px;${statusStyle(p.status)}">${statusLabel(p.status)}</span>
           </div>
-          <button onclick="deleteProperty('${p.id}')" style="background:none;border:none;cursor:pointer;padding:8px;color:rgba(255,255,255,0.2);flex-shrink:0;" title="Remove">
+          <button data-action="deleteProperty" data-prop-id="${p.id}" style="background:none;border:none;cursor:pointer;padding:8px;color:rgba(255,255,255,0.2);flex-shrink:0;" title="Remove">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
           </button>
         </div>

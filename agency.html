@@ -11,12 +11,14 @@
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="/css/fonts.css" as="style" data-async-css>
   <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
   <link rel="icon" href="data:image/svg+xml,🏠">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
-  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+  <script src="/js/gtag-init.js" defer></script>
+  <script src="/js/async-css.js" defer></script>
+  <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+  <script src="/js/sentry-init.js" defer></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" integrity="sha384-2zrRDgDHSYB/GN3nFW3fsZXoxEhKIr3N2h63Tc6DEOB9JJdFIu8xMJT2Cph/gBil" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,6 +100,6 @@
     </div>
   </main>
 
-  <script type="module" src="/js/agency-page.js"></script>
+  <script type="module" src="/dist/agency-page.bundle.js"></script>
 </body>
 </html>

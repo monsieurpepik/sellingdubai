@@ -9,11 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
-<link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="/css/fonts.css" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
-<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" async onload="Sentry.init({dsn:'https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360',environment:/sellingdubai\.(ae|com)$/.test(location.hostname)?'production':'development'})"></script>
+<script src="/js/gtag-init.js" defer></script>
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+<script src="/js/sentry-init.js" defer></script>
+<script src="/js/async-css.js" defer></script>
 <link rel="stylesheet" href="/css/dashboard.css">
 <style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}</style>
 </head>
@@ -32,14 +34,14 @@
       <div class="auth-msg" id="auth-error" role="alert" aria-live="assertive"></div>
       <div class="auth-msg" id="auth-success" role="status" aria-live="polite"></div>
       <input type="email" class="auth-input" id="auth-email" placeholder="your@email.com" autocomplete="email" aria-label="Email address">
-      <button class="auth-btn" id="btn-magic" onclick="sendMagicLink()">Send Magic Link</button>
+      <button class="auth-btn" id="btn-magic" data-action="sendMagicLink">Send Magic Link</button>
     </div>
 
     <!-- Sent confirmation -->
     <div id="auth-sent" class="hidden">
       <h2 class="auth-title">Check your email</h2>
       <p class="auth-sub">We sent a magic link to <strong id="sent-email"></strong>. Click it to access your dashboard.</p>
-      <button class="auth-btn" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);" onclick="showAuthForm()">Use a different email</button>
+      <button class="auth-btn" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);" data-action="showAuthForm">Use a different email</button>
     </div>
 
     <!-- Loading -->
@@ -65,7 +67,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit Profile
       </a>
-      <button class="nav-item" onclick="scrollToProperties()">
+      <button class="nav-item" data-action="scrollToProperties">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Properties
       </button>
@@ -79,7 +81,7 @@
         <span id="nav-upgrade-label">Upgrade Plan</span>
       </a>
       <div class="nav-divider"></div>
-      <button class="nav-item" onclick="logout()">
+      <button class="nav-item" data-action="logout">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
       </button>
@@ -99,13 +101,13 @@
       <h1>Dashboard</h1>
       <div class="topbar-actions">
         <a class="btn-sm btn-ghost" href="/edit">Edit Profile</a>
-        <a class="btn-sm btn-primary" id="btn-share" onclick="copyProfileLink()" style="cursor:pointer;">Share Link</a>
+        <a class="btn-sm btn-primary" id="btn-share" data-action="copyProfileLink" style="cursor:pointer;">Share Link</a>
       </div>
     </div>
 
     <!-- Onboarding Checklist (hidden when complete) -->
     <div class="onboard" id="onboard-checklist" style="display:none;">
-      <button class="onboard-dismiss" onclick="dismissOnboarding()" title="Dismiss" aria-label="Dismiss">&times;</button>
+      <button class="onboard-dismiss" data-action="dismissOnboarding" title="Dismiss" aria-label="Dismiss">&times;</button>
       <div class="onboard-title">Get your profile live</div>
       <div class="onboard-sub">Complete these steps to start getting leads from your SellingDubai profile.</div>
       <div class="onboard-progress"><div class="onboard-bar" id="onboard-bar" style="width:0%"></div></div>
@@ -125,12 +127,12 @@
           <span class="onboard-step-label">Add your WhatsApp number</span>
           <span class="onboard-step-action">Add →</span>
         </a>
-        <div class="onboard-step" id="ob-property" onclick="scrollToProperties(); openPropModal(null);" style="cursor:pointer;">
+        <div class="onboard-step" id="ob-property" data-action="openAddListing" style="cursor:pointer;">
           <span class="onboard-check" id="ob-property-check"></span>
           <span class="onboard-step-label">Add your first property listing</span>
           <span class="onboard-step-action">Add →</span>
         </div>
-        <div class="onboard-step" id="ob-share" onclick="copyProfileLink()" style="cursor:pointer;">
+        <div class="onboard-step" id="ob-share" data-action="copyProfileLink" style="cursor:pointer;">
           <span class="onboard-check" id="ob-share-check"></span>
           <span class="onboard-step-label">Share your profile link</span>
           <span class="onboard-step-action">Copy →</span>
@@ -149,7 +151,7 @@
       </div>
       <div class="billing-card-right">
         <div class="billing-status-banner" id="billing-status-banner" style="display:none;"></div>
-        <button class="btn-sm btn-ghost" id="btn-manage-billing" onclick="openBillingPortal()">Manage billing</button>
+        <button class="btn-sm btn-ghost" id="btn-manage-billing" data-action="openBillingPortal">Manage billing</button>
       </div>
     </div>
 
@@ -228,7 +230,7 @@
           <span class="props-title">My Listings</span>
           <span class="props-count-badge" id="props-count-badge">0 / 3</span>
         </div>
-        <button class="btn-sm btn-primary" id="btn-add-prop" onclick="openPropModal(null)">+ Add Listing</button>
+        <button class="btn-sm btn-primary" id="btn-add-prop" data-action="openPropModal">+ Add Listing</button>
       </div>
       <div id="props-list">
         <div class="empty-state">
@@ -254,7 +256,7 @@
           </div>
           <div class="referral-link-box">
             <input type="text" readonly id="referral-link" class="referral-link-input" value="">
-            <button class="referral-copy-btn" id="referral-copy-btn" onclick="copyReferralLink()">Copy</button>
+            <button class="referral-copy-btn" id="referral-copy-btn" data-action="copyReferralLink">Copy</button>
           </div>
           <div id="referral-stats" style="margin-top:16px;display:none;">
             <div style="display:flex;gap:16px;">
@@ -291,7 +293,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       Profile
     </a>
-    <button onclick="scrollToProperties()">
+    <button data-action="scrollToProperties">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Properties
     </button>
@@ -299,7 +301,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       Upgrade
     </a>
-    <button onclick="logout()">
+    <button data-action="logout">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Sign Out
     </button>
@@ -307,18 +309,18 @@
 </div>
 
 <!-- Add / Edit Property Modal -->
-<div class="modal-overlay" id="prop-modal" onclick="if(event.target===this)closePropModal()">
+<div class="modal-overlay" id="prop-modal" data-action="closePropModalIfBackdrop">
   <div class="modal-card">
     <div class="modal-header">
       <h3 id="prop-modal-title">Add Listing</h3>
-      <button class="modal-close" onclick="closePropModal()" aria-label="Close">&times;</button>
+      <button class="modal-close" data-action="closePropModal" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
       <!-- Photos -->
       <div>
         <div class="modal-label">Photos <span style="font-weight:400;font-size:11px;color:rgba(255,255,255,0.35);text-transform:none;letter-spacing:0;">(up to 15)</span></div>
         <div class="photo-grid" id="prop-photo-grid"></div>
-        <input type="file" id="prop-photo-input" accept="image/*" multiple style="display:none;" onchange="onPropPhotoPick(this)">
+        <input type="file" id="prop-photo-input" accept="image/*" multiple style="display:none;" data-action-change="propPhotoPick">
       </div>
       <!-- Title -->
       <div>
@@ -385,18 +387,18 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-sm btn-ghost" onclick="closePropModal()">Cancel</button>
-      <button class="btn-sm btn-primary" id="btn-save-prop" onclick="savePropModal()">Save Listing</button>
+      <button class="btn-sm btn-ghost" data-action="closePropModal">Cancel</button>
+      <button class="btn-sm btn-primary" id="btn-save-prop" data-action="savePropModal">Save Listing</button>
     </div>
   </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal-overlay" id="delete-prop-modal" onclick="if(event.target===this)closeDeletePropModal()">
+<div class="modal-overlay" id="delete-prop-modal" data-action="closeDeletePropModalIfBackdrop">
   <div class="modal-card modal-card-sm">
     <div class="modal-header">
       <h3>Delete Listing?</h3>
-      <button class="modal-close" onclick="closeDeletePropModal()" aria-label="Close">&times;</button>
+      <button class="modal-close" data-action="closeDeletePropModal" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
       <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
@@ -404,8 +406,8 @@
       </p>
     </div>
     <div class="modal-footer">
-      <button class="btn-sm btn-ghost" onclick="closeDeletePropModal()">Cancel</button>
-      <button class="btn-sm btn-danger" id="btn-confirm-delete" onclick="confirmDeleteProp()">Delete</button>
+      <button class="btn-sm btn-ghost" data-action="closeDeletePropModal">Cancel</button>
+      <button class="btn-sm btn-danger" id="btn-confirm-delete" data-action="confirmDeleteProp">Delete</button>
     </div>
   </div>
 </div>
@@ -414,10 +416,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="/js/sd-config.js" defer></script>
-<script type="module">
-  import { renderAdminCard } from '/js/components.js';
-  window.renderAdminCard = renderAdminCard;
-</script>
+<script type="module" src="/js/dashboard-bridge.js"></script>
 <script src="/js/dashboard.js" defer></script>
 </body>
 </html>

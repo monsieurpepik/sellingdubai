@@ -16,9 +16,9 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: 'npx netlify dev',
+    command: 'npx serve . -l 8888 --single --no-clipboard',
     url: 'http://localhost:8888',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 30000,
   },
 });

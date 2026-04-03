@@ -10,7 +10,8 @@ function safeImgUrl(url) {
   return url && url.startsWith(SUPABASE_STORAGE) ? url : null;
 }
 
-const slug = window.location.pathname.replace(/^\/agency\//, '').replace(/\/$/, '');
+const _pathMatch = window.location.pathname.match(/^\/agency\/([^/]+)/);
+const slug = _pathMatch ? _pathMatch[1] : '';
 
 async function init() {
   if (!slug) { showError('Agency not found.'); return; }

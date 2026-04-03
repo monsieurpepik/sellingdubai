@@ -9,7 +9,7 @@ window.openFullGallery = function() {
   const images = window._currentDetailImages || [];
   if (!images.length) return;
   const body = document.getElementById('gallery-body');
-  body.innerHTML = images.map((url, i) => `<img src="${escAttr(url)}" alt="" loading="lazy" onclick="openPhotoViewer(${i})" onerror="handleImgError(this)">`).join('');
+  body.innerHTML = images.map((url, i) => `<img src="${escAttr(url)}" alt="" loading="lazy" data-action="openPhotoViewer" data-dir="${i}" data-managed>`).join('');
   document.getElementById('gallery-count').textContent = `${images.length} Photos`;
   document.getElementById('gallery-overlay').classList.add('open');
 };
