@@ -9,17 +9,23 @@
 //   deploy-preview → SUPABASE_URL=https://lhrtdlxqbdxrfvjeoxrt.supabase.co  (set in Netlify)
 //   branch-deploy  → SUPABASE_URL=https://lhrtdlxqbdxrfvjeoxrt.supabase.co  (set in Netlify)
 //
-// If neither env var is set (local dev, CI without secrets) the prod values are
-// used as a fallback — the same values already hardcoded in js/config.js.
+// Both env vars must be set — there are no hardcoded fallbacks. The build will
+// fail fast with a clear error if either is missing.
 
 const esbuild = require('esbuild');
 const fs = require('fs');
 
-const PROD_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
-const PROD_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqeW9yZ2VkYXhldnhvcGhwZmliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjU2MzYsImV4cCI6MjA4OTgwMTYzNn0.IhIpAxk--Y0ZKufK51-CPuhw-NafyLPvhH31iqzpgrU';
+const url = process.env.SUPABASE_URL;
+const key = process.env.SUPABASE_ANON_KEY;
 
-const url = process.env.SUPABASE_URL || PROD_URL;
-const key = process.env.SUPABASE_ANON_KEY || PROD_KEY;
+if (!url) {
+  console.error('build-js: SUPABASE_URL is not set — set it in your environment or .env file');
+  process.exit(1);
+}
+if (!key) {
+  console.error('build-js: SUPABASE_ANON_KEY is not set — set it in your environment or .env file');
+  process.exit(1);
+}
 
 const context = process.env.CONTEXT || process.env.NODE_ENV || 'unknown';
 console.log(`build-js: SUPABASE_URL=${url.slice(0, 40)}... (context: ${context})`);
