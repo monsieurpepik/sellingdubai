@@ -1,5 +1,17 @@
 # SellingDubai — Premium Tier Architecture
 
+> **PRICING OUTDATED — DO NOT USE FOR INVESTOR OR CUSTOMER COMMUNICATIONS**
+> The pricing figures in this document (AED 149/month Pro, AED 499/month Enterprise) are **archived early-stage projections** and no longer reflect the live product.
+>
+> **Current live pricing (as of 2026-04-02):**
+> - Free: AED 0/month
+> - Pro: AED 299/month (AED 2,990/year)
+> - Premium: AED 799/month (AED 7,990/year)
+>
+> The tier names have also changed: "Enterprise" is now "Premium". Revenue projections below are based on old prices and should be recalculated against current pricing before use in any pitch deck or financial model.
+
+---
+
 ## CURRENT STATE: Everything is free
 The `tier` column defaults to `'free'` for all agents. No gates are enforced yet.
 When you have 20-50 active agents and see which features they actually use, flip on gating.
@@ -17,7 +29,7 @@ When you have 20-50 active agents and see which features they actually use, flip
 - Social links (all platforms)
 - Basic SEO (auto-generated og:tags)
 
-### PRO — AED 149/month (~$40)
+### PRO — ~~AED 149/month~~ **AED 299/month** (live pricing)
 Everything in Free, plus:
 - Calendly consultation integration
 - Facebook Pixel + Conversion API (server-side)
@@ -30,7 +42,7 @@ Everything in Free, plus:
 - Custom backhalf URL (choose your slug)
 - Priority in agent directory (future)
 
-### ENTERPRISE — AED 499/month (~$135)
+### PREMIUM — ~~AED 499/month (was "Enterprise")~~ **AED 799/month** (live pricing)
 Everything in Pro, plus:
 - Multiple agent profiles under one brokerage
 - Brokerage-wide lead dashboard
@@ -82,11 +94,12 @@ Edge function updates agents.tier = 'pro' →
 Features unlocked instantly
 ```
 
-### Revenue Projections
-- 50 agents × 30% conversion to Pro = 15 × AED 149 = AED 2,235/month
-- 100 agents × 30% conversion = 30 × AED 149 = AED 4,470/month
-- 500 agents × 25% conversion = 125 × AED 149 = AED 18,625/month
-- Enterprise: 5 brokerages × AED 499 = AED 2,495/month
+### Revenue Projections (ARCHIVED — based on old pricing, do not use)
+> These figures used the old AED 149/149 Pro and AED 499 Enterprise prices. Recalculate using current live pricing (Pro AED 299, Premium AED 799) before including in any pitch or financial model.
+- ~~50 agents × 30% conversion to Pro = 15 × AED 149 = AED 2,235/month~~
+- ~~100 agents × 30% conversion = 30 × AED 149 = AED 4,470/month~~
+- ~~500 agents × 25% conversion = 125 × AED 149 = AED 18,625/month~~
+- ~~Enterprise: 5 brokerages × AED 499 = AED 2,495/month~~
 
 ---
 

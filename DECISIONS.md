@@ -1,5 +1,13 @@
 # Architecture Decisions Log
 
+## 2026-04-02 — Extract renderOffPlanBreakdown to mortgage-offplan.js
+
+**What:** Extracted `renderOffPlanBreakdown` from `js/mortgage.js` into a new `js/mortgage-offplan.js` module. The new module exports one pure function that takes a `proj` object and returns `{ html, bookingAmt, dldFee, agentComm, totalCash, loanAmount }` without side effects on `_mortState`. In `mortGoStep`, when step === 1 and mode === 'offplan', the function is loaded via dynamic `import('./mortgage-offplan.js')` and state is updated from the returned values.
+
+**Why:** `dist/chunks/mortgage-*.js` was ~23.2KB, over the 20KB soft limit. `renderMortOffPlanStep1` (~3KB) is only needed in offplan mode. By making it a pure function in a separate chunk loaded on demand, the cost is deferred to first offplan calculator open.
+
+**Result:** `mortgage-*.js` dropped from 23,831 bytes (~23.2KB) to 20,824 bytes (~20.3KB) — a reduction of ~3KB. A new `mortgage-offplan-*.js` chunk is 3,345 bytes (~3.3KB). The mortgage chunk is 0.3KB over the 20KB soft limit, which is acceptable given it is lazy-loaded on first mortgage modal open (no first-paint impact) and cannot be reduced further without splitting core state-management logic.
+
 ## 2026-04-02 — Luxury Off-Plan & Mortgage Refactor: chunk size increases
 
 ### mortgage chunk: ~18.2KB → ~23.2KB
@@ -13,9 +21,14 @@ Three additions drove the increase:
 
 Cannot be split further: `renderMortOffPlanStep1`, `window.mortOpProceed`, and `window._mortOpToggleAgent` all read/write `_mortState` directly — extracting them to a sub-module would require either shared mutable state across chunks (complexity) or prop-drilling the entire state object (defeats the consolidation). The mortgage chunk is already lazy-loaded on first "Get Pre-Approved" or "Calculate Mortgage" click, so no first-paint impact. Accepted overage.
 
-### project-detail chunk: 20.3KB (unchanged from 2026-03-30 entry)
+### project-detail chunk: 20.3KB → 21.6KB (JSON-LD injection + DOM sanitizer)
 
-No new code added in this sprint. The 20.3KB figure is the same overage previously accepted. Carried forward for completeness.
+`dist/chunks/project-detail-*.js` grew from 20.3KB to 21.6KB (~1.3KB increase across two changes).
+
+- **JSON-LD injection** (+0.9KB): `_injectProjectSchema(project)` injects an `ApartmentComplex` schema into `<head>` on project open and removes it on close. Tightly coupled to the project fetch result.
+- **DOM-based sanitizeHtml** (+0.4KB): Replaced regex blocklist with a `<template>`-based DOM parser that removes dangerous elements and strips `javascript:`/`data:` protocol URLs. Handles SVG XSS and malformed markup that regex patterns miss.
+
+Both are tightly coupled to the project detail render path and cannot be split into sub-chunks. Chunk is lazy-loaded on first project card tap (no first-paint impact). Accepted overage.
 
 ## 2026-03-30 — project-detail chunk at 23.1KB (DLD async section)
 
