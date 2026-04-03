@@ -48,6 +48,7 @@
         "npm:@tailwindcss/container-queries@~0.1.1",
         "npm:@tailwindcss/forms@~0.5.9",
         "npm:esbuild@~0.27.4",
+        "npm:netlify-cli@^24.9.0",
         "npm:tailwindcss@^3.4.17"
       ]
     }
