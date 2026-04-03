@@ -98,93 +98,6 @@ window.closeMortgage = function() {
   document.body.style.overflow = '';
 };
 
-function renderMortOffPlanStep1() {
-  const step1 = document.getElementById('mort-step-1');
-  if (!step1 || !_mortState.project) return;
-
-  const proj    = _mortState.project;
-  const price   = proj.minPrice || 0;
-  const miles   = Array.isArray(proj.milestones) ? proj.milestones : [];
-  const fmtPct  = (pct) => `${pct}%`;
-  const fmtAmt  = (n)   => 'AED ' + Math.round(n).toLocaleString();
-
-  // Derive milestone buckets
-  const booking      = miles.find(m => m.trigger === 'on_booking')          || miles[0];
-  const handover     = miles.find(m => m.trigger === 'on_handover')         || miles[miles.length - 1];
-  const construction = miles.filter(m => m !== booking && m !== handover);
-
-  const bookingPct   = booking?.percentage   || 0;
-  const handoverPct  = handover?.percentage  || 0;
-  const constPct     = construction.reduce((sum, m) => sum + (m.percentage || 0), 0);
-
-  const bookingAmt    = price * bookingPct / 100;
-  const constAmt      = price * constPct   / 100;
-  const handoverAmt   = price * handoverPct / 100;
-  const dldFee        = price * 0.04;
-  const agentComm     = price * 0.02;
-  const totalCash     = bookingAmt + dldFee + agentComm;
-  const loanAmount    = handoverAmt;
-
-  const completionStr = proj.completionDate
-    ? (() => { const d = new Date(proj.completionDate); return `Q${Math.ceil((d.getMonth()+1)/3)} ${d.getFullYear()}`; })()
-    : 'TBC';
-
-  const milestoneRows = [
-    { label: `Booking (${fmtPct(bookingPct)})`,      amount: bookingAmt  },
-    { label: `Construction (${fmtPct(constPct)})`,   amount: constAmt    },
-    { label: `Handover (${fmtPct(handoverPct)})`,    amount: handoverAmt },
-    { label: 'DLD Fee (4%)',                          amount: dldFee      },
-  ];
-
-  const rowsHtml = milestoneRows.map(r =>
-    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-      <span style="font-size:12px;color:rgba(255,255,255,0.5);">${escHtml(r.label)}</span>
-      <span style="font-size:12px;color:#fff;font-weight:600;">${fmtAmt(r.amount)}</span>
-    </div>`
-  ).join('');
-
-  step1.innerHTML = `
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">${escHtml(proj.name)} · Completion ${escHtml(completionStr)}</div>
-      <div style="font-size:10px;font-weight:600;color:rgba(77,101,255,0.7);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Payment Breakdown</div>
-      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
-        ${rowsHtml}
-        <div style="display:flex;justify-content:space-between;padding:6px 0;margin-top:4px;">
-          <label style="font-size:12px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="checkbox" id="mort-op-agent-check" checked
-              onchange="_mortOpToggleAgent(this.checked)"
-              style="accent-color:#4d65ff;width:14px;height:14px;">
-            Agent commission (2%)
-          </label>
-          <span id="mort-op-agent-amt" style="font-size:12px;color:#fff;font-weight:600;">${fmtAmt(agentComm)}</span>
-        </div>
-      </div>
-    </div>
-
-    <div style="background:rgba(17,39,210,0.08);border:1px solid rgba(17,39,210,0.18);border-radius:10px;padding:12px;margin-bottom:16px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.45);">Total cash required at booking</span>
-        <span id="mort-op-cash" style="font-size:12px;color:#fff;font-weight:700;">${fmtAmt(totalCash)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.45);">Mortgage loan amount (at handover)</span>
-        <span style="font-size:12px;color:#fff;font-weight:700;">${fmtAmt(loanAmount)}</span>
-      </div>
-    </div>
-
-    <button class="modal-btn" onclick="mortOpProceed()"
-      style="width:100%;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">
-      Calculate Mortgage Payments
-    </button>`;
-
-  // Store for toggling and for step 2 pre-fill
-  _mortState.data._opBookingAmt   = bookingAmt;
-  _mortState.data._opDldFee       = dldFee;
-  _mortState.data._opAgentComm    = agentComm;
-  _mortState.data._opLoanAmount   = loanAmount;
-  _mortState.data._opTotalCash    = totalCash;
-  _mortState.data._opIncludeAgent = true;
-}
 
 window._mortOpToggleAgent = function(checked) {
   _mortState.data._opIncludeAgent = checked;
@@ -214,7 +127,18 @@ window.mortGoStep = function(step) {
   if (el) el.style.display = 'block';
   // Off-plan mode: replace step 1 content with milestone breakdown
   if (step === 1 && _mortState.mode === 'offplan') {
-    renderMortOffPlanStep1();
+    import('./mortgage-offplan.js').then(({ renderOffPlanBreakdown }) => {
+      if (!_mortState.project) return;
+      const result = renderOffPlanBreakdown(_mortState.project);
+      _mortState.data._opBookingAmt   = result.bookingAmt;
+      _mortState.data._opDldFee       = result.dldFee;
+      _mortState.data._opAgentComm    = result.agentComm;
+      _mortState.data._opLoanAmount   = result.loanAmount;
+      _mortState.data._opTotalCash    = result.totalCash;
+      _mortState.data._opIncludeAgent = true;
+      const step1El = document.getElementById('mort-step-1');
+      if (step1El) step1El.innerHTML = result.html;
+    });
   }
   // Scroll modal back to top on every step change
   const modal = document.querySelector('#mortgage-modal .modal');
@@ -468,7 +392,15 @@ window.calcMortgage = function() {
   const loanAmt = rawVal * (1 - dpPct);
   const monthlyRate = (_mortState.rate / 100) / 12;
   const numPayments = _mortState.term * 12;
-  const monthlyPayment = loanAmt * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+  let monthlyPayment;
+  if (numPayments === 0) {
+    monthlyPayment = 0;
+  } else if (monthlyRate === 0) {
+    monthlyPayment = loanAmt / numPayments;
+  } else {
+    const factor = Math.pow(1 + monthlyRate, numPayments);
+    monthlyPayment = loanAmt * (monthlyRate * factor) / (factor - 1);
+  }
   const totalInterest = (monthlyPayment * numPayments) - loanAmt;
   _mortState.data.loanAmt        = loanAmt;
   _mortState.data.monthlyPayment = monthlyPayment;

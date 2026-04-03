@@ -189,7 +189,7 @@ window.openLeadForBrochure = function(projectName, brochureUrl) {
 // Open lead modal pre-filled with property name
 window.openLeadForProperty = function(propertyTitle) {
   document.getElementById('detail-overlay').classList.remove('open');
-  closeProps();
+  if (typeof closeProps === 'function') closeProps();
   setTimeout(() => {
     openLead();
     const msgEl = document.getElementById('lead-message');

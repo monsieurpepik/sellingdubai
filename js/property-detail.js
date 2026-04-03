@@ -8,6 +8,18 @@ import { applyCurrentFilters } from './filters.js';
 
 let currentDetailProp = null;
 
+// Load Google Maps iframe on demand (GDPR — only after explicit user click)
+window._loadDetailMap = function(container) {
+  const mapQ = container.dataset.mapq;
+  const mapsUrl = container.dataset.mapsurl;
+  if (!mapQ) return;
+  container.innerHTML =
+    '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14000!2d55.27!3d25.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z' + mapQ + '!5e0!3m2!1sen!2sae!4v1" class="detail-map-iframe" allowfullscreen loading="lazy"></iframe>' +
+    '<div class="detail-map-overlay" onclick="window.open(\'' + mapsUrl + '\',\'_blank\')" style="cursor:pointer;">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+    '<span class="detail-map-label">Open in Maps</span></div>';
+};
+
 // Stable lookup by property ID — immune to filter changes between render and click
 window.openPropertyById = function(propId) {
   const p = allProperties.find(prop => String(prop.id) === String(propId));
@@ -36,6 +48,7 @@ window.openPropertyDetail = function(propIndex) {
 
 window.closeDetail = function() {
   document.getElementById('detail-overlay').classList.remove('open');
+  document.querySelector('script[data-sd-project-ld]')?.remove();
   // Keep scroll locked only if the properties overlay is still open behind this
   const propOverlayOpen = document.getElementById('prop-overlay')?.classList.contains('open');
   document.body.style.overflow = propOverlayOpen ? 'hidden' : '';
@@ -133,12 +146,11 @@ function renderDetailView(p) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQ}`;
     locationHtml = `<div class="detail-location-card"><div class="detail-section-title">Location</div>
       <div class="detail-location-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a96e" style="vertical-align:-2px;margin-right:6px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>${escHtml(p.location)}, Dubai, UAE</div>
-      <div class="detail-map detail-map-clickable" onclick="window.open('${mapsUrl}','_blank')">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14000!2d55.27!3d25.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${mapQ}!5e0!3m2!1sen!2sae!4v1" class="detail-map-iframe" allowfullscreen loading="lazy"></iframe>
-        <div class="detail-map-overlay">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          <span class="detail-map-label">Open in Maps</span>
-        </div>
+      <div class="detail-map" data-mapq="${escAttr(mapQ)}" data-mapsurl="${escAttr(mapsUrl)}">
+        <button class="show-map-btn" onclick="window._loadDetailMap(this.parentElement)" style="width:100%;height:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.55);font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+          Show Map
+        </button>
       </div></div>`;
   }
 

@@ -159,6 +159,17 @@ window.closeProjLightbox = function() {
   document.body.style.overflow = '';
 };
 
+// Lazy-load Google Maps iframe when user taps "Show Map"
+window._loadDetailMap = function(container) {
+  if (!container) return;
+  const lat = container.dataset.maplat;
+  const lng = container.dataset.maplng;
+  const q = container.dataset.mapq || '';
+  if (!lat || !lng) return;
+  const src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+  container.innerHTML = `<iframe src="${src}" width="100%" height="240" style="border:0;border-radius:8px;display:block;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Project location map"></iframe>`;
+};
+
 export async function openProjectDetail(projectSlug) {
   const sheet = document.getElementById('detail-sheet');
   const overlay = document.getElementById('detail-overlay');
@@ -181,7 +192,7 @@ export async function openProjectDetail(projectSlug) {
 
   const { data: project, error } = await supabase
     .from('projects')
-    .select('slug,name,description,location,district_name,area,cover_image_url,min_price,max_price,min_area_sqft,max_area_sqft,completion_date,handover_percentage,payment_plan,payment_plan_detail,gallery_images,floor_plan_urls,available_units,facilities,nearby_locations,brochure_url,images_categorized,status,property_types,beds,developers(name,logo_url,website)')
+    .select('slug,name,description,location,district_name,area,cover_image_url,min_price,max_price,min_area_sqft,max_area_sqft,completion_date,handover_percentage,payment_plan,payment_plan_detail,gallery_images,floor_plan_urls,available_units,facilities,nearby_locations,brochure_url,images_categorized,status,property_types,beds,lat,lng,developers(name,logo_url,website)')
     .eq('slug', projectSlug)
     .single();
 
@@ -436,6 +447,12 @@ export async function openProjectDetail(projectSlug) {
             ${l.distance ? `<span style="font-size:13px;color:rgba(255,255,255,0.4);white-space:nowrap;margin-left:8px;">${escHtml(l.distance)}</span>` : ''}
           </div>`).join('')}
         </div>
+      </div>` : ''}
+
+      <!-- Map (lazy-loaded) -->
+      ${(project.lat && project.lng) ? `
+      <div data-mapq="${escAttr(encodeURIComponent((project.name || '') + ' ' + (project.district_name || project.location || project.area || '') + ' Dubai'))}" data-maplat="${escAttr(String(project.lat))}" data-maplng="${escAttr(String(project.lng))}" style="margin-bottom:20px;">
+        <button onclick="window._loadDetailMap && window._loadDetailMap(this.parentElement)" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;text-align:center;color:rgba(255,255,255,0.55);font-size:13px;cursor:pointer;width:100%;margin-bottom:0;">📍 Show Map</button>
       </div>` : ''}
 
       <!-- Description -->

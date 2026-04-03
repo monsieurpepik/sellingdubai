@@ -18,7 +18,7 @@ export function safeUrl(url) {
   // Allow http, https, mailto, tel, and protocol-relative
   if (/^(https?:\/\/|mailto:|tel:|\/)/.test(trimmed)) return trimmed;
   // Bare domain or path — prefix with https
-  return trimmed;
+  return 'https://' + trimmed;
 }
 
 // Validate tracking IDs — alphanumeric, hyphens, underscores only

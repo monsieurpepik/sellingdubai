@@ -14,7 +14,7 @@ window.closeDetail = function() {
 };
 
 // Lazy-load helpers — modules load on first user interaction, not on init
-let _gallery, _propDetail, _leadModal, _filters;
+let _gallery, _propDetail, _leadModal, _filters, _projectDetail;
 
 function lazyLoad(promise, name) {
   return promise.catch(e => {
@@ -120,9 +120,9 @@ window.initMortModal = async function initMortModalLazy(opts) {
 
 // project-detail.js is lazy-loaded on first openProjectDetail() call
 window.openProjectDetail = async function openProjectDetailLazy(slug) {
-  const m = await import('./project-detail.js');
-  window.openProjectDetail = m.openProjectDetail;
-  m.openProjectDetail(slug);
+  if (!_projectDetail) _projectDetail = lazyLoad(import('./project-detail.js'), 'project-detail');
+  await _projectDetail;
+  if (window.openProjectDetail !== openProjectDetailLazy) window.openProjectDetail(slug);
 };
 
 // ==========================================
@@ -131,13 +131,13 @@ window.openProjectDetail = async function openProjectDetailLazy(slug) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const mortModal = document.getElementById('mortgage-modal');
-    if (mortModal && mortModal.classList.contains('open')) { closeMortgage(); return; }
-    if (document.getElementById('photo-viewer').classList.contains('open')) { closePhotoViewer(); return; }
-    if (document.getElementById('gallery-overlay').classList.contains('open')) { closeFullGallery(); return; }
-    if (document.getElementById('detail-overlay').classList.contains('open')) { closeDetail(); return; }
-    if (document.getElementById('filters-overlay').classList.contains('open')) { closeFilters(); return; }
-    if (document.getElementById('prop-overlay').classList.contains('open')) closeProps();
-    if (document.getElementById('lead-modal').classList.contains('open')) closeLead();
+    if (mortModal && mortModal.classList.contains('open')) { if (typeof closeMortgage === 'function') closeMortgage(); return; }
+    if (document.getElementById('photo-viewer').classList.contains('open')) { if (typeof closePhotoViewer === 'function') closePhotoViewer(); return; }
+    if (document.getElementById('gallery-overlay').classList.contains('open')) { if (typeof closeFullGallery === 'function') closeFullGallery(); return; }
+    if (document.getElementById('detail-overlay').classList.contains('open')) { if (typeof closeDetail === 'function') closeDetail(); return; }
+    if (document.getElementById('filters-overlay').classList.contains('open')) { if (typeof closeFilters === 'function') closeFilters(); return; }
+    if (document.getElementById('prop-overlay').classList.contains('open')) { if (typeof closeProps === 'function') closeProps(); }
+    if (document.getElementById('lead-modal').classList.contains('open')) { if (typeof closeLead === 'function') closeLead(); }
   }
 });
 
@@ -185,23 +185,24 @@ async function init() {
 
     if (error || !agent) { showPage('error'); return; }
 
+    // Check ownership once — used both for the pending-profile gate and the edit button.
+    const ownerToken = localStorage.getItem('sd_edit_token');
+    let isOwner = false;
+    if (ownerToken) {
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', { // await-ok: conditional on ownerToken, depends on agent.id from prior query
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: ownerToken })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.agent && data.agent.id === agent.id) isOwner = true;
+        }
+      } catch (_e) { /* silently fail — not critical */ }
+    }
+
     if (agent.verification_status !== 'verified') {
-      // Check if the viewer is the profile owner — owners see their own profile with a banner
-      const ownerToken = localStorage.getItem('sd_edit_token');
-      let isOwner = false;
-      if (ownerToken) {
-        try {
-          const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', { // await-ok: conditional on ownerToken, depends on agent.id from prior query
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: ownerToken })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.agent && data.agent.id === agent.id) isOwner = true;
-          }
-        } catch (_e) { /* silently fail — not critical */ }
-      }
       if (!isOwner) {
         document.getElementById('pending-agent-name').textContent = agent.name || 'This agent';
         showPage('pending');
@@ -217,7 +218,9 @@ async function init() {
     try { injectSchemaOrg(agent); } catch (e) { console.error('[schema-org]', e); }
     try { hydrateOgMeta(agent); } catch (e) { console.error('[og-meta]', e); }
     try { trackPageView(agent.id); } catch (e) { console.error('[analytics]', e); }
-    try { showEditButtonIfOwner(agent); } catch (e) { console.error('[owner-check]', e); }
+    // Pass pre-resolved isOwner to avoid a second verify-magic-link network call.
+    // showEditButtonIfOwner falls back to its own fetch only if called without the second argument.
+    try { showEditButtonIfOwner(agent, ownerToken ? isOwner : undefined); } catch (e) { console.error('[owner-check]', e); }
 
     // Detect /a/[agent-slug]/project/[project-slug] sub-path
     const pathParts = window.location.pathname.split('/').filter(Boolean);

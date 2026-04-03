@@ -184,7 +184,7 @@ export async function renderAgent(agent) {
   const ogTags = {
     'og:title': `${agent.name} | SellingDubai`,
     'og:description': agent.tagline || 'Dubai Real Estate Agent',
-    'og:image': agent.photo_url || DEFAULT_BG,
+    'og:image': agent.photo_url ? optimizeImg(agent.photo_url, 1200) : DEFAULT_BG,
     'og:type': 'profile',
     'og:url': window.location.href,
     'og:site_name': 'SellingDubai'
@@ -192,27 +192,6 @@ export async function renderAgent(agent) {
   Object.entries(ogTags).forEach(([prop, content]) => {
     if (content) upsertMeta('property', prop, content);
   });
-
-  // === JSON-LD STRUCTURED DATA ===
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'RealEstateAgent',
-    'name': agent.name,
-    'url': window.location.href,
-    'description': agent.tagline || 'Dubai Real Estate Agent',
-  };
-  if (agent.photo_url) jsonLd.image = agent.photo_url;
-  if (agent.agency_name) jsonLd.worksFor = { '@type': 'Organization', 'name': agent.agency_name };
-  if (agent.whatsapp) jsonLd.telephone = agent.whatsapp;
-  if (agent.email) jsonLd.email = agent.email;
-  jsonLd.address = { '@type': 'PostalAddress', 'addressLocality': 'Dubai', 'addressCountry': 'AE' };
-  // Remove any existing JSON-LD before inserting
-  const existingLd = document.querySelector('script[type="application/ld+json"]');
-  if (existingLd) existingLd.remove();
-  const ldScript = document.createElement('script');
-  ldScript.type = 'application/ld+json';
-  ldScript.textContent = JSON.stringify(jsonLd);
-  document.head.appendChild(ldScript);
 
   // === BUTTONS ===
   const linksEl = document.getElementById('links');
@@ -400,7 +379,24 @@ window.nativeShare = async function() {
 // ==========================================
 // OWNER DETECTION — show Edit button if logged in
 // ==========================================
-export async function showEditButtonIfOwner(agent) {
+export async function showEditButtonIfOwner(agent, preResolvedIsOwner) {
+  // If the caller already verified ownership (e.g. init.js for pending profiles),
+  // skip the network call and use the pre-resolved result directly.
+  if (preResolvedIsOwner !== undefined) {
+    if (preResolvedIsOwner) {
+      const editBtn = document.getElementById('nav-edit-btn');
+      if (editBtn) {
+        editBtn.href = '/edit';
+        editBtn.classList.remove('hidden');
+      }
+      // Hide "Get Your Page" since they already have one
+      const claimBtn = document.getElementById('nav-claim-btn');
+      if (claimBtn) claimBtn.style.display = 'none';
+    }
+    return;
+  }
+
+  // Fallback: make the network call when no pre-resolved result is available.
   const token = localStorage.getItem('sd_edit_token');
   if (!token) return;
   try {
@@ -456,11 +452,11 @@ export function hydrateOgMeta(agent) {
     setMeta('og-title', title);
     setMeta('og-desc', desc);
     setMeta('og-url', url);
-    if (agent.photo_url) setMeta('og-image', NETLIFY_IMG_REM(agent.photo_url, 1200));
+    if (agent.photo_url) setMeta('og-image', optimizeImg(agent.photo_url, 1200));
     // Update Twitter meta tags
     setMeta('twitter-title', title);
     setMeta('twitter-description', desc);
-    if (agent.photo_url) setMeta('twitter-image', NETLIFY_IMG_REM(agent.photo_url, 1200));
+    if (agent.photo_url) setMeta('twitter-image', optimizeImg(agent.photo_url, 1200));
     const canon = document.getElementById('canonical-url');
     if (canon) canon.setAttribute('href', url);
     // Update meta description
@@ -494,67 +490,3 @@ window.searchAgent = async function() {
   }
 };
 
-// === REM OFF-PLAN PROJECTS (boban-pepic test environment only) ===
-const NETLIFY_IMG_REM = (url, w) =>
-  url ? `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80` : '';
-
-async function loadRemOffplanProjects() {
-  const { data: projects, error } = await supabase
-    .from('projects')
-    .select('slug, name, cover_image_url, location, district_name, min_price, max_price, property_types, completion_date, status, developers!projects_developer_id_fkey(name)')
-    .order('synced_at', { ascending: false })
-    .limit(20);
-
-  if (error) { console.error('[REM off-plan] Supabase error:', error); return; }
-  if (!projects || projects.length === 0) { console.warn('[REM off-plan] No projects returned'); return; }
-
-  const statusLabel = (s) => s === 'under_construction' ? 'Under Construction' : 'Off Plan';
-  const fmtPrice = (n) => n ? 'AED\u00a0' + Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 }) : null;
-
-  const cards = projects.map(p => {
-    const devName = escHtml(p.developers?.name || '');
-    const loc = escHtml(p.district_name || p.location || '');
-    const minP = fmtPrice(p.min_price);
-    const maxP = fmtPrice(p.max_price);
-    const priceStr = minP && maxP ? `${minP} \u2013 ${maxP}` : minP ? `From ${minP}` : (maxP || '');
-    const types = Array.isArray(p.property_types) && p.property_types.length
-      ? escHtml(p.property_types.join(', '))
-      : '';
-    const completion = p.completion_date ? escHtml(p.completion_date) : '';
-    const badge = statusLabel(p.status);
-    const imgSrc = p.cover_image_url ? escAttr(NETLIFY_IMG_REM(p.cover_image_url, 600)) : '';
-    return `<a href="/a/boban-pepic/project/${encodeURIComponent(p.slug)}" class="rem-project-card" style="display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;transition:border-color 0.15s;">
-      ${imgSrc ? `<div style="height:160px;overflow:hidden;"><img src="${imgSrc}" alt="${escAttr(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="handleImgError(this)"></div>` : `<div style="height:160px;background:rgba(255,255,255,0.06);"></div>`}
-      <div style="padding:14px 16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">${escHtml(badge)}</span>
-        </div>
-        <div style="font-weight:700;font-size:15px;margin-bottom:3px;">${escHtml(p.name)}</div>
-        ${devName ? `<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:4px;">${devName}</div>` : ''}
-        ${loc ? `<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:6px;">📍 ${loc}</div>` : ''}
-        ${priceStr ? `<div style="font-size:13px;font-weight:600;margin-bottom:4px;">${priceStr}</div>` : ''}
-        ${types ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);">${types}</div>` : ''}
-        ${completion ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:4px;">Completion: ${completion}</div>` : ''}
-      </div>
-    </a>`;
-  }).join('');
-
-  const section = document.createElement('section');
-  section.style.cssText = 'margin-top:40px;';
-  section.innerHTML = `
-    <div style="background:rgba(255,165,0,0.08);border:1px solid rgba(255,165,0,0.2);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;">
-      Off-plan projects shown for demonstration purposes. Data sourced from REM CRM. Individual project advertising requires a valid Trakheesi permit issued by DLD. Beta environment.
-    </div>
-    <h2 style="font-family:'Manrope',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">Off-Plan Projects</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
-      ${cards}
-    </div>`;
-
-  const footer = document.querySelector('.sd-footer');
-  if (footer) {
-    footer.parentNode.insertBefore(section, footer);
-  } else {
-    const agentPage = document.getElementById('agent-page');
-    if (agentPage) agentPage.appendChild(section);
-  }
-}

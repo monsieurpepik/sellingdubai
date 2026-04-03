@@ -32,7 +32,7 @@ export function logEvent(eventType, metadata) {
 }
 
 export async function trackPageView(agentId) {
-  setTimeout(() => logEvent('view', {}), 300);
+  logEvent('view', agentId ? { agent_id: agentId } : {});
 }
 
 // Click tracking via event delegation

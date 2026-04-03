@@ -375,35 +375,14 @@ export async function loadRemProjects(agentSlug, agentId) {
 
     let projects = [];
 
-    if (agentSlug === 'boban-pepic') {
-      // Showcase: priority developers first (price DESC), fill to 30 from remainder
-      const PRIORITY_DEVS = [
-        'emaar', 'sobha', 'omniyat', 'nakheel', 'ellington',
-        'meraas', 'damac', 'binghatti', 'aldar', 'dubai properties'
-      ];
-      const { data, error: remErr } = await supabase
-        .from('projects')
-        .select('id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, available_units, developers!projects_developer_id_fkey(name, logo_url)')
-        .not('status', 'in', '(completed,sold_out)')
-        .order('min_price', { ascending: false, nullsFirst: false })
-        .limit(100);
-      if (remErr) console.error('[rem-projects] query error', remErr);
-      const all = data || [];
-      const isPriority = p =>
-        PRIORITY_DEVS.some(d => (p.developers?.name || '').toLowerCase().includes(d));
-      const priority = all.filter(isPriority);
-      const rest     = all.filter(p => !isPriority(p));
-      projects = [...priority, ...rest].slice(0, 30);
-    } else {
-      // Approved only — via junction table
-      const { data } = await supabase
-        .from('agent_projects')
-        .select('projects(id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, available_units, developers!projects_developer_id_fkey(name, logo_url))')
-        .eq('agent_id', agentId)
-        .eq('status', 'approved')
-        .limit(12);
-      projects = (data || []).map(row => row.projects).filter(Boolean);
-    }
+    // Approved only — via junction table
+    const { data } = await supabase
+      .from('agent_projects')
+      .select('projects(id, slug, name, cover_image_url, min_price, completion_date, status, district_name, area, location, available_units, developers!projects_developer_id_fkey(name, logo_url))')
+      .eq('agent_id', agentId)
+      .eq('status', 'approved')
+      .limit(12);
+    projects = (data || []).map(row => row.projects).filter(Boolean);
 
     if (!projects.length) {
       const sEl = document.getElementById('rem-projects');

@@ -1,6 +1,7 @@
 // ==========================================
 // PHOTO GALLERY + VIEWER (crossfade)
 // ==========================================
+import { escAttr } from './utils.js';
 let _photoViewerIdx = 0;
 let _activeLayer = 'a'; // tracks which layer is currently visible
 
@@ -8,7 +9,7 @@ window.openFullGallery = function() {
   const images = window._currentDetailImages || [];
   if (!images.length) return;
   const body = document.getElementById('gallery-body');
-  body.innerHTML = images.map((url, i) => `<img src="${url}" alt="" loading="lazy" onclick="openPhotoViewer(${i})" onerror="handleImgError(this)">`).join('');
+  body.innerHTML = images.map((url, i) => `<img src="${escAttr(url)}" alt="" loading="lazy" onclick="openPhotoViewer(${i})" onerror="handleImgError(this)">`).join('');
   document.getElementById('gallery-count').textContent = `${images.length} Photos`;
   document.getElementById('gallery-overlay').classList.add('open');
 };
