@@ -1837,7 +1837,9 @@
     if (agent.photo_url) {
       const img = document.createElement('img');
       img.className = 'avatar' + (isVerified ? ' avatar-verified' : '');
-      img.src = agent.photo_url;
+      const encUrl = encodeURIComponent(agent.photo_url);
+      img.src = `/.netlify/images?url=${encUrl}&w=160&fm=webp&q=80`;
+      img.srcset = `/.netlify/images?url=${encUrl}&w=80&fm=webp&q=80 1x, /.netlify/images?url=${encUrl}&w=160&fm=webp&q=80 2x`;
       img.alt = agent.name || '';
       img.onerror = function() { avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`; };
       avatarContainer.innerHTML = '';

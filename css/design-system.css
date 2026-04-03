@@ -11,8 +11,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background: #000;
-  color: #fff;
+  background: var(--color-bg-deep);
+  color: var(--color-text-primary);
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -39,14 +39,21 @@ body {
   --duration-entrance: 0.6s;
   /* Colors */
   --color-bg: #000;
+  --color-bg-deep: #0a0a0a;
   --color-surface: #111;
   --color-surface-elevated: #1a1a1a;
   --color-surface-raised: rgba(255,255,255,0.06);
+  --color-surface-subtle: rgba(255,255,255,0.04);
+  --color-surface-dim: rgba(255,255,255,0.03);
+  --color-surface-ghost: rgba(255,255,255,0.02);
   --color-border: rgba(255,255,255,0.08);
   --color-border-strong: rgba(255,255,255,0.15);
   --color-overlay: rgba(0,0,0,0.8);
+  --color-scrim-light: rgba(0,0,0,0.35);
   --color-text-primary: #fff;
+  --color-text-high: rgba(255,255,255,0.9);
   --color-text-secondary: rgba(255,255,255,0.75);
+  --color-text-dim: rgba(255,255,255,0.6);
   --color-text-muted: rgba(255,255,255,0.55);
   --color-brand: #1127d2;
   --color-brand-light: #4d65ff;

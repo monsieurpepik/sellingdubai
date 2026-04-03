@@ -144,7 +144,7 @@
   }
 
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"AED"},"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"AED","description":"Verified agent profile, up to 3 listings, basic analytics, and lead capture."},{"@type":"Offer","name":"Pro","price":"299","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"299","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Free plus up to 20 listings, advanced analytics, lead CRM, and custom branding."},{"@type":"Offer","name":"Premium","price":"799","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"799","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Pro plus unlimited listings, lead export, featured agent badge, and dedicated support."}],"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
 <style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}</style>
 </head>
 
@@ -161,8 +161,7 @@
     </div>
     <div class="flex items-center gap-3">
       <a href="/dashboard" class="text-zinc-500 hover:text-zinc-900 transition-colors text-xs font-semibold tracking-tight">Agent Login</a>
-      <!-- WAITLIST MODE: href intentionally points to #waitlist section until BILLING_LIVE=true (~2026-04-05). Change to /join when billing opens. -->
-      <a href="#waitlist" class="bg-primary text-on-primary px-5 py-2 rounded-full text-xs font-bold tracking-tight hover:opacity-90 transition-opacity">Join Waitlist</a>
+      <a href="/join" class="bg-primary text-on-primary px-5 py-2 rounded-full text-xs font-bold tracking-tight hover:opacity-90 transition-opacity">Get Your Page</a>
     </div>
   </div>
 </nav>
@@ -178,23 +177,9 @@
   <p class="font-body text-base text-on-surface-variant max-w-lg mx-auto mb-10 leading-relaxed" style="font-weight:300;">
     You built that audience. You answered their questions, posted the market updates, showed up every week. When they want to buy, they open a portal and find you listed alongside ten other agents. You paid to be on that list. So did the other nine.
   </p>
-  <!-- WAITLIST FORM -->
-  <div id="waitlist" class="max-w-md mx-auto mb-6 w-full px-4">
-    <form id="wl-hero" class="bg-white border border-zinc-100 rounded-2xl p-6 shadow-sm text-left" onsubmit="joinWaitlist(event,this)">
-      <div class="mb-3">
-        <input type="text" name="name" placeholder="Your name" required minlength="2" maxlength="80" class="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-on-surface placeholder-zinc-400 outline-none focus:border-zinc-400 transition-colors">
-      </div>
-      <div class="mb-3">
-        <input type="email" name="email" placeholder="Email address" required class="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-on-surface placeholder-zinc-400 outline-none focus:border-zinc-400 transition-colors">
-      </div>
-      <div class="mb-4">
-        <input type="tel" name="whatsapp" placeholder="WhatsApp number (optional)" class="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm font-medium text-on-surface placeholder-zinc-400 outline-none focus:border-zinc-400 transition-colors">
-      </div>
-      <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Join the Waitlist</button>
-      <p class="text-xs text-zinc-400 mt-3 text-center">No subscription fee. No platform commission. Independent by design.</p>
-    </form>
-    <div id="wl-hero-msg" class="hidden mt-3 text-sm text-center text-red-500"></div>
-    <p class="text-xs text-zinc-400 mt-3 text-center"><span id="waitlist-count-live"></span></p>
+  <div class="max-w-md mx-auto mb-6 w-full px-4 text-center">
+    <a href="/join" class="inline-block bg-primary text-on-primary px-10 py-4 rounded-2xl text-sm font-bold hover:opacity-90 transition-opacity">Get Your Page — Free</a>
+    <p class="text-xs text-zinc-400 mt-3">No subscription fee. No platform commission. Independent by design.</p>
   </div>
 
 
@@ -241,7 +226,7 @@
     }
     .chip-icon-blue  { background: rgba(17,39,210,0.3); }
     .chip-icon-green { background: rgba(37,211,102,0.2); }
-    .chip-icon-gold  { background: rgba(255,196,0,0.15); }
+    .chip-icon-highlight { background: rgba(77,101,255,0.12); }
     .chip-label { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.45); display: block; margin-top: 1px; }
     .screenshot-wrap {
       position: relative;
@@ -291,7 +276,7 @@
 
       <!-- Callout 3: Sales stats — bottom left -->
       <div class="callout-chip" id="chip-stats" style="bottom:20%;left:-4%;">
-        <div class="chip-icon chip-icon-gold">📊</div>
+        <div class="chip-icon chip-icon-highlight">📊</div>
         <div>
           <span>AED 312M in sales</span>
           <span class="chip-label">Auto-synced from DLD records</span>
@@ -467,7 +452,7 @@
       <span class="text-sm text-zinc-600" style="font-weight:300;">You are visible as a personality. You are invisible as a professional. SellingDubai closes that gap.</span>
     </div>
     <div class="mt-8">
-      <a href="#waitlist" class="inline-block bg-primary text-on-primary px-8 py-3 rounded-full text-sm font-bold hover:opacity-90 transition-all">Join the Waitlist</a>
+      <a href="/join" class="inline-block bg-primary text-on-primary px-8 py-3 rounded-full text-sm font-bold hover:opacity-90 transition-all">Get Your Page</a>
     </div>
   </div>
 </section>
@@ -780,13 +765,7 @@
           <span class="text-xs font-bold">Direct leads. Mortgage revenue. Full platform.</span>
         </div>
       </div>
-      <form id="wl-dark" class="space-y-3 max-w-sm" onsubmit="joinWaitlist(event,this)">
-        <input type="text" name="name" placeholder="Your name" required minlength="2" maxlength="80" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-white/40 outline-none focus:border-white/40 transition-colors">
-        <input type="email" name="email" placeholder="Email address" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-white/40 outline-none focus:border-white/40 transition-colors">
-        <input type="tel" name="whatsapp" placeholder="WhatsApp number (optional)" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-white/40 outline-none focus:border-white/40 transition-colors">
-        <button type="submit" class="w-full bg-white text-[#242426] py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Join the Waitlist — Free</button>
-      </form>
-      <div id="wl-dark-msg" class="hidden mt-3 text-sm text-red-300"></div>
+      <a href="/join" class="inline-block bg-white text-[#242426] px-10 py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity max-w-sm w-full text-center">Get Your Page — Free</a>
     </div>
     <div class="lg:w-1/2 relative flex justify-end">
       <div class="phone-frame phone-frame-lg" style="background:#fff;border-color:#d1d5db;">
@@ -849,7 +828,7 @@
     <div>
       <h4 class="text-[11px] font-bold text-white mb-6 uppercase tracking-widest opacity-80">For Agents</h4>
       <ul class="space-y-3">
-        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#waitlist">Join Waitlist</a></li>
+        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/join">Get Your Page</a></li>
         <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/edit">Edit Profile</a></li>
         <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/dashboard">Dashboard</a></li>
       </ul>
@@ -876,7 +855,7 @@
 
 <!-- ======== STICKY MOBILE CTA ======== -->
 <div class="sticky-cta">
-  <a href="#waitlist" style="display:block;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;text-decoration:none;">Join the Waitlist — Free</a>
+  <a href="/join" style="display:block;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;text-decoration:none;">Get Your Page — Free</a>
 </div>
 
 <script>
@@ -898,57 +877,6 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Waitlist submission
-const WAITLIST_FN_URL = 'https://pjyorgedaxevxophpfib.supabase.co/functions/v1/waitlist-join';
-
-function joinWaitlist(e, form) {
-  e.preventDefault();
-  const name = (form.name.value || '').trim();
-  const email = (form.email.value || '').trim().toLowerCase();
-  const whatsapp = (form.whatsapp ? form.whatsapp.value : '').trim();
-  const msgId = form.id + '-msg';
-  const msgEl = document.getElementById(msgId);
-
-  if (msgEl) { msgEl.textContent = ''; msgEl.classList.add('hidden'); }
-  if (!name || name.length < 2) {
-    if (msgEl) { msgEl.textContent = 'Please enter your name.'; msgEl.classList.remove('hidden'); }
-    return false;
-  }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (msgEl) { msgEl.textContent = 'Please enter a valid email address.'; msgEl.classList.remove('hidden'); }
-    return false;
-  }
-
-  const btn = form.querySelector('button[type="submit"]');
-  const origText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  fetch(WAITLIST_FN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, whatsapp: whatsapp || null })
-  }).then(res => res.json()).then(data => {
-    if (data.success) {
-      const isDark = form.id === 'wl-dark';
-      const color = isDark ? '#fff' : '#1d1d1f';
-      form.innerHTML = '<p style="padding:14px 0;font-size:15px;font-weight:700;color:' + color + ';">You\'re on the list, ' + name.split(' ')[0] + '. We\'ll be in touch.</p>';
-      // Update count display
-      if (data.count) {
-        const countEl = document.getElementById('waitlist-count-live');
-        if (countEl) countEl.textContent = data.count.toLocaleString() + ' agents already on the waitlist';
-      }
-    } else {
-      throw new Error(data.error || 'Failed');
-    }
-  }).catch((err) => {
-    btn.disabled = false;
-    btn.textContent = origText;
-    if (msgEl) { msgEl.textContent = err.message || 'Something went wrong. Try again.'; msgEl.classList.remove('hidden'); }
-  });
-
-  return false;
-}
 
 </script>
 
@@ -968,19 +896,6 @@ function joinWaitlist(e, form) {
       if (!isNaN(total) && total > 0) {
         var el = document.getElementById('agent-count-live');
         if (el) el.textContent = total.toLocaleString();
-      }
-    }
-  }).catch(function() {});
-  // Waitlist count
-  fetch(SUPABASE_URL + '/rest/v1/waitlist?select=id', {
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
-  }).then(function(res) {
-    var countHeader = res.headers.get('content-range');
-    if (countHeader) {
-      var total = parseInt(countHeader.split('/')[1], 10);
-      if (!isNaN(total) && total > 0) {
-        var el = document.getElementById('waitlist-count-live');
-        if (el) el.textContent = total.toLocaleString() + ' agents already on the waitlist';
       }
     }
   }).catch(function() {});

@@ -15,10 +15,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Pricing — SellingDubai">
   <meta name="twitter:description" content="Simple, transparent pricing for Dubai real estate agents. Free forever with Pro and Premium plans.">
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap&subset=latin" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap&subset=latin" rel="stylesheet"></noscript>
+  <link rel="preload" href="/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BXMRWM9ZM1',{send_page_view:true});</script>
   <link rel="stylesheet" href="/css/pricing.css">
@@ -224,7 +222,7 @@
     });
 
     // Flip to true once Stripe price IDs are confirmed in production env vars
-    const BILLING_LIVE = false;
+    const BILLING_LIVE = true;
 
     // Redirect to /edit for re-auth, preserving plan+interval for retry on return
     function redirectToAuth(plan, interval) {

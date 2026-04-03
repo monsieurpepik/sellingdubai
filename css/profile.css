@@ -13,7 +13,7 @@
   transition: border-color var(--duration-moderate) var(--spring), box-shadow var(--duration-moderate) var(--spring);
 }
 .avatar:hover {
-  border-color: rgba(255,255,255,0.55);
+  border-color: var(--color-text-muted);
   box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.1);
 }
 /* Verified agent — subtle blue glow ring */
@@ -28,7 +28,7 @@
 .avatar-fallback {
   width: 96px; height: 96px; border-radius: var(--radius-full);
   border: 2.5px solid rgba(255,255,255,0.2);
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, var(--color-surface-subtle) 100%);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 20px; font-size: 30px; font-weight: 700;
@@ -51,7 +51,7 @@
 }
 .verified svg { display: block; }
 .bio {
-  font-size: var(--text-sm); color: rgba(255,255,255,0.55); text-align: center;
+  font-size: var(--text-sm); color: var(--color-text-muted); text-align: center;
   line-height: 1.4; max-width: 300px; font-weight: 400;
   letter-spacing: -0.1px;
   animation: fadeUp var(--duration-slow) var(--ease-out-expo) var(--duration-fast) both;
@@ -62,7 +62,7 @@
   white-space: normal;
 }
 .bio-long {
-  font-size: var(--text-xs); color: rgba(255,255,255,0.55); text-align: center;
+  font-size: var(--text-xs); color: var(--color-text-muted); text-align: center;
   line-height: 1.45; max-width: 300px; font-weight: 300;
   margin-top: 6px;
   animation: fadeUp var(--duration-slow) var(--ease-out-expo) var(--duration-medium) both;
@@ -79,7 +79,7 @@
 .dld-stats-row {
   display: flex; align-items: center; justify-content: center; gap: 24px;
   padding: 12px 20px;
-  background: rgba(255,255,255,0.03);
+  background: var(--color-surface-dim);
   border: 1px solid var(--color-surface-raised);
   border-radius: var(--radius-card);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -89,24 +89,24 @@
 }
 .dld-stat-value {
   font-family: 'Manrope', sans-serif;
-  font-size: var(--text-lg); font-weight: 800; color: rgba(255,255,255,0.9);
+  font-size: var(--text-lg); font-weight: 800; color: var(--color-text-high);
   letter-spacing: -0.02em;
 }
 .dld-stat-label {
   font-family: 'Inter', sans-serif;
-  font-size: var(--text-3xs); font-weight: 500; color: rgba(255,255,255,0.55);
+  font-size: var(--text-3xs); font-weight: 500; color: var(--color-text-muted);
   text-transform: uppercase; letter-spacing: 0.06em;
 }
 .agency-badge {
   display: flex; align-items: center; gap: 6px; margin-top: 10px;
   padding: 6px 14px; border-radius: var(--radius-xl);
-  background: rgba(255,255,255,0.04); backdrop-filter: blur(12px);
+  background: var(--color-surface-subtle); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.05);
   animation: fadeUp var(--duration-slow) var(--ease-out-expo) var(--duration-medium) both;
 }
 .agency-logo { width: 18px; height: 18px; border-radius: var(--radius-xs); object-fit: contain; }
-.agency-name { font-size: var(--text-2xs); color: rgba(255,255,255,0.55); font-weight: 600; letter-spacing: 0.02em; }
+.agency-name { font-size: var(--text-2xs); color: var(--color-text-muted); font-weight: 600; letter-spacing: 0.02em; }
 
 /* ========== LINK BUTTONS ========== */
 .links {
@@ -154,8 +154,8 @@
 .socials a {
   width: 44px; height: 44px; border-radius: var(--radius-full);
   display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.55); text-decoration: none;
-  background: rgba(255,255,255,0.04);
+  color: var(--color-text-muted); text-decoration: none;
+  background: var(--color-surface-subtle);
   border: 1px solid var(--color-surface-raised);
   transition: transform var(--duration-normal) var(--spring), color var(--duration-medium), background var(--duration-medium), border-color var(--duration-medium), box-shadow var(--duration-normal) var(--spring);
   -webkit-tap-highlight-color: transparent;
@@ -164,21 +164,21 @@
 @media (hover: hover) {
   .socials a:hover {
     color: #fff; background: var(--color-border);
-    border-color: rgba(255,255,255,0.55);
+    border-color: var(--color-text-muted);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   }
 }
 
 .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; }
-.trust-copy { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); }
+.trust-copy { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--color-text-muted); }
 .trust-badges {
   display: flex; align-items: center; justify-content: center; gap: 16px;
   margin-bottom: 10px; flex-wrap: wrap;
 }
 .trust-badge-item {
   display: flex; align-items: center; gap: 5px;
-  font-size: var(--text-4xs); font-weight: 500; color: rgba(255,255,255,0.55);
+  font-size: var(--text-4xs); font-weight: 500; color: var(--color-text-muted);
   letter-spacing: 0.04em; text-transform: uppercase;
   font-family: 'Inter', sans-serif;
 }
@@ -193,7 +193,7 @@
 /* ========== BUTTON HIERARCHY ========== */
 .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .link-btn-glass {
-  background: var(--color-surface-raised); color: rgba(255,255,255,0.9);
+  background: var(--color-surface-raised); color: var(--color-text-high);
   border: 1px solid var(--color-border); box-shadow: none;
   font-size: var(--text-sm); padding: 16px 18px;
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -215,7 +215,7 @@
 }
 .link-btn-ghost:active { transform: scale(0.97); transition-duration: var(--duration-instant); }
 @media (hover: hover) {
-  .link-btn-ghost:hover { color: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.55); transform: translateY(-1px); }
+  .link-btn-ghost:hover { color: rgba(255,255,255,0.65); border-color: var(--color-text-muted); transform: translateY(-1px); }
 }
 
 /* ========== GOLDEN VISA INFO LINE ========== */
@@ -225,7 +225,7 @@
 .gv-card {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px;
-  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+  background: var(--color-surface-ghost); border: 1px solid rgba(255,255,255,0.05);
   border-radius: var(--radius-card);
   transition: border-color var(--duration-fast);
 }
@@ -233,10 +233,10 @@
   flex-shrink: 0; display: flex; align-items: center; justify-content: center;
 }
 .gv-info {
-  font-size: var(--text-2xs); color: rgba(255,255,255,0.55); line-height: 1.4;
+  font-size: var(--text-2xs); color: var(--color-text-muted); line-height: 1.4;
   font-family: 'Inter', sans-serif;
 }
 .gv-threshold {
-  font-weight: 700; color: rgba(255,255,255,0.55);
+  font-weight: 700; color: var(--color-text-muted);
 }
 
