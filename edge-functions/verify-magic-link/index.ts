@@ -101,7 +101,7 @@ Deno.serve(async (req: Request) => {
     const DASHBOARD_FIELDS = [
       'id', 'slug', 'full_name', 'name', 'email', 'phone',
       'photo_url', 'profile_photo_url', 'cover_photo_url', 'background_image_url',
-      'agency_name', 'agency_logo_url', 'bio', 'tagline',
+      'agency_name', 'agency_logo_url', 'tagline',
       'title', 'dld_number', 'rera_number', 'brn_number', 'broker_number',
       'dld_broker_number', 'dld_broker_id', 'license_image_url',
       'verification_status', 'tier', 'is_active', 'email_verified',

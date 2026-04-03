@@ -9,21 +9,12 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders as getSharedCorsHeaders } from "../_shared/utils.ts";
 
-const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.com",
-  "https://sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
-];
 function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const origin = req.headers.get("origin") || null;
   return {
-    "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Headers": "content-type, authorization",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    ...getSharedCorsHeaders(origin),
     "Content-Type": "application/json",
   };
 }
@@ -122,6 +113,29 @@ Deno.serve(async (req: Request) => {
         } else {
           safeUpdates[key] = value;
         }
+      }
+    }
+
+    // Validate input length limits
+    const TEXT_MAX_LENGTHS: Record<string, number> = {
+      name: 100,
+      tagline: 300,
+      agency_name: 150,
+      custom_link_1_label: 50,
+      custom_link_2_label: 50,
+      dld_broker_number: 50,
+      email: 254,
+      whatsapp: 30,
+      facebook_pixel_id: 50,
+      facebook_capi_token: 500,
+      ga4_measurement_id: 50,
+    };
+    for (const [field, max] of Object.entries(TEXT_MAX_LENGTHS)) {
+      if (safeUpdates[field] && typeof safeUpdates[field] === "string" && (safeUpdates[field] as string).length > max) {
+        return new Response(
+          JSON.stringify({ error: `${field} exceeds maximum length of ${max} characters.` }),
+          { status: 400, headers: cors }
+        );
       }
     }
 

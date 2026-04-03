@@ -17,26 +17,14 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { isBlockedSsrfUrl } from "../_shared/utils.ts";
+import { isBlockedSsrfUrl, getCorsHeaders as getSharedCorsHeaders } from "../_shared/utils.ts";
 
 const FB_GRAPH_API_VERSION = "v21.0";
 
-// Allowed origins — restrict to production + preview domains
-const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.com",
-  "https://sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
-];
-
 function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const origin = req.headers.get("origin") || null;
   return {
-    "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Headers": "content-type, authorization",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    ...getSharedCorsHeaders(origin),
     "Content-Type": "application/json",
   };
 }
@@ -246,7 +234,7 @@ Deno.serve(async (req: Request) => {
     // Find agent
     const { data: agent, error: agentErr } = await supabase
       .from("agents")
-      .select("*")
+      .select("id, name, slug, email, webhook_url, facebook_pixel_id, facebook_capi_token")
       .eq("slug", agent_slug)
       .eq("verification_status", "verified")
       .single();
@@ -300,7 +288,7 @@ Deno.serve(async (req: Request) => {
         device_type: device_type || null,
         ip_hash: ipHash,
       })
-      .select("*")
+      .select("id, name, phone, email, budget_range, property_type, preferred_area, message, source, utm_source, utm_medium, utm_campaign, device_type, created_at")
       .single();
 
     if (insertErr) {
