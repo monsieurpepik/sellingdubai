@@ -131,7 +131,7 @@ function buildEmailHtml(
 
   <!-- Urgency -->
   <div style="text-align:center;padding:20px 16px 8px;">
-    <p style="font-size:12px;color:#f59e0b;font-weight:600;margin:0;">
+    <p style="font-size:12px;color:#4d65ff;font-weight:600;margin:0;">
       &#9889; Agents who respond within 5 minutes are 21x more likely to convert
     </p>
   </div>

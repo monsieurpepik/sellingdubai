@@ -400,7 +400,7 @@ export async function openProjectDetail(projectSlug) {
             let availColor = '', availText = '';
             if (avail != null) {
               if (avail === 0) { availColor = 'rgba(255,255,255,0.3)'; availText = 'Sold out'; }
-              else if (avail <= 5) { availColor = '#f59e0b'; availText = avail + ' left'; }
+              else if (avail <= 5) { availColor = '#4d65ff'; availText = avail + ' left'; }
               else { availColor = '#4ade80'; availText = avail + ' left'; }
             }
             return `

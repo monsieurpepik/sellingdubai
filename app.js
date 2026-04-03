@@ -2306,7 +2306,7 @@
       banner = document.createElement('div');
       banner.id = 'offline-banner';
       banner.setAttribute('role', 'alert');
-      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;transition:transform 0.3s;';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#1127d2;color:#fff;text-align:center;padding:8px 16px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;transition:transform 0.3s;';
       banner.textContent = 'You are offline. Some features may not work.';
       document.body.prepend(banner);
     } else if (!show && banner) {
