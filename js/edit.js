@@ -657,10 +657,10 @@
 
   // === PROPERTY STATUS HELPERS ===
   const statusColors = {
-    'just_listed': 'background:rgba(96,165,250,0.12);color:#60a5fa;',
+    'just_listed': 'background:rgba(77,101,255,0.12);color:#4d65ff;',
     'available': 'background:rgba(37,211,102,0.1);color:#25d366;',
     'open_house': 'background:rgba(168,85,247,0.12);color:#a855f7;',
-    'under_offer': 'background:rgba(251,191,36,0.12);color:#fbbf24;',
+    'under_offer': 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);',
     'just_sold': 'background:rgba(244,63,94,0.12);color:#f43f5e;',
     'sold': 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.35);',
     'rented': 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.35);',

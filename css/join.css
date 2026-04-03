@@ -278,7 +278,7 @@
     background: rgba(255,255,255,0.9); color: #111;
   }
   .preview-trust {
-    font-size: 7px; text-transform: uppercase; letter-spacing: 0.15em;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em;
     color: rgba(255,255,255,0.5); margin-top: 12px; line-height: 1.8;
   }
 

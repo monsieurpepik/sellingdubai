@@ -171,7 +171,7 @@
     min-height: 40px;
   }
   .status-new { background: rgba(77,101,255,0.15); color: #4d65ff; }
-  .status-contacted { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .status-contacted { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
   .status-qualified { background: rgba(34,197,94,0.15); color: #22c55e; }
   .status-lost { background: rgba(239,68,68,0.15); color: #ef4444; }
   .status-converted { background: rgba(168,85,247,0.15); color: #a855f7; }
@@ -268,16 +268,16 @@
   .prop-badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
   .prop-badge-just_listed { background: rgba(77,101,255,0.15); color: #4d65ff; }
   .prop-badge-available { background: rgba(34,197,94,0.15); color: #22c55e; }
-  .prop-badge-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .prop-badge-under_offer { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
   .prop-badge-sold { background: rgba(239,68,68,0.15); color: #ef4444; }
   .prop-badge-rented { background: rgba(168,85,247,0.15); color: #a855f7; }
   .prop-badge-live { background: rgba(34,197,94,0.15); color: #22c55e; }
-  .prop-badge-hidden { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .prop-badge-hidden { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); }
   .prop-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .prop-status-select { padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
   .prop-status-just_listed { background: rgba(77,101,255,0.15); color: #4d65ff; }
   .prop-status-available { background: rgba(34,197,94,0.15); color: #22c55e; }
-  .prop-status-under_offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .prop-status-under_offer { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
   .prop-status-sold { background: rgba(239,68,68,0.15); color: #ef4444; }
   .prop-status-rented { background: rgba(168,85,247,0.15); color: #a855f7; }
   .prop-share-btn, .prop-edit-btn, .prop-delete-btn { padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
@@ -355,7 +355,7 @@
     font-size: 12px; padding: 6px 12px; border-radius: 8px; font-weight: 500;
   }
   .billing-status-past-due {
-    background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2);
+    background: rgba(17,39,210,0.12); color: #1127d2; border: 1px solid rgba(17,39,210,0.2);
   }
 
   /* ── Onboarding Checklist ── */

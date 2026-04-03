@@ -5,7 +5,7 @@
 }
 
 body {
-  background: #000;
+  background: #0a0a0a;
   color: #fff;
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
@@ -82,7 +82,7 @@ header {
 
 .toggle-switch input:checked + .toggle-slider {
   transform: translateX(22px);
-  background: #d4af37;
+  background: #1127d2;
 }
 
 .toggle-slider {
@@ -98,8 +98,8 @@ header {
 
 .yearly-badge {
   display: inline-block;
-  background: #d4af37;
-  color: #000;
+  background: #1127d2;
+  color: #fff;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -132,15 +132,15 @@ header {
 }
 
 .pricing-card:hover {
-  border-color: rgba(212, 175, 55, 0.5);
+  border-color: rgba(17, 39, 210, 0.5);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
   transform: translateY(-4px);
 }
 
 .pricing-card.featured {
-  border-color: #d4af37;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+  border-color: #1127d2;
+  background: linear-gradient(135deg, rgba(17, 39, 210, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow: 0 0 30px rgba(17, 39, 210, 0.15);
 }
 
 .featured-badge {
@@ -148,8 +148,8 @@ header {
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #d4af37;
-  color: #000;
+  background: #1127d2;
+  color: #fff;
   padding: 0.4rem 1rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -203,7 +203,7 @@ header {
 .price-save {
   display: none;
   font-size: 0.9rem;
-  color: #d4af37;
+  color: rgba(255, 255, 255, 0.55);
   margin-top: 0.5rem;
   font-weight: 600;
 }
@@ -235,7 +235,7 @@ header {
   content: "✓";
   position: absolute;
   left: 0;
-  color: #d4af37;
+  color: rgba(255, 255, 255, 0.55);
   font-weight: 700;
   font-size: 1.1rem;
 }
@@ -246,7 +246,7 @@ header {
 
 .feature-coming-soon .coming-soon-label {
   font-size: 0.7rem;
-  color: #d4af37;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .cta-button {
@@ -254,7 +254,7 @@ header {
   width: 100%;
   padding: 1rem 1.5rem;
   margin-top: 1.5rem;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
@@ -267,25 +267,25 @@ header {
 }
 
 .cta-free {
-  background: rgba(212, 175, 55, 0.1);
-  color: #d4af37;
-  border: 1px solid #d4af37;
+  background: rgba(17, 39, 210, 0.1);
+  color: #1127d2;
+  border: 1px solid #1127d2;
 }
 
 .cta-free:hover {
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(17, 39, 210, 0.2);
   transform: translateY(-2px);
 }
 
 .cta-upgrade {
-  background: #d4af37;
-  color: #000;
+  background: #1127d2;
+  color: #fff;
 }
 
 .cta-upgrade:hover {
-  background: #e8c547;
+  background: #1e36e8;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 20px rgba(17, 39, 210, 0.3);
 }
 
 .cta-upgrade:disabled {
@@ -327,7 +327,7 @@ header {
 }
 
 .faq-item:hover {
-  border-color: rgba(212, 175, 55, 0.5);
+  border-color: rgba(17, 39, 210, 0.5);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
 }
 
@@ -345,10 +345,10 @@ header {
   display: inline-block;
   width: 24px;
   height: 24px;
-  background: rgba(212, 175, 55, 0.2);
-  border: 1px solid #d4af37;
+  background: rgba(17, 39, 210, 0.2);
+  border: 1px solid #1127d2;
   border-radius: 50%;
-  color: #d4af37;
+  color: #1127d2;
   text-align: center;
   line-height: 24px;
   font-weight: bold;
@@ -358,8 +358,8 @@ header {
 }
 
 .faq-item.active .faq-icon {
-  background: #d4af37;
-  color: #000;
+  background: #1127d2;
+  color: #fff;
   transform: rotate(45deg);
 }
 

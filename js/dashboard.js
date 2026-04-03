@@ -388,7 +388,7 @@
     const sources = {};
     leads.forEach(l => { const s = l.source || 'direct'; sources[s] = (sources[s] || 0) + 1; });
     const srcEl = document.getElementById('lead-source-list');
-    const srcColors = { profile: '#3b82f6', full_profile: '#6366f1', landing: '#8b5cf6', qr: '#f59e0b', direct: '#71717a' };
+    const srcColors = { profile: '#4d65ff', full_profile: '#6366f1', landing: '#8b5cf6', qr: 'rgba(255,255,255,0.4)', direct: '#71717a' };
     srcEl.innerHTML = Object.entries(sources).sort((a,b) => b[1]-a[1]).map(([s,c]) => {
       const color = srcColors[s] || '#71717a';
       return '<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:' + color + '"></span>' + esc(s) + '</span><span class="ref-count">' + c + '</span></div>';

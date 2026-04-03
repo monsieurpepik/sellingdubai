@@ -362,8 +362,8 @@ async function createProfile(otpCode) {
       document.querySelector('#step-3 .bio').textContent = "Your profile is created. We'll verify your identity within 24 hours and your profile will go live.";
     }
     // Show amber/pending icon for all paths since verification is manual
-    document.querySelector('#step-3 .profile-icon').innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
-    document.querySelector('#step-3 .profile-icon').style.borderColor = 'rgba(245,158,11,0.5)';
+    document.querySelector('#step-3 .profile-icon').innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="rgba(255,255,255,0.55)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+    document.querySelector('#step-3 .profile-icon').style.borderColor = 'rgba(255,255,255,0.2)';
 
     clearFormState();
     setLoading('btn-verify-otp', false, 'Verify & Create Profile');
@@ -527,15 +527,15 @@ async function manualSubmit() {
   document.getElementById('verify-expiry').textContent = 'Under review';
   document.getElementById('verify-status').textContent = 'Pending Review';
   document.getElementById('verify-status').classList.remove('active');
-  document.getElementById('verify-status').style.color = '#f59e0b';
+  document.getElementById('verify-status').style.color = 'rgba(255,255,255,0.55)';
 
   // Update the badge to show pending
   const badge = document.querySelector('.verify-card .badge');
   badge.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.55)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
     Pending Manual Verification
   `;
-  badge.style.color = '#f59e0b';
+  badge.style.color = 'rgba(255,255,255,0.55)';
 
   document.getElementById('step2-name').textContent = name;
   document.getElementById('display-name').value = name;
