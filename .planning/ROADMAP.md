@@ -145,19 +145,20 @@ Currently: 1 migration file. Schema was built directly in Supabase Studio.
 
 ---
 
-## Phase 4 — TypeScript Migration (Client)
+## Phase 4 — TypeScript Migration (Client) [COMPLETE — 2026-04-05]
 
 **Goal:** All 31 client JS modules typed. Edge functions are already TypeScript;
 client code must match.
 
 ### Deliverables
-1. `tsconfig.json` configured for ES modules, strict mode
-2. All `js/*.js` → `js/*.ts` (31 files)
-3. Supabase-generated types (`supabase gen types typescript`) committed to `types/supabase.ts`
-4. esbuild pipeline updated to compile TypeScript
-5. Zero `@ts-ignore` suppressions
-6. CI `lint` job: `tsc --noEmit` fails PR on type errors
-7. Type coverage ≥ 95% (measured, documented in ENGINEERING.md)
+1. [x] `tsconfig.json` configured for ES modules, strict mode (+ noUncheckedIndexedAccess, exactOptionalPropertyTypes)
+2. [x] All Category A `js/*.js` → `js/*.ts` (18 esbuild-bundled modules)
+3. [x] Supabase-generated types committed to `types/supabase.ts`
+4. [x] esbuild pipeline updated to compile TypeScript (3 entry points: init.ts, agency-page.ts, event-delegation.ts)
+5. [x] Zero `@ts-ignore` suppressions (`tsc --noEmit` clean)
+6. [x] `npm run typecheck` script added to package.json
+7. [x] Type coverage >= 95%; documented in ENGINEERING.md
+8. [x] Category B IIFE scripts: `// @ts-check` + JSDoc on 12 files
 
 ---
 

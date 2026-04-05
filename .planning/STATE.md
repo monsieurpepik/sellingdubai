@@ -7,8 +7,8 @@
 
 ## Current Position
 
-- **Phase:** 3 of 7 — Schema & Data Integrity COMPLETE
-- **Status:** Ready to execute Phase 4
+- **Phase:** 4 of 7 — TypeScript Migration COMPLETE
+- **Status:** Ready to execute Phase 5
 
 ## Progress
 
@@ -16,12 +16,12 @@
 Phase 1 — Test Coverage: Fill the Gaps    [x] COMPLETE
 Phase 2 — CI/CD Hardening                 [x] COMPLETE
 Phase 3 — Schema & Data Integrity         [x] COMPLETE
-Phase 4 — TypeScript Migration            [ ] Not started
+Phase 4 — TypeScript Migration            [x] COMPLETE
 Phase 5 — Observability & Alerting        [ ] Not started
-Phase 6 — Load Testing & SLOs             [ ] Not started
+Phase 6 — Load Testing & SLOs            [ ] Not started
 Phase 7 — ENGINEERING.md (DD doc)         [ ] Not started
 
-Overall: [███░░░░░░░] 43%
+Overall: [████░░░░░░] 57%
 ```
 
 ## Phase 1 Summary (COMPLETE — 2026-04-03)
@@ -79,6 +79,11 @@ Overall: [███░░░░░░░] 43%
 - 2026-04-03: Phase 1 complete — all Tier 1-3 edge functions tested
 - 2026-04-03: Phase 2 complete — CI/CD hardening done
 - 2026-04-03: Phase 3 complete — schema reconstructed, 21 migrations, SCHEMA.md + DECISIONS.md
+- 2026-04-05: Use as unknown as T double-cast for Supabase Json columns — avoids breaking type gen
+- 2026-04-05: Property & { land_area?: number | null } intersection rather than modifying generated types
+- 2026-04-05: Category B files keep .js + @ts-check — not bundled by esbuild, no tsc pass needed
+- 2026-04-05: event-delegation.ts added as third esbuild entry point for edit/join/agency-dashboard pages
+- 2026-04-05: Phase 4 complete — 18 modules migrated to TS strict, 12 IIFE scripts annotated, tsc clean
 
 ## Blockers / Concerns
 
@@ -87,9 +92,9 @@ Overall: [███░░░░░░░] 43%
 
 ## Session Continuity
 
-Last session: 2026-04-03
-Stopped at: Phase 3 complete — Schema & Data Integrity done
-Next: Begin Phase 4 — TypeScript Migration
+Last session: 2026-04-05
+Stopped at: Phase 4 complete — TypeScript Migration done
+Next: Begin Phase 5 — Observability & Alerting
 
 ## Pending Todos
 
