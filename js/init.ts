@@ -6,6 +6,7 @@ import { getAgentSlug } from './utils';
 import { trackPageView } from './analytics';
 import { showPage, renderAgent, injectSchemaOrg, hydrateOgMeta, showEditButtonIfOwner } from './agent-page';
 import './event-delegation';
+import './errors';
 import type { Agent } from './state';
 
 // closeDetail stub — available immediately, before property-detail.ts lazy-loads.
