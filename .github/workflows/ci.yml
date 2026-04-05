@@ -1,5 +1,13 @@
 name: CI/CD
 
+# Required GitHub Actions secrets:
+#   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+#   NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID
+#   BILLING_LIVE
+#   SENTRY_AUTH_TOKEN  — from Sentry Settings > Auth Tokens > Create Internal Token
+#   SENTRY_ORG         — your Sentry org slug (e.g. "sellingdubai")
+#   SENTRY_PROJECT     — your Sentry project slug (e.g. "sellingdubai-web")
+
 on:
   push:
     branches: [main]
@@ -233,12 +241,45 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           BILLING_LIVE: ${{ secrets.BILLING_LIVE }}
+          SENTRY_RELEASE: ${{ github.sha }}
+
+      - name: Install sentry-cli
+        run: npm install -g @sentry/cli@2
+
+      - name: Create Sentry release + upload source maps
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_RELEASE: ${{ github.sha }}
+        run: |
+          sentry-cli releases new "$SENTRY_RELEASE"
+          sentry-cli releases set-commits --auto "$SENTRY_RELEASE"
+          sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps dist/ \
+            --url-prefix "~/" \
+            --rewrite
+          sentry-cli releases finalize "$SENTRY_RELEASE"
+
+      - name: Remove source maps from dist (not for public serving)
+        run: |
+          find dist -name "*.map" -delete
+          echo "Removed .map files from dist/:"
+          find dist -name "*.map" | wc -l
 
       - name: Deploy to Netlify
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: npx netlify-cli deploy --prod
+
+      - name: Associate Sentry release with deploy
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_RELEASE: ${{ github.sha }}
+        run: |
+          sentry-cli releases deploys "$SENTRY_RELEASE" new -e production
 
       - name: Post-deploy smoke test
         run: bash scripts/smoke-test.sh

@@ -192,6 +192,8 @@
   </footer>
 
   <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+  <!-- Must come before sentry-init.js -->
+  <script src="/dist/release-config.js"></script>
   <script src="/js/sentry-init.js" defer></script>
   <script src="/js/pricing.js" defer></script>
 </body>

@@ -33,7 +33,7 @@ console.log(`build-js: SUPABASE_URL=${url.slice(0, 40)}... (context: ${context})
 fs.mkdirSync('dist', { recursive: true });
 
 esbuild.build({
-  entryPoints: ['js/init.ts', 'js/agency-page.ts', 'js/event-delegation.ts'],
+  entryPoints: ['js/init.ts', 'js/agency-page.ts', 'js/event-delegation.js'],
   bundle: true,
   minify: true,
   sourcemap: true,
@@ -47,6 +47,16 @@ esbuild.build({
     __SUPABASE_ANON_KEY__: JSON.stringify(key),
   },
 }).catch(() => process.exit(1));
+
+// Write release-config.js so sentry-init.js (a plain script, not esbuild-processed)
+// can read window.SENTRY_RELEASE at runtime.
+const sha = process.env.SENTRY_RELEASE || process.env.COMMIT_REF || process.env.GITHUB_SHA || 'dev';
+fs.writeFileSync(
+  'dist/release-config.js',
+  `window.SENTRY_RELEASE = ${JSON.stringify(sha)};\n`,
+  'utf8'
+);
+console.log(`build-js: dist/release-config.js written (SENTRY_RELEASE=${sha})`);
 
 // Patch js/pricing.js BILLING_LIVE flag from build-time env var.
 // The source file defaults to false; Netlify sets BILLING_LIVE=true in production.
