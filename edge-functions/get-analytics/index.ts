@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -20,6 +21,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('get-analytics', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -127,6 +130,7 @@ Deno.serve(async (req: Request) => {
       .slice(0, 5)
       .map(([source, count]) => ({ source, count }));
 
+    log({ event: 'success', status: 200, agent_id: agentId });
     return new Response(JSON.stringify({
       this_month: {
         views: thisMonth['view'] || 0,
@@ -150,7 +154,10 @@ Deno.serve(async (req: Request) => {
       referral_stats: referralStats,
     }), { headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("get-analytics error");
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: getCorsHeaders(req) });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

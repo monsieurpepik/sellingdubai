@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from '../_shared/logger.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -10,6 +11,8 @@ const REDIRECT_URI = 'https://agents.sellingdubai.ae/edit?ig_callback=1';
 const IG_GRAPH_VERSION = 'v22.0';
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('instagram-auth', req);
+  const _start = Date.now();
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -40,6 +43,7 @@ Deno.serve(async (req: Request) => {
       const csrfState = Array.from(csrfBytes).map(b => b.toString(16).padStart(2, '0')).join('');
       const scopes = 'instagram_business_basic';
       const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${IG_APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scopes}&state=${csrfState}`;
+      log({ event: 'success', status: 200, action: 'get_auth_url' });
       return new Response(JSON.stringify({ url: authUrl, state: csrfState }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -122,6 +126,7 @@ Deno.serve(async (req: Request) => {
         console.error('Agent update error');
       }
 
+      log({ event: 'success', status: 200, agent_id: agent_id, action: 'exchange_code' });
       return new Response(JSON.stringify({
         success: true,
         username: profile.username,
@@ -161,17 +166,22 @@ Deno.serve(async (req: Request) => {
         })
         .eq('id', agent_id);
 
+      log({ event: 'success', status: 200, agent_id: agent_id, action: 'disconnect' });
       return new Response(JSON.stringify({ success: !updateError }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    log({ event: 'bad_request', status: 400 });
     return new Response(JSON.stringify({ error: 'Unknown action' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     return new Response(JSON.stringify({ error: 'Authentication failed. Please try again.' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

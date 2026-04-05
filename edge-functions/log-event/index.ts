@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -31,6 +32,8 @@ function hashIP(ip: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('log-event', req);
+  const _start = Date.now();
   const CORS = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
@@ -125,9 +128,13 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Failed to log event" }), { status: 500, headers: CORS });
     }
 
+    log({ event: 'success', status: 200, agent_id: agent_id });
     return new Response(JSON.stringify({ success: true }), { headers: CORS });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("log-event error");
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: CORS });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

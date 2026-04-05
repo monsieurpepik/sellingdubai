@@ -10,6 +10,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const RATE_TYPE = "3m_eibor";
 const FALLBACK_RATE = 3.68;  // EIBOR as of March 2026 — update comment if scraping stays broken long-term
@@ -68,6 +69,8 @@ async function scrapeEibor(): Promise<number | null> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('fetch-eibor', req);
+  const _start = Date.now();
   const origin = req.headers.get("origin");
   const headers = corsHeaders(origin);
 
@@ -75,53 +78,63 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 204, headers });
   }
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
-  // ── Cache check ──────────────────────────────────────────────────────────
-  const { data: cached } = await supabase
-    .from("market_rates")
-    .select("rate_value, fetched_at, source")
-    .eq("rate_type", RATE_TYPE)
-    .single();
+    // ── Cache check ──────────────────────────────────────────────────────────
+    const { data: cached } = await supabase
+      .from("market_rates")
+      .select("rate_value, fetched_at, source")
+      .eq("rate_type", RATE_TYPE)
+      .single();
 
-  if (cached) {
-    const ageMs = Date.now() - new Date(cached.fetched_at).getTime();
-    if (ageMs < CACHE_TTL_MS) {
+    if (cached) {
+      const ageMs = Date.now() - new Date(cached.fetched_at).getTime();
+      if (ageMs < CACHE_TTL_MS) {
+        log({ event: 'success', status: 200, source: 'cache' });
+        return Response.json(
+          { rate: Number(cached.rate_value), cached: true, fetched_at: cached.fetched_at, source: cached.source },
+          { headers },
+        );
+      }
+    }
+
+    // ── Scrape ───────────────────────────────────────────────────────────────
+    const scraped = await scrapeEibor();
+
+    // If scrape failed but we have a stale value, return it — stale data beats fallback
+    if (scraped === null && cached) {
+      log({ event: 'success', status: 200, source: 'stale_cache' });
       return Response.json(
-        { rate: Number(cached.rate_value), cached: true, fetched_at: cached.fetched_at, source: cached.source },
+        { rate: Number(cached.rate_value), cached: true, fetched_at: cached.fetched_at, source: "stale_cache", stale: true },
         { headers },
       );
     }
-  }
 
-  // ── Scrape ───────────────────────────────────────────────────────────────
-  const scraped = await scrapeEibor();
+    const rateValue = scraped ?? FALLBACK_RATE;
+    const source = scraped !== null ? "scrape" : "fallback";
+    const now = new Date().toISOString();
 
-  // If scrape failed but we have a stale value, return it — stale data beats fallback
-  if (scraped === null && cached) {
+    // ── Upsert ───────────────────────────────────────────────────────────────
+    await supabase
+      .from("market_rates")
+      .upsert(
+        { rate_type: RATE_TYPE, rate_value: rateValue, fetched_at: now, source },
+        { onConflict: "rate_type" },
+      );
+
+    log({ event: 'success', status: 200, source });
     return Response.json(
-      { rate: Number(cached.rate_value), cached: true, fetched_at: cached.fetched_at, source: "stale_cache", stale: true },
+      { rate: rateValue, cached: false, fetched_at: now, source },
       { headers },
     );
+  } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
+    return Response.json({ error: 'Internal server error.' }, { status: 500, headers });
+  } finally {
+    log.flush(Date.now() - _start);
   }
-
-  const rateValue = scraped ?? FALLBACK_RATE;
-  const source = scraped !== null ? "scrape" : "fallback";
-  const now = new Date().toISOString();
-
-  // ── Upsert ───────────────────────────────────────────────────────────────
-  await supabase
-    .from("market_rates")
-    .upsert(
-      { rate_type: RATE_TYPE, rate_value: rateValue, fetched_at: now, source },
-      { onConflict: "rate_type" },
-    );
-
-  return Response.json(
-    { rate: rateValue, cached: false, fetched_at: now, source },
-    { headers },
-  );
 });

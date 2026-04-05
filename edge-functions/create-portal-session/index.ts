@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -20,6 +21,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('create-portal-session', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -97,9 +100,13 @@ Deno.serve(async (req: Request) => {
 
     const portalSession = await portalRes.json();
 
+    log({ event: 'success', status: 200, agent_id: agentId });
     return new Response(JSON.stringify({ url: portalSession.url }), { status: 200, headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("create-portal-session error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

@@ -7,6 +7,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -36,6 +37,8 @@ function escCsv(val: string | null | undefined): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('export-leads', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -118,6 +121,7 @@ Deno.serve(async (req: Request) => {
 
     const csv = [headers.join(','), ...rows].join('\n');
 
+    log({ event: 'success', status: 200, agent_id: link.agent_id });
     return new Response(csv, {
       status: 200,
       headers: {
@@ -127,9 +131,12 @@ Deno.serve(async (req: Request) => {
       }
     });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("export-leads error");
     return new Response(JSON.stringify({ error: "Internal server error." }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" }
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

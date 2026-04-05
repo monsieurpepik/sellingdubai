@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -27,6 +28,8 @@ const PRICE_MAP: Record<string, string | undefined> = {
 };
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('create-checkout', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -168,9 +171,13 @@ Deno.serve(async (req: Request) => {
 
     const session = await sessionRes.json();
 
+    log({ event: 'success', status: 200, agent_id: agentId });
     return new Response(JSON.stringify({ url: session.url }), { status: 200, headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("create-checkout error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });
