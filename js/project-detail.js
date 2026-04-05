@@ -173,7 +173,10 @@ window._loadDetailMap = function(container) {
 export async function openProjectDetail(projectSlug) {
   const sheet = document.getElementById('detail-sheet');
   const overlay = document.getElementById('detail-overlay');
-  if (!sheet || !overlay) return;
+  if (!sheet || !overlay) {
+    console.error('openProjectDetail: required DOM elements not found (#detail-sheet, #detail-overlay)');
+    return;
+  }
 
   // Show loading state
   sheet.innerHTML = `
@@ -197,8 +200,10 @@ export async function openProjectDetail(projectSlug) {
     .single();
 
   if (error || !project) {
-    sheet.innerHTML = `
-      <div style="text-align:center;padding:80px 24px;color:rgba(255,255,255,0.4);font-size:14px;">Project not found.</div>`;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    if (ctaBar) ctaBar.style.display = '';
+    if (stickyCta) stickyCta.style.display = stickyCta.dataset.prevDisplay ?? '';
     return;
   }
 

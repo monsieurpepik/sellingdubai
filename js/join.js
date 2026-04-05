@@ -153,13 +153,20 @@ function previewPhoto(input) {
   if (file.size > 10 * 1024 * 1024) { showError(2, 'Photo must be under 10MB.'); return; }
   clearError(2);
 
+  const placeholder = document.getElementById('photo-placeholder');
+  const prev = document.getElementById('photo-preview');
+  const dataInput = document.getElementById('onboard-photo-data');
+  if (!placeholder || !prev || !dataInput) return;
+
   compressImage(file, 800, 0.8).then(function(dataUrl) {
-    document.getElementById('photo-placeholder').style.display = 'none';
-    const prev = document.getElementById('photo-preview');
+    placeholder.style.display = 'none';
     prev.style.display = 'block';
     prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    document.getElementById('onboard-photo-data').value = dataUrl.split(',')[1];
+    dataInput.value = dataUrl.split(',')[1];
   }, function() {
+    placeholder.style.display = '';
+    prev.style.display = 'none';
+    prev.innerHTML = '';
     showError(2, 'Failed to process photo. Try a different image.');
   });
 }
