@@ -9,6 +9,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 // Escape HTML for email templates (defense in depth)
 function escHtml(s: string): string {
@@ -44,6 +45,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('send-magic-link', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -51,6 +54,7 @@ Deno.serve(async (req: Request) => {
     const { email, destination } = await req.json();
 
     if (!email || typeof email !== "string") {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: "Email is required." }), {
         status: 400,
         headers: cors,
@@ -92,6 +96,7 @@ Deno.serve(async (req: Request) => {
 
     if ((agentRecentCount || 0) >= 3) {
       // Silent success — don't reveal rate limit
+      log({ event: 'rate_limit_exceeded', status: 429 });
       return new Response(
         JSON.stringify({ success: true, message: "If this email is registered, you'll receive a magic link." }),
         { status: 200, headers: cors }
@@ -125,6 +130,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (insertErr) {
+      log({ event: 'error', status: 500, error: String(insertErr) });
       console.error("Failed to insert magic link");
       return new Response(
         JSON.stringify({ error: "Failed to create magic link." }),
@@ -207,6 +213,7 @@ Deno.serve(async (req: Request) => {
       }
 
       if (!emailOk) {
+        log({ event: 'error', status: 503, error: 'email_send_failed' });
         return new Response(
           JSON.stringify({ error: "We couldn't send your login email right now. Please try again in a moment." }),
           { status: 503, headers: cors }
@@ -214,15 +221,19 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    log({ event: 'success', status: 200 });
     return new Response(
       JSON.stringify({ success: true, message: "If this email is registered, you'll receive a magic link." }),
       { status: 200, headers: cors }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("send-magic-link error:", e instanceof Error ? e.stack : String(e));
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

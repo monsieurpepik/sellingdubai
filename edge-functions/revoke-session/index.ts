@@ -12,8 +12,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from "../_shared/logger.ts";
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('revoke-session', req);
+  const _start = Date.now();
   const cors = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -25,6 +28,7 @@ Deno.serve(async (req: Request) => {
     const { token } = await req.json();
 
     if (!token || typeof token !== "string") {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: "Token is required." }), { status: 400, headers: cors });
     }
 
@@ -41,9 +45,13 @@ Deno.serve(async (req: Request) => {
       .eq("token", token)
       .is("revoked_at", null);
 
+    log({ event: 'success', status: 200 });
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("revoke-session error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

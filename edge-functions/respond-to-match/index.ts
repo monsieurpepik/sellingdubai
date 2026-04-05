@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { escHtml, getCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from "../_shared/logger.ts";
 
 /**
  * respond-to-match
@@ -38,6 +39,8 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('respond-to-match', req);
+  const _start = Date.now();
   const origin = req.headers.get("origin");
   const cors = getCorsHeaders(origin);
 
@@ -54,6 +57,7 @@ Deno.serve(async (req: Request) => {
     // Auth
     const authHeader = req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -68,12 +72,14 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (!link || new Date(link.expires_at) < new Date()) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
         status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
     if (!link.used_at) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), {
         status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -85,6 +91,7 @@ Deno.serve(async (req: Request) => {
     const action = body.action; // 'interested' or 'declined'
 
     if (!matchId || !action || !['interested', 'declined'].includes(action)) {
+      log({ event: 'bad_request', status: 400, agent_id: agentId });
       return new Response(JSON.stringify({ error: "match_id and action ('interested' or 'declined') required" }), {
         status: 400, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -98,6 +105,7 @@ Deno.serve(async (req: Request) => {
       .eq("listing_agent_id", agentId)
       .gte("listing_agent_responded_at", oneHourAgo);
     if (recentResponses !== null && recentResponses >= 60) {
+      log({ event: 'rate_limit_exceeded', status: 429, agent_id: agentId });
       return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
         status: 429, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -121,6 +129,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (!match) {
+      log({ event: 'bad_request', status: 404, agent_id: agentId });
       return new Response(JSON.stringify({ error: "Match not found" }), {
         status: 404, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -128,12 +137,14 @@ Deno.serve(async (req: Request) => {
 
     // Only listing agent can respond
     if (match.listing_agent_id !== agentId) {
+      log({ event: 'auth_failed', status: 403, agent_id: agentId });
       return new Response(JSON.stringify({ error: "Only the listing agent can respond to this match" }), {
         status: 403, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
     if (match.status !== "notified") {
+      log({ event: 'bad_request', status: 400, agent_id: agentId });
       return new Response(JSON.stringify({ error: `Already responded to this match (status: ${match.status})` }), {
         status: 400, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -151,6 +162,7 @@ Deno.serve(async (req: Request) => {
         listing_agent_responded_at: now,
       }).eq("id", matchId);
 
+      log({ event: 'success', status: 200, agent_id: agentId, action: 'declined' });
       return new Response(JSON.stringify({ ok: true, status: "declined" }), {
         status: 200, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -255,6 +267,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Match connected: ${listingAgent?.slug} <-> ${buyingAgent?.slug} on property ${property?.title}`);
 
+    log({ event: 'success', status: 200, agent_id: agentId, action: 'interested' });
     return new Response(JSON.stringify({
       ok: true,
       status: "connected",
@@ -270,9 +283,12 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     console.error("respond-to-match error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

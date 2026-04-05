@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 // Stripe webhook — no CORS headers needed (Stripe calls this directly, not from browser)
 // Required env vars:
@@ -87,6 +88,9 @@ function resolvePlan(
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('stripe-webhook', req);
+  const _start = Date.now();
+
   if (req.method !== "POST") {
     return new Response("Method not allowed.", { status: 405 });
   }
@@ -95,12 +99,16 @@ Deno.serve(async (req: Request) => {
   const sigHeader = req.headers.get("stripe-signature") ?? "";
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
   if (!webhookSecret) {
+    log({ event: 'error', status: 500, error: 'STRIPE_WEBHOOK_SECRET not configured' });
+    log.flush(Date.now() - _start);
     console.error("STRIPE_WEBHOOK_SECRET is not configured — rejecting all webhook requests.");
     return new Response("Service misconfigured.", { status: 500 });
   }
 
   const valid = await verifyStripeSignature(rawBody, sigHeader, webhookSecret);
   if (!valid) {
+    log({ event: 'signature_failure', status: 401 });
+    log.flush(Date.now() - _start);
     console.error("Stripe webhook signature verification failed.");
     return new Response("Unauthorized.", { status: 401 });
   }
@@ -109,6 +117,8 @@ Deno.serve(async (req: Request) => {
   try {
     event = JSON.parse(rawBody);
   } catch {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response("Invalid JSON.", { status: 400 });
   }
 
@@ -288,6 +298,8 @@ Deno.serve(async (req: Request) => {
         console.log(`Unhandled Stripe event: ${eventType}`);
     }
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
+    log.flush(Date.now() - _start);
     console.error(
       "Error processing Stripe event:",
       e instanceof Error ? e.stack : String(e),
@@ -301,6 +313,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  log({ event: 'success', status: 200 });
+  log.flush(Date.now() - _start);
   return new Response(JSON.stringify({ received: true }), {
     status: 200,
     headers: { "Content-Type": "application/json" },

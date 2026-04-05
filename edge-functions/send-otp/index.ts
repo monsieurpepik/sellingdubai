@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -30,6 +31,8 @@ const TEST_EMAIL = "boban@sellingdubai.com";
 const TEST_OTP   = "123456";
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('send-otp', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
@@ -40,6 +43,7 @@ Deno.serve(async (req: Request) => {
 
     // Proper email validation
     if (!email || typeof email !== 'string' || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      log({ event: 'bad_request', status: 400 });
       return json({ error: "Valid email is required" }, 400, cors);
     }
 
@@ -72,6 +76,7 @@ Deno.serve(async (req: Request) => {
       .gte("created_at", oneHourAgo);
 
     if (count && count >= 5) {
+      log({ event: 'rate_limit_exceeded', status: 429 });
       return json({ error: "Too many attempts. Please wait an hour and try again." }, 429, cors);
     }
 
@@ -84,6 +89,7 @@ Deno.serve(async (req: Request) => {
       .gte("created_at", oneHourAgo);
 
     if (ipCount && ipCount >= 15) {
+      log({ event: 'rate_limit_exceeded', status: 429 });
       return json({ error: "Too many attempts from this location. Please try again later." }, 429, cors);
     }
 
@@ -100,6 +106,7 @@ Deno.serve(async (req: Request) => {
       });
 
     if (insertError) {
+      log({ event: 'error', status: 500, error: String(insertError) });
       console.error("OTP insert error");
       return json({ error: "Failed to generate verification code" }, 500, cors);
     }
@@ -162,14 +169,19 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!emailSent && RESEND_KEY) {
+      log({ event: 'error', status: 502, error: 'email_send_failed' });
       return json({ error: "Failed to send verification email. Please try again." }, 502, cors);
     }
+    log({ event: 'success', status: 200 });
     return json({
       success: true,
       message: "Verification code sent to your email",
     }, 200, cors);
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     console.error("send-otp error");
     return json({ error: "Internal server error" }, 500, getCorsHeaders(req));
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 async function sha256(message: string): Promise<string> {
   const msgBuffer = new TextEncoder().encode(message);
@@ -27,6 +28,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('submit-mortgage', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: cors });
@@ -41,6 +44,7 @@ Deno.serve(async (req: Request) => {
     // Validate required fields
     const { buyer_name, buyer_phone, buyer_email } = body;
     if (!buyer_name || (!buyer_phone && !buyer_email)) {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: 'Name and at least phone or email required' }), { status: 400, headers: cors });
     }
 
@@ -49,9 +53,11 @@ Deno.serve(async (req: Request) => {
     const validResidency = ['uae_national', 'uae_resident', 'non_resident'];
 
     if (body.employment_type && !validEmployment.includes(body.employment_type)) {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: 'Invalid employment type' }), { status: 400, headers: cors });
     }
     if (body.residency_status && !validResidency.includes(body.residency_status)) {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: 'Invalid residency status' }), { status: 400, headers: cors });
     }
 
@@ -75,6 +81,7 @@ Deno.serve(async (req: Request) => {
       .eq("ip_hash", ipHash)
       .gt("created_at", oneHourAgo);
     if (recentApps !== null && recentApps >= 5) {
+      log({ event: 'rate_limit_exceeded', status: 429 });
       return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), { status: 429, headers: cors });
     }
 
@@ -115,6 +122,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (error) {
+      log({ event: 'error', status: 500, error: String(error) });
       console.error('Insert error');
       return new Response(JSON.stringify({ error: 'Failed to submit application' }), { status: 500, headers: cors });
     }
@@ -131,12 +139,16 @@ Deno.serve(async (req: Request) => {
       } catch (notifyErr) { console.error('[submit-mortgage] Could not dispatch notification:', notifyErr); }
     }
 
+    log({ event: 'success', status: 201, agent_id: body.agent_id || undefined });
     return new Response(JSON.stringify({ id: data.id, edit_token: editToken }), {
       status: 201,
       headers: cors,
     });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error('Unexpected error');
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });
