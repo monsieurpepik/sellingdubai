@@ -1,3 +1,4 @@
+// @ts-check
 // ==========================================
 // CSP-SAFE EVENT DELEGATION
 // Replaces inline onclick/onchange/onerror/onload handlers

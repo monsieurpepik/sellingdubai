@@ -182,6 +182,29 @@ else
 fi
 echo ""
 
+# ── 10. @ts-check on Category B JS files ────────────────────────────────────
+echo -e "${BOLD}10. @ts-check on Category B JS files${NC}"
+echo "--- Check 10: @ts-check on Category B JS files ---"
+TSCHECK_FAIL=0
+for js_file in js/*.js; do
+  base="${js_file%.js}"
+  if [ ! -f "${base}.ts" ]; then
+    first_line=$(head -1 "$js_file")
+    if [ "$first_line" != "// @ts-check" ]; then
+      echo "FAIL: $js_file is missing '// @ts-check' on line 1"
+      TSCHECK_FAIL=1
+    fi
+  fi
+done
+if [ "$TSCHECK_FAIL" -eq 0 ]; then
+  echo "PASS: all Category B JS files have @ts-check"
+  pass "@ts-check present on all Category B JS files"
+else
+  fail "One or more Category B JS files are missing '// @ts-check' on line 1"
+fi
+[ "$TSCHECK_FAIL" -ne 0 ] && ERRORS=$((ERRORS+1))
+echo ""
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo "══════════════════════════════════════"
 if [ "$ERRORS" -gt 0 ]; then

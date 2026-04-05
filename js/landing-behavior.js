@@ -1,3 +1,4 @@
+// @ts-check
 // FAQ toggle — handles buttons with data-action="toggleFaq"
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('[data-action="toggleFaq"]');

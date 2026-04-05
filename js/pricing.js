@@ -1,3 +1,4 @@
+// @ts-check
 // Billing toggle
 var toggle = document.getElementById('billing-toggle');
 var monthlyEls = document.querySelectorAll('.price-monthly');

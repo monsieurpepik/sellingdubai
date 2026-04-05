@@ -1,3 +1,4 @@
+// @ts-check
 (function() {
   var chips = [
     document.getElementById('chip-dld'),

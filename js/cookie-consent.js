@@ -1,3 +1,4 @@
+// @ts-check
 (function(){
   var CONSENT_KEY = 'sd_cookie_consent';
   var stored = null;
