@@ -72,6 +72,76 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 let _mod: Promise<unknown> | null = null;
 ```
 
+---
+
+## Observability
+
+### Sentry
+
+- **SDK:** Loaded from CDN (`browser.sentry-cdn.com`) in `js/sentry-init.ts`
+- **DSN:** `https://689d6d66d9267e827b1d4129c4fe4ee8@o4511110584926208.ingest.us.sentry.io/4511110595215360`
+- **Releases:** Tagged with git SHA on every production deploy via `sentry-cli` in CI
+- **Source maps:** Uploaded to Sentry, then deleted from `dist/` before Netlify deploy
+- **Release config:** `dist/release-config.js` written at build time; sets `window.SENTRY_RELEASE` before `sentry-init.js` loads
+- **Error helper:** `js/errors.ts` → `reportError(context, error, extras?)` used in esbuild-processed modules; exposed as `window.reportError` for plain IIFE scripts (dashboard.js, edit.js, join.js)
+
+### Sentry Alert Rules
+
+| Alert | Trigger | Channel |
+|-------|---------|---------|
+| capture-lead-v4 error rate | > 1% in 5 min window | Slack `#engineering` |
+| stripe-webhook signature failure | Any occurrence | Slack `#engineering` + Email |
+| send-magic-link rate limit | > 10/hour | Slack `#engineering` |
+| JS error rate spike | > 3× 7-day baseline | Slack `#engineering` |
+
+Configure in: **Sentry → [project] → Alerts**
+
+Filter tags used by alert rules:
+- `tags[context]` — set by `reportError(context, ...)` in `js/errors.ts`
+- `tags[event]` — set by structured edge function logs (`signature_failure`, `rate_limit_exceeded`)
+
+### Required CI Secrets
+
+Add these in **GitHub → Repository → Settings → Secrets → Actions**:
+
+| Secret | Where to get it |
+|--------|----------------|
+| `SENTRY_AUTH_TOKEN` | Sentry → Settings → Auth Tokens → Create Internal Token (scope: `project:releases`) |
+| `SENTRY_ORG` | Sentry → Settings → General → Organization Slug |
+| `SENTRY_PROJECT` | Sentry → Settings → Projects → [your project] → Slug |
+
+### Edge Function Structured Logging
+
+Every HTTP-handler edge function (39 of 41) emits JSON-structured logs via `_shared/logger.ts`.
+
+Excluded from logging (Supabase scheduler invocation — `request_id` is not meaningful):
+- `sync-rem-offplan`
+- `lead-followup-nagger`
+
+Log format:
+```json
+{
+  "function": "capture-lead-v4",
+  "request_id": "a1b2c3d4-e5f6-...",
+  "event": "lead_captured",
+  "agent_id": "uuid-here",
+  "status": 200,
+  "duration_ms": 342,
+  "timestamp": "2026-04-03T12:00:00.000Z"
+}
+```
+
+Logs are visible in **Supabase Dashboard → Edge Functions → Logs**.
+Filter by `event` or `request_id` for incident tracing.
+
+Special events:
+- `signature_failure` — stripe-webhook: Stripe signature verification failed (potential replay attack)
+- `rate_limit_exceeded` — send-magic-link, send-otp, respond-to-match, submit-mortgage: rate limit hit
+- `auth_failed` — auth token invalid or expired
+- `bad_request` — malformed or missing request body fields
+
+---
+
 ### Rotating the Supabase anon key
 
 The public anon key appears in two places — update both simultaneously:
