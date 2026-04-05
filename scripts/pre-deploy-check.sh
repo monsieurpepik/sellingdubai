@@ -202,7 +202,6 @@ if [ "$TSCHECK_FAIL" -eq 0 ]; then
 else
   fail "One or more Category B JS files are missing '// @ts-check' on line 1"
 fi
-[ "$TSCHECK_FAIL" -ne 0 ] && ERRORS=$((ERRORS+1))
 echo ""
 
 # ── Summary ───────────────────────────────────────────────────────────────────
