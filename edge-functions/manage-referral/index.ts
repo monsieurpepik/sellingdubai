@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { escHtml, getCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from '../_shared/logger.ts';
 
 /**
  * manage-referral
@@ -45,6 +46,8 @@ const VALID_TRANSITIONS: Record<string, { from: string[]; by: "receiver" | "refe
 };
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('manage-referral', req);
+  const _start = Date.now();
   const origin = req.headers.get("origin");
   const cors = getCorsHeaders(origin);
 
@@ -217,6 +220,7 @@ Deno.serve(async (req: Request) => {
 
     if (updateErr) {
       console.error("Update error");
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to update referral' });
       return new Response(JSON.stringify({ error: "Failed to update referral" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -271,6 +275,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Referral ${referralId}: ${action} by ${isReferrer ? "referrer" : "receiver"}`);
 
+    log({ event: 'success', agent_id: agentId, status: 200 });
     return new Response(JSON.stringify({
       ok: true,
       status: update.status,
@@ -284,9 +289,12 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     console.error("manage-referral error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

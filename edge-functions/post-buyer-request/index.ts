@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 /**
  * post-buyer-request (v2)
@@ -110,6 +111,8 @@ function scoreMatch(
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('post-buyer-request', req);
+  const _start = Date.now();
   const origin = req.headers.get("origin");
   const cors = getCorsHeaders(origin);
 
@@ -230,6 +233,7 @@ Deno.serve(async (req: Request) => {
 
     if (insertErr || !request) {
       console.error("Insert error");
+      log({ event: 'error', agent_id: agent.id, status: 500, error: 'Failed to create request' });
       return new Response(JSON.stringify({ error: "Failed to create request" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -347,6 +351,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Buyer request ${request.id}: ${matches.length} matches, ${listingAgentIds.length} agents notified`);
 
+    log({ event: 'success', agent_id: agent.id, status: 200 });
     return new Response(JSON.stringify({
       ok: true,
       request_id: request.id,
@@ -363,9 +368,12 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     console.error("post-buyer-request error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -28,6 +29,8 @@ function slugify(s: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('manage-agency', req);
+  const _start = Date.now();
   const cors = corsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "Method not allowed." }), { status: 405, headers: cors });
@@ -61,6 +64,7 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
     if (!agency) {
       const { data: agentRow } = await supabase.from("agents").select("agency_id").eq("id", agentId).single();
+      log({ event: 'success', agent_id: agentId, status: 200 });
       return new Response(JSON.stringify({ agency: null, is_owner: false, member_of: agentRow?.agency_id ?? null }), { headers: cors });
     }
     const { data: members } = await supabase
@@ -69,6 +73,7 @@ Deno.serve(async (req: Request) => {
       .eq("agency_id", agency.id)
       .order("name")
       .limit(200);
+    log({ event: 'success', agent_id: agentId, status: 200 });
     return new Response(JSON.stringify({ agency, members: members ?? [], is_owner: true }), { headers: cors });
   }
 
@@ -110,9 +115,13 @@ Deno.serve(async (req: Request) => {
       insertErr = err;
       break;
     }
-    if (insertErr || !agency) return new Response(JSON.stringify({ error: "Failed to create agency." }), { status: 500, headers: cors });
+    if (insertErr || !agency) {
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to create agency' });
+      return new Response(JSON.stringify({ error: "Failed to create agency." }), { status: 500, headers: cors });
+    }
     // Add owner as member
     await supabase.from("agents").update({ agency_id: agency.id }).eq("id", agentId);
+    log({ event: 'success', agent_id: agentId, status: 200 });
     return new Response(JSON.stringify({ agency, is_owner: true }), { headers: cors });
   }
 
@@ -129,7 +138,11 @@ Deno.serve(async (req: Request) => {
     if ("description" in body) updates.description = typeof body.description === "string" ? body.description || null : null;
     if (Object.keys(updates).length === 0) return new Response(JSON.stringify({ error: "No fields to update." }), { status: 400, headers: cors });
     const { data: updated, error: upErr } = await supabase.from("agencies").update(updates).eq("id", agencyId).eq("owner_agent_id", agentId).select("id, slug, name, logo_url, website, description, created_at").single();
-    if (upErr) return new Response(JSON.stringify({ error: "Update failed." }), { status: 500, headers: cors });
+    if (upErr) {
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Update failed' });
+      return new Response(JSON.stringify({ error: "Update failed." }), { status: 500, headers: cors });
+    }
+    log({ event: 'success', agent_id: agentId, status: 200 });
     return new Response(JSON.stringify({ agency: updated }), { headers: cors });
   }
 
@@ -146,7 +159,10 @@ Deno.serve(async (req: Request) => {
     if (target.id === agentId) return new Response(JSON.stringify({ error: "You are already the agency owner." }), { status: 409, headers: cors });
     if (target.agency_id) return new Response(JSON.stringify({ error: "This agent already belongs to an agency." }), { status: 409, headers: cors });
     const { error: addErr } = await supabase.from("agents").update({ agency_id: agencyId }).eq("id", target.id);
-    if (addErr) return new Response(JSON.stringify({ error: "Failed to add member." }), { status: 500, headers: cors });
+    if (addErr) {
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to add member' });
+      return new Response(JSON.stringify({ error: "Failed to add member." }), { status: 500, headers: cors });
+    }
     // Notify new member via email (fire-and-forget)
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
     const RESEND_FROM = Deno.env.get("RESEND_FROM") || "SellingDubai <leads@sellingdubai.ae>";
@@ -162,6 +178,7 @@ Deno.serve(async (req: Request) => {
         }),
       }).catch(() => {});
     }
+    log({ event: 'success', agent_id: agentId, status: 200 });
     return new Response(JSON.stringify({ success: true, member: { id: target.id, name: target.name, email: target.email } }), { headers: cors });
   }
 
@@ -174,14 +191,25 @@ Deno.serve(async (req: Request) => {
     if (!ownerAgency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
     if (memberId === agentId) return new Response(JSON.stringify({ error: "Cannot remove the agency owner." }), { status: 409, headers: cors });
     const { data: removed, error: removeErr } = await supabase.from("agents").update({ agency_id: null }).eq("id", memberId).eq("agency_id", agencyId).select("id");
-    if (removeErr) return new Response(JSON.stringify({ error: "Failed to remove member." }), { status: 500, headers: cors });
-    if (!removed || removed.length === 0) return new Response(JSON.stringify({ error: "Member not found in this agency." }), { status: 404, headers: cors });
+    if (removeErr) {
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to remove member' });
+      return new Response(JSON.stringify({ error: "Failed to remove member." }), { status: 500, headers: cors });
+    }
+    if (!removed || removed.length === 0) {
+      log({ event: 'bad_request', agent_id: agentId, status: 404 });
+      return new Response(JSON.stringify({ error: "Member not found in this agency." }), { status: 404, headers: cors });
+    }
+    log({ event: 'success', agent_id: agentId, status: 200 });
     return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
+  log({ event: 'bad_request', agent_id: agentId, status: 400 });
   return new Response(JSON.stringify({ error: "Unknown action." }), { status: 400, headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("manage-agency error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: corsHeaders(req) });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

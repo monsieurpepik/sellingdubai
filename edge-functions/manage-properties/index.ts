@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -100,6 +101,8 @@ async function deleteOrphanedImages(
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('manage-properties', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -162,9 +165,11 @@ Deno.serve(async (req: Request) => {
 
       if (propsErr) {
         console.error("list error");
+        log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to fetch properties' });
         return new Response(JSON.stringify({ error: "Failed to fetch properties." }), { status: 500, headers: cors });
       }
 
+      log({ event: 'success', agent_id: agentId, status: 200 });
       return new Response(
         JSON.stringify({
           properties: properties ?? [],
@@ -253,6 +258,7 @@ Deno.serve(async (req: Request) => {
 
       if (insertErr) {
         console.error("add error");
+        log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to add property' });
         return new Response(JSON.stringify({ error: "Failed to add property." }), { status: 500, headers: cors });
       }
 
@@ -264,6 +270,7 @@ Deno.serve(async (req: Request) => {
           .eq("agent_id", agentId);
         if ((postCount ?? 0) > limit) {
           await supabase.from("properties").delete().eq("id", newProp!.id).eq("agent_id", agentId);
+          log({ event: 'error', agent_id: agentId, status: 403, error: 'Listing limit reached' });
           return new Response(
             JSON.stringify({ error: `Listing limit reached (${limit}). Upgrade to add more.`, limit_reached: true }),
             { status: 403, headers: cors },
@@ -271,6 +278,7 @@ Deno.serve(async (req: Request) => {
         }
       }
 
+      log({ event: 'success', agent_id: agentId, status: 200 });
       return new Response(JSON.stringify({ property: newProp }), { status: 200, headers: cors });
     }
 
@@ -362,9 +370,11 @@ Deno.serve(async (req: Request) => {
 
       if (updateErr) {
         console.error("update error");
+        log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to update property' });
         return new Response(JSON.stringify({ error: "Failed to update property." }), { status: 500, headers: cors });
       }
 
+      log({ event: 'success', agent_id: agentId, status: 200 });
       return new Response(JSON.stringify({ property: updated }), { status: 200, headers: cors });
     }
 
@@ -391,9 +401,11 @@ Deno.serve(async (req: Request) => {
 
       if (deleteErr) {
         console.error("delete error");
+        log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to delete property' });
         return new Response(JSON.stringify({ error: "Failed to delete property." }), { status: 500, headers: cors });
       }
       if (!deleted || deleted.length === 0) {
+        log({ event: 'bad_request', agent_id: agentId, status: 404 });
         return new Response(JSON.stringify({ error: "Property not found." }), { status: 404, headers: cors });
       }
 
@@ -405,6 +417,7 @@ Deno.serve(async (req: Request) => {
         if (toRemove.length > 0) await deleteOrphanedImages(supabase, toRemove);
       }
 
+      log({ event: 'success', agent_id: agentId, status: 200 });
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: cors });
     }
 
@@ -443,15 +456,21 @@ Deno.serve(async (req: Request) => {
       const reorderFailed = reorderResults.filter((r) => r.error);
       if (reorderFailed.length > 0) {
         console.error("Reorder partial failure");
+        log({ event: 'error', agent_id: agentId, status: 500, error: 'Reorder partially failed' });
         return new Response(JSON.stringify({ error: "Reorder partially failed." }), { status: 500, headers: cors });
       }
 
+      log({ event: 'success', agent_id: agentId, status: 200 });
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: cors });
     }
 
+    log({ event: 'bad_request', agent_id: agentId, status: 400 });
     return new Response(JSON.stringify({ error: "Unknown action." }), { status: 400, headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("manage-properties error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

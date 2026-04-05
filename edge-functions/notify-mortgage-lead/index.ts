@@ -7,6 +7,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const PLATFORM_OPS_EMAIL = Deno.env.get('PLATFORM_OPS_EMAIL');
 if (!PLATFORM_OPS_EMAIL) {
@@ -187,6 +188,8 @@ function buildOpsEmailHtml(
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('notify-mortgage-lead', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
 
@@ -207,6 +210,7 @@ Deno.serve(async (req: Request) => {
     const { application_id } = body;
 
     if (!application_id) {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: 'application_id required' }), { status: 400, headers: cors });
     }
 
@@ -341,9 +345,13 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    log({ event: 'success', agent_id: app?.agent_id, status: 200 });
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: cors });
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error('notify-mortgage-lead error');
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

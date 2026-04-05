@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -13,6 +14,8 @@ function escHtml(s: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('prerender', req);
+  const _start = Date.now();
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -20,46 +23,56 @@ Deno.serve(async (req: Request) => {
   };
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
-  const url = new URL(req.url);
-  const slug = url.searchParams.get('slug');
-  if (!slug) {
-    return new Response('Missing slug parameter', { status: 400, headers: corsHeaders });
-  }
-
-  // Fetch agent
-  const { data: agent, error: agentErr } = await supabase
-    .from('agents')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single();
-
-  if (agentErr || !agent) {
-    return new Response(renderNotFound(slug), {
-      status: 404,
-      headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' }
-    });
-  }
-
-  // Fetch properties
-  const { data: properties } = await supabase
-    .from('properties')
-    .select('id,title,image_url,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status')
-    .eq('agent_id', agent.id)
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-    .limit(50);
-
-  const html = renderAgentPage(agent, properties || []);
-
-  return new Response(html, {
-    status: 200,
-    headers: {
-      ...corsHeaders,
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=7200',
+  try {
+    const url = new URL(req.url);
+    const slug = url.searchParams.get('slug');
+    if (!slug) {
+      log({ event: 'bad_request', status: 400 });
+      return new Response('Missing slug parameter', { status: 400, headers: corsHeaders });
     }
-  });
+
+    // Fetch agent
+    const { data: agent, error: agentErr } = await supabase
+      .from('agents')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+
+    if (agentErr || !agent) {
+      log({ event: 'bad_request', status: 404 });
+      return new Response(renderNotFound(slug), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' }
+      });
+    }
+
+    // Fetch properties
+    const { data: properties } = await supabase
+      .from('properties')
+      .select('id,title,image_url,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status')
+      .eq('agent_id', agent.id)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .limit(50);
+
+    const html = renderAgentPage(agent, properties || []);
+
+    log({ event: 'success', agent_id: agent.id, status: 200 });
+    return new Response(html, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600, s-maxage=7200',
+      }
+    });
+  } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
+    return new Response('Internal server error', { status: 500, headers: corsHeaders });
+  } finally {
+    log.flush(Date.now() - _start);
+  }
 });
 
 function renderAgentPage(agent: any, properties: any[]): string {
