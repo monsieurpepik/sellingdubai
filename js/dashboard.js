@@ -1,17 +1,25 @@
+// @ts-check
 (function() {
   // Credentials loaded from js/sd-config.js — update that file when rotating keys
-  const SUPABASE_URL = window.SD_CONFIG.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = window.SD_CONFIG.SUPABASE_ANON_KEY;
+  /** @type {{ SUPABASE_URL: string; SUPABASE_ANON_KEY: string }} */
+  const cfg = window.SD_CONFIG;
+  const SUPABASE_URL = cfg.SUPABASE_URL;
+  const SUPABASE_ANON_KEY = cfg.SUPABASE_ANON_KEY;
   const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
   const VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
   const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
   const PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
 
+  /** @type {string | null} */
   let currentAgent = null;
+  /** @type {string | null} */
   let authToken = null;
+  /** @type {unknown[]} */
   let propertiesCache = [];
   let propLimitReached = false;
+  /** @type {string | null} */
   let _pendingDeleteId = null;
+  /** @type {string[]} */
   let propPhotos = [];
 
   // ── Init ──

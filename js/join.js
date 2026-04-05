@@ -1,3 +1,4 @@
+// @ts-check
 const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
 const VERIFY_URL = `${SUPABASE_URL}/functions/v1/verify-broker`;
 const CREATE_URL = `${SUPABASE_URL}/functions/v1/create-agent`;

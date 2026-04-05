@@ -1,3 +1,4 @@
+// @ts-check
 const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
 const MANAGE_URL = SUPABASE_URL + '/functions/v1/manage-agency';
 const STATS_URL = SUPABASE_URL + '/functions/v1/agency-stats';
