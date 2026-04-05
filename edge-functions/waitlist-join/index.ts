@@ -2,6 +2,7 @@
 // Accepts waitlist signups: inserts into waitlist table, sends Resend confirmation email.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -24,9 +25,13 @@ function corsHeaders(req: Request): Record<string, string> {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('waitlist-join', req);
+  const _start = Date.now();
   const cors = corsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") {
+    log({ event: 'bad_request', status: 405 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Method not allowed." }), { status: 405, headers: cors });
   }
 
@@ -34,6 +39,8 @@ Deno.serve(async (req: Request) => {
   try {
     body = await req.json();
   } catch {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Invalid JSON." }), { status: 400, headers: cors });
   }
 
@@ -42,9 +49,13 @@ Deno.serve(async (req: Request) => {
   const whatsapp = typeof body.whatsapp === "string" ? body.whatsapp.trim() || null : null;
 
   if (name.length < 2) {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Name must be at least 2 characters." }), { status: 400, headers: cors });
   }
   if (!EMAIL_RE.test(email)) {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Invalid email address." }), { status: 400, headers: cors });
   }
 
@@ -61,6 +72,8 @@ Deno.serve(async (req: Request) => {
     if (insertErr.code === "23505") {
       duplicate = true;
     } else {
+      log({ event: 'error', status: 500, error: String(insertErr) });
+      log.flush(Date.now() - _start);
       return new Response(
         JSON.stringify({ error: "Failed to join waitlist. Please try again." }),
         { status: 500, headers: cors },
@@ -92,6 +105,8 @@ Deno.serve(async (req: Request) => {
     }).catch(() => {});
   }
 
+  log({ event: 'success', status: 200 });
+  log.flush(Date.now() - _start);
   return new Response(
     JSON.stringify({ success: true, duplicate, count: count ?? null }),
     { headers: cors },

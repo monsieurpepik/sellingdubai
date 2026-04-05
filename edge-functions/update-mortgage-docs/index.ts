@@ -5,6 +5,7 @@
 // so all writes must flow through this function using the service role.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -28,9 +29,13 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('update-mortgage-docs', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") {
+    log({ event: 'bad_request', status: 405 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: cors });
   }
 
@@ -38,22 +43,30 @@ Deno.serve(async (req: Request) => {
   try {
     body = await req.json();
   } catch {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: cors });
   }
 
   const { id, edit_token, doc_type, path } = body;
 
   if (!id || !edit_token || !doc_type || !path) {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "id, edit_token, doc_type and path are required" }), { status: 400, headers: cors });
   }
 
   // Validate doc_type is a known column to prevent arbitrary column writes
   if (!ALLOWED_DOC_TYPES.includes(doc_type)) {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Invalid doc_type" }), { status: 400, headers: cors });
   }
 
   // Validate path looks like a storage path (no traversal, no URLs)
   if (!/^[a-zA-Z0-9_\-./]+$/.test(path) || path.includes("..") || path.startsWith("/")) {
+    log({ event: 'bad_request', status: 400 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Invalid path" }), { status: 400, headers: cors });
   }
 
@@ -70,6 +83,8 @@ Deno.serve(async (req: Request) => {
     .single();
 
   if (lookupErr || !app) {
+    log({ event: 'error', status: 404 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Application not found" }), { status: 404, headers: cors });
   }
 
@@ -80,6 +95,8 @@ Deno.serve(async (req: Request) => {
   const len = Math.min(tokenA.length, tokenB.length);
   for (let i = 0; i < len; i++) mismatch |= tokenA[i] ^ tokenB[i];
   if (mismatch !== 0) {
+    log({ event: 'auth_failed', status: 401 });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: cors });
   }
 
@@ -90,8 +107,12 @@ Deno.serve(async (req: Request) => {
 
   if (updateErr) {
     console.error("Update error");
+    log({ event: 'error', status: 500, error: String(updateErr) });
+    log.flush(Date.now() - _start);
     return new Response(JSON.stringify({ error: "Update failed" }), { status: 500, headers: cors });
   }
 
+  log({ event: 'success', status: 200 });
+  log.flush(Date.now() - _start);
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers: cors });
 });

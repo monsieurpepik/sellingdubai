@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -24,6 +25,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 const TEST_BRN = 0;
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('verify-broker', req);
+  const _start = Date.now();
   const corsHeaders = getCorsHeaders(req);
 
   // Handle CORS preflight
@@ -32,6 +35,8 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method !== "POST") {
+    log({ event: 'bad_request', status: 405 });
+    log.flush(Date.now() - _start);
     return new Response(
       JSON.stringify({ error: "POST only" }),
       { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -68,6 +73,7 @@ Deno.serve(async (req: Request) => {
     // ─────────────────────────────────────────────────────────────────────────
 
     if (!broker_number || typeof broker_number !== "number") {
+      log({ event: 'bad_request', status: 400 });
       return new Response(
         JSON.stringify({ error: "broker_number (integer) required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -85,6 +91,8 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (error || !broker) {
+      log({ event: 'error', status: 404 });
+      log.flush(Date.now() - _start);
       return new Response(
         JSON.stringify({
           verified: false,
@@ -98,6 +106,8 @@ Deno.serve(async (req: Request) => {
     const today = new Date().toISOString().split("T")[0];
     const licenseActive = broker.license_end_date >= today;
 
+    log({ event: 'success', status: 200 });
+    log.flush(Date.now() - _start);
     return new Response(
       JSON.stringify({
         verified: true,
@@ -114,6 +124,8 @@ Deno.serve(async (req: Request) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
+    log.flush(Date.now() - _start);
     return new Response(
       JSON.stringify({ error: "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

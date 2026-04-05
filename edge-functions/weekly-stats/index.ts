@@ -12,8 +12,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { escHtml, getCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from '../_shared/logger.ts';
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('weekly-stats', req);
+  const _start = Date.now();
   const CORS = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
 
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -27,6 +30,7 @@ Deno.serve(async (req: Request) => {
     const cronHeader = req.headers.get("x-cron-secret") || "";
 
     if (!cronSecret) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: "CRON_SECRET not configured." }), { status: 401, headers: CORS });
     }
 
@@ -36,6 +40,7 @@ Deno.serve(async (req: Request) => {
       cronHeader === cronSecret;
 
     if (!isAuthorized) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: "Unauthorized." }), { status: 401, headers: CORS });
     }
 
@@ -46,6 +51,7 @@ Deno.serve(async (req: Request) => {
 
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
     if (!RESEND_KEY) {
+      log({ event: 'error', status: 500, error: 'No RESEND_API_KEY configured.' });
       return new Response(JSON.stringify({ error: "No RESEND_API_KEY configured." }), { status: 500, headers: CORS });
     }
 
@@ -61,6 +67,7 @@ Deno.serve(async (req: Request) => {
       .limit(500);
 
     if (agentsErr || !agents) {
+      log({ event: 'error', status: 500, error: 'Failed to fetch agents.' });
       return new Response(JSON.stringify({ error: "Failed to fetch agents." }), { status: 500, headers: CORS });
     }
 
@@ -161,12 +168,16 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    log({ event: 'success', status: 200 });
     return new Response(
       JSON.stringify({ sent, total_agents: agents.length, errors: errors.slice(0, 10) }),
       { status: 200, headers: CORS }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("weekly-stats error");
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: CORS });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

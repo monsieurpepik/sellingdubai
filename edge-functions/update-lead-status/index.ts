@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -29,6 +30,8 @@ function json(data: unknown, status = 200, cors: Record<string, string> = {}) {
 const VALID_STATUSES = ["new", "contacted", "qualified", "converted", "lost"];
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('update-lead-status', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
@@ -37,9 +40,10 @@ Deno.serve(async (req: Request) => {
   try {
     const { token, lead_id, status } = await req.json();
 
-    if (!token) return json({ error: "Authentication required." }, 401, cors);
-    if (!lead_id) return json({ error: "lead_id is required." }, 400, cors);
+    if (!token) { log({ event: 'auth_failed', status: 401 }); return json({ error: "Authentication required." }, 401, cors); }
+    if (!lead_id) { log({ event: 'bad_request', status: 400 }); return json({ error: "lead_id is required." }, 400, cors); }
     if (!status || !VALID_STATUSES.includes(status)) {
+      log({ event: 'bad_request', status: 400 });
       return json({ error: "Invalid status. Must be one of: " + VALID_STATUSES.join(", ") }, 400, cors);
     }
 
@@ -57,14 +61,17 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (linkErr || !link) {
+      log({ event: 'auth_failed', status: 401 });
       return json({ error: "Invalid or expired session." }, 401, cors);
     }
 
     if (new Date(link.expires_at) < new Date()) {
+      log({ event: 'auth_failed', status: 401 });
       return json({ error: "Session expired. Please log in again." }, 401, cors);
     }
 
     if (!link.used_at) {
+      log({ event: 'auth_failed', status: 401 });
       return json({ error: "Session not activated. Please use the login link sent to your email." }, 401, cors);
     }
 
@@ -78,12 +85,17 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (leadErr || !lead) {
+      log({ event: 'error', agent_id: link.agent_id, status: 404 });
       return json({ error: "Lead not found or you don't have permission." }, 404, cors);
     }
 
+    log({ event: 'success', agent_id: link.agent_id, status: 200 });
     return json({ success: true, lead }, 200, cors);
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     console.error("update-lead-status error");
     return json({ error: "Internal server error" }, 500, getCorsHeaders(req));
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

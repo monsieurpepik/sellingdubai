@@ -11,6 +11,7 @@
 
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 // Resolve the effective tier, honouring the 7-day grace period on past_due.
 // If payment failed but we're still within period_end + 7 days, keep paid tier.
@@ -892,6 +893,8 @@ const CORS = {
 };
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('whatsapp-ingest', req);
+  const _start = Date.now();
   const url = new URL(req.url);
 
   // === WEBHOOK VERIFICATION (GET) ===
@@ -956,6 +959,7 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (agentErr || !agent) {
+      log({ event: 'auth_failed', status: 200 });
       await sendWhatsAppReply(senderPhone, "Hi! Your number isn't registered on SellingDubai yet. Visit sellingdubai-agents.netlify.app/join to create your profile first.");
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
@@ -1071,6 +1075,7 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      log({ event: 'success', agent_id: agent.id, status: 200 });
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
@@ -1209,11 +1214,16 @@ Deno.serve(async (req: Request) => {
         }
       }
 
+      log({ event: 'success', agent_id: agent.id, status: 200 });
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
+    log({ event: 'success', agent_id: agent.id, status: 200 });
     return new Response(JSON.stringify({ success: true }), { headers: CORS });
   } catch (_e) {
+    log({ event: 'error', status: 200, error: String(_e) });
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: CORS });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

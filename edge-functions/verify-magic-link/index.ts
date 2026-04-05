@@ -10,6 +10,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -34,6 +35,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('verify-magic-link', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -41,6 +44,7 @@ Deno.serve(async (req: Request) => {
     const { token } = await req.json();
 
     if (!token || typeof token !== "string") {
+      log({ event: 'bad_request', status: 400 });
       return new Response(
         JSON.stringify({ error: "Token is required." }),
         { status: 400, headers: cors }
@@ -61,6 +65,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (linkErr || !link) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(
         JSON.stringify({ error: "Invalid or expired link. Request a new one." }),
         { status: 401, headers: cors }
@@ -69,6 +74,7 @@ Deno.serve(async (req: Request) => {
 
     // Check expiry
     if (new Date(link.expires_at) < new Date()) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(
         JSON.stringify({ error: "This link has expired. Request a new one." }),
         { status: 401, headers: cors }
@@ -83,6 +89,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (agentErr || !agent) {
+      log({ event: 'error', status: 404 });
       return new Response(
         JSON.stringify({ error: "Agent not found or deactivated." }),
         { status: 404, headers: cors }
@@ -123,15 +130,19 @@ Deno.serve(async (req: Request) => {
       if (field in agent) safeAgent[field] = agent[field];
     }
 
+    log({ event: 'success', agent_id: agent.id, status: 200 });
     return new Response(
       JSON.stringify({ agent: safeAgent }),
       { status: 200, headers: cors }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("verify-magic-link error:", e instanceof Error ? e.stack : String(e));
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

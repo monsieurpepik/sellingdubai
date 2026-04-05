@@ -1,8 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { getCorsHeaders, isValidImageBytes } from "../_shared/utils.ts";
+import { createLogger } from '../_shared/logger.ts';
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('upload-image', req);
+  const _start = Date.now();
   const cors = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: cors });
@@ -13,6 +16,7 @@ Deno.serve(async (req: Request) => {
     // image_type: 'avatar' | 'background' | 'agency_logo' | 'license'
 
     if (!token || !image_base64) {
+      log({ event: 'bad_request', status: 400 });
       return new Response(JSON.stringify({ error: 'Token and image required' }), {
         status: 400, headers: cors
       });
@@ -34,12 +38,14 @@ Deno.serve(async (req: Request) => {
 
     if (linkErr || !link) {
       console.error('Token verification failed');
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: 'Invalid or expired token. Please log in again.' }), {
         status: 401, headers: cors
       });
     }
 
     if (!link.used_at) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(JSON.stringify({ error: 'Session not activated. Please use the login link sent to your email.' }), {
         status: 401, headers: cors
       });
@@ -53,6 +59,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (!agent) {
+      log({ event: 'error', agent_id: link.agent_id, status: 404 });
       return new Response(JSON.stringify({ error: 'Agent not found' }), {
         status: 404, headers: cors
       });
@@ -61,6 +68,7 @@ Deno.serve(async (req: Request) => {
     // Validate file type — reject SVG and non-image bytes for image uploads
     const isPdf = file_type === 'application/pdf';
     if (!isPdf && !isValidImageBytes(image_base64)) {
+      log({ event: 'bad_request', agent_id: link.agent_id, status: 400 });
       return new Response(JSON.stringify({ error: 'Invalid image format. Only JPEG, PNG, GIF, and WebP are allowed.' }), {
         status: 400, headers: cors
       });
@@ -99,6 +107,7 @@ Deno.serve(async (req: Request) => {
 
     if (uploadError) {
       console.error('Storage upload failed');
+      log({ event: 'error', agent_id: link.agent_id, status: 500, error: String(uploadError) });
       return new Response(JSON.stringify({ error: 'Upload failed. Please try again.' }), {
         status: 500, headers: cors
       });
@@ -120,14 +129,18 @@ Deno.serve(async (req: Request) => {
       await supabase.from('agents').update({ [field]: publicUrl, updated_at: new Date().toISOString() }).eq('id', link.agent_id);
     }
 
+    log({ event: 'success', agent_id: link.agent_id, status: 200 });
     return new Response(JSON.stringify({ url: publicUrl, field }), {
       headers: cors
     });
 
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error('upload-image error');
     return new Response(JSON.stringify({ error: 'Server error' }), {
       status: 500, headers: cors
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

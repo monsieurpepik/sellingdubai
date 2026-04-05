@@ -10,6 +10,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders as getSharedCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from '../_shared/logger.ts';
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || null;
@@ -49,6 +50,8 @@ const ALLOWED_FIELDS = new Set([
 ]);
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('update-agent', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -56,6 +59,7 @@ Deno.serve(async (req: Request) => {
     const { token, updates } = await req.json();
 
     if (!token) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(
         JSON.stringify({ error: "Authentication required." }),
         { status: 401, headers: cors }
@@ -63,6 +67,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!updates || typeof updates !== "object") {
+      log({ event: 'bad_request', status: 400 });
       return new Response(
         JSON.stringify({ error: "No updates provided." }),
         { status: 400, headers: cors }
@@ -83,6 +88,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (linkErr || !link) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(
         JSON.stringify({ error: "Invalid or expired session. Sign in again." }),
         { status: 401, headers: cors }
@@ -90,6 +96,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (new Date(link.expires_at) < new Date()) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(
         JSON.stringify({ error: "Session expired. Sign in again." }),
         { status: 401, headers: cors }
@@ -97,6 +104,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!link.used_at) {
+      log({ event: 'auth_failed', status: 401 });
       return new Response(
         JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }),
         { status: 401, headers: cors }
@@ -220,6 +228,7 @@ Deno.serve(async (req: Request) => {
 
     if (updateErr) {
       console.error("Update error");
+      log({ event: 'error', status: 500, error: String(updateErr) });
       return new Response(
         JSON.stringify({ error: "Failed to update profile." }),
         { status: 500, headers: cors }
@@ -237,15 +246,19 @@ Deno.serve(async (req: Request) => {
       delete safeAgent[field];
     }
 
+    log({ event: 'success', agent_id: link.agent_id, status: 200 });
     return new Response(
       JSON.stringify({ success: true, agent: safeAgent }),
       { status: 200, headers: cors }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("update-agent error");
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });
