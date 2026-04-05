@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 complete — TypeScript Migration done
-last_updated: "2026-04-05T09:37:54.113Z"
+stopped_at: Phase 5 complete — Observability & Alerting done
+last_updated: "2026-04-05T00:00:00.000Z"
 progress:
-  total_phases: 4
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 1
+  total_phases: 7
+  completed_phases: 5
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # STATE.md — SellingDubai YC Engineering Excellence
@@ -21,11 +21,11 @@ progress:
 
 ## Current Position
 
-Phase: 05 (observability-alerting) — EXECUTING
-Plan: 1 of 1
+Phase: 06 (load-testing-slos) — NOT STARTED
+Plan: 0 of 1
 
-- **Phase:** 4 of 7 — TypeScript Migration COMPLETE
-- **Status:** Executing Phase 05
+- **Phase:** 5 of 7 — Observability & Alerting COMPLETE
+- **Status:** Ready for Phase 06
 
 ## Progress
 
@@ -34,11 +34,11 @@ Phase 1 — Test Coverage: Fill the Gaps    [x] COMPLETE
 Phase 2 — CI/CD Hardening                 [x] COMPLETE
 Phase 3 — Schema & Data Integrity         [x] COMPLETE
 Phase 4 — TypeScript Migration            [x] COMPLETE
-Phase 5 — Observability & Alerting        [ ] Not started
+Phase 5 — Observability & Alerting        [x] COMPLETE
 Phase 6 — Load Testing & SLOs            [ ] Not started
 Phase 7 — ENGINEERING.md (DD doc)         [ ] Not started
 
-Overall: [████░░░░░░] 57%
+Overall: [███████░░░] 71%
 ```
 
 ## Phase 1 Summary (COMPLETE — 2026-04-03)
@@ -112,11 +112,33 @@ Overall: [████░░░░░░] 57%
 - Need `supabase db pull` diff to confirm no prod column discrepancies in reconstructed base schema
 - Need to know the correct GitHub repo path to fix the CI badge URL in README (currently placeholder `sellingdubai/sellingdubai-app`)
 
+## Phase 5 Summary (COMPLETE — 2026-04-05)
+
+### What was done
+
+- Added `sentry-cli` steps to deploy job in CI: creates release, uploads source maps, deletes maps from dist before Netlify deploy, associates deploy after
+- `scripts/build-js.js` writes `dist/release-config.js` at build time (sets `window.SENTRY_RELEASE` to git SHA or 'dev')
+- `js/sentry-init.ts` reads `window.SENTRY_RELEASE` — release tag present in every Sentry event
+- All HTML files updated to load `release-config.js` before `sentry-init.js`
+- Created `js/errors.ts` — `reportError(context, error, extras?)` with Sentry capture + `window.reportError` global for Category B IIFE scripts
+- Replaced raw catch blocks in `js/dashboard.js`, `js/edit.js`, `js/join.js` — all now ≤ 5 catch blocks using `window.reportError` pattern (no ES imports)
+- Created `edge-functions/_shared/logger.ts` — `createLogger(fn, req)` returning typed `Logger` with `flush(ms)` and `requestId`
+- Added structured logging to all 39 HTTP-handler edge functions (excluded: `sync-rem-offplan`, `lead-followup-nagger`)
+- Special events: `signature_failure` (stripe-webhook), `rate_limit_exceeded` (send-magic-link, send-otp, respond-to-match, submit-mortgage)
+- Added `## Observability` section to `ENGINEERING.md` — Sentry setup, alert rules table, required secrets, log format reference
+- CI secrets documented: `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`
+
+### Human actions pending
+
+- Add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` to GitHub Actions secrets
+- Configure 4 Sentry alert rules (see ENGINEERING.md → Observability → Sentry Alert Rules)
+- Install Sentry Slack integration (Sentry → Settings → Integrations → Slack)
+
 ## Session Continuity
 
 Last session: 2026-04-05
-Stopped at: Phase 4 complete — TypeScript Migration done
-Next: Begin Phase 5 — Observability & Alerting
+Stopped at: Phase 5 complete — Observability & Alerting done
+Next: Begin Phase 6 — Load Testing & SLOs
 
 ## Pending Todos
 
