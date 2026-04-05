@@ -219,3 +219,28 @@ Timestamps were assigned by feature dependency order, not by wall-clock creation
 ### Next step
 
 Once DB access is available, run `supabase db pull` and diff the output against these migrations. Any gaps become a new `2026xxxx_schema_corrections.sql` migration.
+
+## Untested Edge Functions — Justification Register
+
+The following edge functions are deliberately excluded from integration tests. This register documents the reason for each exclusion so that the "no tests" state is an intentional decision, not an oversight.
+
+### `create-portal-session` — Requires live Stripe secret key
+Integration-testable only against the Stripe test API, which requires a live `STRIPE_SECRET_KEY` in CI. Adding a Stripe-mocked test would duplicate the `create-checkout` pattern but provide no additional safety signal. Deferred until a Stripe test-mode environment is provisioned in CI secrets.
+
+### `debug-resend` — Development utility, never deployed to production
+This function is a local debug helper for Resend email delivery and is not listed in the production function set. It has no business logic beyond forwarding a payload to Resend's API. Excluded from test coverage on the same basis as a local `scripts/` helper.
+
+### `prerender` — Covered by Playwright E2E smoke tests
+The prerender/OG-injector function is exercised by the E2E smoke-test job on every deploy (`scripts/smoke-test.sh` hits the rendered page endpoints). A separate Deno integration test would duplicate this coverage without adding value.
+
+### `sync-rem-offplan` — Cron job, external API dependency
+This function is triggered by a Supabase cron job and calls the REM off-plan feed API. Its correctness depends on the external API response structure, which cannot be controlled in a test environment. Integration-testing it would require mocking the HTTP client or a VCR cassette — both add complexity without proportionate safety gain. Covered by Sentry error alerting in production.
+
+### `lead-followup-nagger` — Cron job, side-effect only
+This function sends WhatsApp follow-up messages via the Twilio/WhatsApp API. Integration testing requires either a live Twilio sandbox (complex CI setup) or mocking the outbound HTTP call (provides no real signal). Covered by Sentry error alerting and manual QA after changes.
+
+### `instagram-auth` — OAuth callback, requires browser session
+This is the OAuth redirect callback for Instagram login. Testing it requires initiating a real OAuth flow from a browser, which cannot be replicated in a headless Deno test. Covered by manual QA on staging.
+
+### `tiktok-auth` — OAuth callback, requires browser session
+Same reasoning as `instagram-auth`. TikTok OAuth callback requires a browser-initiated flow. Covered by manual QA on staging.
