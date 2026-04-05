@@ -25,7 +25,7 @@ document.querySelectorAll('.faq-item').forEach(function(item) {
 });
 
 // Flip to true via BILLING_LIVE=true env var in Netlify (patched at build time by scripts/build-js.js)
-var BILLING_LIVE = true;
+var BILLING_LIVE = false;
 
 // Redirect to /edit for re-auth, preserving plan+interval for retry on return
 function redirectToAuth(plan, interval) {

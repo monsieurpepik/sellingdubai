@@ -1,10 +1,13 @@
 import { escHtml } from './utils.js';
 
-export function renderOffPlanBreakdown(proj) {
+interface OffPlanMilestone { trigger: string; percentage?: number; }
+interface OffPlanProject { name?: string; minPrice?: number; milestones?: OffPlanMilestone[]; completionDate?: string; }
+
+export function renderOffPlanBreakdown(proj: OffPlanProject) {
   const price  = proj.minPrice || 0;
-  const miles  = Array.isArray(proj.milestones) ? proj.milestones : [];
-  const fmtPct = (pct) => `${pct}%`;
-  const fmtAmt = (n)   => 'AED ' + Math.round(n).toLocaleString();
+  const miles  = Array.isArray(proj.milestones) ? proj.milestones : ([] as OffPlanMilestone[]);
+  const fmtPct = (pct: number) => `${pct}%`;
+  const fmtAmt = (n: number)   => 'AED ' + Math.round(n).toLocaleString();
 
   const booking      = miles.find(m => m.trigger === 'on_booking')    || miles[0];
   const handover     = miles.find(m => m.trigger === 'on_handover')   || miles[miles.length - 1];

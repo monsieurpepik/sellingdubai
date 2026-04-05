@@ -5,12 +5,13 @@
 // and exposed to dashboard.js via a window bridge in dashboard.html.
 // ==========================================
 import { escHtml, escAttr, optimizeImg } from './utils.js';
+import type { Property } from './state.js';
 
 // ==========================================
 // PUBLIC VIEWER CARD
 // Used on: index.html (agent public profile)
 // ==========================================
-export function renderPropertyCard(p, idx) {
+export function renderPropertyCard(p: Property, idx: number) {
   const STATUS_MAP = {
     'just_listed': { label: 'Just Listed', css: 'prop-tag-just-listed' },
     'available':   { label: 'Available',   css: 'prop-tag-available' },
@@ -21,7 +22,8 @@ export function renderPropertyCard(p, idx) {
     'rented':      { label: 'Rented',      css: 'prop-tag-rented' },
   };
 
-  const st = STATUS_MAP[p.status] || STATUS_MAP['available'];
+  const statusKey = (p.status && p.status in STATUS_MAP) ? p.status as keyof typeof STATUS_MAP : 'available';
+  const st = STATUS_MAP[statusKey];
   const safeTitle = escAttr(p.title);
   const propId = escAttr(String(p.id || idx));
 
@@ -115,7 +117,7 @@ export function renderPropertyCard(p, idx) {
 // OFF-PLAN / NEW LAUNCH CAROUSEL CARD
 // Used on: index.html (agent public profile, off-plan section)
 // ==========================================
-export function renderOffPlanCard(p) {
+export function renderOffPlanCard(p: Property) {
   const propId = escAttr(String(p.id));
   const safeTitle = escAttr(p.title);
   const isLaunch = p.listing_type === 'new_launch';
@@ -174,7 +176,7 @@ export function renderOffPlanCard(p) {
 //   total        — total array length (for first/last detection)
 //   statusLabels — PROP_STATUS_LABELS map from dashboard.js
 // ==========================================
-export function renderAdminCard(p, idx, total, statusLabels) {
+export function renderAdminCard(p: Property, idx: number, total: number, statusLabels: Record<string, string>) {
   const safeTitle = escAttr(p.title || '');
   const safeId = escAttr(String(p.id));
   const status = p.status || 'available';
