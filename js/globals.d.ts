@@ -29,7 +29,7 @@ declare global {
     openFilters: (() => void) | undefined;
     openProps: (() => void) | undefined;
     openMortgage: (() => void) | undefined;
-    initMortModal: ((opts: unknown) => void) | undefined;
+    initMortModal: ((opts?: Record<string, unknown>) => void) | undefined;
     openProjectDetail: ((slug: string) => void) | undefined;
     closeDetail: (() => void) | undefined;
 
@@ -106,6 +106,16 @@ declare global {
     mortOpProceed: (() => void) | undefined;
     _mortOpToggleAgent: ((checked: boolean) => void) | undefined;
 
+    // Property detail internals
+    _currentProperty: import('./state').Property | undefined;
+    _costData: {
+      cashTotal: number;
+      mortgageTotal: number;
+      rawPrice: number;
+      fmtAED: (n: number) => string;
+      fmtPct: (n: number) => string;
+    } | undefined;
+
     // Gallery internals
     _currentDetailImages: string[] | undefined;
     _currentDetailHeroIdx: number | undefined;
@@ -146,7 +156,7 @@ declare global {
     addMember: (() => void) | undefined;
 
     // renderAdminCard bridge (components.ts -> dashboard.js)
-    renderAdminCard: ((p: unknown, idx: number, total: number, statusLabels: Record<string, string>) => string) | undefined;
+    renderAdminCard: ((p: import('./state').Property, idx: number, total: number, statusLabels: Record<string, string>) => string) | undefined;
 
     // Allow dynamic window property checks in event-delegation.ts
     [key: string]: unknown;
