@@ -1,3 +1,4 @@
+// @ts-check
 (function() {
   const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
   const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
@@ -6,7 +7,9 @@
   const UPLOAD_URL = `${SUPABASE_URL}/functions/v1/upload-image`;
   const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
 
+  /** @type {string | null} */
   let currentAgent = null;
+  /** @type {string | null} */
   let authToken = null;
 
   function showToast(msg) {

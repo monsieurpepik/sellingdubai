@@ -1,17 +1,3 @@
----
-gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-stopped_at: Phase 3 complete — Schema & Data Integrity done
-last_updated: "2026-04-05T08:21:05.605Z"
-progress:
-  total_phases: 4
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 0
----
-
 # STATE.md — SellingDubai YC Engineering Excellence
 
 ## Project Reference
@@ -21,11 +7,8 @@ progress:
 
 ## Current Position
 
-Phase: 04 (TypeScript Migration) — EXECUTING
-Plan: 1 of 1
-
-- **Phase:** 3 of 7 — Schema & Data Integrity COMPLETE
-- **Status:** Executing Phase 04
+- **Phase:** 4 of 7 — TypeScript Migration COMPLETE
+- **Status:** Ready to execute Phase 5
 
 ## Progress
 
@@ -33,18 +16,17 @@ Plan: 1 of 1
 Phase 1 — Test Coverage: Fill the Gaps    [x] COMPLETE
 Phase 2 — CI/CD Hardening                 [x] COMPLETE
 Phase 3 — Schema & Data Integrity         [x] COMPLETE
-Phase 4 — TypeScript Migration            [ ] Not started
+Phase 4 — TypeScript Migration            [x] COMPLETE
 Phase 5 — Observability & Alerting        [ ] Not started
-Phase 6 — Load Testing & SLOs             [ ] Not started
+Phase 6 — Load Testing & SLOs            [ ] Not started
 Phase 7 — ENGINEERING.md (DD doc)         [ ] Not started
 
-Overall: [███░░░░░░░] 43%
+Overall: [████░░░░░░] 57%
 ```
 
 ## Phase 1 Summary (COMPLETE — 2026-04-03)
 
 ### What was done
-
 - Fixed CI glob miss: `send-magic-link/index.test.ts` now picked up (`package.json` extended to `*/index.test.ts`)
 - Added `seedUsedMagicLink`, `seedOtp`, `cleanupOtp` helpers to `_shared/test-helpers.ts`
 - Wrote test.ts for all Tier 1-3 functions (30 functions total now have tests):
@@ -58,7 +40,6 @@ Overall: [███░░░░░░░] 43%
 **Tier 3 (new):** revoke-session, export-leads, log-event, refer-lead, track-referral, manage-referral, cobroke-request, cobroke-listings, manage-cobroke, post-buyer-request, agency-stats, weekly-stats, notify-mortgage-lead
 
 ### Functions without tests (justified)
-
 - `debug-resend`, `prerender`, `sync-rem-offplan`, `lead-followup-nagger`, `instagram-auth`, `tiktok-auth` — explicitly out of scope per ROADMAP.md
 - `create-portal-session`, `respond-to-match`, `update-mortgage-docs`, `waitlist-join` — not in Tier 1-3; add to Phase 2 backlog if needed
 - `fetch-eibor` — roadmap notes "test graceful fallback"; deferred to Phase 2
@@ -66,7 +47,6 @@ Overall: [███░░░░░░░] 43%
 ## Phase 2 Summary (COMPLETE — 2026-04-03)
 
 ### What was done
-
 - Added `bundle-size` CI job: builds base branch + PR branch in separate directories, posts before/after size diff as PR comment; updates existing comment on re-push; fails if over 30KB (init) / 20KB (chunks)
 - Added `e2e` CI job: installs Playwright chromium, builds static site, runs 6 journey specs; uploads `playwright-report/` artifact on failure
 - Updated `playwright.config.js`: uses `npx serve . -l 8888` in CI (avoids netlify-dev auth requirement), `npx netlify dev` locally
@@ -79,7 +59,6 @@ Overall: [███░░░░░░░] 43%
 ## Phase 3 Summary (COMPLETE — 2026-04-03)
 
 ### What was done
-
 - Reconstructed 20 migration files (timestamps 20240101–20250801) from `sql/` directory + edge function source code
 - One migration already existed: `20260402062459_off_plan_enrichment.sql` (not modified)
 - Discovered 9 tables with no `sql/` migration file; reconstructed from edge functions: `email_verification_codes`, `dld_brokers`, `lead_referrals`, `co_broke_deals`, `buyer_requests`, `property_matches`, `referrals`, `featured_projects`, `project_agent_assignments`
@@ -90,7 +69,6 @@ Overall: [███░░░░░░░] 43%
 - Added DECISIONS.md entry on migration reconstruction strategy and trade-offs
 
 ### Caveats
-
 - `supabase db reset` should pass cleanly (all IF NOT EXISTS guards); but `supabase db pull` diff is needed to catch any prod column discrepancies once DB access is available.
 
 ## Recent Decisions
@@ -101,6 +79,11 @@ Overall: [███░░░░░░░] 43%
 - 2026-04-03: Phase 1 complete — all Tier 1-3 edge functions tested
 - 2026-04-03: Phase 2 complete — CI/CD hardening done
 - 2026-04-03: Phase 3 complete — schema reconstructed, 21 migrations, SCHEMA.md + DECISIONS.md
+- 2026-04-05: Use as unknown as T double-cast for Supabase Json columns — avoids breaking type gen
+- 2026-04-05: Property & { land_area?: number | null } intersection rather than modifying generated types
+- 2026-04-05: Category B files keep .js + @ts-check — not bundled by esbuild, no tsc pass needed
+- 2026-04-05: event-delegation.ts added as third esbuild entry point for edit/join/agency-dashboard pages
+- 2026-04-05: Phase 4 complete — 18 modules migrated to TS strict, 12 IIFE scripts annotated, tsc clean
 
 ## Blockers / Concerns
 
@@ -109,9 +92,9 @@ Overall: [███░░░░░░░] 43%
 
 ## Session Continuity
 
-Last session: 2026-04-03
-Stopped at: Phase 3 complete — Schema & Data Integrity done
-Next: Begin Phase 4 — TypeScript Migration
+Last session: 2026-04-05
+Stopped at: Phase 4 complete — TypeScript Migration done
+Next: Begin Phase 5 — Observability & Alerting
 
 ## Pending Todos
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/build-js.js — bundle js/init.js with esbuild, injecting Supabase config.
+// scripts/build-js.js — bundle js/init.ts with esbuild, injecting Supabase config.
 //
 // SUPABASE_URL and SUPABASE_ANON_KEY are read from the environment at build time
 // and baked into the bundle via esbuild --define. This lets each Netlify deploy
@@ -33,7 +33,7 @@ console.log(`build-js: SUPABASE_URL=${url.slice(0, 40)}... (context: ${context})
 fs.mkdirSync('dist', { recursive: true });
 
 esbuild.build({
-  entryPoints: ['js/init.js', 'js/agency-page.js'],
+  entryPoints: ['js/init.ts', 'js/agency-page.ts', 'js/event-delegation.ts'],
   bundle: true,
   minify: true,
   sourcemap: true,
