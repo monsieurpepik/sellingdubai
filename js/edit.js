@@ -94,6 +94,8 @@
       document.getElementById('auth-screen').classList.add('hidden');
       document.getElementById('sent-screen').classList.remove('hidden');
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('edit/sendMagicLink', e);
+      else console.error('[edit/sendMagicLink]', e);
       btn.disabled = false;
       btn.textContent = 'Send Magic Link';
       errEl.textContent = 'Connection error. Try again.';
@@ -142,6 +144,8 @@
       window.history.replaceState({}, '', '/edit');
       loadEditor();
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('edit/verifyToken', e);
+      else console.error('[edit/verifyToken]', e);
       localStorage.removeItem('sd_edit_token');
       showAuth();
       const errEl = document.getElementById('auth-error');
@@ -283,45 +287,43 @@
   }
 
   // === INSTAGRAM ===
-  window.connectInstagram = async function() {
+  window.connectInstagram = function() {
     const btn = document.getElementById('btn-ig-connect');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Connecting...';
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_auth_url' }),
-      });
-      const data = await res.json();
+    const igSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`;
+    fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_auth_url' }),
+    }).then(function(res) { return res.json(); }).then(function(data) {
       if (data.url) {
         if (data.state) localStorage.setItem('sd_ig_csrf_state', data.state);
         window.location.href = data.url;
       } else {
         btn.disabled = false;
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`;
+        btn.innerHTML = igSvg;
         showToast('Could not get Instagram authorization URL. Please try again.');
       }
-    } catch (e) {
+    }).then(null, function() {
       btn.disabled = false;
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`;
+      btn.innerHTML = igSvg;
       showToast('Connection failed. Please try again.');
-    }
+    });
   };
 
-  async function exchangeInstagramCode(code) {
+  function exchangeInstagramCode(code) {
     if (!authToken) return;
 
     const btn = document.getElementById('btn-ig-connect');
+    const igSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`;
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Finishing setup...'; }
 
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
-      });
-      const data = await res.json();
+    fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
+    }).then(function(res) { return res.json(); }).then(function(data) {
       if (data.success) {
         document.getElementById('ig-disconnected').style.display = 'none';
         document.getElementById('ig-connected').style.display = 'block';
@@ -333,77 +335,74 @@
         setTimeout(() => succEl.classList.remove('show'), 4000);
       } else {
         showToast('Instagram connection failed: ' + (data.error || 'Unknown error'));
-        if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`; }
+        if (btn) { btn.disabled = false; btn.innerHTML = igSvg; }
       }
-    } catch (e) {
+    }).then(null, function() {
       showToast('Instagram connection failed. Please try again.');
-      if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`; }
-    }
+      if (btn) { btn.disabled = false; btn.innerHTML = igSvg; }
+    });
   }
 
-  window.disconnectInstagram = async function() {
+  window.disconnectInstagram = function() {
     if (!confirm('Disconnect Instagram?')) return;
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect', token: authToken }),
-      });
+    fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'disconnect', token: authToken }),
+    }).then(function(res) {
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        showToast('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
-        return;
+        return res.json().then(null, () => ({})).then(function(data) {
+          showToast('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
+        });
       }
       document.getElementById('ig-disconnected').style.display = 'block';
       document.getElementById('ig-connected').style.display = 'none';
       document.getElementById('ed-ig').value = '';
       document.getElementById('btn-ig-connect').disabled = false;
       document.getElementById('btn-ig-connect').innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`;
-    } catch (e) {
+    }).then(null, function() {
       showToast('Failed to disconnect. Please try again.');
-    }
+    });
   };
 
   // === TIKTOK ===
-  window.connectTikTok = async function() {
+  window.connectTikTok = function() {
     const btn = document.getElementById('btn-tt-connect');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Connecting...';
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_auth_url' }),
-      });
-      const data = await res.json();
+    const ttSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`;
+    fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_auth_url' }),
+    }).then(function(res) { return res.json(); }).then(function(data) {
       if (data.url) {
         if (data.state) localStorage.setItem('sd_tt_csrf_state', data.state);
         window.location.href = data.url;
       } else {
         btn.disabled = false;
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`;
+        btn.innerHTML = ttSvg;
         showToast('Could not get TikTok authorization URL. Please try again.');
       }
-    } catch (e) {
+    }).then(null, function() {
       btn.disabled = false;
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`;
+      btn.innerHTML = ttSvg;
       showToast('Connection failed. Please try again.');
-    }
+    });
   };
 
-  async function exchangeTikTokCode(code) {
+  function exchangeTikTokCode(code) {
     if (!authToken) return;
 
     const btn = document.getElementById('btn-tt-connect');
+    const ttSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`;
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Finishing setup...'; }
 
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
-      });
-      const data = await res.json();
+    fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
+    }).then(function(res) { return res.json(); }).then(function(data) {
       if (data.success) {
         document.getElementById('tt-disconnected').style.display = 'none';
         document.getElementById('tt-connected').style.display = 'block';
@@ -416,35 +415,34 @@
         setTimeout(() => succEl.classList.remove('show'), 4000);
       } else {
         showToast('TikTok connection failed: ' + (data.error || 'Unknown error'));
-        if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`; }
+        if (btn) { btn.disabled = false; btn.innerHTML = ttSvg; }
       }
-    } catch (e) {
+    }).then(null, function() {
       showToast('TikTok connection failed. Please try again.');
-      if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`; }
-    }
+      if (btn) { btn.disabled = false; btn.innerHTML = ttSvg; }
+    });
   }
 
-  window.disconnectTikTok = async function() {
+  window.disconnectTikTok = function() {
     if (!confirm('Disconnect TikTok?')) return;
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect', token: authToken }),
-      });
+    fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'disconnect', token: authToken }),
+    }).then(function(res) {
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        showToast('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
-        return;
+        return res.json().then(null, () => ({})).then(function(data) {
+          showToast('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
+        });
       }
       document.getElementById('tt-disconnected').style.display = 'block';
       document.getElementById('tt-connected').style.display = 'none';
       document.getElementById('ed-tt').value = '';
       document.getElementById('btn-tt-connect').disabled = false;
       document.getElementById('btn-tt-connect').innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`;
-    } catch (e) {
+    }).then(null, function() {
       showToast('Failed to disconnect. Please try again.');
-    }
+    });
   };
 
   // === SAVE PROFILE ===
@@ -526,6 +524,8 @@
       window.scrollTo({top:0,behavior:'smooth'});
       setTimeout(() => { succEl.classList.remove('show'); }, 4000);
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('edit/saveProfile', e);
+      else console.error('[edit/saveProfile]', e);
       btn.disabled = false;
       btn.textContent = 'Save Changes';
       errEl.textContent = 'Connection error. Try again.';
@@ -593,7 +593,7 @@
     document.getElementById(ui.prompt).classList.add('hidden');
     document.getElementById(ui.loading).classList.remove('hidden');
 
-    try {
+    (async function() {
       // Compress image client-side before upload
       const base64 = file.type.startsWith('image/')
         ? await compressImage(file, ui.maxPx, 0.8)
@@ -648,14 +648,13 @@
         document.getElementById('edit-avatar').innerHTML = `<img src="${esc(data.url)}" srcset="${esc('/.netlify/images?url=' + encodeURIComponent(data.url) + '&w=80&fm=webp&q=80')} 80w, ${esc('/.netlify/images?url=' + encodeURIComponent(data.url) + '&w=160&fm=webp&q=80')} 160w" sizes="80px" width="80" height="80" alt="${safeName}">`;
       }
 
-    } catch (e) {
+      fileInput.value = '';
+    })().then(null, function() {
       document.getElementById(ui.loading).classList.add('hidden');
       document.getElementById(ui.prompt).classList.remove('hidden');
       showToast('Upload failed. Check your connection and try again.');
-    }
-
-    // Reset file input
-    fileInput.value = '';
+      fileInput.value = '';
+    });
   };
 
   // === PROPERTY STATUS HELPERS ===
@@ -767,42 +766,40 @@
       succEl.classList.add('show');
       setTimeout(() => succEl.classList.remove('show'), 3000);
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('edit/addProperty', e);
+      else console.error('[edit/addProperty]', e);
       btn.disabled = false;
       btn.textContent = 'Add Property';
       showToast('Connection error. Try again.');
     }
   };
 
-  window.deleteProperty = async function(propId) {
+  window.deleteProperty = function(propId) {
     if (!confirm('Remove this property from your profile?')) return;
 
-    try {
-      const res = await fetch(PROPS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken, action: 'delete', property: { id: propId } })
-      });
-
+    fetch(PROPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'delete', property: { id: propId } })
+    }).then(function(res) {
       if (res.ok) {
         loadProperties();
       } else {
-        const data = await res.json();
-        showToast('Error: ' + (data.error || 'Failed to delete.'));
+        return res.json().then(function(data) {
+          showToast('Error: ' + (data.error || 'Failed to delete.'));
+        });
       }
-    } catch (e) {
+    }).then(null, function() {
       showToast('Connection error.');
-    }
+    });
   };
 
-  async function loadProperties() {
-    try {
-      const res = await fetch(PROPS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken, action: 'list' })
-      });
-      const data = await res.json();
-
+  function loadProperties() {
+    fetch(PROPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'list' })
+    }).then(function(res) { return res.json(); }).then(function(data) {
       const list = document.getElementById('props-list');
       if (!data.properties || data.properties.length === 0) {
         list.innerHTML = '<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.2);font-size:13px;">No properties yet. Add your first listing.</div>';
@@ -827,9 +824,9 @@
           </button>
         </div>
       `).join('');
-    } catch (e) {
+    }).then(null, function(e) {
       console.error('loadProperties error:', e);
-    }
+    });
   }
 
   // === LOGOUT ===
@@ -865,19 +862,19 @@
     const url = window._profileUrl || window.location.origin;
     const copyFn = (navigator.clipboard && navigator.clipboard.writeText)
       ? () => navigator.clipboard.writeText(url)
-      : () => new Promise((resolve, reject) => {
+      : () => new Promise(function(resolve, reject) {
           const ta = document.createElement('textarea');
           ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
           document.body.appendChild(ta); ta.select();
-          try { document.execCommand('copy'); resolve(); } catch(e) { reject(e); }
+          if (document.execCommand('copy')) { resolve(); } else { reject(new Error('execCommand failed')); }
           document.body.removeChild(ta);
         });
-    copyFn().then(() => {
+    copyFn().then(function() {
       const btn = document.getElementById('btn-copy-link');
       btn.classList.add('copied');
       btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Copied!`;
       setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Link`; }, 2000);
-    }).catch(() => {});
+    }, function() {});
   }
   window.copyProfileLink = copyProfileLink;
 
@@ -1043,6 +1040,8 @@
         }
       }
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('edit/confirmCrop', e);
+      else console.error('[edit/confirmCrop]', e);
       document.getElementById(ui.loading).classList.add('hidden');
       document.getElementById(ui.prompt).classList.remove('hidden');
       showToast('Upload failed. Check your connection and try again.');

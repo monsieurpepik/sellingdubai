@@ -83,6 +83,8 @@
       document.getElementById('auth-form').classList.add('hidden');
       document.getElementById('auth-sent').classList.remove('hidden');
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/sendMagicLink', e);
+      else console.error('[dashboard/sendMagicLink]', e);
       btn.disabled = false; btn.textContent = 'Send Magic Link';
       errEl.textContent = 'Connection error.'; errEl.className = 'auth-msg error';
     }
@@ -119,6 +121,8 @@
       currentAgent = data.agent;
       loadDashboard();
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/verifyToken', e);
+      else console.error('[dashboard/verifyToken]', e);
       localStorage.removeItem('sd_edit_token');
       showAuthOverlay();
       const errEl = document.getElementById('auth-error');
@@ -200,22 +204,21 @@
     const btn = document.getElementById('btn-manage-billing');
     btn.disabled = true;
     btn.textContent = 'Opening…';
-    try {
-      const res = await fetch('https://pjyorgedaxevxophpfib.supabase.co/functions/v1/create-portal-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        showToast(data.error || 'Could not open billing portal.');
-        btn.disabled = false;
-        btn.textContent = 'Manage billing';
-      }
-    } catch (e) {
-      showToast('Connection error. Please try again.');
+    const res = await fetch('https://pjyorgedaxevxophpfib.supabase.co/functions/v1/create-portal-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken }),
+    }).then(null, function(e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/openBillingPortal', e);
+      else console.error('[dashboard/openBillingPortal]', e);
+      return null;
+    });
+    if (!res) { showToast('Connection error. Please try again.'); btn.disabled = false; btn.textContent = 'Manage billing'; return; }
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast(data.error || 'Could not open billing portal.');
       btn.disabled = false;
       btn.textContent = 'Manage billing';
     }
@@ -291,35 +294,34 @@
 
   // ── Fetch Analytics ──
   async function fetchAnalytics() {
-    try {
-      const res = await fetch(ANALYTICS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken })
-      });
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
+    const analyticsRes = await fetch(ANALYTICS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken })
+    }).then(null, function(e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/fetchAnalytics', e);
+      else console.error('[dashboard/fetchAnalytics]', e);
+      return null;
+    });
+    if (analyticsRes && analyticsRes.ok) {
+      const data = await analyticsRes.json();
       renderMetrics(data);
       renderChart(data.chart || []);
       renderReferrers(data.top_referrers || []);
       renderLeads(data.recent_leads || []);
       loadReferralSection(data.referral_stats || null);
-    } catch (e) {
-      console.error('Analytics fetch error:', e);
     }
 
-    // Check property count for onboarding step (lightweight HEAD-style query)
+    // Check property count for onboarding step (lightweight HEAD-style query — non-critical)
     if (currentAgent && currentAgent.id) {
-      try {
-        const pRes = await fetch(
-          SUPABASE_URL + '/rest/v1/properties?agent_id=eq.' + currentAgent.id + '&select=id&limit=1',
-          { headers: { 'apikey': SUPABASE_ANON_KEY } }
-        );
-        if (pRes.ok) {
-          const props = await pRes.json();
-          updateOnboardPropertyStep(props.length);
-        }
-      } catch (_) { /* non-critical */ }
+      const pRes = await fetch(
+        SUPABASE_URL + '/rest/v1/properties?agent_id=eq.' + currentAgent.id + '&select=id&limit=1',
+        { headers: { 'apikey': SUPABASE_ANON_KEY } }
+      ).then(null, function() { return null; });
+      if (pRes && pRes.ok) {
+        const props = await pRes.json();
+        updateOnboardPropertyStep(props.length);
+      }
     }
   }
 
@@ -448,20 +450,21 @@
   window.updateLeadStatus = async function(leadId, status, selectEl) {
     selectEl.className = 'status-select status-' + status;
 
-    try {
-      const res = await fetch(SUPABASE_URL + '/functions/v1/update-lead-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken, lead_id: leadId, status: status })
-      });
-      if (res.ok) {
-        showToast('Status updated to ' + status);
-      } else {
-        const data = await res.json().catch(() => ({}));
-        showToast(data.error || 'Failed to update status');
-      }
-    } catch (e) {
-      showToast('Connection error');
+    const res = await fetch(SUPABASE_URL + '/functions/v1/update-lead-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, lead_id: leadId, status: status })
+    }).then(null, function(e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/updateLeadStatus', e);
+      else console.error('[dashboard/updateLeadStatus]', e);
+      return null;
+    });
+    if (!res) { showToast('Connection error'); return; }
+    if (res.ok) {
+      showToast('Status updated to ' + status);
+    } else {
+      const data = await res.json().then(null, () => ({}));
+      showToast(data.error || 'Failed to update status');
     }
   };
 
@@ -519,7 +522,7 @@
       const btn = document.getElementById('btn-share');
       btn.textContent = 'Copied!';
       setTimeout(() => { btn.textContent = 'Share Link'; }, 1500);
-    }).catch(() => {
+    }, () => {
       // Fallback for older browsers / insecure contexts
       const tmp = document.createElement('textarea');
       tmp.value = url;
@@ -563,7 +566,7 @@
       btn.textContent = 'Copied!';
       btn.style.background = '#22c55e';
       setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; }, 1500);
-    }).catch(() => {
+    }, () => {
       // Fallback for older browsers
       input.select();
       document.execCommand('copy');
@@ -588,25 +591,25 @@
   };
 
   async function loadProperties() {
-    try {
-      const res = await fetch(PROPS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken, action: 'list' })
-      });
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
-      propertiesCache = data.properties || [];
-      propLimitReached = data.limit !== null && propertiesCache.length >= data.limit;
-      renderPropertyCards(data.properties || [], data.limit, data.tier);
-      // Update onboarding property step
-      updateOnboardPropertyStep(propertiesCache.length);
-      // Update add button state
-      const addBtn = document.getElementById('btn-add-prop');
-      if (addBtn) addBtn.disabled = propLimitReached;
-    } catch (e) {
-      console.error('loadProperties error:', e);
-    }
+    const res = await fetch(PROPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'list' })
+    }).then(null, function(e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/loadProperties', e);
+      else console.error('[dashboard/loadProperties]', e);
+      return null;
+    });
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    propertiesCache = data.properties || [];
+    propLimitReached = data.limit !== null && propertiesCache.length >= data.limit;
+    renderPropertyCards(data.properties || [], data.limit, data.tier);
+    // Update onboarding property step
+    updateOnboardPropertyStep(propertiesCache.length);
+    // Update add button state
+    const addBtn = document.getElementById('btn-add-prop');
+    if (addBtn) addBtn.disabled = propLimitReached;
   }
 
   function renderPropertyCards(props, limit, tier) {
@@ -795,6 +798,8 @@
       showToast(editId ? 'Listing updated' : 'Listing added');
       await loadProperties();
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/saveProp', e);
+      else console.error('[dashboard/saveProp]', e);
       showToast('Connection error');
     }
 
@@ -833,6 +838,8 @@
       showToast('Listing deleted');
       await loadProperties();
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/confirmDeleteProp', e);
+      else console.error('[dashboard/confirmDeleteProp]', e);
       showToast('Connection error');
     }
 
@@ -862,10 +869,12 @@
         if (p) p.status = status;
         showToast('Status updated');
       } else {
-        const data = await res.json().catch(() => ({}));
+        const data = await res.json().then(null, () => ({}));
         showToast(data.error || 'Failed to update status');
       }
     } catch (e) {
+      if (typeof window.reportError === 'function') window.reportError('dashboard/updatePropStatus', e);
+      else console.error('[dashboard/updatePropStatus]', e);
       showToast('Connection error');
     }
   };
@@ -884,24 +893,22 @@
     const limit = parseInt(document.getElementById('props-count-badge').textContent.split('/')[1]) || null;
     renderPropertyCards(propertiesCache, limit === null || isNaN(limit) ? null : limit, null);
 
-    try {
-      const ids = propertiesCache.map(p => p.id);
-      await fetch(PROPS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: authToken, action: 'reorder', ids })
-      });
-    } catch (e) {
+    const ids = propertiesCache.map(p => p.id);
+    fetch(PROPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'reorder', ids })
+    }).then(null, function() {
       // Non-critical — re-render from server on next load
-    }
+    });
   };
 
   window.shareProperty = function(propId) {
     if (!currentAgent) return;
     const url = 'https://sellingdubai.ae/a/' + currentAgent.slug + '?open=property&id=' + propId;
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(url).then(function() {
       showToast('Link copied!');
-    }).catch(() => {
+    }, function() {
       const tmp = document.createElement('textarea');
       tmp.value = url;
       tmp.style.cssText = 'position:fixed;opacity:0;';
@@ -924,7 +931,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
         body: JSON.stringify({ token }),
-      }).catch(function(err) { console.warn('[dashboard] revoke-session fire-and-forget failed:', err); });
+      }).then(null, function(err) { console.warn('[dashboard] revoke-session fire-and-forget failed:', err); });
     }
     showAuthOverlay();
   };

@@ -115,6 +115,8 @@ async function verifyBroker() {
   } catch (e) {
     setLoading('btn-verify', false, 'Verify My License');
     showError(1, networkErrorMsg());
+    if (typeof window.reportError === 'function') window.reportError('join/verifyBroker', e);
+    else console.error('[join/verifyBroker]', e);
   }
 }
 
@@ -145,22 +147,21 @@ function compressImage(file, maxSize, quality) {
   });
 }
 
-async function previewPhoto(input) {
+function previewPhoto(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 10 * 1024 * 1024) { showError(2, 'Photo must be under 10MB.'); return; }
   clearError(2);
 
-  try {
-    const dataUrl = await compressImage(file, 800, 0.8);
+  compressImage(file, 800, 0.8).then(function(dataUrl) {
     document.getElementById('photo-placeholder').style.display = 'none';
     const prev = document.getElementById('photo-preview');
     prev.style.display = 'block';
     prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     document.getElementById('onboard-photo-data').value = dataUrl.split(',')[1];
-  } catch (err) {
+  }, function() {
     showError(2, 'Failed to process photo. Try a different image.');
-  }
+  });
 }
 window.previewPhoto = previewPhoto;
 
@@ -187,8 +188,7 @@ async function sendOtpAndShow() {
         broker_number: verifiedBroker ? verifiedBroker.broker_number : null
       })
     });
-    let data;
-    try { data = await res.json(); } catch { data = {}; }
+    const data = await res.json().then(null, () => ({}));
 
     if (!res.ok) {
       setLoading('btn-create', false, 'Create My Profile');
@@ -206,50 +206,51 @@ async function sendOtpAndShow() {
   } catch (e) {
     setLoading('btn-create', false, 'Create My Profile');
     showError(2, e instanceof TypeError ? networkErrorMsg() : `Error: ${e.message}`);
+    if (typeof window.reportError === 'function') window.reportError('join/sendOtpAndShow', e);
+    else console.error('[join/sendOtpAndShow]', e);
   }
 }
 
-async function resendOtp() {
+function resendOtp() {
   clearError(2);
   const email = document.getElementById('email').value.trim();
   const btn = document.getElementById('btn-resend-otp');
   btn.textContent = 'Sending...';
   btn.disabled = true;
 
-  try {
-    const res = await fetch(OTP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: email,
-        broker_number: verifiedBroker ? verifiedBroker.broker_number : null
-      })
+  fetch(OTP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      broker_number: verifiedBroker ? verifiedBroker.broker_number : null
+    })
+  }).then(function(res) {
+    return res.json().then(null, () => ({})).then(function(data) {
+      if (!res.ok) {
+        showError(2, data.error || 'Failed to resend code.');
+        btn.textContent = "Didn't get it? Resend code";
+        btn.disabled = false;
+      } else {
+        let countdown = 60;
+        btn.textContent = `Resend code (${countdown}s)`;
+        const countdownTimer = setInterval(() => {
+          countdown--;
+          if (countdown <= 0) {
+            clearInterval(countdownTimer);
+            btn.textContent = "Didn't get it? Resend code";
+            btn.disabled = false;
+          } else {
+            btn.textContent = `Resend code (${countdown}s)`;
+          }
+        }, 1000);
+      }
     });
-    const data = await res.json();
-
-    if (!res.ok) {
-      showError(2, data.error || 'Failed to resend code.');
-      btn.textContent = "Didn't get it? Resend code";
-      btn.disabled = false;
-    } else {
-      let countdown = 60;
-      btn.textContent = `Resend code (${countdown}s)`;
-      const countdownTimer = setInterval(() => {
-        countdown--;
-        if (countdown <= 0) {
-          clearInterval(countdownTimer);
-          btn.textContent = "Didn't get it? Resend code";
-          btn.disabled = false;
-        } else {
-          btn.textContent = `Resend code (${countdown}s)`;
-        }
-      }, 1000);
-    }
-  } catch (e) {
+  }, function() {
     showError(2, networkErrorMsg());
     btn.textContent = "Didn't get it? Resend code";
     btn.disabled = false;
-  }
+  });
 }
 
 async function verifyOtpAndCreate() {
@@ -306,8 +307,7 @@ async function createProfile(otpCode) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    let data;
-    try { data = await res.json(); } catch { data = {}; }
+    const data = await res.json().then(null, () => ({}));
 
     if (!res.ok) {
       setLoading('btn-verify-otp', false, 'Verify & Create Profile');
@@ -331,7 +331,7 @@ async function createProfile(otpCode) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ referral_code: _refCode, agent_id: data.agent.id })
-      }).catch(e => console.error('[referral] tracking failed:', e)); // fire-and-forget, don't block signup
+      }).then(null, function(e) { console.error('[referral] tracking failed:', e); }); // fire-and-forget, don't block signup
     }
 
     // Populate the preview card — show photo if uploaded, else initials
@@ -373,6 +373,8 @@ async function createProfile(otpCode) {
   } catch (e) {
     setLoading('btn-verify-otp', false, 'Verify & Create Profile');
     showError(2, e instanceof TypeError ? networkErrorMsg() : `Error: ${e.message}`);
+    if (typeof window.reportError === 'function') window.reportError('join/createProfile', e);
+    else console.error('[join/createProfile]', e);
   }
 }
 
@@ -384,13 +386,13 @@ function copyUrl() {
         const ta = document.createElement('textarea');
         ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
         document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); resolve(); } catch (e) { reject(e); }
+        if (document.execCommand('copy')) { resolve(); } else { reject(new Error('execCommand failed')); }
         document.body.removeChild(ta);
       });
-  doCopy.then(() => {
+  doCopy.then(function() {
     const btn = document.querySelector('.btn-copy');
     btn.textContent = 'COPIED'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000);
-  }).catch(() => {});
+  }, function() {});
 }
 
 function shareWhatsApp() {
@@ -485,7 +487,7 @@ function restoreFormState() {
 }
 
 function clearFormState() {
-  try { localStorage.removeItem(FORM_DRAFT_KEY); } catch(e) { /* private mode — ignore */ }
+  localStorage.removeItem(FORM_DRAFT_KEY);
 }
 
 // Attach save-on-input listeners to all persisted fields
