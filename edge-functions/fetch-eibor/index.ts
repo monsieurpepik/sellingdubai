@@ -78,6 +78,13 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 204, headers });
   }
 
+  if (req.method !== "GET") {
+    return new Response(JSON.stringify({ error: 'Method not allowed.' }), {
+      status: 405,
+      headers: { ...headers, 'Allow': 'GET, OPTIONS' },
+    });
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
