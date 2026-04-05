@@ -214,7 +214,7 @@ Budget violations cause the `ci` job to fail via `npm run check`. On PRs, the `b
 
 ### Integration tests — edge functions
 
-~30 of 41 edge functions have integration tests. Test files live at `edge-functions/<name>/test.ts`. Tests run against the real local Supabase stack (not mocked), so they cover actual DB writes, RLS policies, and edge function logic end-to-end.
+34 of 41 edge functions have integration tests; 7 are explicitly excluded — see `DECISIONS.md` → "Untested Edge Functions — Justification Register" for rationale. Test files live at `edge-functions/<name>/test.ts`. Tests run against the real local Supabase stack (not mocked), so they cover actual DB writes, RLS policies, and edge function logic end-to-end.
 
 ```bash
 npm run test:functions   # requires local Supabase stack running (npm run dev)
@@ -439,6 +439,18 @@ Run this before every deploy. The `pre-deploy-check.sh` script also calls it.
 
 Entry points: `js/init.ts`, `js/agency-page.ts`, `js/event-delegation.ts`
 
+### Lazy-Loaded Modules
+
+The following modules are dynamically imported on demand and are **not** included in `init.bundle.js`:
+
+| Module | Loaded when |
+|---|---|
+| `mortgage.ts` | User opens mortgage enquiry form |
+| `mortgage-offplan.ts` | User opens off-plan mortgage flow |
+| `property-detail.ts` | User opens property detail sheet |
+| `project-detail.ts` | User opens project detail sheet |
+| `lead-modal.ts` | Agent opens lead capture modal |
+
 **Category B — JS with @ts-check (IIFE / standalone):** Standalone scripts loaded via `<script>` tags. These remain `.js` files but have `// @ts-check` at the top and JSDoc annotations on key variables. Checked by the TypeScript language server in editors; not part of the `tsc --noEmit` pass.
 
 Category B files: `js/dashboard.js`, `js/edit.js`, `js/join.js`, `js/agency-dashboard.js`, `js/pricing.js`, `js/landing-behavior.js`, `js/landing-chip-anim.js`, `js/cookie-consent.js`, `js/sd-config.js`, `js/gtag-init.js`, `js/sentry-init.js`, `js/async-css.js`
@@ -536,6 +548,16 @@ All non-blocking — wrapped in `Promise.allSettled()`, never sequentially await
 | `/dist/chunks/*` (hashed) | `public, max-age=31536000, immutable` |
 | `/dist/*.css` | `public, max-age=31536000, immutable` |
 | `/fonts/*.woff2` | `public, max-age=31536000, immutable` |
+
+### Core Web Vitals Targets
+
+| Metric | Target | Threshold (fail) |
+|---|---|---|
+| LCP (Largest Contentful Paint) | < 2.5 s | > 4.0 s |
+| INP (Interaction to Next Paint) | < 200 ms | > 500 ms |
+| CLS (Cumulative Layout Shift) | < 0.1 | > 0.25 |
+
+Measured via Lighthouse CI on every deploy. Reference: [web.dev/vitals](https://web.dev/vitals).
 
 ---
 
@@ -674,3 +696,73 @@ The public anon key appears in two places — update both simultaneously:
 2. `js/config.ts` — `export const SUPABASE_ANON_KEY`
 
 The anon key is safe to expose (it is a public read-only key scoped by RLS policies).
+
+### API Key Rotation
+
+To rotate a secret without downtime:
+
+1. Add the new secret value as a *new* env var in Netlify (Settings → Environment Variables) and Supabase (project Settings → Edge Functions → Secrets) under a temporary name, e.g. `SUPABASE_KEY_NEW`.
+2. Deploy a code change that reads both the old and new var, preferring the new one.
+3. Confirm traffic is flowing correctly for at least 5 minutes.
+4. Remove the old var and rename the new var to the canonical name.
+5. Remove the fallback read from code and deploy again.
+
+For Stripe keys specifically: use Stripe's built-in key rotation — disable the old restricted key only after the new one is confirmed working in production.
+
+---
+
+## Troubleshooting
+
+### Edge function returns 500 in production
+
+1. Check Sentry for the error — filter by `transaction` matching the function name.
+2. Check Supabase function logs: Dashboard → Edge Functions → select function → Logs tab.
+3. Reproduce locally: `supabase functions serve <name> --env-file ./supabase/.env --no-verify-jwt` then `curl` the failing request.
+4. Common causes: missing env var (check Supabase secrets), RLS policy blocking a service-role query (check `supabase/SCHEMA.md`), Deno import resolution (check `deno.json` importMap).
+
+### Deploy succeeds but site is broken
+
+1. Check Netlify deploy log for build errors.
+2. Run `npm run check` locally — catches bundle size regressions and CTA routing issues.
+3. Check browser console for JS errors — all are reported to Sentry with release tag.
+4. If a bad deploy is live, use **Rollback** procedure below.
+
+### Database migration fails on `supabase db reset`
+
+1. Check that all migrations in `supabase/migrations/` use `IF NOT EXISTS` guards.
+2. Identify the failing migration from the error output.
+3. Fix the SQL and re-run `supabase db reset`.
+4. If the migration order is wrong, rename the timestamp prefix to reorder.
+
+### Magic link auth loop (user keeps getting new links)
+
+Check `magic_links` table: the row should have `used_at IS NOT NULL` after first use. If `used_at` is null after use, the `verify-magic-link` function may have failed to update it — check Sentry for errors from that function.
+
+---
+
+## Rollback
+
+### Frontend (Netlify)
+
+1. Go to Netlify → Deploys.
+2. Find the last known-good deploy (green checkmark, correct timestamp).
+3. Click **Publish deploy** — Netlify instantly serves that build, no rebuild required.
+4. Notify team in Slack with the deploy URL and reason.
+
+### Database migration
+
+If a migration caused data corruption or a schema change needs reverting:
+
+1. **Stop traffic** — pause the Netlify site (Site Settings → Danger Zone → Pause publishing) or put up a maintenance page.
+2. Write a new *forward* migration that undoes the change (do not delete the bad migration — history must be preserved).
+3. Apply the new migration: `supabase db push` (or via the Supabase dashboard SQL editor for emergencies).
+4. Re-enable traffic.
+
+> Never use `supabase db reset` against production — it drops and rebuilds the entire schema.
+
+### Edge function
+
+Supabase does not support instant edge function rollback. To revert:
+1. Check out the previous working commit.
+2. Run `supabase functions deploy <name>` from that commit.
+3. The previous version is live within ~30 seconds.
