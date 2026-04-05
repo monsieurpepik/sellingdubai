@@ -91,3 +91,19 @@ baseline) and is monitored via Sentry alerts.
 - Netlify uptime: https://www.netlifystatus.com
 - Supabase uptime: https://status.supabase.com
 - Sentry dashboard: https://sentry.io/organizations/<org>/alerts/
+
+## Core Web Vitals SLOs
+
+Measured via Lighthouse CI on every Netlify deploy (chromium, 4x CPU throttle, Fast 3G).
+
+| Metric | SLO Target | Alert Threshold |
+|---|---|---|
+| LCP (Largest Contentful Paint) | < 2.5 s | > 4.0 s |
+| INP (Interaction to Next Paint) | < 200 ms | > 500 ms |
+| CLS (Cumulative Layout Shift) | < 0.1 | > 0.25 |
+
+**Measurement:** Lighthouse CI run post-deploy, results stored as GitHub Actions artifacts (`lighthouse-report/`). Manual spot-check via PageSpeed Insights on `index.html` and `landing.html` after each major JS change.
+
+**Alerting:** Currently manual — no automated alert fires on CWV regression. To automate: add a Lighthouse CI budget assertion in `lighthouserc.js` that fails the deploy job when targets are breached.
+
+**Vendor SLA note:** Core Web Vitals are measured client-side and are not covered by Netlify's or Supabase's infrastructure SLAs. Regressions are caused by JS bundle growth, third-party script additions, or image size increases.
