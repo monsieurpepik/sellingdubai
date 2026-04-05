@@ -18,6 +18,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isBlockedSsrfUrl, getCorsHeaders as getSharedCorsHeaders } from "../_shared/utils.ts";
+import { createLogger } from "../_shared/logger.ts";
 
 const FB_GRAPH_API_VERSION = "v21.0";
 
@@ -152,6 +153,8 @@ function buildEmailHtml(
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('capture-lead-v4', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -452,6 +455,7 @@ Deno.serve(async (req: Request) => {
       .update({ agent_notified_at: new Date().toISOString() })
       .eq("id", lead.id);
 
+    log({ event: 'lead_captured', agent_id: agent.id, status: 200 });
     return new Response(
       JSON.stringify({
         success: true,
@@ -461,10 +465,13 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("capture-lead error");
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

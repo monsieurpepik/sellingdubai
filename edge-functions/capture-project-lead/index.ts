@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 async function sha256(message: string): Promise<string> {
   const msgBuffer = new TextEncoder().encode(message);
@@ -27,6 +28,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('capture-project-lead', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
@@ -195,6 +198,7 @@ Deno.serve(async (req: Request) => {
       wa_lead_link = `https://wa.me/${waNum}?text=${waMsg}`;
     }
 
+    log({ event: 'lead_captured', agent_id: agent.id, status: 200 });
     return new Response(
       JSON.stringify({
         success: true,
@@ -207,10 +211,13 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: cors }
     );
   } catch (e) {
+    log({ event: 'error', status: 500, error: String(e) });
     console.error("Unexpected error");
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: cors }
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

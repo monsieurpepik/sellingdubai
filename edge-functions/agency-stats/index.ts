@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -56,6 +57,8 @@ async function statsForAgent(
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('agency-stats', req);
+  const _start = Date.now();
   const cors = corsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -110,5 +113,7 @@ Deno.serve(async (req: Request) => {
     agents_count: members.length,
   };
 
+  log({ event: 'success', agent_id: agentId, status: 200 });
+  log.flush(Date.now() - _start);
   return new Response(JSON.stringify({ agency, agents: agentStats, totals }), { headers: cors });
 });

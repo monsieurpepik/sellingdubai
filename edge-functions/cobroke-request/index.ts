@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { escHtml, getCorsHeaders, sanitize } from "../_shared/utils.ts";
+import { createLogger } from "../_shared/logger.ts";
 
 /**
  * cobroke-request
@@ -32,6 +33,8 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('cobroke-request', req);
+  const _start = Date.now();
   const origin = req.headers.get("origin");
   const cors = getCorsHeaders(origin);
 
@@ -218,6 +221,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Co-broke request: ${buyingAgent.slug} wants to bring buyer to ${listingAgent.slug}'s property (${property.title})`);
 
+    log({ event: 'success', status: 200 });
     return new Response(JSON.stringify({
       ok: true,
       deal_id: deal.id,
@@ -227,9 +231,12 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     console.error("cobroke-request error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders, isValidImageBytes } from "../_shared/utils.ts";
+import { createLogger } from "../_shared/logger.ts";
 
 function json(data: unknown, status = 200, cors: Record<string, string> = {}) {
   return new Response(JSON.stringify(data), {
@@ -33,6 +34,8 @@ function sanitizeUrl(val: string | undefined | null): string | null {
 }
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('create-agent', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
