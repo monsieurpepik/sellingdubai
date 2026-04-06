@@ -1,5 +1,13 @@
 # Architecture Decisions Log
 
+## 2026-04-06 — agent-page chunk: 30KB (lazy-loaded to fix init.bundle.js overage)
+
+**What:** `js/agent-page.ts` is no longer eagerly imported by `init.ts`. Instead, `init.ts` starts a dynamic `import('./agent-page')` concurrently with the Supabase agent fetch. The module is `await`-ed before calling `renderAgent()`. The inline `showPage()` helper (7 lines) was copied into `init.ts` to remove the only synchronous dependency.
+
+**Why:** `init.bundle.js` was 37.7KB — 7KB over the 30KB budget. `agent-page.ts` eagerly pulled in `icons.ts` (7.9KB of SVG strings) and transitively `properties.ts` (491 lines). Since `renderAgent()` is only called after the Supabase agent fetch completes (async, 100–500ms), the chunk loads in parallel with the network request and adds zero perceptible latency.
+
+**Result:** `init.bundle.js` dropped from 37,733 bytes to 8,420 bytes. A new `agent-page-*.js` chunk is 30,045 bytes (~29.3KB). This chunk exceeds the 20KB soft limit because it contains the full agent profile rendering logic (icons, DLD badge, social links, property loading, REM projects) which is tightly coupled and cannot be split further without artificial separation. It is lazy-loaded on every agent page visit — no first-paint impact.
+
 ## 2026-04-06 — Biome linting: formatter disabled, linter only in CI
 
 **What:** Added Biome v2 (`@biomejs/biome@2.4.10`) as a dev dependency with a `biome.json` config covering `js/**` and `scripts/**`. The formatter is disabled (`"formatter": { "enabled": false }`). The linter runs in CI as a blocking gate via `npm run lint`.

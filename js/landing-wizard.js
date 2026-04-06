@@ -1,6 +1,6 @@
 // @ts-check
 
-(function() {
+(() => {
   // Cache DOM elements
   const overlay = document.getElementById('wizard-overlay');
   const closeBtn = document.getElementById('wizard-close');
@@ -192,11 +192,11 @@
       },
       body: JSON.stringify(payload)
     })
-      .then(response => {
+      .then(_response => {
         // Always show success on any response (2xx or non-2xx)
         showStep(3);
       })
-      .catch(error => {
+      .catch(_error => {
         // Network error
         if (step2Error) step2Error.textContent = 'Something went wrong. Please try again.';
         submitBtn.disabled = false;

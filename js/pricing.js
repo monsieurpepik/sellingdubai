@@ -55,7 +55,7 @@ async function startCheckout(plan, interval, btn) {
 
   try {
     var supabaseUrl = (typeof window !== 'undefined' && window.__SD_SUPABASE_URL__) || 'https://pjyorgedaxevxophpfib.supabase.co';
-    var res = await fetch(supabaseUrl + '/functions/v1/create-checkout', {
+    var res = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: token, plan: plan, interval: interval })

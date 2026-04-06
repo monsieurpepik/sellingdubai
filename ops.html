@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SellingDubai Ops</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/dist/styles.min.css">
+  <style>
+    body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 2rem; }
+    #ops-root { max-width: 1200px; margin: 0 auto; }
+    #ops-root h1 { font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 2rem; }
+    .ops-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .metric-card { background: #1e293b; border-radius: 12px; padding: 1.5rem; }
+    .metric-card .label { font-size: 0.75rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .metric-card .value { font-size: 2rem; font-weight: 700; color: #f8fafc; }
+    .metric-card .sub { font-size: 0.875rem; color: #64748b; margin-top: 0.25rem; }
+    .metric-card .badge-stale { font-size: 0.7rem; background: #7c3aed; color: #fff; padding: 2px 8px; border-radius: 99px; vertical-align: middle; margin-left: 0.5rem; }
+    .chart-section { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+    .chart-section h2 { font-size: 0.875rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 1rem 0; }
+    .funnel-section { background: #1e293b; border-radius: 12px; padding: 1.5rem; }
+    .funnel-section h2 { font-size: 0.875rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 1rem 0; }
+    .funnel-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #334155; }
+    .funnel-row:last-child { border-bottom: none; }
+    .funnel-row .step { font-size: 0.875rem; color: #cbd5e1; }
+    .funnel-row .count { font-size: 1.125rem; font-weight: 600; color: #f8fafc; }
+    .funnel-bar { height: 4px; background: #334155; border-radius: 2px; margin-top: 0.25rem; }
+    .funnel-bar-fill { height: 100%; background: #6366f1; border-radius: 2px; transition: width 0.4s ease; }
+    #ops-auth-error { text-align: center; padding: 4rem 2rem; }
+    #ops-auth-error p { font-size: 1.25rem; color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div id="ops-root">
+    <div id="ops-auth-error" style="display:none">
+      <p>Access denied. Provide the correct <code>?key=</code> parameter.</p>
+    </div>
+    <div id="ops-load-error" style="display:none">
+      <p style="color:#f59e0b">Failed to load metrics. Check the edge function logs.</p>
+    </div>
+    <div id="ops-content" style="display:none">
+      <h1>SellingDubai Ops Dashboard</h1>
+      <div class="ops-grid" id="metrics-cards"></div>
+      <div class="chart-section">
+        <h2>Lead Volume — Last 30 Days</h2>
+        <svg id="lead-chart" width="100%" height="120" viewBox="0 0 700 120" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="funnel-section" id="funnel-section"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // OPS_SECRET check — validate key server-side by calling get-metrics
+    const params = new URLSearchParams(location.search);
+    const key = params.get('key') || '';
+
+    // Hardcoded intentionally: ops.html has no build step, and this page always
+    // calls the production edge function regardless of where the page is viewed.
+    const SUPABASE_FUNCTIONS_URL = 'https://pjyorgedaxevxophpfib.supabase.co/functions/v1';
+
+    async function validateAndLoad() {
+      if (!key) {
+        document.getElementById('ops-auth-error').style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/get-metrics`, {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        if (res.status === 401) {
+          document.getElementById('ops-auth-error').style.display = 'block';
+          return;
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        document.getElementById('ops-content').style.display = 'block';
+        const data = await res.json();
+
+        const { default: renderOps } = await import('/js/ops.js');
+        renderOps(data, key, SUPABASE_FUNCTIONS_URL);
+      } catch (err) {
+        document.getElementById('ops-load-error').style.display = 'block';
+        console.error('Ops load failed:', err);
+      }
+    }
+
+    validateAndLoad();
+  </script>
+</body>
+</html>
