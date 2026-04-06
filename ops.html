@@ -35,6 +35,9 @@
     <div id="ops-auth-error" style="display:none">
       <p>Access denied. Provide the correct <code>?key=</code> parameter.</p>
     </div>
+    <div id="ops-load-error" style="display:none">
+      <p style="color:#f59e0b">Failed to load metrics. Check the edge function logs.</p>
+    </div>
     <div id="ops-content" style="display:none">
       <h1>SellingDubai Ops Dashboard</h1>
       <div class="ops-grid" id="metrics-cards"></div>
@@ -75,7 +78,7 @@
         const { default: renderOps } = await import('/js/ops.js');
         renderOps(data, key, SUPABASE_FUNCTIONS_URL);
       } catch (err) {
-        document.getElementById('ops-auth-error').style.display = 'block';
+        document.getElementById('ops-load-error').style.display = 'block';
         console.error('Ops load failed:', err);
       }
     }
