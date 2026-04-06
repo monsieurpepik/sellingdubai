@@ -2,13 +2,23 @@
 // APP INITIALIZATION
 // ==========================================
 
-import { hydrateOgMeta, injectSchemaOrg, renderAgent, showEditButtonIfOwner, showPage } from './agent-page';
 import { trackPageView } from './analytics';
 import { SUPABASE_URL, supabase } from './config';
 import { getAgentSlug } from './utils';
 import './event-delegation';
 import './errors';
 import type { Agent } from './state';
+
+// Inlined from agent-page — too small to justify keeping agent-page (icons + properties) in the eager bundle.
+// agent-page is lazy-loaded below, concurrently with the Supabase fetch.
+function showPage(id: string): void {
+  document.getElementById('loading')?.classList.add('hidden');
+  document.getElementById('skeleton')?.classList.add('hidden');
+  document.getElementById('error')?.classList.add('hidden');
+  document.getElementById('pending')?.classList.add('hidden');
+  document.getElementById('agent-page')?.classList.add('hidden');
+  document.getElementById(id)?.classList.remove('hidden');
+}
 
 // closeDetail stub — available immediately, before property-detail.ts lazy-loads.
 // property-detail.ts replaces this with its full implementation when it loads.
@@ -189,6 +199,11 @@ async function init(): Promise<void> {
   document.getElementById('loading')?.classList.add('hidden');
   document.getElementById('skeleton')?.classList.remove('hidden');
 
+  // Kick off agent-page lazy load concurrently with the Supabase fetch.
+  // agent-page.ts pulls in icons.ts + properties.ts — keeping them out of the
+  // eager init bundle saves ~10KB. They're only needed after the data fetch anyway.
+  const agentPagePromise = import('./agent-page');
+
   // Timeout guard — show error if fetch takes > 10s
   const timeout = setTimeout(() => { showPage('error'); }, 10000);
 
@@ -234,6 +249,7 @@ async function init(): Promise<void> {
       document.getElementById('verification-pending-banner')?.classList.remove('hidden');
     }
 
+    const { renderAgent, hydrateOgMeta, injectSchemaOrg, showEditButtonIfOwner } = await agentPagePromise;
     renderAgent(agentData);
 
     // Non-critical enhancements — failures here don't break the profile
