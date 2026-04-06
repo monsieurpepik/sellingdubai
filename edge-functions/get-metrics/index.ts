@@ -1,8 +1,8 @@
 // edge-functions/get-metrics/index.ts
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const OPS_SECRET = Deno.env.get("OPS_SECRET") || "";
 
 const CORS_HEADERS = {
@@ -14,6 +14,12 @@ const CORS_HEADERS = {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    return new Response(JSON.stringify({ error: "Supabase env vars not configured." }), {
+      status: 503, headers: CORS_HEADERS,
+    });
+  }
 
   // Auth: require OPS_SECRET in Authorization header
   if (!OPS_SECRET) {
