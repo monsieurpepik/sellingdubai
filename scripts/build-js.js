@@ -67,10 +67,10 @@ const pricingPath = 'js/pricing.js';
 const pricingSource = fs.readFileSync(pricingPath, 'utf8');
 // Replace whichever boolean is currently present — idempotent for repeated local builds.
 const pricingPatched = pricingSource.replace(
-  /var BILLING_LIVE = (true|false);/,
-  `var BILLING_LIVE = ${billingLive};`
+  /(?:const|var) BILLING_LIVE = (true|false);/,
+  `const BILLING_LIVE = ${billingLive};`
 );
-if (pricingPatched === pricingSource && !/var BILLING_LIVE = (true|false);/.test(pricingSource)) {
+if (pricingPatched === pricingSource && !/(?:const|var) BILLING_LIVE = (true|false);/.test(pricingSource)) {
   console.error('build-js: BILLING_LIVE patch failed — declaration not found in js/pricing.js');
   process.exit(1);
 }
