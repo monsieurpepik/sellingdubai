@@ -1,6 +1,6 @@
 // @ts-check
 
-(function() {
+(() => {
   // Cache DOM elements
   const overlay = document.getElementById('wizard-overlay');
   const closeBtn = document.getElementById('wizard-close');
