@@ -7,8 +7,8 @@
 // ==========================================
 
 import { renderOffPlanCard, renderPropertyCard } from './components.js';
-import { allProperties, currentFilters } from './state.js';
 import { initOffPlanCarousel } from './properties.js';
+import { allProperties, currentFilters } from './state.js';
 
 export function renderPropertyList(props: { listing_type?: string; [key: string]: unknown }[]) {
   const listEl = document.getElementById('prop-list');
