@@ -606,3 +606,24 @@ Leads captured via agent-promoted featured project pages.
 |----------|-----------|---------|
 | `set_updated_at()` | `() RETURNS TRIGGER` | Generic `updated_at = now()` trigger. Used by agencies, developers, projects, project_units, agents. |
 | `increment_bonus_listings()` | `(agent_uuid UUID) RETURNS VOID` | Increments `agents.bonus_listings` by 1. Called by `manage-cobroke` (both agents on close_won) and `manage-referral` (referrer on close_won). SECURITY DEFINER. |
+
+## Schema Diff — Production vs Reconstructed Migrations (2026-04-06)
+
+A `supabase db pull` diff revealed 8 tables present in production that were missing from the Phase 3 reconstruction. All have been added via migrations `20260900000000_analytics_tables.sql` and `20260901000000_billing_and_units.sql`.
+
+### Tables added
+
+| Table | Migration | Purpose |
+|-------|-----------|---------|
+| `developers` | analytics_tables | Developer profiles for off-plan projects |
+| `page_views` | analytics_tables | Agent page view analytics (UTM, device, geo) |
+| `link_clicks` | analytics_tables | Agent link click tracking (WhatsApp, email, etc.) |
+| `email_signups` | analytics_tables | Email signups from agent pages |
+| `dld_projects` | billing_and_units | DLD project registry (synced by sync-rem-offplan) |
+| `dld_transactions` | billing_and_units | DLD transaction records per agent |
+| `subscription_events` | billing_and_units | Stripe billing event log |
+| `project_units` | billing_and_units | Individual off-plan project units |
+
+### Migration history note
+
+The production database's `supabase_migrations` table contains 35 real migration files (timestamps 20260323–20260401) that predate the Phase 3 reconstruction. Our local `supabase/migrations/` directory contains 23 files with reconstructed timestamps (20240101–20260901). The histories diverge — run `supabase migration repair` commands documented in `.planning/STATE.md` to reconcile if needed.

@@ -261,3 +261,13 @@ This is the OAuth redirect callback for Instagram login. Testing it requires ini
 
 ### `tiktok-auth` — OAuth callback, requires browser session
 TikTok OAuth callback requires a browser-initiated flow with a valid TikTok app session. Like `instagram-auth`, the handler only processes the redirect from TikTok's authorization server and cannot be invoked meaningfully in a headless Deno test. Covered by manual QA on staging.
+
+## 2026-04-06 — Schema Diff: 8 Tables Missing from Phase 3 Reconstruction
+
+A live `supabase db pull` diff (via MCP direct SQL) revealed 8 tables in production that Phase 3 reconstruction missed: `developers`, `page_views`, `link_clicks`, `email_signups`, `dld_projects`, `dld_transactions`, `subscription_events`, `project_units`.
+
+**Why missed:** These tables had no edge function source code that referenced their CREATE TABLE statement — they were created via the Supabase dashboard or early migrations not preserved in source control. Phase 3 only reconstructed tables referenced in edge function SQL.
+
+**Resolution:** Two new migrations added (`20260900000000` and `20260901000000`) with schemas derived from `information_schema.columns` query against the live production database.
+
+**RLS note:** RLS policies on these tables are best-effort reconstructions. The production policies should be verified in Supabase Dashboard → Authentication → Policies.
