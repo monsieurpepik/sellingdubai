@@ -3,6 +3,14 @@
 // Lazy-loaded by ops.html after OPS_SECRET validation.
 // Renders metric cards, SVG line chart, and funnel table.
 
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function fmtAED(n) {
   if (n >= 1_000_000) return `AED ${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `AED ${Math.round(n / 1_000)}K`;
@@ -19,15 +27,15 @@ function renderCards(data) {
     : 'No prior month data';
 
   const cards = [
-    { label: 'MRR', value: fmtAED(data.mrr), sub: `ARR ${fmtAED(data.arr)}` },
-    { label: 'New Agents (MoM)', value: fmtNum(data.funnel.joined), sub: momLabel },
-    { label: 'Paid Agents', value: fmtNum(data.funnel.paid), sub: `Pro + Premium` },
-    { label: 'Activation Rate', value: `${data.activation_rate_pct}%`, sub: 'Agents with ≥1 listing' },
-    { label: 'Leads (30d)', value: fmtNum(data.total_leads_30d), sub: 'All agents combined' },
-    { label: 'Churn (30d)', value: fmtNum(data.churn_30d), sub: 'Cancellations this month' },
-    { label: 'Free', value: fmtNum(data.tier_breakdown.free ?? 0), sub: 'Free tier agents' },
-    { label: 'Pro', value: fmtNum(data.tier_breakdown.pro ?? 0), sub: 'AED 299/mo' },
-    { label: 'Premium', value: fmtNum(data.tier_breakdown.premium ?? 0), sub: 'AED 799/mo' },
+    { label: 'MRR', value: esc(fmtAED(data.mrr)), sub: `ARR ${esc(fmtAED(data.arr))}` },
+    { label: 'New Agents (MoM)', value: esc(fmtNum(data.funnel.joined)), sub: esc(momLabel) },
+    { label: 'Paid Agents', value: esc(fmtNum(data.funnel.paid)), sub: `Pro + Premium` },
+    { label: 'Activation Rate', value: `${esc(data.activation_rate_pct)}%`, sub: 'Agents with ≥1 listing' },
+    { label: 'Leads (30d)', value: esc(fmtNum(data.total_leads_30d)), sub: 'All agents combined' },
+    { label: 'Churn (30d)', value: esc(fmtNum(data.churn_30d)), sub: 'Cancellations this month' },
+    { label: 'Free', value: esc(fmtNum(data.tier_breakdown.free ?? 0)), sub: 'Free tier agents' },
+    { label: 'Pro', value: esc(fmtNum(data.tier_breakdown.pro ?? 0)), sub: 'AED 299/mo' },
+    { label: 'Premium', value: esc(fmtNum(data.tier_breakdown.premium ?? 0)), sub: 'AED 799/mo' },
   ];
 
   const container = document.getElementById('metrics-cards');
@@ -91,7 +99,7 @@ function renderFunnel(funnel) {
     ${steps.map(s => `
       <div class="funnel-row">
         <span class="step">${s.label}</span>
-        <span class="count">${fmtNum(s.count)}</span>
+        <span class="count">${esc(fmtNum(s.count))}</span>
       </div>
       <div class="funnel-bar">
         <div class="funnel-bar-fill" style="width:${Math.round((s.count / maxCount) * 100)}%"></div>

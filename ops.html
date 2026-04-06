@@ -54,6 +54,8 @@
     const params = new URLSearchParams(location.search);
     const key = params.get('key') || '';
 
+    // Hardcoded intentionally: ops.html has no build step, and this page always
+    // calls the production edge function regardless of where the page is viewed.
     const SUPABASE_FUNCTIONS_URL = 'https://pjyorgedaxevxophpfib.supabase.co/functions/v1';
 
     async function validateAndLoad() {
