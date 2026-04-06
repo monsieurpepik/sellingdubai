@@ -107,6 +107,7 @@ export async function loadProperties(agentId: string): Promise<Property[]> {
     propertiesCache = [];
     propertiesOffset = 0;
     propertiesHasMore = false;
+    propertiesLoadingMore = false;
   }
   if (propertiesLoaded) return propertiesCache;
   propertiesError = null;
