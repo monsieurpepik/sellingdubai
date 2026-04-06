@@ -157,8 +157,8 @@ echo ""
 # ── 8. Hardcoded prod URLs in edge functions ──────────────────────────────────
 echo -e "${BOLD}8. Edge function hygiene${NC}"
 HARDCODED_PROD=$(grep -rn "pjyorgedaxevxophpfib\.supabase\.co" \
-  edge-functions/ --include="*.ts" \
-  | grep -v "\.test\.\|index\.test\." | grep -v "_shared" | head -5 || true)
+  edge-functions/ --include="*.ts" js/ --include="*.js" \
+  | grep -v "\.test\.\|index\.test\." | grep -v "_shared" | grep -v "__SD_SUPABASE_URL__" | head -5 || true)
 if [ -n "$HARDCODED_PROD" ]; then
   warn "Hardcoded prod Supabase URL in edge functions (use Deno.env.get('SUPABASE_URL') instead):"
   echo "$HARDCODED_PROD" | sed 's/^/    /'
