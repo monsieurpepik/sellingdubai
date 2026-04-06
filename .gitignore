@@ -39,3 +39,4 @@ node_modules/
 
 # Deployment artifacts
 *.zip
+.worktrees/
