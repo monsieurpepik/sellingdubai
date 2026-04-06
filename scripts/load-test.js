@@ -47,7 +47,7 @@ export const options = {
 // -- Config — injected via env vars from load-test.sh --
 const BASE_URL      = __ENV.BASE_URL      || 'https://staging.sellingdubai.com';
 const SUPABASE_URL  = __ENV.SUPABASE_URL  || 'https://pjyorgedaxevxophpfib.supabase.co/functions/v1';
-const TEST_AGENT_ID = __ENV.TEST_AGENT_ID || 'loadtest-agent-uuid-placeholder';
+const TEST_AGENT_SLUG = __ENV.TEST_AGENT_SLUG || 'test-agent';
 // send-magic-link requires an authed session token for the test agent.
 // Generate once via: supabase functions invoke send-magic-link --project-ref pjyorgedaxevxophpfib
 // and paste the Bearer token here, or inject via LOADTEST_TOKEN env var.
@@ -58,11 +58,11 @@ export default function () {
   {
     const url = `${SUPABASE_URL}/capture-lead-v4`;
     const payload = JSON.stringify({
-      name:     'Load Test User',
-      email:    `loadtest+${Date.now()}@sellingdubai.com`,
-      phone:    '+971501234567',
-      agent_id: TEST_AGENT_ID,
-      source:   'load-test',
+      name:       'Load Test User',
+      email:      `loadtest+${Date.now()}@sellingdubai.com`,
+      phone:      '+971501234567',
+      agent_slug: TEST_AGENT_SLUG,
+      source:     'load-test',
     });
     const params = { headers: { 'Content-Type': 'application/json' } };
     const start = Date.now();

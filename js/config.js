@@ -14,7 +14,7 @@ export const SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY__ !== 'undefined') 
 if (!SUPABASE_ANON_KEY) {
   console.error('[config] SUPABASE_ANON_KEY is not set — check your environment variables');
 }
-export const CAPTURE_URL = `${SUPABASE_URL}/functions/v1/capture-lead`;
+export const CAPTURE_URL = `${SUPABASE_URL}/functions/v1/capture-lead-v4`;
 export const LOG_EVENT_URL = `${SUPABASE_URL}/functions/v1/log-event`;
 
 export const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

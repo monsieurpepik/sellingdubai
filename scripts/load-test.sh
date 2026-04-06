@@ -27,7 +27,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 BASE_URL="${BASE_URL:-https://staging.sellingdubai.com}"
 SUPABASE_URL="${SUPABASE_URL:-https://pjyorgedaxevxophpfib.supabase.co/functions/v1}"
-TEST_AGENT_ID="${TEST_AGENT_ID:-loadtest-agent-uuid-placeholder}"
+TEST_AGENT_SLUG="${TEST_AGENT_SLUG:-test-agent}"
 LOADTEST_TOKEN="${LOADTEST_TOKEN:-}"
 JSON_OUT="${JSON_OUT:-${SCRIPT_DIR}/load-test-results.json}"
 
@@ -49,13 +49,13 @@ echo ""
 echo "=== SellingDubai Load Test ==="
 echo "  Frontend:  $BASE_URL"
 echo "  Functions: $SUPABASE_URL"
-echo "  Agent ID:  $TEST_AGENT_ID"
+echo "  Agent:     $TEST_AGENT_SLUG"
 echo "  JSON out:  $JSON_OUT"
 echo ""
 
 BASE_URL="$BASE_URL" \
 SUPABASE_URL="$SUPABASE_URL" \
-TEST_AGENT_ID="$TEST_AGENT_ID" \
+TEST_AGENT_SLUG="$TEST_AGENT_SLUG" \
 LOADTEST_TOKEN="$LOADTEST_TOKEN" \
   k6 run \
     --out "json=${JSON_OUT}" \

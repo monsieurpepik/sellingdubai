@@ -585,13 +585,13 @@ window.mortCaptureAndProceed = async () => {
   if (step3Phone && !step3Phone.value) step3Phone.value = rawPhone;
   // Fire-and-forget: capture as a lead for the agent immediately
   try {
-    const agentId = currentAgent?.id;
+    const agentSlug = currentAgent?.slug;
     const propTitle = window._currentProperty?.title || null;
-    fetch(`${SUPABASE_URL}/functions/v1/capture-lead`, {
+    fetch(`${SUPABASE_URL}/functions/v1/capture-lead-v4`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        agent_id: agentId, name: name, phone: phone,
+        agent_slug: agentSlug, name: name, phone: phone,
         source: 'mortgage_calculator', message: `Mortgage pre-qualification — Max loan: ${fmtAEDMort(_mortState.data.maxLoan ?? 0)}${propTitle ? ` — Property: ${propTitle}` : ''}`,
         property_title: propTitle
       })
