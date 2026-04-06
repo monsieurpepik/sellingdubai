@@ -271,3 +271,18 @@ A live `supabase db pull` diff (via MCP direct SQL) revealed 8 tables in product
 **Resolution:** Two new migrations added (`20260900000000` and `20260901000000`) with schemas derived from `information_schema.columns` query against the live production database.
 
 **RLS note:** RLS policies on these tables are best-effort reconstructions. The production policies should be verified in Supabase Dashboard → Authentication → Policies.
+
+## 2026-04-06 — Load Test CI Wiring
+
+Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-action@v1` and runs weekly on Monday 03:00 UTC against staging, or on-demand via `workflow_dispatch`.
+
+**Staging Supabase project:** `lhrtdlxqbdxrfvjeoxrt` (sellingdubai-staging, Frankfurt)
+
+**Staging setup checklist (human actions required before first CI run):**
+1. Deploy edge functions to staging: `supabase functions deploy --project-ref lhrtdlxqbdxrfvjeoxrt`
+2. Seed load test agent: `deno run --allow-env --allow-net scripts/seed-loadtest-agent.ts` (against staging URL)
+3. Add `LOADTEST_AGENT_ID` secret to GitHub repo with the seeded agent UUID
+4. Provision `staging.sellingdubai.com` DNS (Netlify → staging branch deploy) or use a deploy preview URL as `base_url` input
+5. (Optional) Add `LOADTEST_TOKEN` secret for `send-magic-link` load testing
+
+**Why separate workflow file (not in ci.yml):** Load tests run 4.5 minutes with 100 VUs. Running this on every PR would consume runner minutes and risk rate-limiting the staging environment. Weekly schedule + manual dispatch is the right cadence.

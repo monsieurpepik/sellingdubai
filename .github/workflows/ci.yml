@@ -8,6 +8,8 @@ name: CI/CD
 #   SENTRY_ORG         — your Sentry org slug (e.g. "sellingdubai")
 #   SENTRY_PROJECT     — your Sentry project slug (e.g. "sellingdubai-web")
 #   LHCI_GITHUB_APP_TOKEN — optional: enables Lighthouse CI GitHub status checks
+#   LOADTEST_AGENT_ID  — UUID of the seeded test agent in the staging Supabase project
+#   LOADTEST_TOKEN     — Bearer token for send-magic-link load test (optional)
 
 on:
   push:

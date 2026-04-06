@@ -1,0 +1,57 @@
+name: Load Test (k6)
+
+on:
+  # Manual trigger with configurable parameters
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Frontend base URL (e.g. https://staging.sellingdubai.com or a Netlify preview URL)'
+        required: true
+        default: 'https://staging.sellingdubai.com'
+      supabase_url:
+        description: 'Supabase functions base URL'
+        required: false
+        default: 'https://lhrtdlxqbdxrfvjeoxrt.supabase.co/functions/v1'
+  # Weekly scheduled run against staging
+  schedule:
+    - cron: '0 3 * * 1'  # Monday 03:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  load-test:
+    name: k6 Load Test (100 VUs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run load test
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://staging.sellingdubai.com' }}
+          SUPABASE_URL: ${{ github.event.inputs.supabase_url || 'https://lhrtdlxqbdxrfvjeoxrt.supabase.co/functions/v1' }}
+          TEST_AGENT_ID: ${{ secrets.LOADTEST_AGENT_ID }}
+          LOADTEST_TOKEN: ${{ secrets.LOADTEST_TOKEN }}
+          JSON_OUT: load-test-results.json
+        run: |
+          BASE_URL="$BASE_URL" \
+          SUPABASE_URL="$SUPABASE_URL" \
+          TEST_AGENT_ID="${TEST_AGENT_ID:-loadtest-agent-uuid-placeholder}" \
+          LOADTEST_TOKEN="${LOADTEST_TOKEN:-}" \
+          JSON_OUT="$JSON_OUT" \
+          k6 run \
+            --out "json=${JSON_OUT}" \
+            scripts/load-test.js
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-results
+          path: load-test-results.json
+          retention-days: 30
