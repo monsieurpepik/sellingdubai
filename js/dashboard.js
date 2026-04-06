@@ -1,5 +1,5 @@
 // @ts-check
-(function() {
+(() => {
   // Credentials loaded from js/sd-config.js — update that file when rotating keys
   /** @type {{ SUPABASE_URL: string; SUPABASE_ANON_KEY: string }} */
   const cfg = window.SD_CONFIG;
@@ -45,7 +45,7 @@
     document.getElementById('auth-loading').classList.add('hidden');
   }
 
-  window.showAuthForm = function() {
+  window.showAuthForm = () => {
     document.getElementById('auth-form').classList.remove('hidden');
     document.getElementById('auth-sent').classList.add('hidden');
   };
@@ -138,13 +138,13 @@
     // Set agent info
     const a = currentAgent;
     document.getElementById('sidebar-name').textContent = a.name || '—';
-    document.getElementById('sidebar-tier').textContent = (a.tier || 'free').charAt(0).toUpperCase() + (a.tier || 'free').slice(1) + ' plan';
-    document.getElementById('nav-view-profile').href = '/a/' + (a.slug || '');
-    document.getElementById('mobile-view-profile').href = '/a/' + (a.slug || '');
+    document.getElementById('sidebar-tier').textContent = `${(a.tier || 'free').charAt(0).toUpperCase() + (a.tier || 'free').slice(1)} plan`;
+    document.getElementById('nav-view-profile').href = `/a/${a.slug || ''}`;
+    document.getElementById('mobile-view-profile').href = `/a/${a.slug || ''}`;
 
     const avatarEl = document.getElementById('sidebar-avatar');
     if (a.photo_url) {
-      avatarEl.innerHTML = '<img src="' + cdnImg(a.photo_url, 80) + '" srcset="' + cdnImg(a.photo_url, 80) + ' 80w, ' + cdnImg(a.photo_url, 160) + ' 160w" sizes="80px" width="80" height="80" alt="">';
+      avatarEl.innerHTML = `<img src="${cdnImg(a.photo_url, 80)}" srcset="${cdnImg(a.photo_url, 80)} 80w, ${cdnImg(a.photo_url, 160)} 160w" sizes="80px" width="80" height="80" alt="">`;
     } else {
       avatarEl.textContent = (a.name || '?').charAt(0).toUpperCase();
     }
@@ -158,7 +158,7 @@
   // ── Billing Card ──
   function renderBillingCard() {
     const a = currentAgent;
-    if (!a || !a.tier || a.tier === 'free') return;
+    if (!a?.tier || a.tier === 'free') return;
 
     const card = document.getElementById('billing-card');
     const badge = document.getElementById('billing-plan-badge');
@@ -167,10 +167,10 @@
     const statusBanner = document.getElementById('billing-status-banner');
 
     const tierName = a.tier.charAt(0).toUpperCase() + a.tier.slice(1);
-    const planInterval = a.stripe_plan && a.stripe_plan.includes('yearly') ? 'Yearly' : 'Monthly';
+    const planInterval = a.stripe_plan?.includes('yearly') ? 'Yearly' : 'Monthly';
     badge.textContent = tierName;
     badge.dataset.tier = a.tier;
-    planLabel.textContent = tierName + ' Plan · ' + planInterval;
+    planLabel.textContent = `${tierName} Plan · ${planInterval}`;
 
     if (a.stripe_current_period_end) {
       const periodEnd = new Date(a.stripe_current_period_end);
@@ -181,8 +181,8 @@
         graceEnd.setDate(graceEnd.getDate() + 7);
         const now = new Date();
         if (now <= graceEnd) {
-          periodLabel.textContent = 'Renews ' + fmt;
-          statusBanner.textContent = '⚠ Payment failed — update your card to keep ' + tierName + ' features';
+          periodLabel.textContent = `Renews ${fmt}`;
+          statusBanner.textContent = `⚠ Payment failed — update your card to keep ${tierName} features`;
           statusBanner.style.display = 'block';
           statusBanner.className = 'billing-status-banner billing-status-past-due';
         } else {
@@ -193,7 +193,7 @@
       } else if (a.stripe_subscription_status === 'canceled') {
         return; // Downgraded — don't show card
       } else {
-        periodLabel.textContent = 'Renews ' + fmt;
+        periodLabel.textContent = `Renews ${fmt}`;
       }
     }
 
@@ -208,7 +208,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken }),
-    }).then(null, function(e) {
+    }).then(null, (e) => {
       if (typeof window.reportError === 'function') window.reportError('dashboard/openBillingPortal', e);
       else console.error('[dashboard/openBillingPortal]', e);
       return null;
@@ -229,7 +229,7 @@
   function renderOnboarding() {
     if (!currentAgent) return;
     // Don't show if user previously dismissed
-    if (localStorage.getItem('sd_onboard_dismissed_' + currentAgent.id)) return;
+    if (localStorage.getItem(`sd_onboard_dismissed_${currentAgent.id}`)) return;
 
     const a = currentAgent;
     const hasPhoto = !!a.photo_url;
@@ -237,7 +237,7 @@
     const hasWhatsapp = !!(a.whatsapp && String(a.whatsapp).replace(/\D/g, '').length >= 8);
     // Property count will be checked after analytics load — for now mark as pending
     const hasProperty = (a.property_count || 0) > 0;
-    const hasShared = !!localStorage.getItem('sd_shared_' + a.id);
+    const hasShared = !!localStorage.getItem(`sd_shared_${a.id}`);
 
     const steps = [
       { id: 'ob-photo', done: hasPhoto },
@@ -255,11 +255,11 @@
 
     // Show checklist
     document.getElementById('onboard-checklist').style.display = 'block';
-    document.getElementById('onboard-bar').style.width = ((completed / total) * 100) + '%';
+    document.getElementById('onboard-bar').style.width = `${(completed / total) * 100}%`;
 
     steps.forEach(s => {
       const el = document.getElementById(s.id);
-      const check = document.getElementById(s.id + '-check');
+      const check = document.getElementById(`${s.id}-check`);
       if (s.done) {
         el.classList.add('done');
         check.innerHTML = '✓';
@@ -281,14 +281,14 @@
         check.innerHTML = '✓';
         // Recalculate progress
         const doneCount = document.querySelectorAll('.onboard-step.done').length;
-        document.getElementById('onboard-bar').style.width = ((doneCount / 5) * 100) + '%';
+        document.getElementById('onboard-bar').style.width = `${(doneCount / 5) * 100}%`;
         if (doneCount >= 5) document.getElementById('onboard-checklist').style.display = 'none';
       }
     }
   }
 
-  window.dismissOnboarding = function() {
-    if (currentAgent) localStorage.setItem('sd_onboard_dismissed_' + currentAgent.id, '1');
+  window.dismissOnboarding = () => {
+    if (currentAgent) localStorage.setItem(`sd_onboard_dismissed_${currentAgent.id}`, '1');
     document.getElementById('onboard-checklist').style.display = 'none';
   };
 
@@ -298,12 +298,12 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken })
-    }).then(null, function(e) {
+    }).then(null, (e) => {
       if (typeof window.reportError === 'function') window.reportError('dashboard/fetchAnalytics', e);
       else console.error('[dashboard/fetchAnalytics]', e);
       return null;
     });
-    if (analyticsRes && analyticsRes.ok) {
+    if (analyticsRes?.ok) {
       const data = await analyticsRes.json();
       renderMetrics(data);
       renderChart(data.chart || []);
@@ -313,12 +313,12 @@
     }
 
     // Check property count for onboarding step (lightweight HEAD-style query — non-critical)
-    if (currentAgent && currentAgent.id) {
+    if (currentAgent?.id) {
       const pRes = await fetch(
-        SUPABASE_URL + '/rest/v1/properties?agent_id=eq.' + currentAgent.id + '&select=id&limit=1',
+        `${SUPABASE_URL}/rest/v1/properties?agent_id=eq.${currentAgent.id}&select=id&limit=1`,
         { headers: { 'apikey': SUPABASE_ANON_KEY } }
-      ).then(null, function() { return null; });
-      if (pRes && pRes.ok) {
+      ).then(null, () => null);
+      if (pRes?.ok) {
         const props = await pRes.json();
         updateOnboardPropertyStep(props.length);
       }
@@ -338,7 +338,7 @@
     const views = tm.views || 0;
     const leads = tm.lead_submits || 0;
     const conv = views > 0 ? ((leads / views) * 100).toFixed(1) : '0.0';
-    document.getElementById('m-conv').textContent = conv + '%';
+    document.getElementById('m-conv').textContent = `${conv}%`;
     document.getElementById('m-conv-label').textContent = 'leads / views';
     document.getElementById('m-conv-label').className = 'metric-change metric-flat';
   }
@@ -354,8 +354,8 @@
       changeEl.className = 'metric-change metric-up';
     } else {
       const pct = Math.round(((current - previous) / previous) * 100);
-      if (pct > 0) { changeEl.textContent = '↑ ' + pct + '% vs last month'; changeEl.className = 'metric-change metric-up'; }
-      else if (pct < 0) { changeEl.textContent = '↓ ' + Math.abs(pct) + '% vs last month'; changeEl.className = 'metric-change metric-down'; }
+      if (pct > 0) { changeEl.textContent = `↑ ${pct}% vs last month`; changeEl.className = 'metric-change metric-up'; }
+      else if (pct < 0) { changeEl.textContent = `↓ ${Math.abs(pct)}% vs last month`; changeEl.className = 'metric-change metric-down'; }
       else { changeEl.textContent = '→ Same as last month'; changeEl.className = 'metric-change metric-flat'; }
     }
   }
@@ -369,7 +369,7 @@
     container.innerHTML = chart.map(d => {
       const h = Math.max(2, (d.views / max) * 80);
       const cls = d.views > 0 ? 'chart-bar chart-bar-fill' : 'chart-bar';
-      return '<div class="' + cls + '" style="height:' + h + 'px" title="' + esc(d.date) + ': ' + d.views + ' views"></div>';
+      return `<div class="${cls}" style="height:${h}px" title="${esc(d.date)}: ${d.views} views"></div>`;
     }).join('');
   }
 
@@ -380,14 +380,14 @@
     if (!refs.length) return;
     el.innerHTML = refs.map(r => {
       const color = REF_COLORS[r.source.toLowerCase()] || REF_COLORS.other;
-      return '<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:' + color + '"></span>' + esc(r.source) + '</span><span class="ref-count">' + r.count + '</span></div>';
+      return `<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:${color}"></span>${esc(r.source)}</span><span class="ref-count">${r.count}</span></div>`;
     }).join('');
   }
 
   // ── Render Leads ──
   function renderLeads(leads) {
     const container = document.getElementById('leads-list');
-    document.getElementById('leads-count').textContent = leads.length + ' lead' + (leads.length !== 1 ? 's' : '') + ' (30 days)';
+    document.getElementById('leads-count').textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''} (30 days)`;
 
     if (!leads.length) {
       container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No leads yet</div><div class="empty-sub">Post your link on Instagram or WhatsApp — leads will appear here</div></div>';
@@ -401,12 +401,12 @@
     const srcColors = { profile: '#4d65ff', full_profile: '#6366f1', landing: '#8b5cf6', qr: 'rgba(255,255,255,0.4)', direct: '#71717a' };
     srcEl.innerHTML = Object.entries(sources).sort((a,b) => b[1]-a[1]).map(([s,c]) => {
       const color = srcColors[s] || '#71717a';
-      return '<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:' + color + '"></span>' + esc(s) + '</span><span class="ref-count">' + c + '</span></div>';
+      return `<div class="ref-row"><span class="ref-source"><span class="ref-dot" style="background:${color}"></span>${esc(s)}</span><span class="ref-count">${c}</span></div>`;
     }).join('');
 
     container.innerHTML = leads.map(l => {
       const status = l.status || 'new';
-      const statusCls = 'status-' + status;
+      const statusCls = `status-${status}`;
       const phone = l.phone || '';
       const email = l.email || '';
       const waPhone = phone.replace(/[^0-9]/g, '');
@@ -414,25 +414,25 @@
 
       let actions = '';
       if (waPhone) {
-        const waMsg = encodeURIComponent('Hi ' + (l.name || '') + ', thanks for reaching out! How can I help you with Dubai properties?');
-        actions += '<a class="lead-btn lead-btn-wa" href="https://wa.me/' + waPhone + '?text=' + waMsg + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>';
+        const waMsg = encodeURIComponent(`Hi ${l.name || ''}, thanks for reaching out! How can I help you with Dubai properties?`);
+        actions += `<a class="lead-btn lead-btn-wa" href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`;
       }
-      if (phone) actions += '<a class="lead-btn lead-btn-call" href="tel:' + esc(phone) + '">Call</a>';
-      if (email) actions += '<a class="lead-btn lead-btn-email" href="mailto:' + esc(email) + '">Email</a>';
+      if (phone) actions += `<a class="lead-btn lead-btn-call" href="tel:${esc(phone)}">Call</a>`;
+      if (email) actions += `<a class="lead-btn lead-btn-email" href="mailto:${esc(email)}">Email</a>`;
 
       let pills = '';
-      if (l.budget_range) pills += '<span class="lead-pill">' + esc(l.budget_range) + '</span>';
-      if (l.property_type) pills += '<span class="lead-pill">' + esc(l.property_type) + '</span>';
-      if (l.preferred_area) pills += '<span class="lead-pill">' + esc(l.preferred_area) + '</span>';
-      if (l.source) pills += '<span class="lead-pill">' + esc(l.source) + '</span>';
+      if (l.budget_range) pills += `<span class="lead-pill">${esc(l.budget_range)}</span>`;
+      if (l.property_type) pills += `<span class="lead-pill">${esc(l.property_type)}</span>`;
+      if (l.preferred_area) pills += `<span class="lead-pill">${esc(l.preferred_area)}</span>`;
+      if (l.source) pills += `<span class="lead-pill">${esc(l.source)}</span>`;
 
       return '<div class="lead-card">' +
         '<div class="lead-top">' +
           '<span class="lead-name">' + esc(l.name) + '</span>' +
           '<span class="lead-time">' + timeAgo + '</span>' +
         '</div>' +
-        (pills ? '<div class="lead-details">' + pills + '</div>' : '') +
-        (l.message ? '<div class="lead-msg">"' + esc(l.message) + '"</div>' : '') +
+        (pills ? `<div class="lead-details">${pills}</div>` : '') +
+        (l.message ? `<div class="lead-msg">"${esc(l.message)}"</div>` : '') +
         '<div class="lead-actions">' + actions +
           '<select class="status-select ' + statusCls + '" data-action-change="updateLeadStatus" data-lead-id="\'' + l.id + '\'">' +
             '<option value="new"' + (status==='new'?' selected':'') + '>New</option>' +
@@ -447,21 +447,21 @@
   }
 
   // ── Update Lead Status ──
-  window.updateLeadStatus = async function(leadId, status, selectEl) {
-    selectEl.className = 'status-select status-' + status;
+  window.updateLeadStatus = async (leadId, status, selectEl) => {
+    selectEl.className = `status-select status-${status}`;
 
-    const res = await fetch(SUPABASE_URL + '/functions/v1/update-lead-status', {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/update-lead-status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken, lead_id: leadId, status: status })
-    }).then(null, function(e) {
+    }).then(null, (e) => {
       if (typeof window.reportError === 'function') window.reportError('dashboard/updateLeadStatus', e);
       else console.error('[dashboard/updateLeadStatus]', e);
       return null;
     });
     if (!res) { showToast('Connection error'); return; }
     if (res.ok) {
-      showToast('Status updated to ' + status);
+      showToast(`Status updated to ${status}`);
     } else {
       const data = await res.json().then(null, () => ({}));
       showToast(data.error || 'Failed to update status');
@@ -478,7 +478,7 @@
   function cdnImg(url, w) {
     if (!url) return '';
     if (url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')) {
-      return esc('/.netlify/images?url=' + encodeURIComponent(url) + '&w=' + w + '&fm=webp&q=80');
+      return esc(`/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80`);
     }
     return esc(url);
   }
@@ -488,11 +488,11 @@
     const then = new Date(dateStr).getTime();
     const diff = now - then;
     const mins = Math.floor(diff / 60000);
-    if (mins < 60) return mins + 'm ago';
+    if (mins < 60) return `${mins}m ago`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return hours + 'h ago';
+    if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    if (days < 7) return days + 'd ago';
+    if (days < 7) return `${days}d ago`;
     return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   }
 
@@ -503,18 +503,18 @@
     setTimeout(() => t.classList.remove('show'), 2000);
   }
 
-  window.copyProfileLink = function() {
+  window.copyProfileLink = () => {
     if (!currentAgent) return;
-    const url = 'https://sellingdubai.ae/a/' + currentAgent.slug;
+    const url = `https://sellingdubai.ae/a/${currentAgent.slug}`;
     // Track share step for onboarding checklist
-    localStorage.setItem('sd_shared_' + currentAgent.id, '1');
+    localStorage.setItem(`sd_shared_${currentAgent.id}`, '1');
     const obShare = document.getElementById('ob-share');
     const obShareCheck = document.getElementById('ob-share-check');
     if (obShare && !obShare.classList.contains('done')) {
       obShare.classList.add('done');
       if (obShareCheck) obShareCheck.innerHTML = '✓';
       const doneCount = document.querySelectorAll('.onboard-step.done').length;
-      document.getElementById('onboard-bar').style.width = ((doneCount / 5) * 100) + '%';
+      document.getElementById('onboard-bar').style.width = `${(doneCount / 5) * 100}%`;
       if (doneCount >= 5) document.getElementById('onboard-checklist').style.display = 'none';
     }
 
@@ -542,23 +542,23 @@
   function loadReferralSection(referralStats) {
     if (!currentAgent) return;
     const code = currentAgent.referral_code || currentAgent.slug;
-    const link = 'https://sellingdubai.ae/join?ref=' + encodeURIComponent(code);
+    const link = `https://sellingdubai.ae/join?ref=${encodeURIComponent(code)}`;
     document.getElementById('referral-link').value = link;
 
     // Use referral stats from analytics response (authenticated, bypasses RLS)
-    if (!referralStats || !referralStats.invited) {
+    if (!referralStats?.invited) {
       document.getElementById('referral-count').textContent = '0 invited';
       return;
     }
     const bonus = currentAgent.bonus_listing_slots || 0;
-    document.getElementById('referral-count').textContent = referralStats.invited + ' invited';
+    document.getElementById('referral-count').textContent = `${referralStats.invited} invited`;
     document.getElementById('ref-invited').textContent = referralStats.invited;
     document.getElementById('ref-verified').textContent = referralStats.verified || 0;
     document.getElementById('ref-bonus').textContent = bonus;
     document.getElementById('referral-stats').style.display = 'block';
   }
 
-  window.copyReferralLink = function() {
+  window.copyReferralLink = () => {
     const input = document.getElementById('referral-link');
     if (!input.value) return;
     navigator.clipboard.writeText(input.value).then(() => {
@@ -585,7 +585,7 @@
     rented: 'Rented',
   };
 
-  window.scrollToProperties = function() {
+  window.scrollToProperties = () => {
     const el = document.getElementById('props-section');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -595,12 +595,12 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken, action: 'list' })
-    }).then(null, function(e) {
+    }).then(null, (e) => {
       if (typeof window.reportError === 'function') window.reportError('dashboard/loadProperties', e);
       else console.error('[dashboard/loadProperties]', e);
       return null;
     });
-    if (!res || !res.ok) return;
+    if (!res?.ok) return;
     const data = await res.json();
     propertiesCache = data.properties || [];
     propLimitReached = data.limit !== null && propertiesCache.length >= data.limit;
@@ -612,14 +612,14 @@
     if (addBtn) addBtn.disabled = propLimitReached;
   }
 
-  function renderPropertyCards(props, limit, tier) {
+  function renderPropertyCards(props, limit, _tier) {
     const badge = document.getElementById('props-count-badge');
     const limitNote = document.getElementById('props-limit-note');
     const limitLabel = limit === null ? '∞' : limit;
-    badge.textContent = props.length + ' / ' + limitLabel;
+    badge.textContent = `${props.length} / ${limitLabel}`;
 
     if (propLimitReached) {
-      limitNote.innerHTML = 'Listing limit reached (' + limit + '). <a href="/pricing" style="color:#fff;font-weight:600;text-decoration:underline;">Upgrade to Pro or Premium</a> to add more.';
+      limitNote.innerHTML = `Listing limit reached (${limit}). <a href="/pricing" style="color:#fff;font-weight:600;text-decoration:underline;">Upgrade to Pro or Premium</a> to add more.`;
       limitNote.style.display = 'block';
     } else {
       limitNote.style.display = 'none';
@@ -638,7 +638,7 @@
     container.innerHTML = props.map((p, idx) => window.renderAdminCard(p, idx, props.length, PROP_STATUS_LABELS)).join('');
   }
 
-  window.openPropModal = function(propId) {
+  window.openPropModal = (propId) => {
     const modal = document.getElementById('prop-modal');
     const titleEl = document.getElementById('prop-modal-title');
     const saveBtn = document.getElementById('btn-save-prop');
@@ -677,7 +677,7 @@
       propPhotos = [];
       if (p.image_url) propPhotos.push({ url: p.image_url });
       if (Array.isArray(p.additional_photos)) {
-        p.additional_photos.forEach(function(u) { if (u) propPhotos.push({ url: u }); });
+        p.additional_photos.forEach((u) => { if (u) propPhotos.push({ url: u }); });
       }
       renderPhotoGrid();
     } else {
@@ -688,7 +688,7 @@
     modal.classList.add('open');
   };
 
-  window.closePropModal = function() {
+  window.closePropModal = () => {
     propPhotos = [];
     document.getElementById('prop-modal').classList.remove('open');
   };
@@ -697,7 +697,7 @@
     const grid = document.getElementById('prop-photo-grid');
     if (!grid) return;
     let html = '';
-    propPhotos.forEach(function(photo, idx) {
+    propPhotos.forEach((photo, idx) => {
       const imgSrc = photo.url ? cdnImg(photo.url, 200) : photo.base64;
       html += '<div class="photo-grid-item">' +
         '<img src="' + imgSrc + '" alt="">' +
@@ -711,22 +711,22 @@
     grid.innerHTML = html;
   }
 
-  window.removePropPhoto = function(idx) {
+  window.removePropPhoto = (idx) => {
     propPhotos.splice(idx, 1);
     renderPhotoGrid();
   };
 
-  window.onPropPhotoPick = function(input) {
+  window.onPropPhotoPick = (input) => {
     const files = Array.from(input.files || []);
     input.value = '';
     const remaining = 15 - propPhotos.length;
     if (remaining <= 0) { showToast('Maximum 15 photos reached'); return; }
     const toAdd = files.slice(0, remaining);
-    if (files.length > remaining) showToast('Only ' + remaining + ' photo(s) added — limit reached');
-    toAdd.forEach(function(file) {
+    if (files.length > remaining) showToast(`Only ${remaining} photo(s) added — limit reached`);
+    toAdd.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) { showToast('Photo must be under 5 MB'); return; }
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = (e) => {
         propPhotos.push({ base64: e.target.result });
         renderPhotoGrid();
       };
@@ -734,7 +734,7 @@
     });
   };
 
-  window.savePropModal = async function() {
+  window.savePropModal = async () => {
     const title = document.getElementById('prop-title').value.trim();
     if (!title) { showToast('Title is required'); return; }
 
@@ -746,8 +746,8 @@
       title,
       price: document.getElementById('prop-price').value.trim() || null,
       location: document.getElementById('prop-location').value.trim() || null,
-      bedrooms: document.getElementById('prop-bedrooms').value !== '' ? parseInt(document.getElementById('prop-bedrooms').value) : null,
-      area_sqft: document.getElementById('prop-area').value !== '' ? parseInt(document.getElementById('prop-area').value) : null,
+      bedrooms: document.getElementById('prop-bedrooms').value !== '' ? parseInt(document.getElementById('prop-bedrooms').value, 10) : null,
+      area_sqft: document.getElementById('prop-area').value !== '' ? parseInt(document.getElementById('prop-area').value, 10) : null,
       property_type: document.getElementById('prop-type').value || null,
       status,
       dld_permit: document.getElementById('prop-dld-permit').value.trim() || null,
@@ -766,7 +766,7 @@
     // Additional photos (indices 1+)
     const additionalBase64 = [];
     const retainedAdditional = [];
-    propPhotos.slice(1).forEach(function(photo) {
+    propPhotos.slice(1).forEach((photo) => {
       if (photo.base64) additionalBase64.push(photo.base64);
       else if (photo.url) retainedAdditional.push(photo.url);
     });
@@ -807,19 +807,19 @@
     saveBtn.textContent = 'Save Listing';
   };
 
-  window.deletePropertyConfirm = function(propId) {
+  window.deletePropertyConfirm = (propId) => {
     _pendingDeleteId = propId;
     const p = propertiesCache.find(x => x.id === propId);
     document.getElementById('delete-prop-name').textContent = p ? p.title : 'this listing';
     document.getElementById('delete-prop-modal').classList.add('open');
   };
 
-  window.closeDeletePropModal = function() {
+  window.closeDeletePropModal = () => {
     _pendingDeleteId = null;
     document.getElementById('delete-prop-modal').classList.remove('open');
   };
 
-  window.confirmDeleteProp = async function() {
+  window.confirmDeleteProp = async () => {
     if (!_pendingDeleteId) return;
     const propId = _pendingDeleteId;
     const btn = document.getElementById('btn-confirm-delete');
@@ -847,14 +847,14 @@
     btn.textContent = 'Delete';
   };
 
-  window.updatePropStatus = async function(propId, status, selectEl) {
-    selectEl.className = 'prop-status-select prop-status-' + status;
+  window.updatePropStatus = async (propId, status, selectEl) => {
+    selectEl.className = `prop-status-select prop-status-${status}`;
     // Update badge in same card
     const card = selectEl.closest('.prop-card');
     if (card) {
       const badge = card.querySelector('.prop-badge');
       if (badge) {
-        badge.className = 'prop-badge prop-badge-' + status;
+        badge.className = `prop-badge prop-badge-${status}`;
         badge.textContent = PROP_STATUS_LABELS[status] || status;
       }
     }
@@ -879,7 +879,7 @@
     }
   };
 
-  window.reorderProp = async function(propId, direction) {
+  window.reorderProp = async (propId, direction) => {
     const idx = propertiesCache.findIndex(x => x.id === propId);
     if (idx === -1) return;
     const swapIdx = idx + direction;
@@ -890,25 +890,25 @@
     propertiesCache[idx] = propertiesCache[swapIdx];
     propertiesCache[swapIdx] = tmp;
 
-    const limit = parseInt(document.getElementById('props-count-badge').textContent.split('/')[1]) || null;
-    renderPropertyCards(propertiesCache, limit === null || isNaN(limit) ? null : limit, null);
+    const limit = parseInt(document.getElementById('props-count-badge').textContent.split('/')[1], 10) || null;
+    renderPropertyCards(propertiesCache, limit === null || Number.isNaN(limit) ? null : limit, null);
 
     const ids = propertiesCache.map(p => p.id);
     fetch(PROPS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken, action: 'reorder', ids })
-    }).then(null, function() {
+    }).then(null, () => {
       // Non-critical — re-render from server on next load
     });
   };
 
-  window.shareProperty = function(propId) {
+  window.shareProperty = (propId) => {
     if (!currentAgent) return;
-    const url = 'https://sellingdubai.ae/a/' + currentAgent.slug + '?open=property&id=' + propId;
-    navigator.clipboard.writeText(url).then(function() {
+    const url = `https://sellingdubai.ae/a/${currentAgent.slug}?open=property&id=${propId}`;
+    navigator.clipboard.writeText(url).then(() => {
       showToast('Link copied!');
-    }, function() {
+    }, () => {
       const tmp = document.createElement('textarea');
       tmp.value = url;
       tmp.style.cssText = 'position:fixed;opacity:0;';
@@ -920,24 +920,24 @@
     });
   };
 
-  window.logout = function() {
+  window.logout = () => {
     const token = authToken || localStorage.getItem('sd_edit_token');
     localStorage.removeItem('sd_edit_token');
     authToken = null;
     currentAgent = null;
     // Revoke the token server-side so it cannot be re-used from another device
     if (token) {
-      fetch(SUPABASE_URL + '/functions/v1/revoke-session', {
+      fetch(`${SUPABASE_URL}/functions/v1/revoke-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
         body: JSON.stringify({ token }),
-      }).then(null, function(err) { console.warn('[dashboard] revoke-session fire-and-forget failed:', err); });
+      }).then(null, (err) => { console.warn('[dashboard] revoke-session fire-and-forget failed:', err); });
     }
     showAuthOverlay();
   };
 
   // Handle Enter key on email input
-  document.getElementById('auth-email').addEventListener('keydown', function(e) {
+  document.getElementById('auth-email').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendMagicLink();
   });
 

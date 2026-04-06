@@ -18,7 +18,7 @@ export function logEvent(eventType, metadata) {
       else if (ref.hostname.includes('facebook') || ref.hostname.includes('fb.')) referrerSource = 'facebook';
       else if (ref.hostname.includes('t.co') || ref.hostname.includes('twitter') || ref.hostname.includes('x.com')) referrerSource = 'twitter';
       else referrerSource = ref.hostname;
-    } catch(e) { referrerSource = 'direct'; }
+    } catch(_e) { referrerSource = 'direct'; }
   }
   if (!referrerSource) referrerSource = 'direct';
 
@@ -36,7 +36,7 @@ export async function trackPageView(agentId) {
 }
 
 // Click tracking via event delegation
-document.addEventListener('click', function(e) {
+document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-track]');
   if (!btn || !currentAgent) return;
   const trackType = btn.dataset.track;

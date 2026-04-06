@@ -13,7 +13,7 @@
 // fail fast with a clear error if either is missing.
 
 const esbuild = require('esbuild');
-const fs = require('fs');
+const fs = require('node:fs');
 
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_ANON_KEY;

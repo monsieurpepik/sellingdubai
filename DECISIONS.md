@@ -1,5 +1,22 @@
 # Architecture Decisions Log
 
+## 2026-04-06 — Biome linting: formatter disabled, linter only in CI
+
+**What:** Added Biome v2 (`@biomejs/biome@2.4.10`) as a dev dependency with a `biome.json` config covering `js/**` and `scripts/**`. The formatter is disabled (`"formatter": { "enabled": false }`). The linter runs in CI as a blocking gate via `npm run lint`.
+
+**Why formatter is off:** Running `biome check --write` showed format violations in 46 files (well over the 10-file threshold). Applying mass format changes would create a noisy diff that obscures the meaningful code changes in git history. Linting without formatting still catches real bugs (unused variables, suspicious patterns, deprecated APIs).
+
+**Rules turned off (intentional patterns):**
+- `noExplicitAny` — codebase uses `any` intentionally in Supabase typed calls
+- `noNonNullAssertion` — `!` assertions used throughout with Supabase query results
+- `noArguments` — Google Analytics `gtag()` snippet uses `arguments` object by design (standard GA snippet, cannot be changed)
+- `noBannedTypes` — `Function` type used in `lead-modal.ts` callback typing
+- `noInnerDeclarations` — legacy JS pattern in `pricing.js`, `landing-behavior.js`, `cookie-consent.js`
+- `useIterableCallbackReturn` — `forEach` used for DOM side effects (correct usage, not a bug)
+- `noImplicitAnyLet` — one intentional untyped let in `mortgage.ts`
+
+**What was auto-fixed:** 27 `useTemplate` and `useLiteralKeys` violations (string concatenation → template literals, bracket notation → literal keys). Import ordering was also normalized across 18 files.
+
 ## 2026-04-02 — Extract renderOffPlanBreakdown to mortgage-offplan.js
 
 **What:** Extracted `renderOffPlanBreakdown` from `js/mortgage.js` into a new `js/mortgage-offplan.js` module. The new module exports one pure function that takes a `proj` object and returns `{ html, bookingAmt, dldFee, agentComm, totalCash, loanAmount }` without side effects on `_mortState`. In `mortGoStep`, when step === 1 and mode === 'offplan', the function is loaded via dynamic `import('./mortgage-offplan.js')` and state is updated from the returned values.

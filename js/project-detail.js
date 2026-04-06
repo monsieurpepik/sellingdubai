@@ -2,19 +2,19 @@
 // OFF-PLAN PROJECT DETAIL (lazy loaded)
 // ==========================================
 import { supabase } from './config.js';
-import { escHtml, escAttr, optimizeImg } from './utils.js';
 import { currentAgent } from './state.js';
+import { escAttr, escHtml, optimizeImg } from './utils.js';
 
 let _detailProject = null;
 
 const fmtPrice = (n) =>
-  n ? 'AED\u00a0' + Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 }) : null;
+  n ? `AED\u00a0${Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 })}` : null;
 const fmtCompact = (n) => {
   if (!n) return null;
   const num = Number(n);
-  if (num >= 1_000_000) return 'AED\u00a0' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (num >= 1_000) return 'AED\u00a0' + Math.round(num / 1_000) + 'K';
-  return 'AED\u00a0' + num.toLocaleString('en-AE', { maximumFractionDigits: 0 });
+  if (num >= 1_000_000) return `AED\u00a0${(num / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (num >= 1_000) return `AED\u00a0${Math.round(num / 1_000)}K`;
+  return `AED\u00a0${num.toLocaleString('en-AE', { maximumFractionDigits: 0 })}`;
 };
 
 // Strip dangerous tags from trusted CRM HTML using the browser's own HTML parser.
@@ -137,13 +137,13 @@ function _lbRender() {
   if (next) next.style.display = multi ? 'flex' : 'none';
 }
 
-window._lbStep = function(dir) {
+window._lbStep = (dir) => {
   _lbIdx = (_lbIdx + dir + _lbImgs.length) % _lbImgs.length;
   _lbScale = 1;
   _lbRender();
 };
 
-window.openProjLightbox = function(idx) {
+window.openProjLightbox = (idx) => {
   _lbEnsureCreated();
   _lbIdx = idx;
   _lbScale = 1;
@@ -153,18 +153,18 @@ window.openProjLightbox = function(idx) {
   _lbRender();
 };
 
-window.closeProjLightbox = function() {
+window.closeProjLightbox = () => {
   const lb = document.getElementById('proj-lb');
   if (lb) lb.style.display = 'none';
   document.body.style.overflow = '';
 };
 
 // Lazy-load Google Maps iframe when user taps "Show Map"
-window._loadDetailMap = function(container) {
+window._loadDetailMap = (container) => {
   if (!container) return;
   const lat = container.dataset.maplat;
   const lng = container.dataset.maplng;
-  const q = container.dataset.mapq || '';
+  const _q = container.dataset.mapq || '';
   if (!lat || !lng) return;
   const src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
   container.innerHTML = `<iframe src="${src}" width="100%" height="240" style="border:0;border-radius:8px;display:block;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Project location map"></iframe>`;
@@ -209,7 +209,7 @@ export async function openProjectDetail(projectSlug) {
 
   const dev = project.developers || {};
   _detailProject = project;
-  window._openProjectMortgage = function() {
+  window._openProjectMortgage = () => {
     if (!_detailProject) return;
     if (typeof window.initMortModal === 'function') {
       window.initMortModal({
@@ -226,11 +226,11 @@ export async function openProjectDetail(projectSlug) {
   const imgSrc = project.cover_image_url ? optimizeImg(project.cover_image_url, 800) : '';
   const minP = fmtPrice(project.min_price);
   const maxP = fmtPrice(project.max_price);
-  const priceStr = minP && maxP ? `${minP} – ${maxP}` : minP ? `From ${minP}` : (maxP || '');
+  const _priceStr = minP && maxP ? `${minP} – ${maxP}` : minP ? `From ${minP}` : (maxP || '');
   const loc = project.district_name || project.location || project.area || '';
-  const types = Array.isArray(project.property_types) && project.property_types.length
+  const _types = Array.isArray(project.property_types) && project.property_types.length
     ? project.property_types.join(', ') : '';
-  const areaStr = project.min_area_sqft && project.max_area_sqft
+  const _areaStr = project.min_area_sqft && project.max_area_sqft
     ? `${Number(project.min_area_sqft).toLocaleString()} – ${Number(project.max_area_sqft).toLocaleString()} sqft`
     : project.min_area_sqft
       ? `From ${Number(project.min_area_sqft).toLocaleString()} sqft`
@@ -274,7 +274,7 @@ export async function openProjectDetail(projectSlug) {
 
   // Payment plan — prefer payment_plan_detail (new_payment_plans array) > legacy payment_plan JSONB > handover_percentage
   let bookingPct = null, constructionPct = null, handoverPct = null;
-  let paymentPlanTitle = null;
+  let _paymentPlanTitle = null;
   let paymentMilestones = null; // full milestone array for detailed view
 
   const ppDetail = project.payment_plan_detail;
@@ -282,7 +282,7 @@ export async function openProjectDetail(projectSlug) {
   const ppPlan = Array.isArray(ppDetail) && ppDetail.length > 0 ? ppDetail[0] : null;
 
   if (ppPlan && typeof ppPlan === 'object') {
-    paymentPlanTitle = ppPlan.title || null;
+    _paymentPlanTitle = ppPlan.title || null;
     paymentMilestones = Array.isArray(ppPlan.milestones) && ppPlan.milestones.length ? ppPlan.milestones : null;
     const hp = ppPlan.heading_percentages;
     if (hp && typeof hp === 'object') {
@@ -316,7 +316,7 @@ export async function openProjectDetail(projectSlug) {
   const statCells = [];
   if (project.min_price) statCells.push({ label: 'From', value: fmtCompact(project.min_price) });
   if (completionShort) statCells.push({ label: 'Handover', value: completionShort });
-  if (project.min_area_sqft) statCells.push({ label: 'Size from', value: Number(project.min_area_sqft).toLocaleString('en-AE', { maximumFractionDigits: 0 }) + '\u00a0sqft' });
+  if (project.min_area_sqft) statCells.push({ label: 'Size from', value: `${Number(project.min_area_sqft).toLocaleString('en-AE', { maximumFractionDigits: 0 })}\u00a0sqft` });
   if (hasPaymentPlan) {
     const parts = [bookingPct, constructionPct, handoverPct].filter(v => v != null);
     statCells.push({ label: 'Pay plan', value: parts.join('/') });
@@ -371,7 +371,7 @@ export async function openProjectDetail(projectSlug) {
           ${constructionPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${constructionPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Construction</div></div>` : ''}
           ${handoverPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${handoverPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Handover</div></div>` : ''}
         </div>
-        ${paymentMilestones && paymentMilestones.length ? `
+        ${paymentMilestones?.length ? `
         <div style="margin-top:12px;position:relative;padding-left:20px;">
           <div style="position:absolute;left:6px;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,0.08);"></div>
           ${paymentMilestones.map((m, i) => `
@@ -405,14 +405,14 @@ export async function openProjectDetail(projectSlug) {
             let availColor = '', availText = '';
             if (avail != null) {
               if (avail === 0) { availColor = 'rgba(255,255,255,0.3)'; availText = 'Sold out'; }
-              else if (avail <= 5) { availColor = '#4d65ff'; availText = avail + ' left'; }
-              else { availColor = '#4ade80'; availText = avail + ' left'; }
+              else if (avail <= 5) { availColor = '#4d65ff'; availText = `${avail} left`; }
+              else { availColor = '#4ade80'; availText = `${avail} left`; }
             }
             return `
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:4px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;">
             <div style="font-size:11px;font-weight:700;">${escHtml(typeLabel)}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.5);">${areaVal ? escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0})) + '\u00a0sqft' : ''}</div>
-            <div style="font-size:11px;font-weight:600;">${priceVal ? 'AED\u00a0' + Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0}) : ''}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);">${areaVal ? `${escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0}))}\u00a0sqft` : ''}</div>
+            <div style="font-size:11px;font-weight:600;">${priceVal ? `AED\u00a0${Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0})}` : ''}</div>
             <div style="font-size:10px;font-weight:600;text-align:right;color:${availColor};">${availText}</div>
           </div>`;
           }).join('')}
@@ -456,7 +456,7 @@ export async function openProjectDetail(projectSlug) {
 
       <!-- Map (lazy-loaded) -->
       ${(project.lat && project.lng) ? `
-      <div data-mapq="${escAttr(encodeURIComponent((project.name || '') + ' ' + (project.district_name || project.location || project.area || '') + ' Dubai'))}" data-maplat="${escAttr(String(project.lat))}" data-maplng="${escAttr(String(project.lng))}" style="margin-bottom:20px;">
+      <div data-mapq="${escAttr(encodeURIComponent(`${project.name || ''} ${project.district_name || project.location || project.area || ''} Dubai`))}" data-maplat="${escAttr(String(project.lat))}" data-maplng="${escAttr(String(project.lng))}" style="margin-bottom:20px;">
         <button data-action="loadDetailMap" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;text-align:center;color:rgba(255,255,255,0.55);font-size:13px;cursor:pointer;width:100%;margin-bottom:0;">📍 Show Map</button>
       </div>` : ''}
 
@@ -482,7 +482,7 @@ export async function openProjectDetail(projectSlug) {
     <div style="display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
       <button data-name="${escAttr(project.name)}" data-action="openLeadForProperty" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
       <button data-action="openProjectMortgage" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Mortgage</button>
-      ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hi, I\'m interested in ' + project.name + ' — can you tell me more?')}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
+      ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent(`Hi, I'm interested in ${project.name} — can you tell me more?`)}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
     </div>`;
 
   // Gallery scroll counter

@@ -1,14 +1,16 @@
 // ==========================================
 // PROPERTY LOADING, RENDERING & CAROUSEL
 // ==========================================
+
+import { renderOffPlanCard, renderPropertyCard } from './components';
 import { DEMO_MODE, supabase } from './config';
-import { escHtml, escAttr, optimizeImg as _optimizeImg } from './utils';
-import { allProperties, currentFilters } from './state';
 import type { Property } from './state';
-import { renderPropertyCard, renderOffPlanCard } from './components';
+import { allProperties, currentFilters } from './state';
+import { optimizeImg as _optimizeImg, escAttr, escHtml } from './utils';
 
 // Re-export for consumers that import optimizeImg from this module (e.g. agent-page.ts)
 export { _optimizeImg as optimizeImg };
+
 // Internal alias used by renderRemProjectCard below
 const optimizeImg = _optimizeImg;
 
@@ -114,11 +116,11 @@ export async function loadProperties(agentId: string): Promise<Property[]> {
   return propertiesCache;
 }
 
-export { propertiesLoaded, propertiesError };
+export { propertiesError, propertiesLoaded };
 
 
 // Heart / favorite toggle
-window.toggleHeart = function(btn: HTMLElement) {
+window.toggleHeart = (btn: HTMLElement) => {
   btn.classList.toggle('liked');
   btn.classList.remove('pop');
   // Force reflow for re-animation
@@ -127,31 +129,31 @@ window.toggleHeart = function(btn: HTMLElement) {
 };
 
 // Carousel slide function
-window.slideCarousel = function(cardId: string, dir: number) {
+window.slideCarousel = (cardId: string, dir: number) => {
   const carousel = document.querySelector<HTMLElement>(`.prop-carousel[data-card-id="${cardId}"]`);
   if (!carousel) return;
   const track = carousel.querySelector<HTMLElement>('.prop-carousel-track');
   const dots = carousel.querySelectorAll<HTMLElement>('.prop-carousel-dot');
   const total = dots.length;
-  let current = parseInt(carousel.dataset['idx'] ?? '0');
+  let current = parseInt(carousel.dataset.idx ?? '0', 10);
   current = (current + dir + total) % total;
-  carousel.dataset['idx'] = String(current);
+  carousel.dataset.idx = String(current);
   if (track) track.style.transform = `translateX(-${current * 100}%)`;
   dots.forEach((d, i) => d.classList.toggle('active', i === current));
 };
 
 // Touch swipe for carousels
-document.addEventListener('touchstart', function(e) {
+document.addEventListener('touchstart', (e) => {
   const carousel = (e.target as Element).closest<HTMLElement & { _touchX?: number }>('.prop-carousel');
   if (!carousel) return;
   carousel._touchX = e.touches[0]!.clientX;
 }, { passive: true });
-document.addEventListener('touchend', function(e) {
+document.addEventListener('touchend', (e) => {
   const carousel = (e.target as Element).closest<HTMLElement & { _touchX?: number }>('.prop-carousel');
   if (!carousel || carousel._touchX === undefined) return;
   const diff = carousel._touchX - e.changedTouches[0]!.clientX;
   if (Math.abs(diff) > 40) {
-    const cardId = (carousel as HTMLElement).dataset['cardId'];
+    const cardId = (carousel as HTMLElement).dataset.cardId;
     window.slideCarousel?.(cardId ?? '', diff > 0 ? 1 : -1);
   }
   delete carousel._touchX;
@@ -167,7 +169,7 @@ export function renderPropertyList(props: Property[]): void {
   if (!listEl || !countEl) return;
 
   if (props.length === 0) {
-    const hasFilters = currentFilters.search || currentFilters.priceMin || currentFilters.priceMax || currentFilters.beds || currentFilters.baths || currentFilters.areaMin || currentFilters.areaMax || (currentFilters.amenities && currentFilters.amenities.length);
+    const hasFilters = currentFilters.search || currentFilters.priceMin || currentFilters.priceMax || currentFilters.beds || currentFilters.baths || currentFilters.areaMin || currentFilters.areaMax || (currentFilters.amenities?.length);
     const isFilterEmpty = hasFilters && allProperties.length > 0;
     listEl.innerHTML = `<div class="prop-empty">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="${isFilterEmpty ? 'M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' : 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'}"/></svg>
@@ -334,7 +336,7 @@ function renderRemProjectCard(p: RemProject, devName: string): string {
 
   let priceHtml = '';
   if (p.min_price && p.min_price > 0) {
-    const formatted = 'AED ' + Number(p.min_price).toLocaleString('en-AE', { maximumFractionDigits: 0 });
+    const formatted = `AED ${Number(p.min_price).toLocaleString('en-AE', { maximumFractionDigits: 0 })}`;
     priceHtml = `<div class="offplan-price"><span class="offplan-price-label">Starting from</span><span class="offplan-price-value">${formatted}</span></div>`;
   } else {
     priceHtml = `<div class="offplan-price"><span class="offplan-price-value">Price on Request</span></div>`;
@@ -386,7 +388,7 @@ function renderRemProjectCard(p: RemProject, devName: string): string {
 // ==========================================
 // LOAD REM OFF-PLAN PROJECTS (profile page)
 // ==========================================
-export async function loadRemProjects(agentSlug: string, agentId: string): Promise<void> {
+export async function loadRemProjects(_agentSlug: string, agentId: string): Promise<void> {
   try {
     // Show skeleton placeholder while fetching
     const sectionEl = document.getElementById('rem-projects');

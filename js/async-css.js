@@ -1,4 +1,4 @@
 // @ts-check
-document.querySelectorAll('link[data-async-css]').forEach(function(link) {
+document.querySelectorAll('link[data-async-css]').forEach((link) => {
   link.rel = 'stylesheet';
 });

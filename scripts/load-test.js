@@ -5,8 +5,8 @@
 //
 // Thresholds enforce SLOs. k6 exits 1 on breach.
 
-import http from 'k6/http';
 import { check, sleep } from 'k6';
+import http from 'k6/http';
 import { Rate, Trend } from 'k6/metrics';
 
 // -- Custom metrics per endpoint --
@@ -88,7 +88,7 @@ export default function () {
     const start = Date.now();
     const res = http.post(url, payload, params);
     magicLinkDuration.add(Date.now() - start);
-    const ok = check(res, {
+    const _ok = check(res, {
       'send-magic-link 2xx or 429': (r) => r.status < 500,
     });
     // 429 (rate limit) is expected under load — not an error

@@ -18,7 +18,7 @@ export function logEvent(eventType: string, metadata: Record<string, unknown>): 
       else if (ref.hostname.includes('facebook') || ref.hostname.includes('fb.')) referrerSource = 'facebook';
       else if (ref.hostname.includes('t.co') || ref.hostname.includes('twitter') || ref.hostname.includes('x.com')) referrerSource = 'twitter';
       else referrerSource = ref.hostname;
-    } catch(e) { referrerSource = 'direct'; }
+    } catch(_e) { referrerSource = 'direct'; }
   }
   if (!referrerSource) referrerSource = 'direct';
 
@@ -36,12 +36,12 @@ export async function trackPageView(agentId?: string): Promise<void> {
 }
 
 // Click tracking via event delegation
-document.addEventListener('click', function(e: MouseEvent) {
+document.addEventListener('click', (e: MouseEvent) => {
   const target = e.target as HTMLElement | null;
   const btn = target?.closest<HTMLElement>('[data-track]');
   if (!btn || !currentAgent) return;
-  const trackType = btn.dataset['track'];
-  const trackUrl = btn.dataset['url'] || '';
+  const trackType = btn.dataset.track;
+  const trackUrl = btn.dataset.url || '';
   if (trackType === 'whatsapp') logEvent('whatsapp_tap', { url: trackUrl });
   else if (trackType === 'phone') logEvent('phone_tap', {});
   else logEvent('link_click', { link_type: trackType, url: trackUrl });

@@ -1,17 +1,18 @@
 // ==========================================
 // AGENT PAGE RENDERING
 // ==========================================
-import { SUPABASE_URL, SUPABASE_ANON_KEY, supabase } from './config.js';
-import { escHtml, escAttr, safeUrl, safeTrackingId } from './utils.js';
-import { ICONS } from './icons.js';
+
 import { logEvent } from './analytics.js';
-import { currentAgent, setCurrentAgent } from './state.js';
+import { SUPABASE_URL, } from './config.js';
+import { ICONS } from './icons.js';
 import { loadProperties, loadRemProjects, optimizeImg } from './properties.js';
+import { currentAgent, setCurrentAgent } from './state.js';
+import { escAttr, escHtml, safeTrackingId, safeUrl } from './utils.js';
 
 // ==========================================
 // VCARD GENERATOR
 // ==========================================
-window.saveContact = function() {
+window.saveContact = () => {
   if (!currentAgent) return;
   const a = currentAgent;
   const nameParts = a.name.split(' ');
@@ -20,7 +21,7 @@ window.saveContact = function() {
   const waNum = (a.whatsapp || '').replace(/[^0-9+]/g, '');
   const profileUrl = `https://sellingdubai.ae/a/${a.slug}`;
 
-  let vcard = [
+  const vcard = [
     'BEGIN:VCARD',
     'VERSION:3.0',
     `N:${lastName};${firstName};;;`,
@@ -96,7 +97,7 @@ export async function renderAgent(agent) {
   const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae', 'googleusercontent.com'];
   if (agent.photo_url) {
     const img = document.createElement('img');
-    img.className = 'avatar' + (isVerified ? ' avatar-verified' : '');
+    img.className = `avatar${isVerified ? ' avatar-verified' : ''}`;
     const canOptimize = SAFE_CDN_DOMAINS.some(d => agent.photo_url.includes(d));
     img.src = canOptimize ? optimizeImg(agent.photo_url, 200) : agent.photo_url;
     if (canOptimize) {
@@ -106,7 +107,7 @@ export async function renderAgent(agent) {
     img.width = 80;
     img.height = 80;
     img.alt = agent.name || '';
-    img.onerror = function() { avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`; };
+    img.onerror = () => { avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`; };
     avatarContainer.innerHTML = '';
     avatarContainer.appendChild(img);
   } else {
@@ -122,7 +123,7 @@ export async function renderAgent(agent) {
 
   // Trust bar — single consolidated verification line
   const trustBar = document.getElementById('trust-bar');
-  let trustChips = [];
+  const trustChips = [];
   if (agent.dld_broker_number || agent.broker_number) {
     trustChips.push(`<span class="trust-chip">BRN ${escHtml(agent.dld_broker_number || agent.broker_number)}</span>`);
   }
@@ -147,8 +148,8 @@ export async function renderAgent(agent) {
     }
     if (hasDldVolume) {
       const vol = agent.dld_total_volume_aed >= 1000000
-        ? 'AED ' + (agent.dld_total_volume_aed / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
-        : 'AED ' + agent.dld_total_volume_aed.toLocaleString();
+        ? `AED ${(agent.dld_total_volume_aed / 1000000).toFixed(1).replace(/\.0$/, '')}M`
+        : `AED ${agent.dld_total_volume_aed.toLocaleString()}`;
       statsHtml += `<div class="dld-stat"><span class="dld-stat-value">${vol}</span><span class="dld-stat-label">Total Volume</span></div>`;
     }
     statsHtml += '</div>';
@@ -278,15 +279,15 @@ export async function renderAgent(agent) {
 
   // === TRACKING SCRIPTS (Pro/Premium only) ===
   // Respect cookie consent — skip tracking if the visitor rejected analytics
-  const _cookieConsent = (() => { try { return localStorage.getItem('sd_cookie_consent'); } catch(e) { return null; } })();
+  const _cookieConsent = (() => { try { return localStorage.getItem('sd_cookie_consent'); } catch(_e) { return null; } })();
   const _trackingAllowed = _cookieConsent !== 'reject';
 
   const safeFbPixel = isPaidTier(agent) && _trackingAllowed ? safeTrackingId(agent.facebook_pixel_id) : null;
   if (safeFbPixel) {
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    !((f,b,e,v,n,t,s)=> {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
     n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)})(window,
     document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', safeFbPixel);
     fbq('track', 'PageView');
@@ -345,7 +346,7 @@ export async function renderAgent(agent) {
 // ==========================================
 // SHARE (Native)
 // ==========================================
-window.nativeShare = async function() {
+window.nativeShare = async () => {
   const url = window.location.href;
   const name = currentAgent ? currentAgent.name : 'this agent';
   const shareData = {
@@ -357,7 +358,7 @@ window.nativeShare = async function() {
     if (navigator.share) {
       await navigator.share(shareData);
     } else {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+      if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
       } else {
         const ta = document.createElement('textarea');
@@ -373,7 +374,7 @@ window.nativeShare = async function() {
       }
     }
     if (currentAgent) logEvent('share', { method: navigator.share ? 'native' : 'clipboard' });
-  } catch (e) { /* user cancelled share sheet */ }
+  } catch (_e) { /* user cancelled share sheet */ }
 };
 
 // ==========================================
@@ -400,7 +401,7 @@ export async function showEditButtonIfOwner(agent, preResolvedIsOwner) {
   const token = localStorage.getItem('sd_edit_token');
   if (!token) return;
   try {
-    const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-magic-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token })
@@ -417,7 +418,7 @@ export async function showEditButtonIfOwner(agent, preResolvedIsOwner) {
       const claimBtn = document.getElementById('nav-claim-btn');
       if (claimBtn) claimBtn.style.display = 'none';
     }
-  } catch (e) { /* silently fail — not critical */ }
+  } catch (_e) { /* silently fail — not critical */ }
 }
 
 // ==========================================
@@ -435,11 +436,11 @@ export function injectSchemaOrg(agent) {
       'address': { '@type': 'PostalAddress', 'addressLocality': 'Dubai', 'addressCountry': 'AE' }
     };
     if (agent.email) schema.email = agent.email;
-    if (agent.whatsapp) schema.telephone = '+' + agent.whatsapp;
+    if (agent.whatsapp) schema.telephone = `+${agent.whatsapp}`;
     if (agent.agency_name) schema.worksFor = { '@type': 'Organization', 'name': agent.agency_name };
     const el = document.getElementById('schema-agent');
     if (el) el.textContent = JSON.stringify(schema);
-  } catch (e) { /* non-critical */ }
+  } catch (_e) { /* non-critical */ }
 }
 
 export function hydrateOgMeta(agent) {
@@ -462,11 +463,11 @@ export function hydrateOgMeta(agent) {
     // Update meta description
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.setAttribute('content', desc);
-  } catch (e) { /* non-critical */ }
+  } catch (_e) { /* non-critical */ }
 }
 
 // === AGENT SEARCH (error page) ===
-window.searchAgent = async function() {
+window.searchAgent = async () => {
   const { supabase } = await import('./config.js');
   const query = document.getElementById('agent-search').value.trim();
   if (!query || query.length < 2) return;

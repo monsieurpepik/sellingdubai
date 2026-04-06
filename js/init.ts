@@ -1,17 +1,18 @@
 // ==========================================
 // APP INITIALIZATION
 // ==========================================
-import { supabase, SUPABASE_URL } from './config';
-import { getAgentSlug } from './utils';
+
+import { hydrateOgMeta, injectSchemaOrg, renderAgent, showEditButtonIfOwner, showPage } from './agent-page';
 import { trackPageView } from './analytics';
-import { showPage, renderAgent, injectSchemaOrg, hydrateOgMeta, showEditButtonIfOwner } from './agent-page';
+import { SUPABASE_URL, supabase } from './config';
+import { getAgentSlug } from './utils';
 import './event-delegation';
 import './errors';
 import type { Agent } from './state';
 
 // closeDetail stub — available immediately, before property-detail.ts lazy-loads.
 // property-detail.ts replaces this with its full implementation when it loads.
-window.closeDetail = function() {
+window.closeDetail = () => {
   document.getElementById('detail-overlay')?.classList.remove('open');
   document.body.style.overflow = '';
 };
@@ -141,7 +142,7 @@ window.openProjectDetail = async function openProjectDetailLazy(slug: string) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const mortModal = document.getElementById('mortgage-modal');
-    if (mortModal && mortModal.classList.contains('open')) { window.closeMortgage?.(); return; }
+    if (mortModal?.classList.contains('open')) { window.closeMortgage?.(); return; }
     const photoViewer = document.getElementById('photo-viewer');
     if (photoViewer?.classList.contains('open')) { window.closePhotoViewer?.(); return; }
     const galleryOverlay = document.getElementById('gallery-overlay');
@@ -172,9 +173,9 @@ function trapFocus(modal: HTMLElement, e: KeyboardEvent): void {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Tab') return;
   const leadModal = document.getElementById('lead-modal');
-  if (leadModal && leadModal.classList.contains('open')) { trapFocus(leadModal, e); return; }
+  if (leadModal?.classList.contains('open')) { trapFocus(leadModal, e); return; }
   const mortModal = document.getElementById('mortgage-modal');
-  if (mortModal && mortModal.classList.contains('open')) { trapFocus(mortModal, e); }
+  if (mortModal?.classList.contains('open')) { trapFocus(mortModal, e); }
 });
 
 // ==========================================
@@ -210,7 +211,7 @@ async function init(): Promise<void> {
     let isOwner = false;
     if (ownerToken) {
       try {
-        const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', { // await-ok: conditional on ownerToken, depends on agent.id from prior query
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-magic-link`, { // await-ok: conditional on ownerToken, depends on agent.id from prior query
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: ownerToken })
@@ -264,7 +265,7 @@ async function init(): Promise<void> {
     console.error('Init error:', e);
     const errMsg = e instanceof Error ? e.message : String(e);
     const errStack = e instanceof Error ? e.stack : undefined;
-    window.__sdTrackError?.('Agent init failed: ' + errMsg, { slug, stack: errStack });
+    window.__sdTrackError?.(`Agent init failed: ${errMsg}`, { slug, stack: errStack });
     showPage('error');
   }
 }

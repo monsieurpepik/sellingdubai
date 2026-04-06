@@ -1,15 +1,16 @@
 // ==========================================
 // PROPERTY DETAIL VIEW
 // ==========================================
-import { escHtml, escAttr } from './utils.js';
-import { logEvent } from './analytics.js';
-import { currentAgent, allProperties } from './state.js';
-import { applyCurrentFilters } from './filters.js';
 
-let currentDetailProp = null;
+import { logEvent } from './analytics.js';
+import { applyCurrentFilters } from './filters.js';
+import { allProperties, currentAgent } from './state.js';
+import { escAttr, escHtml } from './utils.js';
+
+let _currentDetailProp = null;
 
 // Load Google Maps iframe on demand (GDPR — only after explicit user click)
-window._loadDetailMap = function(container) {
+window._loadDetailMap = (container) => {
   const mapQ = container.dataset.mapq;
   const mapsUrl = container.dataset.mapsurl;
   if (!mapQ) return;
@@ -21,10 +22,10 @@ window._loadDetailMap = function(container) {
 };
 
 // Stable lookup by property ID — immune to filter changes between render and click
-window.openPropertyById = function(propId) {
+window.openPropertyById = (propId) => {
   const p = allProperties.find(prop => String(prop.id) === String(propId));
   if (!p) return;
-  currentDetailProp = p;
+  _currentDetailProp = p;
   renderDetailView(p);
   const ctaBar = document.getElementById('detail-cta-bar');
   if (ctaBar) ctaBar.style.display = '';
@@ -33,11 +34,11 @@ window.openPropertyById = function(propId) {
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
 };
 
-window.openPropertyDetail = function(propIndex) {
+window.openPropertyDetail = (propIndex) => {
   const props = applyCurrentFilters();
   const p = props[propIndex];
   if (!p) return;
-  currentDetailProp = p;
+  _currentDetailProp = p;
   renderDetailView(p);
   const ctaBar = document.getElementById('detail-cta-bar');
   if (ctaBar) ctaBar.style.display = '';
@@ -46,7 +47,7 @@ window.openPropertyDetail = function(propIndex) {
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
 };
 
-window.closeDetail = function() {
+window.closeDetail = () => {
   document.getElementById('detail-overlay').classList.remove('open');
   document.querySelector('script[data-sd-project-ld]')?.remove();
   // Keep scroll locked only if the properties overlay is still open behind this
@@ -58,8 +59,8 @@ window.closeDetail = function() {
     stickyCta.style.display = stickyCta.dataset.prevDisplay;
     delete stickyCta.dataset.prevDisplay;
   }
-  currentDetailProp = null;
-  if (currentAgent) history.pushState(null, '', '/a/' + currentAgent.slug);
+  _currentDetailProp = null;
+  if (currentAgent) history.pushState(null, '', `/a/${currentAgent.slug}`);
 };
 
 function renderDetailView(p) {
@@ -142,7 +143,7 @@ function renderDetailView(p) {
 
   let locationHtml = '';
   if (p.location) {
-    const mapQ = encodeURIComponent(p.location + ', Dubai, UAE');
+    const mapQ = encodeURIComponent(`${p.location}, Dubai, UAE`);
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQ}`;
     locationHtml = `<div class="detail-location-card"><div class="detail-section-title">Location</div>
       <div class="detail-location-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a96e" style="vertical-align:-2px;margin-right:6px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>${escHtml(p.location)}, Dubai, UAE</div>
@@ -184,8 +185,8 @@ function renderDetailView(p) {
       const bankFee = loanAmt * 0.01; // ~1% processing fee
       const mortgageTotal = cashTotal + mortgageReg + bankFee;
 
-      const fmtAED = (n) => 'AED ' + Math.round(n).toLocaleString();
-      const fmtPct = (n) => (n * 100).toFixed(1) + '%';
+      const fmtAED = (n) => `AED ${Math.round(n).toLocaleString()}`;
+      const fmtPct = (n) => `${(n * 100).toFixed(1)}%`;
 
       costToOwnHtml = `
       <div class="cost-to-own-card">
@@ -270,10 +271,10 @@ function renderDetailView(p) {
   // Wire bottom CTA buttons
   const waBtn = document.getElementById('detail-wa-btn');
   const inquireBtn = document.getElementById('detail-inquire-btn');
-  if (currentAgent && currentAgent.whatsapp) {
+  if (currentAgent?.whatsapp) {
     waBtn.style.display = 'flex';
     waBtn.onclick = () => {
-      window.open(`https://wa.me/${currentAgent.whatsapp.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hi, I\'m interested in: ' + (p.title || 'your property'))}`, '_blank');
+      window.open(`https://wa.me/${currentAgent.whatsapp.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(`Hi, I'm interested in: ${p.title || 'your property'}`)}`, '_blank');
       logEvent('whatsapp_tap', { source: 'property_detail', property: p.title });
     };
   } else {
@@ -283,7 +284,7 @@ function renderDetailView(p) {
 }
 
 // Cost to Own toggle
-window.toggleCostMode = function(btn, mode) {
+window.toggleCostMode = (btn, mode) => {
   // Toggle active state on buttons
   btn.parentElement.querySelectorAll('.cost-toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');

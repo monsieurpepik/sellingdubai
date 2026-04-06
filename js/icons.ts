@@ -28,15 +28,15 @@ export const FEAT_ICONS: Record<string, string> = {
 };
 
 export function getFeatureIcon(featureName: string | null | undefined): string {
-  if (!featureName) return FEAT_ICONS['default'] ?? '';
+  if (!featureName) return FEAT_ICONS.default ?? '';
   const fl = featureName.toLowerCase();
-  if (fl.includes('pool')) return FEAT_ICONS['pool'] ?? '';
-  if (fl.includes('gym') || fl.includes('fitness')) return FEAT_ICONS['gym'] ?? '';
-  if (fl.includes('view') || fl.includes('landmark') || fl.includes('sea') || fl.includes('marina') || fl.includes('panoram')) return FEAT_ICONS['view'] ?? '';
-  if (fl.includes('parking') || fl.includes('garage')) return FEAT_ICONS['parking'] ?? '';
-  if (fl.includes('garden') || fl.includes('terrace')) return FEAT_ICONS['garden'] ?? '';
-  if (fl.includes('balcony') || fl.includes('loggia')) return FEAT_ICONS['balcony'] ?? '';
-  if (fl.includes('beach') || fl.includes('waterfront') || fl.includes('coastal')) return FEAT_ICONS['beach'] ?? '';
-  if (fl.includes('furnish') || fl.includes('maid') || fl.includes('smart') || fl.includes('duplex') || fl.includes('penthouse')) return FEAT_ICONS['home'] ?? '';
-  return FEAT_ICONS['default'] ?? '';
+  if (fl.includes('pool')) return FEAT_ICONS.pool ?? '';
+  if (fl.includes('gym') || fl.includes('fitness')) return FEAT_ICONS.gym ?? '';
+  if (fl.includes('view') || fl.includes('landmark') || fl.includes('sea') || fl.includes('marina') || fl.includes('panoram')) return FEAT_ICONS.view ?? '';
+  if (fl.includes('parking') || fl.includes('garage')) return FEAT_ICONS.parking ?? '';
+  if (fl.includes('garden') || fl.includes('terrace')) return FEAT_ICONS.garden ?? '';
+  if (fl.includes('balcony') || fl.includes('loggia')) return FEAT_ICONS.balcony ?? '';
+  if (fl.includes('beach') || fl.includes('waterfront') || fl.includes('coastal')) return FEAT_ICONS.beach ?? '';
+  if (fl.includes('furnish') || fl.includes('maid') || fl.includes('smart') || fl.includes('duplex') || fl.includes('penthouse')) return FEAT_ICONS.home ?? '';
+  return FEAT_ICONS.default ?? '';
 }

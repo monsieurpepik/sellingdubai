@@ -1,8 +1,9 @@
 // ==========================================
 // LEAD MODAL
 // ==========================================
-import { CAPTURE_URL } from './config.js';
+
 import { logEvent } from './analytics.js';
+import { CAPTURE_URL } from './config.js';
 import { currentAgent } from './state.js';
 
 // Track previously focused element for focus restoration
@@ -20,7 +21,7 @@ function getEl<T extends HTMLElement>(id: string): T {
   return document.getElementById(id) as T;
 }
 
-window.openLead = function() {
+window.openLead = () => {
   if (!currentAgent) return;
   _previousFocus = document.activeElement;
   getEl('lead-modal').classList.add('open');
@@ -34,7 +35,7 @@ window.openLead = function() {
   setTimeout(() => { getEl<HTMLInputElement>('lead-name').focus(); }, 100);
 };
 
-window.closeLead = function() {
+window.closeLead = () => {
   getEl('lead-modal').classList.remove('open');
   document.body.style.overflow = '';
   // Restore focus to the element that opened the modal
@@ -56,14 +57,14 @@ window.closeLead = function() {
   _pendingSource = 'profile';
 };
 
-window.toggleExtra = function() {
+window.toggleExtra = () => {
   const extra = getEl('lead-extra');
   const btn = getEl('lead-expander');
   extra.classList.toggle('open');
   btn.classList.toggle('open');
 };
 
-window.submitLead = async function() {
+window.submitLead = async () => {
   const errEl = getEl('lead-error');
   errEl.classList.remove('show');
 
@@ -82,7 +83,7 @@ window.submitLead = async function() {
 
   // Honeypot check — bots fill hidden fields; don't send value to server
   const hp = document.getElementById('lead-website') as HTMLInputElement | null;
-  if (hp && hp.value) { errEl.textContent = 'Submission blocked.'; errEl.classList.add('show'); return; }
+  if (hp?.value) { errEl.textContent = 'Submission blocked.'; errEl.classList.add('show'); return; }
 
   if (!name || name.length < 2) { errEl.textContent = 'Please enter your full name.'; errEl.classList.add('show'); return; }
   if (!phone && !email) { errEl.textContent = 'Please enter a phone number or email.'; errEl.classList.add('show'); return; }
@@ -174,7 +175,7 @@ window.submitLead = async function() {
 };
 
 // Open lead modal pre-filled for a brochure request; opens PDF after successful submit
-window.openLeadForBrochure = function(projectName, brochureUrl) {
+window.openLeadForBrochure = (projectName, brochureUrl) => {
   _pendingBrochureUrl = brochureUrl;
   _pendingSource = 'brochure_request';
   window.openLead?.();
@@ -191,7 +192,7 @@ window.openLeadForBrochure = function(projectName, brochureUrl) {
 };
 
 // Open lead modal pre-filled with property name
-window.openLeadForProperty = function(propertyTitle) {
+window.openLeadForProperty = (propertyTitle) => {
   getEl('detail-overlay').classList.remove('open');
   window.closeProps?.();
   setTimeout(() => {

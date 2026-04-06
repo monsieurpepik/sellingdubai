@@ -6,7 +6,7 @@ import { escAttr } from './utils';
 let _photoViewerIdx = 0;
 let _activeLayer: 'a' | 'b' = 'a'; // tracks which layer is currently visible
 
-window.openFullGallery = function() {
+window.openFullGallery = () => {
   const images = window._currentDetailImages ?? [];
   if (!images.length) return;
   const body = document.getElementById('gallery-body');
@@ -19,11 +19,11 @@ window.openFullGallery = function() {
   document.getElementById('gallery-overlay')?.classList.add('open');
 };
 
-window.closeFullGallery = function() {
+window.closeFullGallery = () => {
   document.getElementById('gallery-overlay')?.classList.remove('open');
 };
 
-window.openPhotoViewer = function(idx: number) {
+window.openPhotoViewer = (idx: number) => {
   const images = window._currentDetailImages ?? [];
   if (!images.length) return;
   _photoViewerIdx = Math.max(0, Math.min(idx, images.length - 1));
@@ -40,7 +40,7 @@ window.openPhotoViewer = function(idx: number) {
   document.getElementById('photo-viewer')?.classList.add('open');
 };
 
-window.swapDetailHero = function(idx: number) {
+window.swapDetailHero = (idx: number) => {
   const images = window._currentDetailImages ?? [];
   if (idx < 0 || idx >= images.length) return;
   window._currentDetailHeroIdx = idx;
@@ -48,11 +48,11 @@ window.swapDetailHero = function(idx: number) {
   if (hero) hero.src = images[idx] ?? '';
 };
 
-window.closePhotoViewer = function() {
+window.closePhotoViewer = () => {
   document.getElementById('photo-viewer')?.classList.remove('open');
 };
 
-window.navPhoto = function(dir: number) {
+window.navPhoto = (dir: number) => {
   const images = window._currentDetailImages ?? [];
   _photoViewerIdx = (_photoViewerIdx + dir + images.length) % images.length;
   crossfadeTo(images[_photoViewerIdx] ?? '');
@@ -79,7 +79,7 @@ function crossfadeTo(src: string): void {
 }
 
 // Swipe support for photo viewer
-(function() {
+(() => {
   const el = document.getElementById('photo-viewer');
   if (!el) return;
   let startX = 0;

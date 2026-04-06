@@ -1,13 +1,13 @@
 // js/agency-page.js
 import { supabase } from './config.js';
-import { escHtml, escAttr, safeUrl } from './utils.js';
+import { escAttr, escHtml, safeUrl } from './utils.js';
 
 const NETLIFY_IMG = (url, w) =>
   url ? `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&fm=webp&q=80` : '';
 
 const SUPABASE_STORAGE = 'https://pjyorgedaxevxophpfib.supabase.co/';
 function safeImgUrl(url) {
-  return url && url.startsWith(SUPABASE_STORAGE) ? url : null;
+  return url?.startsWith(SUPABASE_STORAGE) ? url : null;
 }
 
 const _pathMatch = window.location.pathname.match(/^\/agency\/([^/]+)/);
@@ -35,12 +35,12 @@ async function init() {
     console.error('Failed to load agents:', agentsErr);
   }
 
-  document.title = agency.name + ' — SellingDubai';
+  document.title = `${agency.name} — SellingDubai`;
   const canonicalEl = document.createElement('link');
   canonicalEl.rel = 'canonical';
   canonicalEl.href = `https://sellingdubai.ae/agency/${encodeURIComponent(agency.slug)}`;
   document.head.appendChild(canonicalEl);
-  document.querySelector('meta[property="og:title"]').setAttribute('content', agency.name + ' — SellingDubai');
+  document.querySelector('meta[property="og:title"]').setAttribute('content', `${agency.name} — SellingDubai`);
   const agencyDesc = agency.description || `${agency.name} — verified DLD real estate agency in Dubai. Browse agent profiles, listings, and contact directly.`;
   document.querySelector('meta[name="description"]')?.setAttribute('content', agencyDesc);
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', agencyDesc);
@@ -60,7 +60,7 @@ async function init() {
 
   const safeLogoUrl = safeImgUrl(agency.logo_url);
   if (safeLogoUrl) {
-    const ogImageUrl = 'https://sellingdubai.ae' + NETLIFY_IMG(safeLogoUrl, 400);
+    const ogImageUrl = `https://sellingdubai.ae${NETLIFY_IMG(safeLogoUrl, 400)}`;
     document.querySelector('meta[property="og:image"]').setAttribute('content', ogImageUrl);
   }
 
@@ -100,7 +100,7 @@ async function init() {
     return;
   }
 
-  document.getElementById('agents-count').textContent = agents.length + ' agent' + (agents.length === 1 ? '' : 's');
+  document.getElementById('agents-count').textContent = `${agents.length} agent${agents.length === 1 ? '' : 's'}`;
   grid.innerHTML = agents.map(a => {
     const initials = (a.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const safePhoto = safeImgUrl(a.photo_url);

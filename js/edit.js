@@ -1,11 +1,11 @@
 // @ts-check
-(function() {
+(() => {
   const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
   const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
   const VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
   const UPDATE_URL = `${SUPABASE_URL}/functions/v1/update-agent`;
   const UPLOAD_URL = `${SUPABASE_URL}/functions/v1/upload-image`;
-  const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
+  const _ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
 
   /** @type {string | null} */
   let currentAgent = null;
@@ -59,7 +59,7 @@
   window.showAuth = showAuth;
 
   // === SEND MAGIC LINK ===
-  window.sendMagicLink = async function() {
+  window.sendMagicLink = async () => {
     const errEl = document.getElementById('auth-error');
     const succEl = document.getElementById('auth-success');
     errEl.classList.remove('show');
@@ -136,7 +136,7 @@
 
       // If we were sent here from another page (e.g. pricing), return there now
       const returnTo = new URLSearchParams(window.location.search).get('return');
-      if (returnTo && returnTo.startsWith('/')) {
+      if (returnTo?.startsWith('/')) {
         window.location.href = returnTo;
         return;
       }
@@ -163,7 +163,7 @@
 
     // Header
     if (a.photo_url) {
-      document.getElementById('edit-avatar').innerHTML = `<img src="${esc(a.photo_url)}" srcset="${esc('/.netlify/images?url=' + encodeURIComponent(a.photo_url) + '&w=80&fm=webp&q=80')} 80w, ${esc('/.netlify/images?url=' + encodeURIComponent(a.photo_url) + '&w=160&fm=webp&q=80')} 160w" sizes="80px" width="80" height="80" alt="${esc(a.name)}">`;
+      document.getElementById('edit-avatar').innerHTML = `<img src="${esc(a.photo_url)}" srcset="${esc(`/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=80&fm=webp&q=80`)} 80w, ${esc(`/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=160&fm=webp&q=80`)} 160w" sizes="80px" width="80" height="80" alt="${esc(a.name)}">`;
     } else {
       const initials = a.name.split(' ').map(n => n[0]).join('').slice(0, 2);
       document.getElementById('edit-avatar').textContent = initials;
@@ -186,7 +186,7 @@
     document.getElementById('ed-bg').value = a.background_image_url || '';
     // Show image previews
     if (a.photo_url) {
-      document.getElementById('preview-avatar').innerHTML = `<img src="${a.photo_url}" srcset="${esc('/.netlify/images?url=' + encodeURIComponent(a.photo_url) + '&w=80&fm=webp&q=80')} 80w, ${esc('/.netlify/images?url=' + encodeURIComponent(a.photo_url) + '&w=160&fm=webp&q=80')} 160w" sizes="80px" width="80" height="80" alt="Profile photo">`;
+      document.getElementById('preview-avatar').innerHTML = `<img src="${a.photo_url}" srcset="${esc(`/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=80&fm=webp&q=80`)} 80w, ${esc(`/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=160&fm=webp&q=80`)} 160w" sizes="80px" width="80" height="80" alt="Profile photo">`;
       document.getElementById('prompt-avatar').classList.add('hidden');
     }
     if (a.background_image_url) {
@@ -238,7 +238,7 @@
     if (a.instagram_connected_at) {
       document.getElementById('ig-disconnected').style.display = 'none';
       document.getElementById('ig-connected').style.display = 'block';
-      const igHandle = a.instagram_url ? '@' + a.instagram_url.replace(/https?:\/\/(www\.)?instagram\.com\/?/, '').replace(/\/$/, '') : 'Connected';
+      const igHandle = a.instagram_url ? `@${a.instagram_url.replace(/https?:\/\/(www\.)?instagram\.com\/?/, '').replace(/\/$/, '')}` : 'Connected';
       document.getElementById('ig-username').textContent = igHandle;
     }
 
@@ -246,7 +246,7 @@
     if (a.tiktok_connected_at) {
       document.getElementById('tt-disconnected').style.display = 'none';
       document.getElementById('tt-connected').style.display = 'block';
-      const ttHandle = a.tiktok_url ? '@' + a.tiktok_url.replace(/https?:\/\/(www\.)?tiktok\.com\/@?/, '').replace(/\/$/, '') : 'Connected';
+      const ttHandle = a.tiktok_url ? `@${a.tiktok_url.replace(/https?:\/\/(www\.)?tiktok\.com\/@?/, '').replace(/\/$/, '')}` : 'Connected';
       document.getElementById('tt-username').textContent = ttHandle;
     }
 
@@ -287,7 +287,7 @@
   }
 
   // === INSTAGRAM ===
-  window.connectInstagram = function() {
+  window.connectInstagram = () => {
     const btn = document.getElementById('btn-ig-connect');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Connecting...';
@@ -296,7 +296,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'get_auth_url' }),
-    }).then(function(res) { return res.json(); }).then(function(data) {
+    }).then((res) => res.json()).then((data) => {
       if (data.url) {
         if (data.state) localStorage.setItem('sd_ig_csrf_state', data.state);
         window.location.href = data.url;
@@ -305,7 +305,7 @@
         btn.innerHTML = igSvg;
         showToast('Could not get Instagram authorization URL. Please try again.');
       }
-    }).then(null, function() {
+    }).then(null, () => {
       btn.disabled = false;
       btn.innerHTML = igSvg;
       showToast('Connection failed. Please try again.');
@@ -323,7 +323,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
-    }).then(function(res) { return res.json(); }).then(function(data) {
+    }).then((res) => res.json()).then((data) => {
       if (data.success) {
         document.getElementById('ig-disconnected').style.display = 'none';
         document.getElementById('ig-connected').style.display = 'block';
@@ -334,25 +334,25 @@
         succEl.classList.add('show');
         setTimeout(() => succEl.classList.remove('show'), 4000);
       } else {
-        showToast('Instagram connection failed: ' + (data.error || 'Unknown error'));
+        showToast(`Instagram connection failed: ${data.error || 'Unknown error'}`);
         if (btn) { btn.disabled = false; btn.innerHTML = igSvg; }
       }
-    }).then(null, function() {
+    }).then(null, () => {
       showToast('Instagram connection failed. Please try again.');
       if (btn) { btn.disabled = false; btn.innerHTML = igSvg; }
     });
   }
 
-  window.disconnectInstagram = function() {
+  window.disconnectInstagram = () => {
     if (!confirm('Disconnect Instagram?')) return;
     fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'disconnect', token: authToken }),
-    }).then(function(res) {
+    }).then((res) => {
       if (!res.ok) {
-        return res.json().then(null, () => ({})).then(function(data) {
-          showToast('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
+        return res.json().then(null, () => ({})).then((data) => {
+          showToast(`Failed to disconnect: ${data.error || 'Server error. Please try again.'}`);
         });
       }
       document.getElementById('ig-disconnected').style.display = 'block';
@@ -360,13 +360,13 @@
       document.getElementById('ed-ig').value = '';
       document.getElementById('btn-ig-connect').disabled = false;
       document.getElementById('btn-ig-connect').innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg> Connect Instagram`;
-    }).then(null, function() {
+    }).then(null, () => {
       showToast('Failed to disconnect. Please try again.');
     });
   };
 
   // === TIKTOK ===
-  window.connectTikTok = function() {
+  window.connectTikTok = () => {
     const btn = document.getElementById('btn-tt-connect');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:#fff;"></span> Connecting...';
@@ -375,7 +375,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'get_auth_url' }),
-    }).then(function(res) { return res.json(); }).then(function(data) {
+    }).then((res) => res.json()).then((data) => {
       if (data.url) {
         if (data.state) localStorage.setItem('sd_tt_csrf_state', data.state);
         window.location.href = data.url;
@@ -384,7 +384,7 @@
         btn.innerHTML = ttSvg;
         showToast('Could not get TikTok authorization URL. Please try again.');
       }
-    }).then(null, function() {
+    }).then(null, () => {
       btn.disabled = false;
       btn.innerHTML = ttSvg;
       showToast('Connection failed. Please try again.');
@@ -402,7 +402,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
-    }).then(function(res) { return res.json(); }).then(function(data) {
+    }).then((res) => res.json()).then((data) => {
       if (data.success) {
         document.getElementById('tt-disconnected').style.display = 'none';
         document.getElementById('tt-connected').style.display = 'block';
@@ -414,25 +414,25 @@
         succEl.classList.add('show');
         setTimeout(() => succEl.classList.remove('show'), 4000);
       } else {
-        showToast('TikTok connection failed: ' + (data.error || 'Unknown error'));
+        showToast(`TikTok connection failed: ${data.error || 'Unknown error'}`);
         if (btn) { btn.disabled = false; btn.innerHTML = ttSvg; }
       }
-    }).then(null, function() {
+    }).then(null, () => {
       showToast('TikTok connection failed. Please try again.');
       if (btn) { btn.disabled = false; btn.innerHTML = ttSvg; }
     });
   }
 
-  window.disconnectTikTok = function() {
+  window.disconnectTikTok = () => {
     if (!confirm('Disconnect TikTok?')) return;
     fetch(`${SUPABASE_URL}/functions/v1/tiktok-auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'disconnect', token: authToken }),
-    }).then(function(res) {
+    }).then((res) => {
       if (!res.ok) {
-        return res.json().then(null, () => ({})).then(function(data) {
-          showToast('Failed to disconnect: ' + (data.error || 'Server error. Please try again.'));
+        return res.json().then(null, () => ({})).then((data) => {
+          showToast(`Failed to disconnect: ${data.error || 'Server error. Please try again.'}`);
         });
       }
       document.getElementById('tt-disconnected').style.display = 'block';
@@ -440,13 +440,13 @@
       document.getElementById('ed-tt').value = '';
       document.getElementById('btn-tt-connect').disabled = false;
       document.getElementById('btn-tt-connect').innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.84a8.27 8.27 0 0 0 4.84 1.57V6.97a4.84 4.84 0 0 1-1.08-.28z"/></svg> Connect TikTok`;
-    }).then(null, function() {
+    }).then(null, () => {
       showToast('Failed to disconnect. Please try again.');
     });
   };
 
   // === SAVE PROFILE ===
-  window.saveProfile = async function() {
+  window.saveProfile = async () => {
     const errEl = document.getElementById('save-error');
     const succEl = document.getElementById('save-success');
     errEl.classList.remove('show');
@@ -478,9 +478,9 @@
       custom_link_2_label: document.getElementById('ed-cl2-label').value.trim() || null,
       custom_link_2_url: document.getElementById('ed-cl2-url').value.trim() || null,
       instagram_url: document.getElementById('ed-ig').value.trim() || null,
-      youtube_url: (() => { const v = document.getElementById('ed-yt').value.trim(); return v ? (v.startsWith('http') ? v : 'https://www.youtube.com/@' + v) : null; })(),
+      youtube_url: (() => { const v = document.getElementById('ed-yt').value.trim(); return v ? (v.startsWith('http') ? v : `https://www.youtube.com/@${v}`) : null; })(),
       tiktok_url: document.getElementById('ed-tt').value.trim() || null,
-      linkedin_url: (() => { const v = document.getElementById('ed-li').value.trim(); return v ? (v.startsWith('http') ? v : 'https://www.linkedin.com/in/' + v) : null; })(),
+      linkedin_url: (() => { const v = document.getElementById('ed-li').value.trim(); return v ? (v.startsWith('http') ? v : `https://www.linkedin.com/in/${v}`) : null; })(),
       webhook_url: document.getElementById('ed-webhook').value.trim() || null,
       facebook_pixel_id: document.getElementById('ed-fb-pixel').value.trim() || null,
       facebook_capi_token: document.getElementById('ed-fb-capi-token').value.trim() || null,
@@ -513,7 +513,7 @@
       // Update header
       document.getElementById('edit-name').textContent = name;
       if (updates.photo_url) {
-        document.getElementById('edit-avatar').innerHTML = `<img src="${updates.photo_url}" srcset="${esc('/.netlify/images?url=' + encodeURIComponent(updates.photo_url) + '&w=80&fm=webp&q=80')} 80w, ${esc('/.netlify/images?url=' + encodeURIComponent(updates.photo_url) + '&w=160&fm=webp&q=80')} 160w" sizes="80px" width="80" height="80" alt="${name}">`;
+        document.getElementById('edit-avatar').innerHTML = `<img src="${updates.photo_url}" srcset="${esc(`/.netlify/images?url=${encodeURIComponent(updates.photo_url)}&w=80&fm=webp&q=80`)} 80w, ${esc(`/.netlify/images?url=${encodeURIComponent(updates.photo_url)}&w=160&fm=webp&q=80`)} 160w" sizes="80px" width="80" height="80" alt="${name}">`;
       } else {
         const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2);
         document.getElementById('edit-avatar').textContent = initials;
@@ -537,9 +537,9 @@
   function compressImage(file, maxSize, quality) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = (e) => {
         const img = new Image();
-        img.onload = function() {
+        img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height;
           if (w > maxSize || h > maxSize) {
@@ -560,7 +560,7 @@
   }
 
   // === IMAGE UPLOAD ===
-  window.uploadImage = async function(fileInput, imageType) {
+  window.uploadImage = async (fileInput, imageType) => {
     const file = fileInput.files[0];
     if (!file) return;
 
@@ -593,7 +593,7 @@
     document.getElementById(ui.prompt).classList.add('hidden');
     document.getElementById(ui.loading).classList.remove('hidden');
 
-    (async function() {
+    (async () => {
       // Compress image client-side before upload
       const base64 = file.type.startsWith('image/')
         ? await compressImage(file, ui.maxPx, 0.8)
@@ -620,7 +620,7 @@
 
       if (!res.ok) {
         document.getElementById(ui.prompt).classList.remove('hidden');
-        showToast('Upload failed: ' + (data.error || 'Unknown error'));
+        showToast(`Upload failed: ${data.error || 'Unknown error'}`);
         fileInput.value = '';
         return;
       }
@@ -645,11 +645,11 @@
       // Update header avatar if it was an avatar upload
       if (imageType === 'avatar') {
         const safeName = (currentAgent.name || '').replace(/[<>"'&]/g, '');
-        document.getElementById('edit-avatar').innerHTML = `<img src="${esc(data.url)}" srcset="${esc('/.netlify/images?url=' + encodeURIComponent(data.url) + '&w=80&fm=webp&q=80')} 80w, ${esc('/.netlify/images?url=' + encodeURIComponent(data.url) + '&w=160&fm=webp&q=80')} 160w" sizes="80px" width="80" height="80" alt="${safeName}">`;
+        document.getElementById('edit-avatar').innerHTML = `<img src="${esc(data.url)}" srcset="${esc(`/.netlify/images?url=${encodeURIComponent(data.url)}&w=80&fm=webp&q=80`)} 80w, ${esc(`/.netlify/images?url=${encodeURIComponent(data.url)}&w=160&fm=webp&q=80`)} 160w" sizes="80px" width="80" height="80" alt="${safeName}">`;
       }
 
       fileInput.value = '';
-    })().then(null, function() {
+    })().then(null, () => {
       document.getElementById(ui.loading).classList.add('hidden');
       document.getElementById(ui.prompt).classList.remove('hidden');
       showToast('Upload failed. Check your connection and try again.');
@@ -671,19 +671,19 @@
     'just_listed': 'Just Listed', 'available': 'Available', 'open_house': 'Open House',
     'under_offer': 'Under Offer', 'just_sold': 'Just Sold', 'sold': 'Sold', 'rented': 'Rented',
   };
-  function statusStyle(s) { return statusColors[s] || statusColors['available']; }
+  function statusStyle(s) { return statusColors[s] || statusColors.available; }
   function statusLabel(s) { return statusLabels[s] || 'Available'; }
 
   // === PROPERTY MANAGEMENT ===
   const PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
 
-  window.showPropForm = function() {
+  window.showPropForm = () => {
     document.getElementById('prop-form').style.display = '';
     document.getElementById('btn-show-prop-form').style.display = 'none';
     document.getElementById('prop-title').focus();
   };
 
-  window.cancelPropForm = function() {
+  window.cancelPropForm = () => {
     document.getElementById('prop-form').style.display = 'none';
     document.getElementById('btn-show-prop-form').style.display = '';
     // Reset form
@@ -700,12 +700,12 @@
     document.querySelector('input[name="prop-status"][value="just_listed"]').checked = true;
   };
 
-  window.previewPropPhoto = function(input) {
+  window.previewPropPhoto = (input) => {
     const file = input.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { showToast('Photo must be under 5MB.'); return; }
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
       document.getElementById('prompt-prop').classList.add('hidden');
       document.getElementById('preview-prop').innerHTML = `<img src="${e.target.result}" alt="Property photo" style="width:100%;height:100%;object-fit:cover;">`;
       document.getElementById('prop-image-data').value = e.target.result;
@@ -713,7 +713,7 @@
     reader.readAsDataURL(file);
   };
 
-  window.addProperty = async function() {
+  window.addProperty = async () => {
     const title = document.getElementById('prop-title').value.trim();
     if (!title) { showToast('Property title is required.'); return; }
     const trakheesi = document.getElementById('prop-trakheesi').value.trim();
@@ -737,8 +737,8 @@
             title,
             price: document.getElementById('prop-price').value.trim() || null,
             location: document.getElementById('prop-location').value.trim() || null,
-            bedrooms: parseInt(document.getElementById('prop-bedrooms').value) || null,
-            area_sqft: parseInt(document.getElementById('prop-sqft').value) || null,
+            bedrooms: parseInt(document.getElementById('prop-bedrooms').value, 10) || null,
+            area_sqft: parseInt(document.getElementById('prop-sqft').value, 10) || null,
             property_type: document.getElementById('prop-type').value || null,
             status,
             external_url: document.getElementById('prop-external-url').value.trim() || null,
@@ -753,7 +753,7 @@
       btn.textContent = 'Add Property';
 
       if (!res.ok) {
-        showToast('Error: ' + (data.error || 'Failed to add property.'));
+        showToast(`Error: ${data.error || 'Failed to add property.'}`);
         return;
       }
 
@@ -774,22 +774,22 @@
     }
   };
 
-  window.deleteProperty = function(propId) {
+  window.deleteProperty = (propId) => {
     if (!confirm('Remove this property from your profile?')) return;
 
     fetch(PROPS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken, action: 'delete', property: { id: propId } })
-    }).then(function(res) {
+    }).then((res) => {
       if (res.ok) {
         loadProperties();
       } else {
-        return res.json().then(function(data) {
-          showToast('Error: ' + (data.error || 'Failed to delete.'));
+        return res.json().then((data) => {
+          showToast(`Error: ${data.error || 'Failed to delete.'}`);
         });
       }
-    }).then(null, function() {
+    }).then(null, () => {
       showToast('Connection error.');
     });
   };
@@ -799,7 +799,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken, action: 'list' })
-    }).then(function(res) { return res.json(); }).then(function(data) {
+    }).then((res) => res.json()).then((data) => {
       const list = document.getElementById('props-list');
       if (!data.properties || data.properties.length === 0) {
         list.innerHTML = '<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.2);font-size:13px;">No properties yet. Add your first listing.</div>';
@@ -824,13 +824,13 @@
           </button>
         </div>
       `).join('');
-    }).then(null, function(e) {
+    }).then(null, (e) => {
       console.error('loadProperties error:', e);
     });
   }
 
   // === LOGOUT ===
-  window.logout = function() {
+  window.logout = () => {
     localStorage.removeItem('sd_edit_token');
     authToken = null;
     currentAgent = null;
@@ -845,7 +845,7 @@
   }
 
   // === ENTER KEY ===
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && document.activeElement.id === 'auth-email') {
       sendMagicLink();
     }
@@ -860,21 +860,21 @@
 
   function copyProfileLink() {
     const url = window._profileUrl || window.location.origin;
-    const copyFn = (navigator.clipboard && navigator.clipboard.writeText)
+    const copyFn = (navigator.clipboard?.writeText)
       ? () => navigator.clipboard.writeText(url)
-      : () => new Promise(function(resolve, reject) {
+      : () => new Promise((resolve, reject) => {
           const ta = document.createElement('textarea');
           ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
           document.body.appendChild(ta); ta.select();
           if (document.execCommand('copy')) { resolve(); } else { reject(new Error('execCommand failed')); }
           document.body.removeChild(ta);
         });
-    copyFn().then(function() {
+    copyFn().then(() => {
       const btn = document.getElementById('btn-copy-link');
       btn.classList.add('copied');
       btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Copied!`;
       setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Link`; }, 2000);
-    }, function() {});
+    }, () => {});
   }
   window.copyProfileLink = copyProfileLink;
 
@@ -885,7 +885,7 @@
   let _cropImgDisplayW = 0, _cropImgDisplayH = 0;
   let _cropDragging = false, _cropDragStartX = 0, _cropDragStartY = 0;
 
-  window.cropThenUpload = function(fileInput, imageType) {
+  window.cropThenUpload = (fileInput, imageType) => {
     if (imageType !== 'avatar') { uploadImage(fileInput, imageType); return; }
     const file = fileInput.files[0];
     if (!file) return;
@@ -900,15 +900,15 @@
     }
     _cropFileInput = fileInput;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
       const img = new Image();
-      img.onload = function() {
+      img.onload = () => {
         _cropImg = img;
         const size = Math.min(320, window.innerWidth - 40);
         _cropDisplaySize = size;
         const wrap = document.getElementById('crop-wrap');
-        wrap.style.width = size + 'px';
-        wrap.style.height = size + 'px';
+        wrap.style.width = `${size}px`;
+        wrap.style.height = `${size}px`;
         const canvas = document.getElementById('crop-preview');
         canvas.width = size;
         canvas.height = size;
@@ -922,10 +922,10 @@
         const modal = document.getElementById('crop-modal');
         modal.style.display = 'flex';
       };
-      img.onerror = function() { showToast('Failed to read image.'); fileInput.value = ''; };
+      img.onerror = () => { showToast('Failed to read image.'); fileInput.value = ''; };
       img.src = e.target.result;
     };
-    reader.onerror = function() { showToast('Failed to read file.'); fileInput.value = ''; };
+    reader.onerror = () => { showToast('Failed to read file.'); fileInput.value = ''; };
     reader.readAsDataURL(file);
   };
 
@@ -950,14 +950,14 @@
     }
   }
 
-  document.addEventListener('mousedown', function(e) {
+  document.addEventListener('mousedown', (e) => {
     if (!e.target || e.target.id !== 'crop-preview') return;
     _cropDragging = true;
     _cropDragStartX = e.clientX;
     _cropDragStartY = e.clientY;
     e.target.style.cursor = 'grabbing';
   });
-  document.addEventListener('mousemove', function(e) {
+  document.addEventListener('mousemove', (e) => {
     if (!_cropDragging) return;
     _cropOffsetX += e.clientX - _cropDragStartX;
     _cropOffsetY += e.clientY - _cropDragStartY;
@@ -966,7 +966,7 @@
     _clampCropOffset();
     _drawCrop();
   });
-  document.addEventListener('mouseup', function() {
+  document.addEventListener('mouseup', () => {
     if (_cropDragging) {
       _cropDragging = false;
       const c = document.getElementById('crop-preview');
@@ -974,14 +974,14 @@
     }
   });
 
-  document.addEventListener('touchstart', function(e) {
+  document.addEventListener('touchstart', (e) => {
     if (!e.target || e.target.id !== 'crop-preview' || e.touches.length !== 1) return;
     _cropDragging = true;
     _cropDragStartX = e.touches[0].clientX;
     _cropDragStartY = e.touches[0].clientY;
     e.preventDefault();
   }, { passive: false });
-  document.addEventListener('touchmove', function(e) {
+  document.addEventListener('touchmove', (e) => {
     if (!_cropDragging || e.touches.length !== 1) return;
     _cropOffsetX += e.touches[0].clientX - _cropDragStartX;
     _cropOffsetY += e.touches[0].clientY - _cropDragStartY;
@@ -991,17 +991,17 @@
     _drawCrop();
     e.preventDefault();
   }, { passive: false });
-  document.addEventListener('touchend', function(e) {
+  document.addEventListener('touchend', (e) => {
     if (e.target && e.target.id === 'crop-preview') _cropDragging = false;
   });
 
-  window.cancelCrop = function() {
+  window.cancelCrop = () => {
     document.getElementById('crop-modal').style.display = 'none';
     if (_cropFileInput) _cropFileInput.value = '';
     _cropFileInput = null; _cropImg = null;
   };
 
-  window.confirmCrop = async function() {
+  window.confirmCrop = async () => {
     if (!_cropImg) return;
     document.getElementById('crop-modal').style.display = 'none';
     const s = _cropDisplaySize;
@@ -1026,7 +1026,7 @@
       document.getElementById(ui.loading).classList.add('hidden');
       if (!res.ok) {
         document.getElementById(ui.prompt).classList.remove('hidden');
-        showToast('Upload failed: ' + (data.error || 'Unknown error'));
+        showToast(`Upload failed: ${data.error || 'Unknown error'}`);
       } else {
         const allowedPrefixes = ['https://pjyorgedaxevxophpfib.supabase.co/storage/', '/.netlify/images?'];
         if (!data.url || !allowedPrefixes.some(p => data.url.startsWith(p))) {
@@ -1036,7 +1036,7 @@
           document.getElementById(ui.preview).innerHTML = `<img src="${esc(data.url)}" alt="Uploaded image">`;
           document.getElementById(ui.input).value = data.url;
           const safeName = (currentAgent.name || '').replace(/[<>"'&]/g, '');
-          document.getElementById('edit-avatar').innerHTML = `<img src="${esc(data.url)}" srcset="${esc('/.netlify/images?url=' + encodeURIComponent(data.url) + '&w=80&fm=webp&q=80')} 80w, ${esc('/.netlify/images?url=' + encodeURIComponent(data.url) + '&w=160&fm=webp&q=80')} 160w" sizes="80px" width="80" height="80" alt="${safeName}">`;
+          document.getElementById('edit-avatar').innerHTML = `<img src="${esc(data.url)}" srcset="${esc(`/.netlify/images?url=${encodeURIComponent(data.url)}&w=80&fm=webp&q=80`)} 80w, ${esc(`/.netlify/images?url=${encodeURIComponent(data.url)}&w=160&fm=webp&q=80`)} 160w" sizes="80px" width="80" height="80" alt="${safeName}">`;
         }
       }
     } catch (e) {

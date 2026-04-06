@@ -10,7 +10,7 @@ const _refCode = new URLSearchParams(window.location.search).get('ref');
 
 let verifiedBroker = null;
 let createdSlug = null;
-let otpSent = false;
+let _otpSent = false;
 
 function goStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -73,7 +73,7 @@ async function verifyBroker() {
   // when ENABLE_TEST_MODE is set. In production (where ENABLE_TEST_MODE is unset) 0 is rejected like any unknown BRN.
   const isTestBrn = raw === '0';
   const num = isTestBrn ? 0 : parseInt(raw, 10);
-  if (!isTestBrn && (!num || isNaN(num))) { showError(1, 'Please enter a valid broker number.'); return; }
+  if (!isTestBrn && (!num || Number.isNaN(num))) { showError(1, 'Please enter a valid broker number.'); return; }
 
   setLoading('btn-verify', true, 'Checking registry...', true);
 
@@ -124,9 +124,9 @@ async function verifyBroker() {
 function compressImage(file, maxSize, quality) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
       const img = new Image();
-      img.onload = function() {
+      img.onload = () => {
         const canvas = document.createElement('canvas');
         let w = img.width, h = img.height;
         if (w > maxSize || h > maxSize) {
@@ -158,12 +158,12 @@ function previewPhoto(input) {
   const dataInput = document.getElementById('onboard-photo-data');
   if (!placeholder || !prev || !dataInput) return;
 
-  compressImage(file, 800, 0.8).then(function(dataUrl) {
+  compressImage(file, 800, 0.8).then((dataUrl) => {
     placeholder.style.display = 'none';
     prev.style.display = 'block';
     prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     dataInput.value = dataUrl.split(',')[1];
-  }, function() {
+  }, () => {
     placeholder.style.display = '';
     prev.style.display = 'none';
     prev.innerHTML = '';
@@ -179,7 +179,7 @@ async function sendOtpAndShow() {
   if (!displayName) { showError(2, 'Display name is required.'); return; }
 
   const email = document.getElementById('email').value.trim();
-  if (!email || !email.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
+  if (!email?.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
 
   const wa = document.getElementById('whatsapp').value.trim();
   if (!wa) { showError(2, 'WhatsApp number is required — it\'s your main contact button.'); return; }
@@ -203,7 +203,7 @@ async function sendOtpAndShow() {
       return;
     }
 
-    otpSent = true;
+    _otpSent = true;
     document.getElementById('otp-email-display').textContent = email;
     document.getElementById('otp-section').style.display = 'block';
     document.getElementById('btn-create').style.display = 'none';
@@ -232,8 +232,7 @@ function resendOtp() {
       email: email,
       broker_number: verifiedBroker ? verifiedBroker.broker_number : null
     })
-  }).then(function(res) {
-    return res.json().then(null, () => ({})).then(function(data) {
+  }).then((res) => res.json().then(null, () => ({})).then((data) => {
       if (!res.ok) {
         showError(2, data.error || 'Failed to resend code.');
         btn.textContent = "Didn't get it? Resend code";
@@ -252,8 +251,7 @@ function resendOtp() {
           }
         }, 1000);
       }
-    });
-  }, function() {
+    }), () => {
     showError(2, networkErrorMsg());
     btn.textContent = "Didn't get it? Resend code";
     btn.disabled = false;
@@ -275,7 +273,7 @@ async function createProfile(otpCode) {
   if (!displayName) { showError(2, 'Display name is required.'); return; }
 
   const email = document.getElementById('email').value.trim();
-  if (!email || !email.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
+  if (!email?.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
 
   const wa = document.getElementById('whatsapp').value.trim();
   if (!wa) { showError(2, 'WhatsApp number is required — it\'s your main contact button.'); return; }
@@ -338,7 +336,7 @@ async function createProfile(otpCode) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ referral_code: _refCode, agent_id: data.agent.id })
-      }).then(null, function(e) { console.error('[referral] tracking failed:', e); }); // fire-and-forget, don't block signup
+      }).then(null, (e) => { console.error('[referral] tracking failed:', e); }); // fire-and-forget, don't block signup
     }
 
     // Populate the preview card — show photo if uploaded, else initials
@@ -346,7 +344,7 @@ async function createProfile(otpCode) {
     const previewAvatar = document.getElementById('preview-initials');
     if (photoData) {
       previewAvatar.innerHTML = `<img src="data:image/jpeg;base64,${photoData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    } else if (data.agent && data.agent.photo_url) {
+    } else if (data.agent?.photo_url) {
       previewAvatar.innerHTML = `<img src="/.netlify/images?url=${encodeURIComponent(data.agent.photo_url)}&w=80&fm=webp&q=80" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     } else {
       previewAvatar.textContent = getInitials(displayName);
@@ -387,7 +385,7 @@ async function createProfile(otpCode) {
 
 function copyUrl() {
   const url = `https://sellingdubai.ae/a/${createdSlug}`;
-  const doCopy = navigator.clipboard && navigator.clipboard.writeText
+  const doCopy = navigator.clipboard?.writeText
     ? navigator.clipboard.writeText(url)
     : new Promise((resolve, reject) => {
         const ta = document.createElement('textarea');
@@ -396,10 +394,10 @@ function copyUrl() {
         if (document.execCommand('copy')) { resolve(); } else { reject(new Error('execCommand failed')); }
         document.body.removeChild(ta);
       });
-  doCopy.then(function() {
+  doCopy.then(() => {
     const btn = document.querySelector('.btn-copy');
     btn.textContent = 'COPIED'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000);
-  }, function() {});
+  }, () => {});
 }
 
 function shareWhatsApp() {
@@ -411,8 +409,8 @@ function shareWhatsApp() {
 // Handle bg image load failure — fallback to gradient
 const bgEl = document.getElementById('bg');
 const bgImg = new Image();
-bgImg.onload = function() { /* image loaded fine */ };
-bgImg.onerror = function() { bgEl.classList.add('bg-fallback'); };
+bgImg.onload = () => { /* image loaded fine */ };
+bgImg.onerror = () => { bgEl.classList.add('bg-fallback'); };
 bgImg.src = '/.netlify/images?url=/dubai-skyline.jpg&w=1600&fm=webp&q=80';
 
 function networkErrorMsg() {
@@ -432,7 +430,7 @@ function previewRera(input) {
   clearError(1);
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = (e) => {
     document.getElementById('rera-photo-data').value = e.target.result.split(',')[1];
     document.getElementById('rera-file-type').value = file.type;
 

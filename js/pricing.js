@@ -7,20 +7,20 @@ var saveBadges = document.querySelectorAll('.price-save');
 var intervalInputs = document.querySelectorAll('[data-interval]');
 
 if (toggle) {
-  toggle.addEventListener('change', function() {
+  toggle.addEventListener('change', () => {
     var isYearly = toggle.checked;
-    monthlyEls.forEach(function(el) { el.style.display = isYearly ? 'none' : 'block'; });
-    yearlyEls.forEach(function(el) { el.style.display = isYearly ? 'block' : 'none'; });
-    saveBadges.forEach(function(el) { el.style.display = isYearly ? 'block' : 'none'; });
-    intervalInputs.forEach(function(el) { el.dataset.interval = isYearly ? 'yearly' : 'monthly'; });
+    monthlyEls.forEach((el) => { el.style.display = isYearly ? 'none' : 'block'; });
+    yearlyEls.forEach((el) => { el.style.display = isYearly ? 'block' : 'none'; });
+    saveBadges.forEach((el) => { el.style.display = isYearly ? 'block' : 'none'; });
+    intervalInputs.forEach((el) => { el.dataset.interval = isYearly ? 'yearly' : 'monthly'; });
   });
 }
 
 // FAQ toggle
-document.querySelectorAll('.faq-item').forEach(function(item) {
-  item.addEventListener('click', function() {
+document.querySelectorAll('.faq-item').forEach((item) => {
+  item.addEventListener('click', () => {
     var isActive = item.classList.contains('active');
-    document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelectorAll('.faq-item').forEach((el) => { el.classList.remove('active'); });
     if (!isActive) item.classList.add('active');
   });
 });
@@ -39,7 +39,7 @@ async function startCheckout(plan, interval, btn) {
     if (btn) {
       var original = btn.textContent;
       btn.textContent = 'Billing coming soon';
-      setTimeout(function() { btn.textContent = original; }, 2000);
+      setTimeout(() => { btn.textContent = original; }, 2000);
     }
     return;
   }
@@ -64,14 +64,14 @@ async function startCheckout(plan, interval, btn) {
       window.location.href = data.url;
     } else if (res.status === 409 && data.error === 'already_on_plan') {
       if (btn) { btn.textContent = 'Already on this plan'; btn.disabled = false; }
-    } else if (res.status === 401 || (data.error && data.error.toLowerCase().includes('session'))) {
+    } else if (res.status === 401 || (data.error?.toLowerCase().includes('session'))) {
       localStorage.removeItem('sd_edit_token');
       redirectToAuth(plan, interval);
     } else {
       alert(data.error || 'Failed to start checkout.');
       if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
     }
-  } catch (e) {
+  } catch (_e) {
     alert('Something went wrong. Please try again.');
     if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
   }
@@ -83,14 +83,14 @@ if (pending && localStorage.getItem('sd_edit_token') && BILLING_LIVE) {
   sessionStorage.removeItem('sd_pending_checkout');
   try {
     var _p = JSON.parse(pending);
-    var matchingBtn = document.querySelector('.upgrade-btn[data-plan="' + _p.plan + '"]');
+    var matchingBtn = document.querySelector(`.upgrade-btn[data-plan="${_p.plan}"]`);
     startCheckout(_p.plan, _p.interval, matchingBtn);
-  } catch (e) { /* malformed sessionStorage value — ignore */ }
+  } catch (_e) { /* malformed sessionStorage value — ignore */ }
 }
 
 // Upgrade buttons
-document.querySelectorAll('.upgrade-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
+document.querySelectorAll('.upgrade-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
     var plan = btn.dataset.plan;
     var interval = btn.dataset.interval || 'monthly';
     startCheckout(plan, interval, btn);

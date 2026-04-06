@@ -1,13 +1,15 @@
 // ==========================================
 // PROPERTY LOADING, RENDERING & CAROUSEL
 // ==========================================
+
+import { renderOffPlanCard, renderPropertyCard } from './components.js';
 import { DEMO_MODE, supabase } from './config.js';
-import { escHtml, escAttr, optimizeImg as _optimizeImg } from './utils.js';
 import { allProperties, currentFilters } from './state.js';
-import { renderPropertyCard, renderOffPlanCard } from './components.js';
+import { optimizeImg as _optimizeImg, escAttr, escHtml } from './utils.js';
 
 // Re-export for consumers that import optimizeImg from this module (e.g. agent-page.js)
 export { _optimizeImg as optimizeImg };
+
 // Internal alias used by renderRemProjectCard below
 const optimizeImg = _optimizeImg;
 
@@ -108,11 +110,11 @@ export async function loadProperties(agentId) {
   return propertiesCache;
 }
 
-export { propertiesLoaded, propertiesError };
+export { propertiesError, propertiesLoaded };
 
 
 // Heart / favorite toggle
-window.toggleHeart = function(btn) {
+window.toggleHeart = (btn) => {
   btn.classList.toggle('liked');
   btn.classList.remove('pop');
   // Force reflow for re-animation
@@ -121,13 +123,13 @@ window.toggleHeart = function(btn) {
 };
 
 // Carousel slide function
-window.slideCarousel = function(cardId, dir) {
+window.slideCarousel = (cardId, dir) => {
   const carousel = document.querySelector(`.prop-carousel[data-card-id="${cardId}"]`);
   if (!carousel) return;
   const track = carousel.querySelector('.prop-carousel-track');
   const dots = carousel.querySelectorAll('.prop-carousel-dot');
   const total = dots.length;
-  let current = parseInt(carousel.dataset.idx || '0');
+  let current = parseInt(carousel.dataset.idx || '0', 10);
   current = (current + dir + total) % total;
   carousel.dataset.idx = current;
   track.style.transform = `translateX(-${current * 100}%)`;
@@ -135,12 +137,12 @@ window.slideCarousel = function(cardId, dir) {
 };
 
 // Touch swipe for carousels
-document.addEventListener('touchstart', function(e) {
+document.addEventListener('touchstart', (e) => {
   const carousel = e.target.closest('.prop-carousel');
   if (!carousel) return;
   carousel._touchX = e.touches[0].clientX;
 }, { passive: true });
-document.addEventListener('touchend', function(e) {
+document.addEventListener('touchend', (e) => {
   const carousel = e.target.closest('.prop-carousel');
   if (!carousel || carousel._touchX === undefined) return;
   const diff = carousel._touchX - e.changedTouches[0].clientX;
@@ -159,7 +161,7 @@ export function renderPropertyList(props) {
   const listEl = document.getElementById('prop-list');
   const countEl = document.getElementById('prop-count');
   if (props.length === 0) {
-    const hasFilters = currentFilters.search || currentFilters.priceMin || currentFilters.priceMax || currentFilters.beds || currentFilters.baths || currentFilters.areaMin || currentFilters.areaMax || (currentFilters.amenities && currentFilters.amenities.length);
+    const hasFilters = currentFilters.search || currentFilters.priceMin || currentFilters.priceMax || currentFilters.beds || currentFilters.baths || currentFilters.areaMin || currentFilters.areaMax || (currentFilters.amenities?.length);
     const isFilterEmpty = hasFilters && allProperties.length > 0;
     listEl.innerHTML = `<div class="prop-empty">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="${isFilterEmpty ? 'M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' : 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'}"/></svg>
@@ -223,7 +225,7 @@ export function initOffPlanCarousel(carouselId = 'offplan-carousel', dotsId = 'o
 
   let currentIdx = 0;
   let startX = 0;
-  let startScrollLeft = 0;
+  let _startScrollLeft = 0;
   let isDragging = false;
 
   // Build dots
@@ -253,7 +255,7 @@ export function initOffPlanCarousel(carouselId = 'offplan-carousel', dotsId = 'o
   // Touch events
   carousel.addEventListener('touchstart', (e) => {
     startX = e.touches[0].clientX;
-    startScrollLeft = carousel.scrollLeft;
+    _startScrollLeft = carousel.scrollLeft;
     isDragging = true;
   }, { passive: true });
 
@@ -313,7 +315,7 @@ function renderRemProjectCard(p, devName) {
 
   let priceHtml = '';
   if (p.min_price && p.min_price > 0) {
-    const formatted = 'AED ' + Number(p.min_price).toLocaleString('en-AE', { maximumFractionDigits: 0 });
+    const formatted = `AED ${Number(p.min_price).toLocaleString('en-AE', { maximumFractionDigits: 0 })}`;
     priceHtml = `<div class="offplan-price"><span class="offplan-price-label">Starting from</span><span class="offplan-price-value">${formatted}</span></div>`;
   } else {
     priceHtml = `<div class="offplan-price"><span class="offplan-price-value">Price on Request</span></div>`;
@@ -365,7 +367,7 @@ function renderRemProjectCard(p, devName) {
 // ==========================================
 // LOAD REM OFF-PLAN PROJECTS (profile page)
 // ==========================================
-export async function loadRemProjects(agentSlug, agentId) {
+export async function loadRemProjects(_agentSlug, agentId) {
   try {
     // Show skeleton placeholder while fetching
     const sectionEl = document.getElementById('rem-projects');

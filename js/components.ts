@@ -4,8 +4,9 @@
 // Imported by properties.js (ES module chain via init.js)
 // and exposed to dashboard.js via a window bridge in dashboard.html.
 // ==========================================
-import { escHtml, escAttr, optimizeImg } from './utils.js';
+
 import type { Property } from './state.js';
+import { escAttr, escHtml, optimizeImg } from './utils.js';
 
 // ==========================================
 // PUBLIC VIEWER CARD
@@ -189,7 +190,7 @@ export function renderAdminCard(p: Property, idx: number, total: number, statusL
     : '<div class="prop-thumb-placeholder">🏠</div>';
 
   const metaParts = [];
-  if (p.bedrooms != null) metaParts.push(p.bedrooms + ' bed');
+  if (p.bedrooms != null) metaParts.push(`${p.bedrooms} bed`);
   if (p.property_type) metaParts.push(escHtml(p.property_type));
   if (p.location) metaParts.push(escHtml(p.location));
   const metaHtml = metaParts.join(' · ');
@@ -206,7 +207,7 @@ export function renderAdminCard(p: Property, idx: number, total: number, statusL
     thumbHtml +
     `<div class="prop-body">` +
       `<div class="prop-title-text">${safeTitle}</div>` +
-      (p.price ? `<div class="prop-meta">AED ${escHtml(p.price)}${metaHtml ? ' · ' + metaHtml : ''}</div>` : (metaHtml ? `<div class="prop-meta">${metaHtml}</div>` : '')) +
+      (p.price ? `<div class="prop-meta">AED ${escHtml(p.price)}${metaHtml ? ` · ${metaHtml}` : ''}</div>` : (metaHtml ? `<div class="prop-meta">${metaHtml}</div>` : '')) +
       `<div class="prop-actions">` +
         (p.is_active ? '<span class="prop-badge prop-badge-live">Live</span>' : '<span class="prop-badge prop-badge-hidden">Hidden · Add DLD Permit to publish</span>') +
         `<span class="prop-badge prop-badge-${escAttr(status)}">${escHtml(statusLabel)}</span>` +

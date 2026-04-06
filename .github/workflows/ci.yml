@@ -41,6 +41,9 @@ jobs:
       - name: Audit dependencies (block on high/critical)
         run: npm audit --audit-level=high
 
+      - name: Lint (Biome)
+        run: npm run lint
+
       - name: Pre-deploy check (build + chunk sizes + routing + field consistency)
         run: npm run check
         env:

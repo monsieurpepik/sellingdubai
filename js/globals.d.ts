@@ -162,5 +162,3 @@ declare global {
     [key: string]: unknown;
   }
 }
-
-export {};

@@ -12,9 +12,11 @@
     "check": "bash scripts/pre-deploy-check.sh",
     "test:functions": "PATH=\"$HOME/.deno/bin:$PATH\" deno test --config supabase/functions/deno.json --allow-net --allow-env --allow-read supabase/functions/*/test.ts supabase/functions/*/index.test.ts",
     "typecheck": "tsc --noEmit",
+    "lint": "biome check js/ scripts/ --no-errors-on-unmatched",
     "test": "npm run test:functions"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
     "@playwright/test": "^1.58.2",
     "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/container-queries": "^0.1.1",

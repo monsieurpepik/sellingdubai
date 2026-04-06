@@ -1,18 +1,19 @@
 // ==========================================
 // AGENT PAGE RENDERING
 // ==========================================
-import { SUPABASE_URL, supabase } from './config';
-import { escHtml, escAttr, safeUrl, safeTrackingId } from './utils';
-import { ICONS } from './icons';
+
 import { logEvent } from './analytics';
-import { currentAgent, setCurrentAgent } from './state';
+import { SUPABASE_URL, } from './config';
+import { ICONS } from './icons';
 import { loadProperties, loadRemProjects, optimizeImg } from './properties';
 import type { Agent } from './state';
+import { currentAgent, setCurrentAgent } from './state';
+import { escAttr, escHtml, safeTrackingId, safeUrl } from './utils';
 
 // ==========================================
 // VCARD GENERATOR
 // ==========================================
-window.saveContact = function() {
+window.saveContact = () => {
   if (!currentAgent) return;
   const a = currentAgent;
   const nameParts = (a.name ?? '').split(' ');
@@ -97,7 +98,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
   const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae', 'googleusercontent.com'];
   if (agent.photo_url && avatarContainer) {
     const img = document.createElement('img');
-    img.className = 'avatar' + (isVerified ? ' avatar-verified' : '');
+    img.className = `avatar${isVerified ? ' avatar-verified' : ''}`;
     const canOptimize = SAFE_CDN_DOMAINS.some(d => agent.photo_url!.includes(d));
     img.src = canOptimize ? optimizeImg(agent.photo_url, 200) : agent.photo_url;
     if (canOptimize) {
@@ -107,7 +108,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
     img.width = 80;
     img.height = 80;
     img.alt = agent.name ?? '';
-    img.onerror = function() {
+    img.onerror = () => {
       if (avatarContainer) avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`;
     };
     avatarContainer.innerHTML = '';
@@ -152,8 +153,8 @@ export async function renderAgent(agent: Agent): Promise<void> {
     }
     if (hasDldVolume) {
       const vol = (agent.dld_total_volume_aed ?? 0) >= 1000000
-        ? 'AED ' + ((agent.dld_total_volume_aed ?? 0) / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
-        : 'AED ' + (agent.dld_total_volume_aed ?? 0).toLocaleString();
+        ? `AED ${((agent.dld_total_volume_aed ?? 0) / 1000000).toFixed(1).replace(/\.0$/, '')}M`
+        : `AED ${(agent.dld_total_volume_aed ?? 0).toLocaleString()}`;
       statsHtml += `<div class="dld-stat"><span class="dld-stat-value">${vol}</span><span class="dld-stat-label">Total Volume</span></div>`;
     }
     statsHtml += '</div>';
@@ -290,19 +291,19 @@ export async function renderAgent(agent: Agent): Promise<void> {
 
   // === TRACKING SCRIPTS (Pro/Premium only) ===
   // Respect cookie consent — skip tracking if the visitor rejected analytics
-  const _cookieConsent = (() => { try { return localStorage.getItem('sd_cookie_consent'); } catch(e) { return null; } })();
+  const _cookieConsent = (() => { try { return localStorage.getItem('sd_cookie_consent'); } catch(_e) { return null; } })();
   const _trackingAllowed = _cookieConsent !== 'reject';
 
   const safeFbPixel = isPaidTier(agent) && _trackingAllowed ? safeTrackingId(agent.facebook_pixel_id ?? null) : null;
   if (safeFbPixel) {
     // Facebook Pixel init (inline IIFE pattern — approved third-party per CLAUDE.md)
-    (function(f: Window & typeof globalThis, b: Document, e: string, v: string) {
+    ((f: Window & typeof globalThis, b: Document, e: string, v: string) => {
       type FbqFn = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[]; push: (...args: unknown[]) => void; loaded: boolean; version: string; _fbq?: FbqFn };
       const w = f as Window & { fbq?: FbqFn; _fbq?: FbqFn };
       if (w.fbq) return;
-      const n: FbqFn = function(...args: unknown[]) {
+      const n: FbqFn = ((...args: unknown[]) => {
         if (n.callMethod) n.callMethod(...args); else n.queue.push(args);
-      } as FbqFn;
+      }) as FbqFn;
       n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
       if (!w._fbq) w._fbq = n;
       w.fbq = n;
@@ -368,7 +369,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
 // ==========================================
 // SHARE (Native)
 // ==========================================
-window.nativeShare = async function() {
+window.nativeShare = async () => {
   const url = window.location.href;
   const name = currentAgent ? currentAgent.name : 'this agent';
   const shareData = {
@@ -380,7 +381,7 @@ window.nativeShare = async function() {
     if (navigator.share) {
       await navigator.share(shareData);
     } else {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+      if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
       } else {
         const ta = document.createElement('textarea');
@@ -396,7 +397,7 @@ window.nativeShare = async function() {
       }
     }
     if (currentAgent) logEvent('share', { method: 'share' in navigator ? 'native' : 'clipboard' });
-  } catch (e) { /* user cancelled share sheet */ }
+  } catch (_e) { /* user cancelled share sheet */ }
 };
 
 // ==========================================
@@ -423,7 +424,7 @@ export async function showEditButtonIfOwner(agent: Agent, preResolvedIsOwner?: b
   const token = localStorage.getItem('sd_edit_token');
   if (!token) return;
   try {
-    const res = await fetch(SUPABASE_URL + '/functions/v1/verify-magic-link', {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-magic-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token })
@@ -440,7 +441,7 @@ export async function showEditButtonIfOwner(agent: Agent, preResolvedIsOwner?: b
       const claimBtn = document.getElementById('nav-claim-btn') as HTMLElement | null;
       if (claimBtn) claimBtn.style.display = 'none';
     }
-  } catch (e) { /* silently fail — not critical */ }
+  } catch (_e) { /* silently fail — not critical */ }
 }
 
 // ==========================================
@@ -457,12 +458,12 @@ export function injectSchemaOrg(agent: Agent): void {
       'image': agent.photo_url || '',
       'address': { '@type': 'PostalAddress', 'addressLocality': 'Dubai', 'addressCountry': 'AE' }
     };
-    if (agent.email) schema['email'] = agent.email;
-    if (agent.whatsapp) schema['telephone'] = '+' + agent.whatsapp;
-    if (agent.agency_name) schema['worksFor'] = { '@type': 'Organization', 'name': agent.agency_name };
+    if (agent.email) schema.email = agent.email;
+    if (agent.whatsapp) schema.telephone = `+${agent.whatsapp}`;
+    if (agent.agency_name) schema.worksFor = { '@type': 'Organization', 'name': agent.agency_name };
     const el = document.getElementById('schema-agent');
     if (el) el.textContent = JSON.stringify(schema);
-  } catch (e) { /* non-critical */ }
+  } catch (_e) { /* non-critical */ }
 }
 
 export function hydrateOgMeta(agent: Agent): void {
@@ -485,11 +486,11 @@ export function hydrateOgMeta(agent: Agent): void {
     // Update meta description
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.setAttribute('content', desc);
-  } catch (e) { /* non-critical */ }
+  } catch (_e) { /* non-critical */ }
 }
 
 // === AGENT SEARCH (error page) ===
-window.searchAgent = async function() {
+window.searchAgent = async () => {
   const { supabase: sb } = await import('./config');
   const query = (document.getElementById('agent-search') as HTMLInputElement | null)?.value.trim() ?? '';
   if (!query || query.length < 2) return;

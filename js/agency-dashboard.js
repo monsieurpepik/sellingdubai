@@ -1,7 +1,7 @@
 // @ts-check
 const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
-const MANAGE_URL = SUPABASE_URL + '/functions/v1/manage-agency';
-const STATS_URL = SUPABASE_URL + '/functions/v1/agency-stats';
+const MANAGE_URL = `${SUPABASE_URL}/functions/v1/manage-agency`;
+const STATS_URL = `${SUPABASE_URL}/functions/v1/agency-stats`;
 
 let _token = null;
 let _agency = null;
@@ -54,10 +54,10 @@ async function init() {
 
 function renderAgencyHeader(agency) {
   document.getElementById('agency-name-el').textContent = agency.name;
-  document.getElementById('agency-slug-el').textContent = '/' + agency.slug;
+  document.getElementById('agency-slug-el').textContent = `/${agency.slug}`;
   const link = document.getElementById('agency-profile-link');
-  link.href = '/agency/' + agency.slug;
-  link.textContent = 'sellingdubai.ae/agency/' + agency.slug;
+  link.href = `/agency/${agency.slug}`;
+  link.textContent = `sellingdubai.ae/agency/${agency.slug}`;
   const logoEl = document.getElementById('agency-logo-el');
   if (agency.logo_url) {
     const logoSrc = agency.logo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
@@ -86,14 +86,14 @@ async function loadStats(membersFromGet) {
     if (!data.totals) return;
     const t = data.totals;
     document.getElementById('m-leads-month').textContent = t.leads_this_month;
-    document.getElementById('m-leads-last').textContent = t.leads_last_month + ' last month';
+    document.getElementById('m-leads-last').textContent = `${t.leads_last_month} last month`;
     document.getElementById('m-views-month').textContent = t.views_this_month;
-    document.getElementById('m-views-last').textContent = t.views_last_month + ' last month';
+    document.getElementById('m-views-last').textContent = `${t.views_last_month} last month`;
     document.getElementById('m-wa-month').textContent = t.wa_taps_this_month;
     document.getElementById('m-props').textContent = t.properties_active;
-    document.getElementById('m-agents-count').textContent = t.agents_count + ' agents';
+    document.getElementById('m-agents-count').textContent = `${t.agents_count} agents`;
     renderMembersTable(data.agents || []);
-  } catch(e) {
+  } catch(_e) {
     renderMembersTable(membersFromGet.map(m => ({ ...m })));
   }
 }
@@ -106,10 +106,10 @@ function renderMembersTable(agents) {
   }
   tbody.innerHTML = agents.map(a => {
     const initials = (a.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    const photoSrc = a.photo_url && a.photo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
+    const photoSrc = a.photo_url?.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
       ? `/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=64&fm=webp&q=80`
       : a.photo_url;
-    const photoSrcset = a.photo_url && a.photo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
+    const photoSrcset = a.photo_url?.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
       ? escapeHtml(`/.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=80&fm=webp&q=80 80w, /.netlify/images?url=${encodeURIComponent(a.photo_url)}&w=160&fm=webp&q=80 160w`)
       : '';
     const avatar = photoSrc
@@ -140,7 +140,7 @@ function renderMembersTable(agents) {
   });
 }
 
-window.createAgency = async function() {
+window.createAgency = async () => {
   const name = document.getElementById('create-name').value.trim();
   const errEl = document.getElementById('create-error');
   errEl.classList.remove('show');
@@ -161,12 +161,12 @@ window.createAgency = async function() {
   loadStats([]);
 };
 
-window.toggleEditPanel = function() {
+window.toggleEditPanel = () => {
   const panel = document.getElementById('edit-panel');
   panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 };
 
-window.saveAgency = async function() {
+window.saveAgency = async () => {
   const errEl = document.getElementById('edit-error');
   const sucEl = document.getElementById('edit-success');
   errEl.classList.remove('show'); sucEl.classList.remove('show');
@@ -187,7 +187,7 @@ window.saveAgency = async function() {
   setTimeout(() => sucEl.classList.remove('show'), 3000);
 };
 
-window.addMember = async function() {
+window.addMember = async () => {
   const email = document.getElementById('add-member-email').value.trim();
   const errEl = document.getElementById('member-error');
   const sucEl = document.getElementById('member-success');
@@ -205,7 +205,7 @@ window.addMember = async function() {
   if (refreshData.agency) loadStats(refreshData.members || []);
 };
 
-window.removeMember = async function(memberId, memberName) {
+window.removeMember = async (memberId, memberName) => {
   if (!confirm(`Remove ${memberName} from the agency?`)) return;
   const errEl = document.getElementById('member-error');
   errEl.classList.remove('show');

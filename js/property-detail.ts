@@ -1,18 +1,19 @@
 // ==========================================
 // PROPERTY DETAIL VIEW
 // ==========================================
-import { escHtml, escAttr } from './utils';
+
 import { logEvent } from './analytics';
-import { currentAgent, allProperties } from './state';
 import { applyCurrentFilters } from './filters';
 import type { Property } from './state';
+import { allProperties, currentAgent } from './state';
+import { escAttr, escHtml } from './utils';
 
-let currentDetailProp: Property | null = null;
+let _currentDetailProp: Property | null = null;
 
 // Load Google Maps iframe on demand (GDPR — only after explicit user click)
-window._loadDetailMap = function(container: HTMLElement) {
-  const mapQ = container.dataset['mapq'];
-  const mapsUrl = container.dataset['mapsurl'];
+window._loadDetailMap = (container: HTMLElement) => {
+  const mapQ = container.dataset.mapq;
+  const mapsUrl = container.dataset.mapsurl;
   if (!mapQ) return;
   container.innerHTML =
     '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14000!2d55.27!3d25.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z' + mapQ + '!5e0!3m2!1sen!2sae!4v1" class="detail-map-iframe" allowfullscreen loading="lazy"></iframe>' +
@@ -22,10 +23,10 @@ window._loadDetailMap = function(container: HTMLElement) {
 };
 
 // Stable lookup by property ID — immune to filter changes between render and click
-window.openPropertyById = function(propId: string) {
+window.openPropertyById = (propId: string) => {
   const p = allProperties.find(prop => String(prop.id) === String(propId));
   if (!p) return;
-  currentDetailProp = p;
+  _currentDetailProp = p;
   renderDetailView(p);
   const ctaBar = document.getElementById('detail-cta-bar');
   if (ctaBar) ctaBar.style.display = '';
@@ -34,11 +35,11 @@ window.openPropertyById = function(propId: string) {
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
 };
 
-window.openPropertyDetail = function(propIndex: number) {
+window.openPropertyDetail = (propIndex: number) => {
   const props = applyCurrentFilters();
   const p = props[propIndex];
   if (!p) return;
-  currentDetailProp = p;
+  _currentDetailProp = p;
   renderDetailView(p);
   const ctaBar = document.getElementById('detail-cta-bar');
   if (ctaBar) ctaBar.style.display = '';
@@ -47,7 +48,7 @@ window.openPropertyDetail = function(propIndex: number) {
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
 };
 
-window.closeDetail = function() {
+window.closeDetail = () => {
   document.getElementById('detail-overlay')?.classList.remove('open');
   document.querySelector('script[data-sd-project-ld]')?.remove();
   // Keep scroll locked only if the properties overlay is still open behind this
@@ -55,12 +56,12 @@ window.closeDetail = function() {
   document.body.style.overflow = propOverlayOpen ? 'hidden' : '';
   // Restore profile sticky CTA bar if it was hidden by openProjectDetail
   const stickyCta = document.getElementById('sticky-cta') as (HTMLElement & { dataset: DOMStringMap }) | null;
-  if (stickyCta && stickyCta.dataset['prevDisplay'] !== undefined) {
-    stickyCta.style.display = stickyCta.dataset['prevDisplay'] ?? '';
-    delete stickyCta.dataset['prevDisplay'];
+  if (stickyCta && stickyCta.dataset.prevDisplay !== undefined) {
+    stickyCta.style.display = stickyCta.dataset.prevDisplay ?? '';
+    delete stickyCta.dataset.prevDisplay;
   }
-  currentDetailProp = null;
-  if (currentAgent) history.pushState(null, '', '/a/' + currentAgent.slug);
+  _currentDetailProp = null;
+  if (currentAgent) history.pushState(null, '', `/a/${currentAgent.slug}`);
 };
 
 function renderDetailView(p: Property): void {
@@ -145,7 +146,7 @@ function renderDetailView(p: Property): void {
 
   let locationHtml = '';
   if (p.location) {
-    const mapQ = encodeURIComponent(p.location + ', Dubai, UAE');
+    const mapQ = encodeURIComponent(`${p.location}, Dubai, UAE`);
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQ}`;
     locationHtml = `<div class="detail-location-card"><div class="detail-section-title">Location</div>
       <div class="detail-location-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a96e" style="vertical-align:-2px;margin-right:6px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>${escHtml(p.location)}, Dubai, UAE</div>
@@ -187,8 +188,8 @@ function renderDetailView(p: Property): void {
       const bankFee = loanAmt * 0.01; // ~1% processing fee
       const mortgageTotal = cashTotal + mortgageReg + bankFee;
 
-      const fmtAED = (n: number) => 'AED ' + Math.round(n).toLocaleString();
-      const fmtPct = (n: number) => (n * 100).toFixed(1) + '%';
+      const fmtAED = (n: number) => `AED ${Math.round(n).toLocaleString()}`;
+      const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
       costToOwnHtml = `
       <div class="cost-to-own-card">
@@ -273,11 +274,11 @@ function renderDetailView(p: Property): void {
   // Wire bottom CTA buttons
   const waBtn = document.getElementById('detail-wa-btn') as HTMLElement | null;
   const inquireBtn = document.getElementById('detail-inquire-btn') as HTMLElement | null;
-  if (currentAgent && currentAgent.whatsapp) {
+  if (currentAgent?.whatsapp) {
     if (waBtn) {
       waBtn.style.display = 'flex';
       waBtn.onclick = () => {
-        window.open(`https://wa.me/${currentAgent!.whatsapp!.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi, I\'m interested in: ' + (p.title ?? 'your property'))}`, '_blank');
+        window.open(`https://wa.me/${currentAgent!.whatsapp!.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in: ${p.title ?? 'your property'}`)}`, '_blank');
         logEvent('whatsapp_tap', { source: 'property_detail', property: p.title });
       };
     }
@@ -288,7 +289,7 @@ function renderDetailView(p: Property): void {
 }
 
 // Cost to Own toggle
-window.toggleCostMode = function(btn: HTMLElement, mode: string) {
+window.toggleCostMode = (btn: HTMLElement, mode: string) => {
   // Toggle active state on buttons
   btn.parentElement?.querySelectorAll('.cost-toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
