@@ -9,7 +9,7 @@ export const CORS_ORIGINS = [
   "https://agents.sellingdubai.ae",
   "https://sellingdubai.com",
   "https://www.sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
+  "https://staging.sellingdubai.com",
 ];
 
 // In local development (supabase functions serve), the frontend runs on localhost.
