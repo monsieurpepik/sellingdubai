@@ -589,3 +589,5 @@ export async function openProjectDetail(projectSlug: string): Promise<void> {
     }
   }
 }
+
+window.openProjectDetail = openProjectDetail;
