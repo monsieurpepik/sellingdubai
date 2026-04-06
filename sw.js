@@ -1,9 +1,9 @@
 // SellingDubai Service Worker — Cache-first for static, network-first for API
-const CACHE_NAME = 'sd-v22';
+const CACHE_NAME = 'sd-v23';
 const STATIC_ASSETS = [
   '/',
   '/styles.css',
-  '/app.js',
+  '/dist/init.bundle.js',
   '/manifest.json',
   '/sellingdubailogo.png',
 ];
