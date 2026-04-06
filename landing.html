@@ -3,25 +3,24 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<title>SellingDubai | The Verified Page for Dubai Agents</title>
+<title>SellingDubai — The Operating System for Dubai Real Estate Agents</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231127D2'/%3E%3Ctext x='16' y='23' font-family='Manrope,Arial,sans-serif' font-size='16' font-weight='800' text-anchor='middle' fill='white'%3ESD%3C/text%3E%3C/svg%3E">
-<meta name="description" content="The DLD-verified link-in-bio for Dubai real estate agents. Your badge, your listings, direct WhatsApp, visitor analytics. Free to set up in 5 minutes."/>
+<meta name="description" content="DLD-verified agent profiles. Your leads, your brand, zero commission. Free forever."/>
 <link rel="canonical" href="https://sellingdubai.ae/"/>
-<meta property="og:title" content="SellingDubai | The Verified Page for Dubai Agents"/>
-<meta property="og:description" content="The DLD-verified link-in-bio for Dubai real estate agents. Your badge, listings, direct WhatsApp, analytics. Free."/>
+<meta property="og:title" content="SellingDubai — The Operating System for Dubai Real Estate Agents"/>
+<meta property="og:description" content="DLD-verified. Your leads. Your brand. Free."/>
 <meta property="og:image" content="https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80"/>
 <meta property="og:url" content="https://sellingdubai.ae"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="SellingDubai"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="SellingDubai | The Verified Page for Dubai Agents"/>
-<meta name="twitter:description" content="The DLD-verified link-in-bio for Dubai real estate agents. Your badge, listings, direct WhatsApp, analytics. Free."/>
+<meta name="twitter:title" content="SellingDubai — The Operating System for Dubai Real Estate Agents"/>
+<meta name="twitter:description" content="DLD-verified. Your leads. Your brand. Free."/>
 <meta name="twitter:image" content="https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80"/>
 <link rel="stylesheet" href="/landing-output.css">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
-<link rel="preload" as="image" fetchpriority="high" href="/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg&w=800&fm=webp&q=80">
 <link rel="preload" href="/css/fonts.css" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" as="style" data-async-css/>
@@ -146,6 +145,98 @@
     outline: 2px solid #0a0a0a;
     outline-offset: 2px;
   }
+
+  /* ── Above-fold hero ── */
+  .hero-above-fold {
+    min-height: 100svh;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 40px 24px; background: #fff;
+  }
+  .hero-inner { max-width: 560px; margin: 0 auto; }
+  .hero-brand { font-family: 'Manrope', sans-serif; font-weight: 800;
+    letter-spacing: 0.25em; text-transform: uppercase; font-size: 12px;
+    color: #0a0a0a; margin-bottom: 40px; display: block; }
+  .hero-headline {
+    font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: clamp(30px, 6vw, 60px); color: #0a0a0a;
+    letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 20px;
+  }
+  .hero-subline { font-size: 18px; font-weight: 400; color: #71717a; margin: 0 0 36px; }
+  .hero-cta-btn {
+    display: inline-block; background: #0a0a0a; color: #fff; border: none;
+    cursor: pointer; padding: 16px 44px; border-radius: 14px;
+    font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
+    font-family: 'Manrope', sans-serif; transition: opacity 0.15s;
+  }
+  .hero-cta-btn:hover, .hero-cta-btn:focus-visible { opacity: 0.8; }
+  .hero-agent-count { font-size: 13px; color: #a1a1aa; margin: 16px 0 0; }
+
+  /* ── Facts row ── */
+  .facts-row { padding: 64px 24px; background: #fafafa; border-top: 1px solid #f0f0f0; }
+  .facts-inner { display: flex; gap: 16px; justify-content: center; max-width: 640px; margin: 0 auto; flex-wrap: wrap; }
+  .fact { text-align: center; flex: 1; min-width: 140px; }
+  .fact-number { font-size: 36px; font-weight: 800; color: #0a0a0a;
+    font-family: 'Manrope', sans-serif; letter-spacing: -0.03em; }
+  .fact-label { font-size: 13px; color: #71717a; margin-top: 4px; }
+
+  /* ── Wizard modal ── */
+  .wz-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .wz-overlay.open { display: flex; }
+  @media (max-width: 767px) {
+    .wz-overlay.open { align-items: flex-end; }
+    .wz-panel { border-radius: 20px 20px 0 0 !important; max-width: none !important;
+      position: fixed; bottom: 0; left: 0; right: 0; max-height: 90svh; }
+  }
+  .wz-panel {
+    background: #fff; border-radius: 20px; padding: 40px 32px;
+    width: calc(100% - 32px); max-width: 400px; position: relative;
+    max-height: 90svh; overflow-y: auto;
+  }
+  .wz-close {
+    position: absolute; top: 14px; right: 16px; background: none; border: none;
+    cursor: pointer; font-size: 22px; color: #a1a1aa; line-height: 1;
+    padding: 4px 8px; border-radius: 6px;
+  }
+  .wz-close:hover { color: #0a0a0a; }
+  .wz-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 28px; }
+  .wz-dot { width: 8px; height: 8px; border-radius: 50%; background: #e4e4e7; transition: background 0.2s; }
+  .wz-dot.active { background: #1127D2; }
+  .wz-step h2 { font-size: 22px; font-weight: 800; color: #0a0a0a; margin: 0 0 8px;
+    font-family: 'Manrope', sans-serif; letter-spacing: -0.02em; }
+  .wz-step p { font-size: 14px; color: #71717a; margin: 0 0 24px; line-height: 1.5; }
+  .wz-step label { display: block; margin-bottom: 16px; font-size: 13px;
+    font-weight: 600; color: #3f3f46; font-family: 'Manrope', sans-serif; }
+  .wz-step input[type="text"],
+  .wz-step input[type="email"],
+  .wz-step input[type="tel"] {
+    display: block; width: 100%; border: 1.5px solid #e4e4e7; border-radius: 10px;
+    padding: 12px 14px; font-size: 15px; margin-top: 5px; outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+  }
+  .wz-step input:focus { border-color: #1127D2; }
+  .wz-optional { font-weight: 400; color: #a1a1aa; margin-left: 4px; }
+  .wz-submit {
+    display: block; width: 100%; background: #0a0a0a; color: #fff; border: none;
+    border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700;
+    cursor: pointer; margin-top: 8px; letter-spacing: -0.01em; font-family: 'Manrope', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .wz-submit:hover:not(:disabled) { opacity: 0.85; }
+  .wz-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .wz-error { color: #dc2626; font-size: 13px; margin: -8px 0 8px; min-height: 18px; }
+  .wz-back {
+    background: none; border: none; cursor: pointer; font-size: 13px;
+    font-weight: 600; color: #71717a; padding: 0; margin-bottom: 20px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .wz-back:hover { color: #0a0a0a; }
+  .wz-success-icon { font-size: 48px; text-align: center; margin-bottom: 16px; }
+  .wz-hidden { display: none !important; }
 
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"AED","description":"Verified agent profile, up to 3 listings, basic analytics, and lead capture."},{"@type":"Offer","name":"Pro","price":"299","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"299","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Free plus up to 20 listings, advanced analytics, lead CRM, and custom branding."},{"@type":"Offer","name":"Premium","price":"799","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"799","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Pro plus unlimited listings, lead export, featured agent badge, and dedicated support."}],"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
