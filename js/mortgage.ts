@@ -253,23 +253,41 @@ window.setMortTerm = (btn, years) => {
 };
 
 let _mortRatesLoadFailed = false;
+const MORT_RATES_TTL_MS = 30 * 60 * 1000; // 30 minutes
+let _cachedMortRates: MortgageRate[] | null = null;
+let _mortRatesFetchedAt = 0;
 
 async function loadMortgageRates() {
-  if (_mortState.rates.length > 0) return;
+  const now = Date.now();
+  if (_cachedMortRates && now - _mortRatesFetchedAt < MORT_RATES_TTL_MS) {
+    _mortState.rates = _cachedMortRates;
+    renderBankCards();
+    return;
+  }
+  if (_mortRatesLoadFailed && now - _mortRatesFetchedAt < MORT_RATES_TTL_MS) {
+    renderBankCards();
+    return;
+  }
+  // TTL expired — reset state and re-fetch
+  _cachedMortRates = null;
   _mortRatesLoadFailed = false;
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/mortgage_rates?is_active=eq.true&order=rate_pct.asc`, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
     });
     if (res.ok) {
-      _mortState.rates = await res.json() as MortgageRate[];
+      _cachedMortRates = await res.json() as MortgageRate[];
+      _mortState.rates = _cachedMortRates;
+      _mortRatesFetchedAt = Date.now();
     } else {
       console.error('[mortgage] rates fetch failed:', res.status);
       _mortRatesLoadFailed = true;
+      _mortRatesFetchedAt = Date.now();
     }
   } catch (e) {
     console.error('Failed to load mortgage rates:', e);
     _mortRatesLoadFailed = true;
+    _mortRatesFetchedAt = Date.now();
   }
   renderBankCards();
 }
