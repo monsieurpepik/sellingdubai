@@ -14,7 +14,7 @@ export function fnUrl(name: string): string {
 
 export async function seedAgent(
   overrides?: Partial<Record<string, unknown>>,
-): Promise<Record<string, unknown>> {
+): Promise<{ id: string } & Record<string, unknown>> {
   const supabase = getSupabase();
   const slug = `test-${crypto.randomUUID().slice(0, 8)}`;
   const { data, error } = await supabase
