@@ -88,10 +88,24 @@ function injectDemoPhotos(p) {
 let propertiesLoaded = false;
 let propertiesError = null;
 let propertiesCache = [];
+const PAGE_SIZE = 50;
+let propertiesOffset = 0;
+let propertiesHasMore = false;
+let propertiesAgentId = '';
+let propertiesLoadingMore = false;
 
 export async function loadProperties(agentId) {
+  if (propertiesLoaded && propertiesAgentId && agentId !== propertiesAgentId) {
+    // Different agent — reset all pagination state
+    propertiesLoaded = false;
+    propertiesCache = [];
+    propertiesOffset = 0;
+    propertiesHasMore = false;
+    propertiesLoadingMore = false;
+  }
   if (propertiesLoaded) return propertiesCache;
   propertiesError = null;
+  propertiesAgentId = agentId;
   const { data: props, error } = await supabase
     .from('properties')
     .select('id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active')
@@ -99,18 +113,47 @@ export async function loadProperties(agentId) {
     .neq('is_active', false)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
-    .limit(50);
+    .range(0, PAGE_SIZE - 1);
   if (error) {
     propertiesError = error.message;
     console.error('[properties] Failed to load properties:', error.message);
     return [];
   }
-  propertiesCache = (props || []).map(injectDemoPhotos);
+  const page = (props || []).map(injectDemoPhotos);
+  propertiesCache = page;
+  propertiesOffset = page.length;
+  propertiesHasMore = page.length === PAGE_SIZE;
   propertiesLoaded = true;
   return propertiesCache;
 }
 
-export { propertiesError, propertiesLoaded };
+export async function loadMoreProperties() {
+  if (!propertiesHasMore || !propertiesAgentId || propertiesLoadingMore) return [];
+  propertiesLoadingMore = true;
+  try {
+    const { data: props, error } = await supabase
+      .from('properties')
+      .select('id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active')
+      .eq('agent_id', propertiesAgentId)
+      .neq('is_active', false)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .range(propertiesOffset, propertiesOffset + PAGE_SIZE - 1);
+    if (error) {
+      console.error('[properties] Failed to load more properties:', error.message);
+      return [];
+    }
+    const page = (props || []).map(injectDemoPhotos);
+    propertiesCache = [...propertiesCache, ...page];
+    propertiesOffset += page.length;
+    propertiesHasMore = page.length === PAGE_SIZE;
+    return page;
+  } finally {
+    propertiesLoadingMore = false;
+  }
+}
+
+export { propertiesError, propertiesHasMore, propertiesLoaded };
 
 
 // Heart / favorite toggle
