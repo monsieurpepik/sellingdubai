@@ -246,39 +246,80 @@
 <body class="bg-surface font-body text-on-surface antialiased overflow-x-hidden">
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
-<!-- ======== NAVBAR (no logo — agent is the brand) ======== -->
-<nav class="sticky top-0 w-full z-50 border-b border-zinc-100 bg-white/80 backdrop-blur-md">
-  <div class="flex justify-between items-center max-w-7xl mx-auto px-6 py-3">
-    <div class="flex items-center gap-6">
-      <a class="text-zinc-500 hover:text-zinc-900 transition-colors text-xs tracking-wide" href="#features">Features</a>
-      <a class="text-zinc-500 hover:text-zinc-900 transition-colors text-xs tracking-wide" href="#how-steps">How It Works</a>
-      <a class="text-zinc-500 hover:text-zinc-900 transition-colors text-xs tracking-wide" href="#faq">FAQ</a>
-    </div>
-    <div class="flex items-center gap-3">
-      <a href="/dashboard" class="text-zinc-500 hover:text-zinc-900 transition-colors text-xs font-semibold tracking-tight">Agent Login</a>
-      <a href="/join" class="bg-primary text-on-primary px-5 py-2 rounded-full text-xs font-bold tracking-tight hover:opacity-90 transition-opacity">Get Your Page</a>
-    </div>
-  </div>
+<!-- ======== MINIMAL NAV ======== -->
+<nav style="position:sticky;top:0;z-index:50;display:flex;justify-content:flex-end;padding:12px 20px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.05);">
+  <a href="/dashboard" style="font-size:12px;font-weight:600;color:#71717a;text-decoration:none;font-family:'Manrope',sans-serif;padding:6px 0;" onmouseover="this.style.color='#0a0a0a'" onmouseout="this.style.color='#71717a'">Agent Login</a>
 </nav>
 
 <main id="main-content">
 
-<!-- ======== HERO ======== -->
-<section class="max-w-7xl mx-auto px-6 pt-16 pb-12 text-center">
-  <div class="inline-block bg-zinc-100 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest text-zinc-500 mb-8 uppercase">The Agent Operating System</div>
-  <h1 class="font-headline text-3xl sm:text-5xl md:text-8xl text-on-surface mb-8 tight-tracking leading-[1.1]">
-    <span>You built the trust.<br/>Someone else is getting the leads.</span>
-  </h1>
-  <p class="font-body text-base text-on-surface-variant max-w-lg mx-auto mb-10 leading-relaxed" style="font-weight:300;">
-    You built that audience. You answered their questions, posted the market updates, showed up every week. When they want to buy, they open a portal and find you listed alongside ten other agents. You paid to be on that list. So did the other nine.
-  </p>
-  <div class="max-w-md mx-auto mb-6 w-full px-4 text-center">
-    <a href="/join" class="inline-block bg-primary text-on-primary px-10 py-4 rounded-2xl text-sm font-bold hover:opacity-90 transition-opacity">Get Your Page — Free</a>
-    <p class="text-xs text-zinc-400 mt-3">No subscription fee. No platform commission. Independent by design.</p>
+<!-- ======== ABOVE-FOLD HERO ======== -->
+<section class="hero-above-fold">
+  <div class="hero-inner">
+    <span class="hero-brand">SellingDubai</span>
+    <h1 class="hero-headline">The Operating System for Dubai Real Estate Agents</h1>
+    <p class="hero-subline">DLD-verified. Your leads. Your brand. Free.</p>
+    <button class="hero-cta-btn" data-open-wizard>Claim Your Profile &rarr;</button>
+    <p class="hero-agent-count">
+      <span id="agent-count-live">—</span> agents already on the platform
+    </p>
+  </div>
+</section>
+
+<!-- ======== WIZARD MODAL ======== -->
+<div id="wizard-overlay" class="wz-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="wz-title-1">
+
+  <div class="wz-panel">
+    <button id="wizard-close" class="wz-close" aria-label="Close">&times;</button>
+
+    <div class="wz-dots" aria-hidden="true">
+      <span class="wz-dot active"></span>
+      <span class="wz-dot"></span>
+      <span class="wz-dot"></span>
+    </div>
+
+    <!-- Step 1: Name / Email / WhatsApp -->
+    <div class="wz-step" id="wizard-step-1">
+      <h2 id="wz-title-1">Claim your profile</h2>
+      <p>Free forever. DLD-verified badge included.</p>
+      <form id="wizard-form-1" novalidate>
+        <label>Full name
+          <input type="text" name="name" required autocomplete="name" placeholder="Ahmed Al Mansouri">
+        </label>
+        <label>Email
+          <input type="email" name="email" required autocomplete="email" placeholder="ahmed@agency.ae">
+        </label>
+        <label>WhatsApp <span class="wz-optional">(optional)</span>
+          <input type="tel" name="whatsapp" autocomplete="tel" placeholder="+971 50 123 4567">
+        </label>
+        <p class="wz-error" id="step1-error" aria-live="polite"></p>
+        <button type="submit" class="wz-submit">Continue &rarr;</button>
+      </form>
+    </div>
+
+    <!-- Step 2: DLD BRN -->
+    <div class="wz-step wz-hidden" id="wizard-step-2">
+      <button type="button" id="wizard-back" class="wz-back">&larr; Back</button>
+      <h2>Your DLD licence</h2>
+      <p>We verify every agent. Your BRN earns you the verified badge on your profile.</p>
+      <form id="wizard-form-2" novalidate>
+        <label>DLD BRN
+          <input type="text" name="brn" required placeholder="e.g. 12345" inputmode="numeric" autocomplete="off">
+        </label>
+        <p class="wz-error" id="step2-error" aria-live="polite"></p>
+        <button type="submit" class="wz-submit">Claim My Profile &rarr;</button>
+      </form>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div class="wz-step wz-hidden" id="wizard-step-3">
+      <div class="wz-success-icon">✓</div>
+      <h2>You're on the list.</h2>
+      <p>We'll email you when your profile is ready to activate. Keep an eye on your inbox.</p>
+    </div>
   </div>
 
-
-</section>
+</div>
 
 <!-- ======== PRODUCT PREVIEW ======== -->
 <section class="py-24 md:py-36 bg-zinc-950 overflow-x-hidden reveal" id="preview">
