@@ -1,3 +1,4 @@
+// @ts-check
 // js/ops.js
 // Lazy-loaded by ops.html after OPS_SECRET validation.
 // Renders metric cards, SVG line chart, and funnel table.
