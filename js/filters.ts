@@ -3,8 +3,51 @@
 // ==========================================
 
 import { logEvent } from './analytics.js';
-import { loadMoreProperties, loadProperties, propertiesHasMore, propertiesLoaded, renderPropertyList, renderSkeletonCards } from './properties.js';
+import { loadMoreProperties, loadProperties, propertiesHasMore, propertiesLoaded, renderSkeletonCards } from './properties.js';
+import { renderPropertyList } from './properties-render.js';
 import { allProperties, currentAgent, currentFilters, resetCurrentFilters, setAllProperties } from './state.js';
+
+// ==========================================
+// CAROUSEL INTERACTION HANDLERS
+// Registered here (lazy chunk) because these are only needed once the
+// properties overlay is open. Moving them out of properties.js lets
+// esbuild tree-shake that module's render functions out of init.bundle.js.
+// ==========================================
+window.toggleHeart = (btn) => {
+  btn.classList.toggle('liked');
+  btn.classList.remove('pop');
+  void btn.offsetWidth;
+  btn.classList.add('pop');
+};
+
+window.slideCarousel = (cardId, dir) => {
+  const carousel = document.querySelector(`.prop-carousel[data-card-id="${cardId}"]`);
+  if (!carousel) return;
+  const track = carousel.querySelector('.prop-carousel-track');
+  const dots = carousel.querySelectorAll('.prop-carousel-dot');
+  const total = dots.length;
+  let current = parseInt(carousel.dataset.idx || '0', 10);
+  current = (current + dir + total) % total;
+  carousel.dataset.idx = current;
+  track.style.transform = `translateX(-${current * 100}%)`;
+  dots.forEach((d, i) => d.classList.toggle('active', i === current));
+};
+
+document.addEventListener('touchstart', (e) => {
+  const carousel = (e.target as Element | null)?.closest('.prop-carousel');
+  if (!carousel) return;
+  (carousel as HTMLElement & { _touchX?: number })._touchX = e.touches[0].clientX;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const carousel = (e.target as Element | null)?.closest('.prop-carousel') as (HTMLElement & { _touchX?: number }) | null;
+  if (!carousel || carousel._touchX === undefined) return;
+  const diff = carousel._touchX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) {
+    const cardId = (carousel as HTMLElement).dataset.cardId;
+    window.slideCarousel(cardId, diff > 0 ? 1 : -1);
+  }
+  delete carousel._touchX;
+}, { passive: true });
 
 // ==========================================
 // FILTER LOGIC
