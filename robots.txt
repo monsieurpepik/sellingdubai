@@ -11,3 +11,5 @@ Disallow: /edit
 Disallow: /agency-dashboard
 Disallow: /netlify/
 Disallow: /edge-functions/
+Disallow: /ops.html
+Disallow: /admin.html
