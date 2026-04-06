@@ -3,7 +3,7 @@
 // ==========================================
 
 import { logEvent } from './analytics.js';
-import { loadProperties, propertiesLoaded, renderPropertyList, renderSkeletonCards } from './properties.js';
+import { loadMoreProperties, loadProperties, propertiesHasMore, propertiesLoaded, renderPropertyList, renderSkeletonCards } from './properties.js';
 import { allProperties, currentAgent, currentFilters, resetCurrentFilters, setAllProperties } from './state.js';
 
 // ==========================================
@@ -51,6 +51,36 @@ export function parsePrice(priceStr: unknown): number {
 }
 
 // ==========================================
+// LOAD-MORE BUTTON
+// ==========================================
+function updateLoadMoreBtn(listEl: HTMLElement): void {
+  const existing = document.getElementById('props-load-more');
+  if (!propertiesHasMore) { existing?.remove(); return; }
+  if (existing) return;
+  const btn = document.createElement('button');
+  btn.id = 'props-load-more';
+  btn.className = 'load-more-btn';
+  btn.textContent = 'Load more properties';
+  btn.addEventListener('click', async () => {
+    btn.textContent = 'Loading\u2026';
+    btn.disabled = true;
+    const more = await loadMoreProperties();
+    setAllProperties(allProperties.concat(more));
+    const filtered = applyCurrentFilters();
+    renderPropertyList(filtered);
+    btn.textContent = 'Load more properties';
+    btn.disabled = false;
+    if (!propertiesHasMore) btn.remove();
+    else {
+      // Ensure button is still in place after re-render
+      const existing2 = document.getElementById('props-load-more');
+      if (!existing2) listEl.after(btn);
+    }
+  });
+  listEl.after(btn);
+}
+
+// ==========================================
 // PROPERTY OVERLAY + TABS
 // ==========================================
 window.openProps = async () => {
@@ -66,6 +96,7 @@ window.openProps = async () => {
   setAllProperties(props);
   const filtered = applyCurrentFilters();
   renderPropertyList(filtered);
+  if (listEl) updateLoadMoreBtn(listEl);
 };
 
 window.closeProps = () => {

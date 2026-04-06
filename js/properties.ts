@@ -94,10 +94,15 @@ function injectDemoPhotos(p: Property): Property {
 let propertiesLoaded = false;
 let propertiesError: string | null = null;
 let propertiesCache: Property[] = [];
+const PAGE_SIZE = 50;
+let propertiesOffset = 0;
+let propertiesHasMore = false;
+let propertiesAgentId = '';
 
 export async function loadProperties(agentId: string): Promise<Property[]> {
   if (propertiesLoaded) return propertiesCache;
   propertiesError = null;
+  propertiesAgentId = agentId;
   const { data: props, error } = await supabase
     .from('properties')
     .select('id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active')
@@ -105,18 +110,42 @@ export async function loadProperties(agentId: string): Promise<Property[]> {
     .neq('is_active', false)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
-    .limit(50);
+    .range(0, PAGE_SIZE - 1);
   if (error) {
     propertiesError = error.message;
     console.error('[properties] Failed to load properties:', error.message);
     return [];
   }
-  propertiesCache = (props || []).map(p => injectDemoPhotos(p as Property));
+  const page = (props || []).map(p => injectDemoPhotos(p as Property));
+  propertiesCache = page;
+  propertiesOffset = page.length;
+  propertiesHasMore = page.length === PAGE_SIZE;
   propertiesLoaded = true;
   return propertiesCache;
 }
 
-export { propertiesError, propertiesLoaded };
+export async function loadMoreProperties(): Promise<Property[]> {
+  if (!propertiesHasMore || !propertiesAgentId) return [];
+  const { data: props, error } = await supabase
+    .from('properties')
+    .select('id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active')
+    .eq('agent_id', propertiesAgentId)
+    .neq('is_active', false)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false })
+    .range(propertiesOffset, propertiesOffset + PAGE_SIZE - 1);
+  if (error) {
+    console.error('[properties] Failed to load more properties:', error.message);
+    return [];
+  }
+  const page = (props || []).map(p => injectDemoPhotos(p as Property));
+  propertiesCache = [...propertiesCache, ...page];
+  propertiesOffset += page.length;
+  propertiesHasMore = page.length === PAGE_SIZE;
+  return page;
+}
+
+export { propertiesError, propertiesHasMore, propertiesLoaded };
 
 
 // Heart / favorite toggle
