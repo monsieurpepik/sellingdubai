@@ -1,5 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+interface Agent {
+  id: string;
+  slug: string;
+  name: string;
+  email: string;
+  [key: string]: unknown;
+}
+
 function getSupabase() {
   return createClient(
     Deno.env.get("SUPABASE_URL") ?? "http://127.0.0.1:54321",
@@ -14,7 +22,7 @@ export function fnUrl(name: string): string {
 
 export async function seedAgent(
   overrides?: Partial<Record<string, unknown>>,
-): Promise<{ id: string } & Record<string, unknown>> {
+): Promise<Agent> {
   const supabase = getSupabase();
   const slug = `test-${crypto.randomUUID().slice(0, 8)}`;
   const { data, error } = await supabase
@@ -33,7 +41,7 @@ export async function seedAgent(
     .select()
     .single();
   if (error) throw new Error(`seedAgent: ${error.message}`);
-  return data;
+  return data as Agent;
 }
 
 export async function cleanupAgent(id: string): Promise<void> {
