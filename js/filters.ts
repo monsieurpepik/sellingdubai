@@ -166,6 +166,8 @@ window.applyFilters = () => {
 
   const filtered = applyCurrentFilters();
   renderPropertyList(filtered);
+  const listEl = document.getElementById('prop-list');
+  if (listEl) updateLoadMoreBtn(listEl);
   window.closeFilters?.();
 };
 
@@ -178,6 +180,8 @@ window.resetFilters = () => {
   document.querySelectorAll('.filters-pill.active').forEach(p => p.classList.remove('active'));
   document.getElementById('filter-toggle-btn')?.classList.remove('active');
   renderPropertyList(allProperties);
+  const listEl = document.getElementById('prop-list');
+  if (listEl) updateLoadMoreBtn(listEl);
 };
 
 // ==========================================
@@ -209,6 +213,8 @@ window.applySidebarFilters = () => {
   currentFilters.baths = activeBath ? parseInt((activeBath as HTMLElement).dataset.val ?? '', 10) : 0;
   const filtered = applyCurrentFilters();
   renderPropertyList(filtered);
+  const listEl = document.getElementById('prop-list');
+  if (listEl) updateLoadMoreBtn(listEl);
 };
 
 window.clearSidebarFilters = () => {
@@ -217,4 +223,6 @@ window.clearSidebarFilters = () => {
   document.querySelectorAll('.sidebar-pill.active').forEach(p => p.classList.remove('active'));
   resetCurrentFilters();
   renderPropertyList(allProperties);
+  const listEl = document.getElementById('prop-list');
+  if (listEl) updateLoadMoreBtn(listEl);
 };
