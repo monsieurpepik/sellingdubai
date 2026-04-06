@@ -25,9 +25,9 @@
     whatsapp: null
   };
 
-  // Get Supabase URL with fallback
+  // Get Supabase URL — prefer runtime-injected value, fall back to canonical SD_CONFIG (sd-config.js)
   function getSupabaseUrl() {
-    return window.__SD_SUPABASE_URL__ || 'https://pjyorgedaxevxophpfib.supabase.co';
+    return window.__SD_SUPABASE_URL__ || window.SD_CONFIG?.SUPABASE_URL || '';
   }
 
   // Email validation regex

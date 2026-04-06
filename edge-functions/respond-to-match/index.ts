@@ -25,7 +25,10 @@ interface BuyerRequest { id: string; buyer_name?: string; buyer_phone?: string; 
 
 
 async function sendEmail(to: string, subject: string, html: string) {
-  if (!RESEND_KEY) return;
+  if (!RESEND_KEY) {
+    console.error("[respond-to-match] RESEND_API_KEY is not set — email skipped");
+    return;
+  }
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
