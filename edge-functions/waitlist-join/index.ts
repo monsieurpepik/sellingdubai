@@ -9,6 +9,7 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
+  "https://staging.sellingdubai.com",
 ];
 
 function corsHeaders(req: Request): Record<string, string> {
