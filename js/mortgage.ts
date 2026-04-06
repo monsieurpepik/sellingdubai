@@ -99,7 +99,6 @@ window.openMortgage = () => {
   if (!modal) return;
   // Reset to standard mode on direct open
   _mortState = { ..._mortStateDefaults, data: { ..._mortStateDefaults.data } };
-  _mortRatesLoadFailed = false;
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   window.mortGoStep!(1);
@@ -142,7 +141,6 @@ window.initMortModal = (opts: Partial<MortState> = {}) => {
     ...opts,
     data: { ..._mortStateDefaults.data, ...(opts.data || {}) },
   } as MortState;
-  _mortRatesLoadFailed = false;
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   window.mortGoStep!(1);
@@ -260,7 +258,7 @@ let _mortRatesFetchedAt = 0;
 async function loadMortgageRates() {
   const now = Date.now();
   if (_cachedMortRates && now - _mortRatesFetchedAt < MORT_RATES_TTL_MS) {
-    _mortState.rates = _cachedMortRates;
+    _mortState.rates = [..._cachedMortRates!];
     renderBankCards();
     return;
   }
