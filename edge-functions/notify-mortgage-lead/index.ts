@@ -19,7 +19,7 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
+  "https://staging.sellingdubai.com",
 ];
 
 function getCorsHeaders(req: Request): Record<string, string> {

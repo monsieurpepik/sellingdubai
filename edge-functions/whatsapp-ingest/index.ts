@@ -960,7 +960,7 @@ Deno.serve(async (req: Request) => {
 
     if (agentErr || !agent) {
       log({ event: 'auth_failed', status: 200 });
-      await sendWhatsAppReply(senderPhone, "Hi! Your number isn't registered on SellingDubai yet. Visit sellingdubai-agents.netlify.app/join to create your profile first.");
+      await sendWhatsAppReply(senderPhone, "Hi! Your number isn't registered on SellingDubai yet. Visit sellingdubai.ae/join to create your profile first.");
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
@@ -1010,8 +1010,8 @@ Deno.serve(async (req: Request) => {
 
         if ((activeCount ?? 0) >= limit) {
           const upgradeMsg = effectiveTier === "free"
-            ? `You've reached the ${limit}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai-agents.netlify.app/pricing`
-            : `You've reached the ${limit}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai-agents.netlify.app/pricing`;
+            ? `You've reached the ${limit}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai.ae/pricing`
+            : `You've reached the ${limit}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai.ae/pricing`;
           await sendWhatsAppReply(senderPhone, upgradeMsg);
           return new Response(JSON.stringify({ success: true }), { headers: CORS });
         }
@@ -1046,7 +1046,7 @@ Deno.serve(async (req: Request) => {
       }
 
       // Build confirmation + social templates
-      const profileUrl = `https://sellingdubai-agents.netlify.app/a/${agent.slug}`;
+      const profileUrl = `https://sellingdubai.ae/a/${agent.slug}`;
       let confirmMsg = `✅ *Listed!*\n\n*${finalTitle}*`;
       if (parsed.price) confirmMsg += `\nPrice: ${parsed.price}`;
       if (parsed.area) confirmMsg += `\n📍 ${parsed.area}`;
@@ -1140,8 +1140,8 @@ Deno.serve(async (req: Request) => {
                 .eq("is_active", true);
               if ((activeCountText ?? 0) >= limitText) {
                 const upgradeMsg = effectiveTierText === "free"
-                  ? `You've reached the ${limitText}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai-agents.netlify.app/pricing`
-                  : `You've reached the ${limitText}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai-agents.netlify.app/pricing`;
+                  ? `You've reached the ${limitText}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai.ae/pricing`
+                  : `You've reached the ${limitText}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai.ae/pricing`;
                 await sendWhatsAppReply(senderPhone, upgradeMsg);
                 break;
               }
@@ -1172,7 +1172,7 @@ Deno.serve(async (req: Request) => {
           const lowerText = rawText.toLowerCase();
           if (lowerText.includes("my link") || lowerText.includes("profile link")) {
             await sendWhatsAppReply(senderPhone,
-              `Here's your profile link:\n\nhttps://sellingdubai-agents.netlify.app/a/${agent.slug}\n\nPaste it in your Instagram bio, WhatsApp status, or email signature.`
+              `Here's your profile link:\n\nhttps://sellingdubai.ae/a/${agent.slug}\n\nPaste it in your Instagram bio, WhatsApp status, or email signature.`
             );
           } else if (lowerText.includes("remove last") || lowerText.includes("delete last")) {
             const { data: lastProp } = await supabase

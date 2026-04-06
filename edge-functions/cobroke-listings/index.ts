@@ -18,7 +18,7 @@ const CORS_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.ae",
   "https://agents.sellingdubai.ae",
-  "https://sellingdubai-agents.netlify.app",
+  "https://staging.sellingdubai.com",
 ];
 
 function getCorsHeaders(origin: string | null) {

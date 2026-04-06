@@ -27,7 +27,7 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
+  "https://staging.sellingdubai.com",
 ];
 const IS_LOCAL_DEV = (Deno.env.get("SUPABASE_URL") ?? "").startsWith("http://127.0.0.1");
 function getCorsHeaders(req: Request): Record<string, string> {

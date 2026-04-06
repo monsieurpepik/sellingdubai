@@ -12,7 +12,7 @@ const ALLOWED_ORIGINS = [
   "https://sellingdubai.ae",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
-  "https://sellingdubai-agents.netlify.app",
+  "https://staging.sellingdubai.com",
 ];
 
 const ALLOWED_DOC_TYPES = ["passport", "visa", "emirates_id", "salary_slip", "bank_statement", "noc", "other"];
