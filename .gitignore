@@ -40,3 +40,6 @@ node_modules/
 # Deployment artifacts
 *.zip
 .worktrees/
+.claude/
+supabase/.temp/
+load-test-results.json
