@@ -14,7 +14,7 @@
   const step2Error = document.getElementById('step2-error');
 
   // Early return if any required element is missing
-  if (!overlay || !closeBtn || !backBtn || !step1 || !step2 || !step3 || !form1 || !form2 || !step1Error || !step2Error) {
+  if (!overlay || !step1 || !step2 || !step3 || !form1 || !form2) {
     return;
   }
 
@@ -71,16 +71,6 @@
     dots.forEach((dot, index) => {
       dot.classList.toggle('active', index < n);
     });
-
-    // Focus BRN input after moving to step 2
-    if (n === 2) {
-      const brnInput = form2.querySelector('input[name="brn"]');
-      if (brnInput) {
-        setTimeout(() => {
-          brnInput.focus();
-        }, 60);
-      }
-    }
   }
 
   // Handle open wizard trigger
@@ -152,6 +142,10 @@
 
     // Move to step 2
     showStep(2);
+
+    // Focus BRN input after moving to step 2
+    var brnEl = /** @type {HTMLInputElement|null} */ (form2.querySelector('[name="brn"]'));
+    if (brnEl) setTimeout(function () { brnEl.focus(); }, 60);
   });
 
   // Handle form2 submit (step 2 → POST → step 3)
