@@ -16,6 +16,9 @@ export const SUPABASE_ANON_KEY: string = __SUPABASE_ANON_KEY__;
 if (!SUPABASE_ANON_KEY) {
   console.error('[config] SUPABASE_ANON_KEY is not set — check your environment variables');
 }
+// capture-lead-v4: production function with dedup, Resend email, FB CAPI, webhook CRM.
+// Migrated from capture-lead (legacy) on 2026-04-06. verify_jwt=false (public endpoint).
+// Do not revert to capture-lead — it lacks dedup and server-side tracking.
 export const CAPTURE_URL = `${SUPABASE_URL}/functions/v1/capture-lead-v4`;
 export const LOG_EVENT_URL = `${SUPABASE_URL}/functions/v1/log-event`;
 
