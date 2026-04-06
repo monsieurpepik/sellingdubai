@@ -208,7 +208,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          BILLING_LIVE: 'false'
+          BILLING_LIVE: ${{ secrets.BILLING_LIVE }}
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
