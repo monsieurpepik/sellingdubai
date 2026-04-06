@@ -82,7 +82,7 @@
   });
 
   // Handle close button
-  closeBtn.addEventListener('click', () => {
+  if (closeBtn) closeBtn.addEventListener('click', () => {
     closeWizard();
   });
 
@@ -101,7 +101,7 @@
   });
 
   // Handle back button
-  backBtn.addEventListener('click', () => {
+  if (backBtn) backBtn.addEventListener('click', () => {
     showStep(1);
   });
 
@@ -110,12 +110,14 @@
     e.preventDefault();
 
     // Clear error
-    step1Error.textContent = '';
+    if (step1Error) step1Error.textContent = '';
 
     // Get form values
     const nameInput = form1.querySelector('input[name="name"]');
     const emailInput = form1.querySelector('input[name="email"]');
     const whatsappInput = form1.querySelector('input[name="whatsapp"]');
+
+    if (!nameInput || !emailInput) return;
 
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
@@ -123,14 +125,14 @@
 
     // Validate name
     if (name.length < 2) {
-      step1Error.textContent = 'Name must be at least 2 characters';
+      if (step1Error) step1Error.textContent = 'Name must be at least 2 characters';
       nameInput.focus();
       return;
     }
 
     // Validate email
     if (!isValidEmail(email)) {
-      step1Error.textContent = 'Please enter a valid email address';
+      if (step1Error) step1Error.textContent = 'Please enter a valid email address';
       emailInput.focus();
       return;
     }
@@ -144,8 +146,8 @@
     showStep(2);
 
     // Focus BRN input after moving to step 2
-    var brnEl = /** @type {HTMLInputElement|null} */ (form2.querySelector('[name="brn"]'));
-    if (brnEl) setTimeout(function () { brnEl.focus(); }, 60);
+    const brnEl = /** @type {HTMLInputElement|null} */ (form2.querySelector('[name="brn"]'));
+    if (brnEl) setTimeout(() => { brnEl.focus(); }, 60);
   });
 
   // Handle form2 submit (step 2 → POST → step 3)
@@ -153,7 +155,7 @@
     e.preventDefault();
 
     // Clear error
-    step2Error.textContent = '';
+    if (step2Error) step2Error.textContent = '';
 
     // Get form values
     const brnInput = form2.querySelector('input[name="brn"]');
@@ -161,7 +163,7 @@
 
     // Validate BRN
     if (!brn) {
-      step2Error.textContent = 'Please enter your BRN (DLD Licence Number)';
+      if (step2Error) step2Error.textContent = 'Please enter your BRN (DLD Licence Number)';
       brnInput.focus();
       return;
     }
@@ -196,7 +198,7 @@
       })
       .catch(error => {
         // Network error
-        step2Error.textContent = 'Something went wrong. Please try again.';
+        if (step2Error) step2Error.textContent = 'Something went wrong. Please try again.';
         submitBtn.disabled = false;
         submitBtn.textContent = 'Claim My Profile →';
       });
