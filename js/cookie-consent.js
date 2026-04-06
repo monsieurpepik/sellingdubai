@@ -2,12 +2,12 @@
 (()=> {
   var CONSENT_KEY = 'sd_cookie_consent';
   var stored = null;
-  try { stored = localStorage.getItem(CONSENT_KEY); } catch(_e){}
+  try { stored = localStorage.getItem(CONSENT_KEY); } catch(_e){ console.warn('localStorage unavailable', _e); }
   if (!stored) {
     setTimeout(()=> { document.getElementById('cookie-banner').classList.add('show'); }, 1200);
   }
   window.__sdCookieConsent = (choice) => {
-    try { localStorage.setItem(CONSENT_KEY, choice); } catch(_e){}
+    try { localStorage.setItem(CONSENT_KEY, choice); } catch(_e){ console.warn('localStorage unavailable', _e); }
     document.getElementById('cookie-banner').classList.remove('show');
     if (choice === 'reject') {
       // Disable non-essential tracking — use the actual GA4 property ID loaded per-agent
