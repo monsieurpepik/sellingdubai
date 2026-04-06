@@ -119,7 +119,6 @@ Deno.serve(async (req: Request) => {
       });
 
       if (!customerRes.ok) {
-        const errBody = await customerRes.json();
         console.error("Stripe customer creation failed");
         return new Response(JSON.stringify({ error: "Payment service is temporarily unavailable. Please try again in a moment." }), { status: 502, headers: cors });
       }
@@ -164,7 +163,6 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!sessionRes.ok) {
-      const errBody = await sessionRes.json();
       console.error("Stripe session creation failed");
       return new Response(JSON.stringify({ error: "Payment service is temporarily unavailable. Please try again in a moment." }), { status: 502, headers: cors });
     }

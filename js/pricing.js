@@ -55,7 +55,7 @@ async function startCheckout(plan, interval, btn) {
 
   try {
     var supabaseUrl = (typeof window !== 'undefined' && window.__SD_SUPABASE_URL__) || 'https://pjyorgedaxevxophpfib.supabase.co';
-    var res = await fetch(supabaseUrl + '/functions/v1/create-checkout', {
+    var res = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: token, plan: plan, interval: interval })
@@ -69,12 +69,18 @@ async function startCheckout(plan, interval, btn) {
       localStorage.removeItem('sd_edit_token');
       redirectToAuth(plan, interval);
     } else {
-      alert(data.error || 'Failed to start checkout.');
-      if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
+      if (btn) {
+        btn.textContent = data.error || 'Something went wrong';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = 'Upgrade Now'; }, 3000);
+      }
     }
   } catch (_e) {
-    alert('Something went wrong. Please try again.');
-    if (btn) { btn.textContent = 'Upgrade Now'; btn.disabled = false; }
+    if (btn) {
+      btn.textContent = 'Something went wrong — try again';
+      btn.disabled = false;
+      setTimeout(() => { btn.textContent = 'Upgrade Now'; }, 3000);
+    }
   }
 }
 

@@ -105,6 +105,16 @@
     showStep(1);
   });
 
+  // Auto-uppercase BRN input as user types — DLD licence numbers are always uppercase
+  const brnInputEl = /** @type {HTMLInputElement|null} */ (form2.querySelector('input[name="brn"]'));
+  if (brnInputEl) {
+    brnInputEl.addEventListener('input', () => {
+      const cursor = brnInputEl.selectionStart;
+      brnInputEl.value = brnInputEl.value.toUpperCase();
+      brnInputEl.setSelectionRange(cursor, cursor);
+    });
+  }
+
   // Handle form1 submit (step 1 → step 2)
   form1.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -158,8 +168,9 @@
     if (step2Error) step2Error.textContent = '';
 
     // Get form values
-    const brnInput = form2.querySelector('input[name="brn"]');
-    const brn = brnInput.value.trim();
+    const brnInput = /** @type {HTMLInputElement|null} */ (form2.querySelector('input[name="brn"]'));
+    if (!brnInput) return;
+    const brn = brnInput.value.trim().toUpperCase();
 
     // Validate BRN
     if (!brn) {
