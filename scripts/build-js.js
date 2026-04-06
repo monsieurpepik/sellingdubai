@@ -53,7 +53,7 @@ esbuild.build({
 const sha = process.env.SENTRY_RELEASE || process.env.COMMIT_REF || process.env.GITHUB_SHA || 'dev';
 fs.writeFileSync(
   'dist/release-config.js',
-  `window.SENTRY_RELEASE = ${JSON.stringify(sha)};\n`,
+  `window.SENTRY_RELEASE = ${JSON.stringify(sha)};\nwindow.__SD_SUPABASE_URL__ = ${JSON.stringify(url)};\n`,
   'utf8'
 );
 console.log(`build-js: dist/release-config.js written (SENTRY_RELEASE=${sha})`);
