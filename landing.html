@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <title>SellingDubai — The Operating System for Dubai Real Estate Agents</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231127D2'/%3E%3Ctext x='16' y='23' font-family='Manrope,Arial,sans-serif' font-size='16' font-weight='800' text-anchor='middle' fill='white'%3ESD%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M16 6L6 14v12a1 1 0 001 1h6v-7h6v7h6a1 1 0 001-1V14L16 6z' fill='%23fff'/%3E%3C/svg%3E">
 <meta name="description" content="DLD-verified agent profiles. Your leads, your brand, zero commission. Free forever."/>
 <link rel="canonical" href="https://sellingdubai.ae/"/>
 <meta property="og:title" content="SellingDubai — The Operating System for Dubai Real Estate Agents"/>
@@ -237,6 +237,8 @@
   .wz-back:hover { color: #0a0a0a; }
   .wz-success-icon { font-size: 48px; text-align: center; margin-bottom: 16px; }
   .wz-hidden { display: none !important; }
+  .landing-nav-login { font-size: 12px; font-weight: 600; color: #71717a; text-decoration: none; font-family: 'Manrope', sans-serif; padding: 6px 0; transition: color 0.15s; }
+  .landing-nav-login:hover { color: #0a0a0a; }
 
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"AED","description":"Verified agent profile, up to 3 listings, basic analytics, and lead capture."},{"@type":"Offer","name":"Pro","price":"299","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"299","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Free plus up to 20 listings, advanced analytics, lead CRM, and custom branding."},{"@type":"Offer","name":"Premium","price":"799","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"799","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Pro plus unlimited listings, lead export, featured agent badge, and dedicated support."}],"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
@@ -251,7 +253,7 @@
 
 <!-- ======== MINIMAL NAV ======== -->
 <nav style="position:sticky;top:0;z-index:50;display:flex;justify-content:flex-end;padding:12px 20px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.05);">
-  <a href="/dashboard" style="font-size:12px;font-weight:600;color:#71717a;text-decoration:none;font-family:'Manrope',sans-serif;padding:6px 0;" onmouseover="this.style.color='#0a0a0a'" onmouseout="this.style.color='#71717a'">Agent Login</a>
+  <a href="/dashboard" class="landing-nav-login">Agent Login</a>
 </nav>
 
 <main id="main-content">
@@ -317,8 +319,8 @@
     <!-- Step 3: Success -->
     <div class="wz-step wz-hidden" id="wizard-step-3">
       <div class="wz-success-icon">✓</div>
-      <h2>You're on the list.</h2>
-      <p>We'll email you when your profile is ready to activate. Keep an eye on your inbox.</p>
+      <h2>Your profile is being reviewed.</h2>
+      <p>We'll notify you within 24 hours once your DLD record is verified. Keep an eye on your inbox.</p>
     </div>
   </div>
 
@@ -350,8 +352,8 @@
     <div>
       <h4 class="text-[11px] font-bold text-white mb-6 uppercase tracking-widest opacity-80">Product</h4>
       <ul class="space-y-3">
-        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#features">Features</a></li>
-        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#how">How It Works</a></li>
+        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/join">Get Your Page</a></li>
+        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/pricing">Pricing</a></li>
         <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#faq">FAQ</a></li>
       </ul>
     </div>
