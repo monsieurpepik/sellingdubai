@@ -87,6 +87,7 @@
     #auth-gate { display: none; }
     #loading { display: block; }
   </style>
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
   <div class="topbar">
@@ -189,5 +190,6 @@
 
   <script src="/dist/event-delegation.bundle.js" defer></script>
   <script type="module" src="/js/agency-dashboard.js"></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

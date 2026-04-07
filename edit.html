@@ -19,6 +19,7 @@
 <script src="/js/sentry-init.js" defer></script>
 <link rel="stylesheet" href="/css/edit.css">
 <style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}.analytics-hover:hover{background:rgba(255,255,255,0.12)!important;}</style>
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -508,5 +509,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="/dist/event-delegation.bundle.js" defer></script>
 <script src="/js/edit.js" defer></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

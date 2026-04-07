@@ -21,6 +21,7 @@
   <script src="/js/gtag-init.js" defer></script>
   <script src="/js/async-css.js" defer></script>
   <link rel="stylesheet" href="/css/pricing.css">
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
   <header>
@@ -196,5 +197,6 @@
   <script src="/dist/release-config.js"></script>
   <script src="/js/sentry-init.js" defer></script>
   <script src="/js/pricing.js" defer></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

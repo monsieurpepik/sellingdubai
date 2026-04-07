@@ -54,6 +54,7 @@
     .page-footer img { height: 24px; filter: invert(1); opacity: 0.5; }
     .skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}
   </style>
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -103,5 +104,6 @@
   </main>
 
   <script type="module" src="/dist/agency-page.bundle.js"></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
