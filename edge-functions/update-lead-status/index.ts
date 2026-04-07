@@ -29,7 +29,13 @@ function json(data: unknown, status = 200, cors: Record<string, string> = {}) {
 
 const VALID_STATUSES = ["new", "contacted", "qualified", "converted", "lost"];
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('update-lead-status', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -47,7 +53,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Invalid status. Must be one of: " + VALID_STATUSES.join(", ") }, 400, cors);
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL") || "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
     );
@@ -98,4 +104,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

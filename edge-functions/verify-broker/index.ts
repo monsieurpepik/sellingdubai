@@ -2,9 +2,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
   "https://sellingdubai.ae",
@@ -24,7 +21,13 @@ function getCorsHeaders(req: Request): Record<string, string> {
 
 const TEST_BRN = 0;
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('verify-broker', req);
   const _start = Date.now();
   const corsHeaders = getCorsHeaders(req);
@@ -81,7 +84,10 @@ Deno.serve(async (req: Request) => {
     }
 
     // Use service_role to bypass RLS on dld_brokers
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const supabase = _createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
     // Look up broker
     const { data: broker, error } = await supabase
@@ -131,4 +137,6 @@ Deno.serve(async (req: Request) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-});
+}
+
+Deno.serve((req) => handler(req));

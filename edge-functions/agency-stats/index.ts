@@ -42,7 +42,8 @@ async function statsForAgent(
   thisMonthStart: string,
   lastMonthStart: string,
   lastMonthEnd: string,
-  sb: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  sb: any,
 ): Promise<AgentStats> {
   const [vTM, vLM, lTM, lLM, lAll, waTM, props] = await Promise.allSettled([
     sb.from("page_events").select("id", { count: "exact", head: true }).eq("agent_id", agentId).eq("event_type", "view").gte("created_at", thisMonthStart),
@@ -53,12 +54,19 @@ async function statsForAgent(
     sb.from("page_events").select("id", { count: "exact", head: true }).eq("agent_id", agentId).eq("event_type", "whatsapp_tap").gte("created_at", thisMonthStart),
     sb.from("properties").select("id", { count: "exact", head: true }).eq("agent_id", agentId).eq("is_active", true),
   ]);
+  // deno-lint-ignore no-explicit-any
   const c = (r: PromiseSettledResult<any>) => r.status === "fulfilled" ? (r.value.count ?? 0) : 0;
   return { agent_id: agentId, name, slug, photo_url, views_this_month: c(vTM), views_last_month: c(vLM), leads_this_month: c(lTM), leads_last_month: c(lLM), leads_all_time: c(lAll), wa_taps_this_month: c(waTM), properties_active: c(props) };
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('agency-stats', req);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("agency-stats", req);
   const _start = Date.now();
   const cors = corsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -69,7 +77,7 @@ Deno.serve(async (req: Request) => {
   const { token } = body;
   if (!token || typeof token !== "string") return new Response(JSON.stringify({ error: "Missing token." }), { status: 401, headers: cors });
 
-  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const sb = _createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   const { data: link, error: linkErr } = await sb.from("magic_links").select("agent_id, expires_at, used_at").eq("token", token).single();
   if (linkErr && linkErr.code !== "PGRST116") {
@@ -96,6 +104,7 @@ Deno.serve(async (req: Request) => {
   const lastMonthEnd = thisMonthStart;
 
   const settledStats = await Promise.allSettled(
+    // deno-lint-ignore no-explicit-any
     members.map((m: any) => statsForAgent(m.id, m.name, m.slug, m.photo_url, thisMonthStart, lastMonthStart, lastMonthEnd, sb))
   );
   const agentStats: AgentStats[] = settledStats
@@ -114,7 +123,9 @@ Deno.serve(async (req: Request) => {
     agents_count: members.length,
   };
 
-  log({ event: 'success', agent_id: agentId, status: 200 });
+  log({ event: "success", agent_id: agentId, status: 200 });
   log.flush(Date.now() - _start);
   return new Response(JSON.stringify({ agency, agents: agentStats, totals }), { headers: cors });
-});
+}
+
+Deno.serve((req) => handler(req));

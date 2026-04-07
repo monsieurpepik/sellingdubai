@@ -10,10 +10,10 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createLogger } from '../_shared/logger.ts';
+import { createLogger } from "../_shared/logger.ts";
 
 const RATE_TYPE = "3m_eibor";
-const FALLBACK_RATE = 3.68;  // EIBOR as of March 2026 — update comment if scraping stays broken long-term
+const FALLBACK_RATE = 3.68; // EIBOR as of March 2026 — update comment if scraping stays broken long-term
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const EIBOR_URL = "https://www.centralbank.ae/en/forex-eibor/eibor-rates/";
 
@@ -59,7 +59,7 @@ async function scrapeEibor(): Promise<number | null> {
       const match = html.match(pattern);
       if (match) {
         const rate = parseFloat(match[1]);
-        if (rate > 0.5 && rate < 15) return rate;  // sanity bounds: EIBOR is never 0 or >15%
+        if (rate > 0.5 && rate < 15) return rate; // sanity bounds: EIBOR is never 0 or >15%
       }
     }
     return null;
@@ -68,8 +68,14 @@ async function scrapeEibor(): Promise<number | null> {
   }
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('fetch-eibor', req);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("fetch-eibor", req);
   const _start = Date.now();
   const origin = req.headers.get("origin");
   const headers = corsHeaders(origin);
@@ -79,14 +85,14 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method !== "GET") {
-    return new Response(JSON.stringify({ error: 'Method not allowed.' }), {
+    return new Response(JSON.stringify({ error: "Method not allowed." }), {
       status: 405,
-      headers: { ...headers, 'Allow': 'GET, OPTIONS' },
+      headers: { ...headers, "Allow": "GET, OPTIONS" },
     });
   }
 
   try {
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
@@ -101,7 +107,7 @@ Deno.serve(async (req: Request) => {
     if (cached) {
       const ageMs = Date.now() - new Date(cached.fetched_at).getTime();
       if (ageMs < CACHE_TTL_MS) {
-        log({ event: 'success', status: 200, source: 'cache' });
+        log({ event: "success", status: 200, source: "cache" });
         return Response.json(
           { rate: Number(cached.rate_value), cached: true, fetched_at: cached.fetched_at, source: cached.source },
           { headers },
@@ -114,7 +120,7 @@ Deno.serve(async (req: Request) => {
 
     // If scrape failed but we have a stale value, return it — stale data beats fallback
     if (scraped === null && cached) {
-      log({ event: 'success', status: 200, source: 'stale_cache' });
+      log({ event: "success", status: 200, source: "stale_cache" });
       return Response.json(
         { rate: Number(cached.rate_value), cached: true, fetched_at: cached.fetched_at, source: "stale_cache", stale: true },
         { headers },
@@ -133,15 +139,17 @@ Deno.serve(async (req: Request) => {
         { onConflict: "rate_type" },
       );
 
-    log({ event: 'success', status: 200, source });
+    log({ event: "success", status: 200, source });
     return Response.json(
       { rate: rateValue, cached: false, fetched_at: now, source },
       { headers },
     );
   } catch (err) {
-    log({ event: 'error', status: 500, error: String(err) });
-    return Response.json({ error: 'Internal server error.' }, { status: 500, headers });
+    log({ event: "error", status: 500, error: String(err) });
+    return Response.json({ error: "Internal server error." }, { status: 500, headers });
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

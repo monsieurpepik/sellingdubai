@@ -27,7 +27,13 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('capture-project-lead', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -96,7 +102,7 @@ Deno.serve(async (req: Request) => {
     const ipHash = await sha256(clientIp + (Deno.env.get("RATE_LIMIT_SALT") || "sd-salt-2026"));
 
     // Use service role to bypass RLS for lookups
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
@@ -220,4 +226,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

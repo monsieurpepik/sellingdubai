@@ -1,49 +1,60 @@
-import { fnUrl, seedAgent } from "../_shared/test-helpers.ts";
-import { cleanupAgent } from "../_shared/test-helpers.ts";
+import { assertEquals } from "jsr:@std/assert@1";
+import { mockClientFactory } from "../_shared/test-mock.ts";
+import { handler } from "./index.ts";
 
-const URL = fnUrl("log-event");
+function makeReq(body: unknown, method = "POST"): Request {
+  return new Request("http://localhost/log-event", {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: method !== "GET" ? JSON.stringify(body) : undefined,
+  });
+}
 
 Deno.test("log-event: missing agent_id returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_type: "view" }),
-  });
-  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq({ event_type: "view" }), mockClientFactory());
+  assertEquals(res.status, 400);
 });
 
 Deno.test("log-event: missing event_type returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ agent_id: crypto.randomUUID() }),
-  });
-  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq({ agent_id: "some-uuid" }), mockClientFactory());
+  assertEquals(res.status, 400);
 });
 
-Deno.test("log-event: valid view event is accepted", async () => {
-  const agent = await seedAgent();
-  try {
-    const res = await fetch(URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ agent_id: agent.id, event_type: "view" }),
-    });
-    if (res.status !== 200) {
-      const body = await res.text();
-      throw new Error(`Expected 200, got ${res.status}: ${body}`);
-    }
-    const data = await res.json();
-    if (data.success !== true) throw new Error(`Expected success:true, got: ${JSON.stringify(data)}`);
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+Deno.test("log-event: invalid event_type returns 400", async () => {
+  const res = await handler(
+    makeReq({ agent_id: "some-uuid", event_type: "invalid_type" }),
+    mockClientFactory(),
+  );
+  assertEquals(res.status, 400);
+});
+
+Deno.test("log-event: valid view event with verified agent returns 200", async () => {
+  const res = await handler(
+    makeReq({ agent_id: "agent-1", event_type: "view" }),
+    mockClientFactory({
+      // agents count query → 1 verified agent found
+      "agents:count": { count: 1, error: null },
+      // page_events count for rate limit → 0
+      "page_events:count": { count: 0, error: null },
+    }),
+  );
+  assertEquals(res.status, 200);
+  const data = await res.json();
+  assertEquals(data.success, true);
+});
+
+Deno.test("log-event: unverified agent returns 400", async () => {
+  // agents:count returns 0 → agent not verified
+  const res = await handler(
+    makeReq({ agent_id: "unknown-agent", event_type: "view" }),
+    mockClientFactory({
+      "agents:count": { count: 0, error: null },
+    }),
+  );
+  assertEquals(res.status, 400);
 });
 
 Deno.test("log-event: GET returns 405", async () => {
-  const res = await fetch(URL, { method: "GET" });
-  if (res.status !== 405) throw new Error(`Expected 405, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq({}, "GET"), mockClientFactory());
+  assertEquals(res.status, 405);
 });

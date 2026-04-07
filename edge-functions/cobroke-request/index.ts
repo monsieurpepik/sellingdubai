@@ -13,8 +13,9 @@ import { createLogger } from "../_shared/logger.ts";
  * AFTER they accept the request.
  */
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
 
@@ -32,7 +33,10 @@ async function sendEmail(to: string, subject: string, html: string) {
   }).catch(() => console.error("Email send failed"));
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('cobroke-request', req);
   const _start = Date.now();
   const origin = req.headers.get("origin");
@@ -56,7 +60,7 @@ Deno.serve(async (req: Request) => {
       });
     }
     const token = authHeader.slice(7);
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = _createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: link } = await supabase
       .from("magic_links")
@@ -239,4 +243,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

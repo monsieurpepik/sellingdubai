@@ -1,6 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
 
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
   "https://sellingdubai.ae",
@@ -28,7 +31,10 @@ function slugify(s: string): string {
     .slice(0, 60);
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('manage-agency', req);
   const _start = Date.now();
   const cors = corsHeaders(req);
@@ -42,7 +48,7 @@ Deno.serve(async (req: Request) => {
   const { token, action } = body;
   if (!token || typeof token !== "string") return new Response(JSON.stringify({ error: "Missing token." }), { status: 401, headers: cors });
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const supabase = _createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   // Validate magic link token
   const { data: link, error: linkErr } = await supabase
@@ -212,4 +218,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

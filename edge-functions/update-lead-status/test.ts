@@ -1,89 +1,106 @@
-import {
-  cleanupAgent,
-  fnUrl,
-  seedAgent,
-  seedUsedMagicLink,
-} from "../_shared/test-helpers.ts";
+import { handler } from "./index.ts";
+import { mockClientFactory } from "../_shared/test-mock.ts";
 
-const URL = fnUrl("update-lead-status");
+Deno.env.set("SUPABASE_URL", "http://test.local");
+Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
+
+const VALID_LINK = {
+  agent_id: "agent-1",
+  expires_at: "2099-01-01T00:00:00Z",
+  used_at: new Date().toISOString(),
+};
 
 Deno.test("update-lead-status: missing token returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ lead_id: "some-id", status: "contacted" }),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lead_id: "some-id", status: "contacted" }),
+    }),
+    mockClientFactory(),
+  );
   if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("update-lead-status: invalid token returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: crypto.randomUUID(), lead_id: "some-id", status: "contacted" }),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: "bad-token", lead_id: "some-id", status: "contacted" }),
+    }),
+    mockClientFactory(), // magic_links defaults to NOT_FOUND
+  );
   if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("update-lead-status: missing lead_id returns 400", async () => {
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: link.token, status: "contacted" }),
-    });
-    if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+      body: JSON.stringify({ token: "valid-token", status: "contacted" }),
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+    }),
+  );
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
 });
 
 Deno.test("update-lead-status: invalid status returns 400", async () => {
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: link.token, lead_id: "some-id", status: "purple" }),
-    });
-    if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+      body: JSON.stringify({ token: "valid-token", lead_id: "some-id", status: "purple" }),
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+    }),
+  );
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
 });
 
 Deno.test("update-lead-status: non-existent lead returns 404", async () => {
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token: link.token,
-        lead_id: crypto.randomUUID(),
-        status: "contacted",
-      }),
-    });
-    if (res.status !== 404) throw new Error(`Expected 404 for unknown lead, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+      body: JSON.stringify({ token: "valid-token", lead_id: "unknown-lead", status: "contacted" }),
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+      // leads defaults to NOT_FOUND
+    }),
+  );
+  if (res.status !== 404) throw new Error(`Expected 404 for unknown lead, got ${res.status}`);
 });
 
 Deno.test("update-lead-status: OPTIONS returns CORS headers", async () => {
-  const res = await fetch(URL, {
-    method: "OPTIONS",
-    headers: { "Origin": "https://sellingdubai.ae" },
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "OPTIONS",
+      headers: { "Origin": "https://sellingdubai.ae" },
+    }),
+    mockClientFactory(),
+  );
   if (!res.ok) throw new Error(`OPTIONS failed with ${res.status}`);
-  await res.body?.cancel();
+});
+
+Deno.test("update-lead-status: valid request updates lead status", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: "valid-token", lead_id: "lead-1", status: "contacted" }),
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+      "leads:write": { data: { id: "lead-1", status: "contacted" }, error: null },
+    }),
+  );
+  if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
+  const data = await res.json();
+  if (!data.success) throw new Error(`Expected success:true, got: ${JSON.stringify(data)}`);
 });

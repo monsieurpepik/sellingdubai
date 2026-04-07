@@ -28,7 +28,13 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('update-mortgage-docs', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -70,7 +76,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Invalid path" }), { status: 400, headers: cors });
   }
 
-  const sb = createClient(
+  const sb = _createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
@@ -115,4 +121,6 @@ Deno.serve(async (req: Request) => {
   log({ event: 'success', status: 200 });
   log.flush(Date.now() - _start);
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers: cors });
-});
+}
+
+Deno.serve((req) => handler(req));

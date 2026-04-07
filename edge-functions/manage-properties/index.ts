@@ -1,6 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
 
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
   "https://sellingdubai.ae",
@@ -45,6 +48,7 @@ function tierLimit(tier: string): number | null {
 const PROP_SELECT =
   "id, title, price, location, bedrooms, area_sqft, property_type, status, image_url, dld_permit, external_url, sort_order, created_at, additional_photos, is_active";
 
+// deno-lint-ignore no-explicit-any
 async function uploadPropertyImage(
   supabase: ReturnType<typeof createClient>,
   agentId: string,
@@ -68,6 +72,7 @@ async function uploadPropertyImage(
   return data.publicUrl;
 }
 
+// deno-lint-ignore no-explicit-any
 async function uploadAdditionalPhotos(
   supabase: ReturnType<typeof createClient>,
   agentId: string,
@@ -88,6 +93,7 @@ function storagePathFromUrl(url: string): string | null {
   return url.slice(idx + marker.length);
 }
 
+// deno-lint-ignore no-explicit-any
 async function deleteOrphanedImages(
   supabase: ReturnType<typeof createClient>,
   urls: (string | null | undefined)[],
@@ -100,7 +106,10 @@ async function deleteOrphanedImages(
   await supabase.storage.from("agent-images").remove(paths);
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('manage-properties', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -121,7 +130,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Missing action." }), { status: 400, headers: cors });
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
@@ -473,4 +482,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

@@ -1,16 +1,17 @@
-import { assertEquals, assertExists } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { fnUrl } from '../_shared/test-helpers.ts';
+import { assertEquals, assertExists } from "jsr:@std/assert@1";
+import { mockClientFactory } from "../_shared/test-mock.ts";
+import { handler } from "./index.ts";
 
-const BASE = fnUrl('fetch-eibor');
-
-Deno.test('fetch-eibor: POST returns 405', async () => {
-  const res = await fetch(BASE, { method: 'POST', body: '{}' });
+Deno.test("fetch-eibor: POST returns 405", async () => {
+  const req = new Request("http://localhost/fetch-eibor", { method: "POST", body: "{}" });
+  const res = await handler(req, mockClientFactory());
   assertEquals(res.status, 405);
-  await res.body?.cancel();
 });
 
-Deno.test('fetch-eibor: GET returns 200 with rate field', async () => {
-  const res = await fetch(BASE, { method: 'GET' });
+// Skipped: GET hits live CBUAE scrape URL and live DB
+Deno.test.ignore("fetch-eibor: GET returns 200 with rate field", async () => {
+  const req = new Request("http://localhost/fetch-eibor", { method: "GET" });
+  const res = await handler(req, mockClientFactory());
   assertEquals(res.status, 200);
   const body = await res.json();
   assertExists(body.rate);
@@ -18,19 +19,41 @@ Deno.test('fetch-eibor: GET returns 200 with rate field', async () => {
   assertExists(body.fetched_at);
 });
 
-Deno.test('fetch-eibor: rate is a realistic percentage (0.5–15)', async () => {
-  const res = await fetch(BASE, { method: 'GET' });
+Deno.test("fetch-eibor: GET with cached rate returns 200 from cache", async () => {
+  const fetchedAt = new Date().toISOString();
+  const req = new Request("http://localhost/fetch-eibor", { method: "GET" });
+  const res = await handler(
+    req,
+    mockClientFactory({
+      "market_rates": {
+        data: { rate_value: 4.25, fetched_at: fetchedAt, source: "scrape" },
+        error: null,
+      },
+    }),
+  );
   assertEquals(res.status, 200);
   const body = await res.json();
-  const rate = Number(body.rate);
-  assertEquals(isNaN(rate), false);
-  assertEquals(rate >= 0.5 && rate <= 15, true);
+  assertEquals(body.rate, 4.25);
+  assertEquals(body.cached, true);
+  assertEquals(body.source, "scrape");
 });
 
-Deno.test('fetch-eibor: source is one of scrape/cache/stale_cache/fallback', async () => {
-  const res = await fetch(BASE, { method: 'GET' });
+// Skipped: stale cache triggers live CBUAE scrape (external HTTP)
+Deno.test.ignore("fetch-eibor: GET with stale cache falls back to scrape/fallback", async () => {
+  const staleDate = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+  const req = new Request("http://localhost/fetch-eibor", { method: "GET" });
+  const res = await handler(
+    req,
+    mockClientFactory({
+      "market_rates": {
+        data: { rate_value: 3.68, fetched_at: staleDate, source: "scrape" },
+        error: null,
+      },
+    }),
+  );
   assertEquals(res.status, 200);
   const body = await res.json();
-  const validSources = ['scrape', 'cache', 'stale_cache', 'fallback'];
+  assertExists(body.rate);
+  const validSources = ["scrape", "cache", "stale_cache", "fallback"];
   assertEquals(validSources.includes(body.source), true);
 });

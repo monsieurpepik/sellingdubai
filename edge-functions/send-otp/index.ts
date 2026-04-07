@@ -2,6 +2,9 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
 
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
   "https://sellingdubai.ae",
@@ -30,7 +33,10 @@ function json(data: unknown, status = 200, cors: Record<string, string> = {}) {
 const TEST_EMAIL = "boban@sellingdubai.com";
 const TEST_OTP   = "123456";
 
-Deno.serve(async (req: Request) => {
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('send-otp', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -62,7 +68,7 @@ Deno.serve(async (req: Request) => {
       : String(Math.floor(100000 + Math.random() * 900000));
     // ─────────────────────────────────────────────────────────────────────────
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
@@ -184,4 +190,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

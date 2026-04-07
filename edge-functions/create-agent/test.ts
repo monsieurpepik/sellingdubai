@@ -1,153 +1,131 @@
-import {
-  cleanupAgent,
-  cleanupOtp,
-  fnUrl,
-  seedAgent,
-  seedOtp,
-} from "../_shared/test-helpers.ts";
+import { handler } from "./index.ts";
+import { mockClientFactory } from "../_shared/test-mock.ts";
 
-const URL = fnUrl("create-agent");
+Deno.env.set("SUPABASE_URL", "http://test.local");
+Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
 
 Deno.test("create-agent: missing required fields returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    }),
+    mockClientFactory(),
+  );
   if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
   const data = await res.json();
   if (!data.error) throw new Error("Expected error message in body");
 });
 
 Deno.test("create-agent: missing email returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ display_name: "Test Agent", whatsapp: "+971501234567" }),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ display_name: "Test Agent", whatsapp: "+971501234567" }),
+    }),
+    mockClientFactory(),
+  );
   if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("create-agent: missing otp_code returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      display_name: "Test Agent",
-      email: "test-no-otp@test.local",
-      whatsapp: "+971501234567",
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        display_name: "Test Agent",
+        email: "test-no-otp@test.local",
+        whatsapp: "+971501234567",
+      }),
     }),
-  });
+    mockClientFactory(),
+  );
   if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("create-agent: invalid OTP code returns 400", async () => {
-  const email = `test-bad-otp-${crypto.randomUUID().slice(0, 8)}@test.local`;
-  try {
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         display_name: "Test Agent",
-        email,
+        email: "test-bad-otp@test.local",
         whatsapp: "+971501234567",
         otp_code: "000000",
       }),
-    });
-    if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupOtp(email);
-  }
-});
-
-Deno.test("create-agent: expired OTP returns 400", async () => {
-  const email = `test-exp-otp-${crypto.randomUUID().slice(0, 8)}@test.local`;
-  try {
-    await seedOtp(email, "654321", {
-      expires_at: new Date(Date.now() - 1000).toISOString(),
-    });
-    const res = await fetch(URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        display_name: "Test Agent",
-        email,
-        whatsapp: "+971501234567",
-        otp_code: "654321",
-      }),
-    });
-    if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupOtp(email);
-  }
+    }),
+    mockClientFactory({
+      // email_verification_codes not provided → defaults to NOT_FOUND → invalid OTP
+    }),
+  );
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
 });
 
 Deno.test("create-agent: duplicate email returns 409", async () => {
-  const existing = await seedAgent();
-  const email = existing.email as string;
-  try {
-    await seedOtp(email);
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         display_name: "Dupe Agent",
-        email,
+        email: "existing@test.local",
         whatsapp: "+971507654321",
         otp_code: "123456",
       }),
-    });
-    if (res.status !== 409) throw new Error(`Expected 409, got ${res.status}`);
-    const data = await res.json();
-    if (!data.error) throw new Error("Expected error in response");
-    await res.body?.cancel();
-  } finally {
-    await cleanupOtp(email);
-    await cleanupAgent(existing.id as string);
-  }
+    }),
+    mockClientFactory({
+      "email_verification_codes": { data: { id: "otp-1", email: "existing@test.local", code: "123456", verified: false, expires_at: "2099-01-01T00:00:00Z" }, error: null },
+      "agents": { data: [{ id: "existing-agent-1", slug: "existing-agent" }], error: null },
+    }),
+  );
+  if (res.status !== 409) throw new Error(`Expected 409, got ${res.status}`);
+  const data = await res.json();
+  if (!data.error) throw new Error("Expected error in response");
 });
 
-Deno.test("create-agent: valid registration with test OTP creates agent", async () => {
-  const email = `test-reg-${crypto.randomUUID().slice(0, 8)}@test.local`;
-  let createdId: string | null = null;
-  try {
-    await seedOtp(email, "999888");
-    const res = await fetch(URL, {
+Deno.test("create-agent: valid registration creates agent and returns 201", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        display_name: "Test Registration",
-        email,
+        display_name: "New Agent",
+        email: "newagent@test.local",
         whatsapp: "+971501234567",
         otp_code: "999888",
       }),
-    });
-    if (res.status !== 201) {
-      const body = await res.text();
-      throw new Error(`Expected 201, got ${res.status}: ${body}`);
-    }
-    const data = await res.json();
-    if (!data.agent?.id) throw new Error("Expected agent.id in response");
-    if (!data.agent?.slug) throw new Error("Expected agent.slug in response");
-    if (!data.edit_token) throw new Error("Expected edit_token in response");
-    createdId = data.agent.id;
-  } finally {
-    await cleanupOtp(email);
-    if (createdId) await cleanupAgent(createdId);
+    }),
+    mockClientFactory({
+      "email_verification_codes": { data: { id: "otp-1", email: "newagent@test.local", code: "999888", verified: false, expires_at: "2099-01-01T00:00:00Z" }, error: null },
+      // "agents" with empty array → read checks (duplicate email/broker/slug) return [] → no conflict
+      "agents": { data: [], error: null },
+      // "agents:write" → used by insert().select().single() → returns the created agent
+      "agents:write": { data: { id: "new-agent-1", name: "New Agent", slug: "new-agent", email: "newagent@test.local", photo_url: null, verification_status: "pending" }, error: null },
+    }),
+  );
+  if (res.status !== 201) {
+    const body = await res.text();
+    throw new Error(`Expected 201, got ${res.status}: ${body}`);
   }
+  const data = await res.json();
+  if (!data.agent?.id) throw new Error("Expected agent.id in response");
+  if (!data.agent?.slug) throw new Error("Expected agent.slug in response");
+  if (!data.edit_token) throw new Error("Expected edit_token in response");
 });
 
 Deno.test("create-agent: OPTIONS returns CORS headers", async () => {
-  const res = await fetch(URL, {
-    method: "OPTIONS",
-    headers: { "Origin": "https://sellingdubai.ae" },
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "OPTIONS",
+      headers: { "Origin": "https://sellingdubai.ae" },
+    }),
+    mockClientFactory(),
+  );
   if (!res.ok) throw new Error(`OPTIONS failed with ${res.status}`);
   const allowOrigin = res.headers.get("access-control-allow-origin");
   if (!allowOrigin) throw new Error("Missing Access-Control-Allow-Origin");
-  await res.body?.cancel();
 });

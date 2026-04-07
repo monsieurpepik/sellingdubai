@@ -49,7 +49,13 @@ const ALLOWED_FIELDS = new Set([
   "show_golden_visa",
 ]);
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('update-agent', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -74,7 +80,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
@@ -261,4 +267,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

@@ -1,38 +1,41 @@
-import { fnUrl } from "../_shared/test-helpers.ts";
+import { assertEquals } from "jsr:@std/assert@1";
+import { mockClientFactory } from "../_shared/test-mock.ts";
+import { handler } from "./index.ts";
 
-const URL = fnUrl("weekly-stats");
+function makeReq(secret?: string, method = "GET"): Request {
+  const headers: Record<string, string> = {};
+  if (secret) headers["Authorization"] = `Bearer ${secret}`;
+  return new Request("http://localhost/weekly-stats", { method, headers });
+}
 
-Deno.test("weekly-stats: missing secret returns 401", async () => {
-  const res = await fetch(URL, { method: "POST" });
-  if (res.status !== 401) throw new Error(`Expected 401 for missing secret, got ${res.status}`);
-  await res.body?.cancel();
+Deno.test("weekly-stats: missing CRON_SECRET env returns 401", async () => {
+  // CRON_SECRET not set in test env → handler returns 401
+  const res = await handler(makeReq(), mockClientFactory());
+  assertEquals(res.status, 401);
 });
 
 Deno.test("weekly-stats: wrong secret returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "x-cron-secret": "wrong-secret-value" },
-  });
-  if (res.status !== 401) throw new Error(`Expected 401 for wrong secret, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq("wrong-secret"), mockClientFactory());
+  // Either 401 (no CRON_SECRET env) or 401 (wrong secret)
+  assertEquals(res.status, 401);
 });
 
-Deno.test("weekly-stats: wrong Bearer secret returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Authorization": `Bearer wrong-secret-${crypto.randomUUID()}` },
-  });
-  if (res.status !== 401) throw new Error(`Expected 401 for wrong Bearer, got ${res.status}`);
-  await res.body?.cancel();
+Deno.test("weekly-stats: OPTIONS returns 200", async () => {
+  const req = new Request("http://localhost/weekly-stats", { method: "OPTIONS" });
+  const res = await handler(req, mockClientFactory());
+  assertEquals(res.status, 200);
 });
 
-Deno.test("weekly-stats: OPTIONS returns CORS headers", async () => {
-  const res = await fetch(URL, {
-    method: "OPTIONS",
-    headers: { "Origin": "https://sellingdubai.ae" },
-  });
-  if (res.status !== 204 && res.status !== 200) {
-    throw new Error(`Expected 204/200 for OPTIONS, got ${res.status}`);
-  }
-  await res.body?.cancel();
+// Skipped: requires live Resend API and valid CRON_SECRET env var
+Deno.test.ignore("weekly-stats: valid secret with no active agents returns sent=0", async () => {
+  const secret = Deno.env.get("CRON_SECRET") || "test-secret";
+  const res = await handler(
+    makeReq(secret),
+    mockClientFactory({
+      "agents": { data: [], error: null },
+    }),
+  );
+  assertEquals(res.status, 200);
+  const data = await res.json();
+  assertEquals(data.sent, 0);
 });

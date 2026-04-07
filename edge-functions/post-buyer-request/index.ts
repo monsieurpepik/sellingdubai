@@ -59,6 +59,7 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 function scoreMatch(
+  // deno-lint-ignore no-explicit-any
   property: any,
   request: {
     property_type?: string;
@@ -110,7 +111,13 @@ function scoreMatch(
   return Math.round((score / factors) * 100);
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('post-buyer-request', req);
   const _start = Date.now();
   const origin = req.headers.get("origin");
@@ -131,7 +138,7 @@ Deno.serve(async (req: Request) => {
       });
     }
     const token = authHeader.slice(7);
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = _createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     const { data: link } = await supabase
       .from("magic_links")
@@ -257,10 +264,14 @@ Deno.serve(async (req: Request) => {
       preferred_areas: preferredAreas.length > 0 ? preferredAreas : undefined,
     };
 
-    const matches = (allProperties || [])
-      .map((p) => ({ ...p, match_score: scoreMatch(p, matchCriteria) }))
-      .filter((p) => p.match_score >= 50)
-      .sort((a, b) => b.match_score - a.match_score)
+    // deno-lint-ignore no-explicit-any
+    const matches = (allProperties || [] as any[])
+      // deno-lint-ignore no-explicit-any
+      .map((p: any) => ({ ...p, match_score: scoreMatch(p, matchCriteria) }))
+      // deno-lint-ignore no-explicit-any
+      .filter((p: any) => p.match_score >= 50)
+      // deno-lint-ignore no-explicit-any
+      .sort((a: any, b: any) => b.match_score - a.match_score)
       .slice(0, 20);
 
     // Group by listing agent
@@ -271,7 +282,8 @@ Deno.serve(async (req: Request) => {
     }
 
     // Insert match records — NO buyer details included
-    const matchRecords = matches.map((m) => ({
+    // deno-lint-ignore no-explicit-any
+    const matchRecords = matches.map((m: any) => ({
       buyer_request_id: request.id,
       property_id: m.id,
       buying_agent_id: agent.id,
@@ -309,7 +321,8 @@ Deno.serve(async (req: Request) => {
         const safeAgency = agent.agency_name ? ` from ${escHtml(agent.agency_name)}` : "";
         const verifiedTag = agent.dld_verified ? " (DLD Verified)" : "";
 
-        const propListHtml = props.map((p) =>
+        // deno-lint-ignore no-explicit-any
+        const propListHtml = props.map((p: any) =>
           `<tr>
             <td style="padding:8px;border-bottom:1px solid #eee;"><strong>${escHtml(p.title || "Untitled")}</strong><br><span style="color:#666;">${escHtml(p.location || "")}</span></td>
             <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;"><span style="background:#e0f2e9;color:#065f46;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;">${p.match_score}%</span></td>
@@ -357,7 +370,8 @@ Deno.serve(async (req: Request) => {
       request_id: request.id,
       matches_found: matches.length,
       agents_notified: listingAgentIds.length,
-      top_matches: matches.slice(0, 5).map((m) => ({
+      // deno-lint-ignore no-explicit-any
+      top_matches: matches.slice(0, 5).map((m: any) => ({
         property_id: m.id,
         title: m.title,
         location: m.location,
@@ -376,4 +390,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

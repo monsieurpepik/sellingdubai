@@ -11,6 +11,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
 
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
 // Escape HTML for email templates (defense in depth)
 function escHtml(s: string): string {
   if (!s) return '';
@@ -44,7 +47,10 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('send-magic-link', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
@@ -64,7 +70,7 @@ Deno.serve(async (req: Request) => {
     const cleanEmail = email.trim().toLowerCase();
 
     // Init Supabase with service_role to bypass RLS
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
@@ -236,4 +242,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

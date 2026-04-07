@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { createLogger } from '../_shared/logger.ts';
+import { createLogger } from "../_shared/logger.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -31,8 +31,14 @@ function hashIP(ip: string): string {
   return hash.toString(36);
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('log-event', req);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("log-event", req);
   const _start = Date.now();
   const CORS = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -50,24 +56,24 @@ Deno.serve(async (req: Request) => {
     }
 
     const validTypes = [
-      'view',
-      'whatsapp_tap',
-      'lead_submit',
-      'link_click',
-      'phone_tap',
-      'share',
-      'mortgage_calc_open',
-      'mortgage_eligibility_check',
-      'mortgage_application_submitted',
-      'mortgage_doc_uploaded',
+      "view",
+      "whatsapp_tap",
+      "lead_submit",
+      "link_click",
+      "phone_tap",
+      "share",
+      "mortgage_calc_open",
+      "mortgage_eligibility_check",
+      "mortgage_application_submitted",
+      "mortgage_doc_uploaded",
     ];
     if (!validTypes.includes(event_type)) {
       return new Response(JSON.stringify({ error: "Invalid event_type" }), { status: 400, headers: CORS });
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
     // Verify agent_id belongs to a real verified agent — prevents fake analytics injection
@@ -82,7 +88,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-                     req.headers.get("x-real-ip") || "unknown";
+      req.headers.get("x-real-ip") || "unknown";
     const ipHash = hashIP(clientIP);
     const userAgent = req.headers.get("user-agent") || "";
 
@@ -99,7 +105,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Dedup: skip if same agent+event+ip in last 30 seconds
-    if (event_type === 'view') {
+    if (event_type === "view") {
       const thirtySecAgo = new Date(Date.now() - 30 * 1000).toISOString();
       const { count } = await supabase
         .from("page_events")
@@ -128,13 +134,15 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Failed to log event" }), { status: 500, headers: CORS });
     }
 
-    log({ event: 'success', status: 200, agent_id: agent_id });
+    log({ event: "success", status: 200, agent_id: agent_id });
     return new Response(JSON.stringify({ success: true }), { headers: CORS });
   } catch (e) {
-    log({ event: 'error', status: 500, error: String(e) });
+    log({ event: "error", status: 500, error: String(e) });
     console.error("log-event error");
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: CORS });
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

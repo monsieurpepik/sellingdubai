@@ -1,70 +1,68 @@
-import {
-  cleanupAgent,
-  fnUrl,
-  seedAgent,
-  seedUsedMagicLink,
-} from "../_shared/test-helpers.ts";
+import { assertEquals } from "jsr:@std/assert@1";
+import { mockClientFactory } from "../_shared/test-mock.ts";
+import { handler } from "./index.ts";
 
-const URL = fnUrl("agency-stats");
+function makeReq(body: unknown, method = "POST"): Request {
+  return new Request("http://localhost/agency-stats", {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
 
 Deno.test("agency-stats: missing token returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
-  if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq({}), mockClientFactory());
+  assertEquals(res.status, 401);
 });
 
-Deno.test("agency-stats: invalid token returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: crypto.randomUUID() }),
-  });
-  if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
+Deno.test("agency-stats: invalid token (not found) returns 401", async () => {
+  // Default mock returns NOT_FOUND for single() — so magic_links lookup fails
+  const res = await handler(makeReq({ token: "bad-token" }), mockClientFactory());
+  assertEquals(res.status, 401);
 });
 
-Deno.test("agency-stats: unused magic link returns 401", async () => {
-  const agent = await seedAgent();
-  try {
-    const { createClient } = await import("jsr:@supabase/supabase-js@2");
-    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const token = crypto.randomUUID();
-    await sb.from("magic_links").insert({
-      agent_id: agent.id,
-      token,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      used_at: null,
-    });
-    const res = await fetch(URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-    if (res.status !== 401) throw new Error(`Expected 401 for unused link, got ${res.status}`);
-    await res.body?.cancel();
-    await sb.from("magic_links").delete().eq("token", token);
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+Deno.test("agency-stats: unused magic link (no used_at) returns 401", async () => {
+  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const res = await handler(
+    makeReq({ token: "valid-token" }),
+    mockClientFactory({
+      "magic_links": { data: { agent_id: "agent-1", expires_at: futureDate, used_at: null }, error: null },
+    }),
+  );
+  assertEquals(res.status, 401);
 });
 
 Deno.test("agency-stats: agent without agency returns 403", async () => {
-  // Seeded agents are not agency owners — expects "No agency found" → 403
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: link.token }),
-    });
-    if (res.status !== 403) throw new Error(`Expected 403 for agent without agency, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  // agencies maybeSingle returns null (no agency found)
+  const res = await handler(
+    makeReq({ token: "valid-token" }),
+    mockClientFactory({
+      "magic_links": { data: { agent_id: "agent-1", expires_at: futureDate, used_at: new Date().toISOString() }, error: null },
+      // agencies not set → maybeSingle returns { data: null, error: null } → 403
+    }),
+  );
+  assertEquals(res.status, 403);
+});
+
+Deno.test("agency-stats: valid session with agency but no members returns 200", async () => {
+  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const res = await handler(
+    makeReq({ token: "valid-token" }),
+    mockClientFactory({
+      "magic_links": { data: { agent_id: "agent-1", expires_at: futureDate, used_at: new Date().toISOString() }, error: null },
+      "agencies": { data: { id: "agency-1", name: "Test Agency", slug: "test-agency", logo_url: null }, error: null },
+      // agents array → empty by default → returns { agency, agents: [], totals: ... }
+    }),
+  );
+  assertEquals(res.status, 200);
+  const data = await res.json();
+  assertEquals(data.agency.id, "agency-1");
+  assertEquals(data.agents, []);
+});
+
+Deno.test("agency-stats: OPTIONS returns 200", async () => {
+  const req = new Request("http://localhost/agency-stats", { method: "OPTIONS" });
+  const res = await handler(req, mockClientFactory());
+  assertEquals(res.status, 200);
 });

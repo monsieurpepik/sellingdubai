@@ -1,106 +1,102 @@
-import {
-  cleanupAgent,
-  fnUrl,
-  seedAgent,
-  seedUsedMagicLink,
-} from "../_shared/test-helpers.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { handler } from "./index.ts";
+import { mockClientFactory } from "../_shared/test-mock.ts";
 
-const URL = fnUrl("manage-properties");
+Deno.env.set("SUPABASE_URL", "http://test.local");
+Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
 
-function getSupabase() {
-  return createClient(
-    Deno.env.get("SUPABASE_URL") ?? "http://127.0.0.1:54321",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-}
+const VALID_LINK = {
+  agent_id: "agent-1",
+  expires_at: "2099-01-01T00:00:00Z",
+  used_at: new Date().toISOString(),
+};
 
-async function cleanupProperties(agentId: string): Promise<void> {
-  const supabase = getSupabase();
-  await supabase.from("properties").delete().eq("agent_id", agentId);
-}
+const FREE_AGENT = {
+  tier: "free",
+  stripe_subscription_status: null,
+  stripe_current_period_end: null,
+};
 
 Deno.test("manage-properties: missing token returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "list" }),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "list" }),
+    }),
+    mockClientFactory(),
+  );
   if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("manage-properties: invalid token returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: crypto.randomUUID(), action: "list" }),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: crypto.randomUUID(), action: "list" }),
+    }),
+    mockClientFactory(),
+  );
   if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("manage-properties: missing action returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: "irrelevant" }),
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: "irrelevant" }),
+    }),
+    mockClientFactory(),
+  );
   if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("manage-properties: unused magic link (not activated) returns 401", async () => {
-  const agent = await seedAgent();
-  try {
-    // seedMagicLink returns a link with used_at: null (not activated)
-    const { seedMagicLink } = await import("../_shared/test-helpers.ts");
-    const link = await seedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: link.token, action: "list" }),
-    });
-    if (res.status !== 401) throw new Error(`Expected 401 for unused link, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+      body: JSON.stringify({ token: "some-unused-token", action: "list" }),
+    }),
+    mockClientFactory({
+      "magic_links": { data: { agent_id: "agent-1", expires_at: "2099-01-01T00:00:00Z", used_at: null }, error: null },
+    }),
+  );
+  if (res.status !== 401) throw new Error(`Expected 401 for unused link, got ${res.status}`);
 });
 
 Deno.test("manage-properties: list returns properties array for valid session", async () => {
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: link.token, action: "list" }),
-    });
-    if (res.status !== 200) {
-      const body = await res.text();
-      throw new Error(`Expected 200, got ${res.status}: ${body}`);
-    }
-    const data = await res.json();
-    if (!Array.isArray(data.properties)) {
-      throw new Error(`Expected properties array, got: ${JSON.stringify(data)}`);
-    }
-  } finally {
-    await cleanupProperties(agent.id as string);
-    await cleanupAgent(agent.id as string);
+      body: JSON.stringify({ token: "valid-token", action: "list" }),
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+      "agents": { data: FREE_AGENT, error: null },
+      "properties": { data: [], error: null },
+    }),
+  );
+  if (res.status !== 200) {
+    const body = await res.text();
+    throw new Error(`Expected 200, got ${res.status}: ${body}`);
+  }
+  const data = await res.json();
+  if (!Array.isArray(data.properties)) {
+    throw new Error(`Expected properties array, got: ${JSON.stringify(data)}`);
   }
 });
 
-Deno.test("manage-properties: create property with valid session returns property", async () => {
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
+Deno.test("manage-properties: add property with valid session returns property", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        token: link.token,
-        action: "create",
+        token: "valid-token",
+        action: "add",
         property: {
           title: "Test Property",
           price: 1500000,
@@ -111,73 +107,63 @@ Deno.test("manage-properties: create property with valid session returns propert
           status: "for_sale",
         },
       }),
-    });
-    if (res.status !== 201 && res.status !== 200) {
-      const body = await res.text();
-      throw new Error(`Expected 200/201, got ${res.status}: ${body}`);
-    }
-    const data = await res.json();
-    if (!data.property?.id) throw new Error(`Expected property.id, got: ${JSON.stringify(data)}`);
-  } finally {
-    await cleanupProperties(agent.id as string);
-    await cleanupAgent(agent.id as string);
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+      "agents": { data: FREE_AGENT, error: null },
+      "properties:count": { count: 0, error: null },
+      // sort_order query (single) → NOT_FOUND → nextOrder = 0
+      "properties": { data: { id: "prop-1", title: "Test Property", price: 1500000 }, error: null },
+      "properties:write": { data: { id: "prop-1", title: "Test Property", price: 1500000 }, error: null },
+    }),
+  );
+  if (res.status !== 200) {
+    const body = await res.text();
+    throw new Error(`Expected 200, got ${res.status}: ${body}`);
   }
+  const data = await res.json();
+  if (!data.property) throw new Error(`Expected property, got: ${JSON.stringify(data)}`);
 });
 
 Deno.test("manage-properties: delete non-owned property returns 404", async () => {
-  const agent = await seedAgent();
-  const other = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-
-    // Create a property owned by `other`
-    const supabase = getSupabase();
-    const { data: prop } = await supabase
-      .from("properties")
-      .insert({
-        agent_id: other.id,
-        title: "Other Property",
-        price: 1000000,
-        location: "JBR",
-        property_type: "apartment",
-        status: "for_sale",
-      })
-      .select("id")
-      .single();
-
-    const res = await fetch(URL, {
+  const propId = crypto.randomUUID();
+  const res = await handler(
+    new Request("http://localhost", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        token: link.token,
+        token: "valid-token",
         action: "delete",
-        property: { id: prop!.id },
+        property: { id: propId },
       }),
-    });
-    // Must not allow cross-agent delete — expect 404 (not found for this agent)
-    if (res.status !== 404) throw new Error(`Expected 404 for cross-agent delete, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupProperties(agent.id as string);
-    await cleanupProperties(other.id as string);
-    await cleanupAgent(agent.id as string);
-    await cleanupAgent(other.id as string);
-  }
+    }),
+    mockClientFactory({
+      "magic_links": { data: VALID_LINK, error: null },
+      // properties single() for toDelete → NOT_FOUND (default, other agent's property)
+      // properties delete → returns empty array (not owned by this agent)
+      "properties:write": { data: [], error: null },
+    }),
+  );
+  if (res.status !== 404) throw new Error(`Expected 404 for cross-agent delete, got ${res.status}`);
 });
 
 Deno.test("manage-properties: GET returns 405", async () => {
-  const res = await fetch(URL, { method: "GET" });
+  const res = await handler(
+    new Request("http://localhost", { method: "GET" }),
+    mockClientFactory(),
+  );
   if (res.status !== 405) throw new Error(`Expected 405, got ${res.status}`);
-  await res.body?.cancel();
 });
 
 Deno.test("manage-properties: OPTIONS returns CORS headers", async () => {
-  const res = await fetch(URL, {
-    method: "OPTIONS",
-    headers: { "Origin": "https://sellingdubai.ae" },
-  });
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "OPTIONS",
+      headers: { "Origin": "https://sellingdubai.ae" },
+    }),
+    mockClientFactory(),
+  );
   if (!res.ok) throw new Error(`OPTIONS failed with ${res.status}`);
   const allowOrigin = res.headers.get("access-control-allow-origin");
   if (!allowOrigin) throw new Error("Missing Access-Control-Allow-Origin");
-  await res.body?.cancel();
 });

@@ -1,45 +1,53 @@
-import {
-  cleanupAgent,
-  fnUrl,
-  seedAgent,
-  seedUsedMagicLink,
-} from "../_shared/test-helpers.ts";
+import { assertEquals, assertStringIncludes } from "jsr:@std/assert@1";
+import { mockClientFactory } from "../_shared/test-mock.ts";
+import { handler } from "./index.ts";
 
-const URL = fnUrl("export-leads");
+function makeReq(token?: string, method = "GET"): Request {
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return new Request("http://localhost/export-leads", { method, headers });
+}
 
 Deno.test("export-leads: missing Authorization header returns 401", async () => {
-  const res = await fetch(URL, { method: "GET" });
-  if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq(), mockClientFactory());
+  assertEquals(res.status, 401);
 });
 
 Deno.test("export-leads: invalid Bearer token returns 401", async () => {
-  const res = await fetch(URL, {
-    method: "GET",
-    headers: { "Authorization": `Bearer ${crypto.randomUUID()}` },
-  });
-  if (res.status !== 401) throw new Error(`Expected 401, got ${res.status}`);
-  await res.body?.cancel();
+  // Default mock returns NOT_FOUND for single() on magic_links
+  const res = await handler(makeReq("bad-token"), mockClientFactory());
+  assertEquals(res.status, 401);
 });
 
-Deno.test("export-leads: valid token returns CSV content", async () => {
-  const agent = await seedAgent();
-  try {
-    const link = await seedUsedMagicLink(agent.id as string);
-    const res = await fetch(URL, {
-      method: "GET",
-      headers: { "Authorization": `Bearer ${link.token}` },
-    });
-    if (res.status !== 200) {
-      const body = await res.text();
-      throw new Error(`Expected 200, got ${res.status}: ${body}`);
-    }
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("text/csv") && !contentType.includes("application/octet-stream")) {
-      throw new Error(`Expected CSV content-type, got: ${contentType}`);
-    }
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+Deno.test("export-leads: unused magic link returns 401", async () => {
+  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const res = await handler(
+    makeReq("valid-token"),
+    mockClientFactory({
+      "magic_links": { data: { agent_id: "agent-1", expires_at: futureDate, used_at: null }, error: null },
+    }),
+  );
+  assertEquals(res.status, 401);
+});
+
+Deno.test("export-leads: valid token with no leads returns CSV with header only", async () => {
+  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const res = await handler(
+    makeReq("valid-token"),
+    mockClientFactory({
+      "magic_links": { data: { agent_id: "agent-1", expires_at: futureDate, used_at: new Date().toISOString() }, error: null },
+      "leads": { data: [], error: null },
+    }),
+  );
+  assertEquals(res.status, 200);
+  const contentType = res.headers.get("content-type") || "";
+  assertStringIncludes(contentType, "text/csv");
+  const body = await res.text();
+  assertStringIncludes(body, "Name");
+});
+
+Deno.test("export-leads: OPTIONS returns 200", async () => {
+  const req = new Request("http://localhost/export-leads", { method: "OPTIONS" });
+  const res = await handler(req, mockClientFactory());
+  assertEquals(res.status, 200);
 });

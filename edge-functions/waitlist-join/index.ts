@@ -25,7 +25,13 @@ function corsHeaders(req: Request): Record<string, string> {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('waitlist-join', req);
   const _start = Date.now();
   const cors = corsHeaders(req);
@@ -60,7 +66,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Invalid email address." }), { status: 400, headers: cors });
   }
 
-  const sb = createClient(
+  const sb = _createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
@@ -112,4 +118,6 @@ Deno.serve(async (req: Request) => {
     JSON.stringify({ success: true, duplicate, count: count ?? null }),
     { headers: cors },
   );
-});
+}
+
+Deno.serve((req) => handler(req));

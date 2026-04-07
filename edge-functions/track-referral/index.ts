@@ -8,8 +8,8 @@ import { createLogger } from "../_shared/logger.ts";
  * Creates a referral record linking the new agent to the referrer.
  */
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
 
 const CORS_ORIGINS = [
   "https://sellingdubai.ae",
@@ -28,8 +28,11 @@ function getCorsHeaders(origin: string | null) {
   };
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('track-referral', req);
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("track-referral", req);
   const _start = Date.now();
   const origin = req.headers.get("origin");
   const cors = getCorsHeaders(origin);
@@ -50,13 +53,16 @@ Deno.serve(async (req: Request) => {
     const referredAgentId = (body.agent_id || "").trim();
 
     if (!referralCode || !referredAgentId) {
-      log({ event: 'bad_request', status: 400 });
+      log({ event: "bad_request", status: 400 });
       return new Response(JSON.stringify({ error: "Missing referral_code or agent_id" }), {
         status: 400, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = _createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
     // Find the referrer by their referral_code
     const { data: referrer } = await supabase
@@ -102,19 +108,19 @@ Deno.serve(async (req: Request) => {
     });
 
     if (insertErr) {
-      log({ event: 'error', status: 500, agent_id: referredAgentId, error: String(insertErr) });
+      log({ event: "error", status: 500, agent_id: referredAgentId, error: String(insertErr) });
       console.error("Referral insert error");
       // Still return success to not break signup flow
     } else {
       console.log(`Referral tracked: ${referrer.slug} → ${referredAgentId}`);
     }
 
-    log({ event: 'success', status: 200, agent_id: referredAgentId });
+    log({ event: "success", status: 200, agent_id: referredAgentId });
     return new Response(JSON.stringify({ ok: true, referrer_name: referrer.name }), {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    log({ event: 'error', status: 500, error: String(err) });
+    log({ event: "error", status: 500, error: String(err) });
     console.error("track-referral error");
     return new Response(JSON.stringify({ ok: true }), {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
@@ -122,4 +128,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

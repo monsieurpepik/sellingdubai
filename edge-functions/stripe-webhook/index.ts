@@ -8,6 +8,9 @@ import { createLogger } from "../_shared/logger.ts";
 //   SUPABASE_URL
 //   SUPABASE_SERVICE_ROLE_KEY
 
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
 // Maps Stripe price IDs to internal plan names
 // Env vars: STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_PRO_YEARLY, etc.
 function buildPriceToTierMap(): Record<string, { tier: string; plan: string }> {
@@ -22,7 +25,7 @@ function buildPriceToTierMap(): Record<string, { tier: string; plan: string }> {
 }
 
 // HMAC-SHA256 webhook signature verification (Stripe's v1 scheme)
-async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
+export async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
   const parts = sigHeader.split(",");
   const tPart = parts.find((p) => p.startsWith("t="));
   const v1Part = parts.find((p) => p.startsWith("v1="));
@@ -55,7 +58,8 @@ async function verifyStripeSignature(payload: string, sigHeader: string, secret:
 
 // Resolve agent_id from subscription metadata or customer lookup
 async function resolveAgentId(
-  supabase: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
   metadata: Record<string, string>,
   customerId: string,
 ): Promise<string | null> {
@@ -87,7 +91,10 @@ function resolvePlan(
   return null;
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('stripe-webhook', req);
   const _start = Date.now();
 
@@ -122,7 +129,7 @@ Deno.serve(async (req: Request) => {
     return new Response("Invalid JSON.", { status: 400 });
   }
 
-  const supabase = createClient(
+  const supabase = _createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
@@ -319,4 +326,6 @@ Deno.serve(async (req: Request) => {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
-});
+}
+
+Deno.serve((req) => handler(req));

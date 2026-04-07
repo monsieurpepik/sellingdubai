@@ -3,7 +3,13 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { getCorsHeaders, isValidImageBytes } from "../_shared/utils.ts";
 import { createLogger } from '../_shared/logger.ts';
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('upload-image', req);
   const _start = Date.now();
   const cors = { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
@@ -22,7 +28,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
@@ -143,4 +149,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

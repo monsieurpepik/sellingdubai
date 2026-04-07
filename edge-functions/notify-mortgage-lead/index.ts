@@ -187,13 +187,20 @@ function buildOpsEmailHtml(
 </div></body></html>`;
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('notify-mortgage-lead', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
 
-  if (!PLATFORM_OPS_EMAIL) {
+  const platformOpsEmail = Deno.env.get('PLATFORM_OPS_EMAIL');
+  if (!platformOpsEmail) {
     console.error('[notify-mortgage-lead] PLATFORM_OPS_EMAIL is not configured');
     return new Response(JSON.stringify({ error: 'Server misconfiguration' }), { status: 500, headers: cors });
   }
@@ -214,7 +221,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'application_id required' }), { status: 400, headers: cors });
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
@@ -306,7 +313,7 @@ Deno.serve(async (req: Request) => {
           signal: controller.signal,
           body: JSON.stringify({
             from: RESEND_FROM,
-            to: [PLATFORM_OPS_EMAIL],
+            to: [platformOpsEmail],
             subject: `[ASSIGN BROKER] ${app.buyer_name} — ${app.max_loan_amount ? fmtAed(app.max_loan_amount) : 'Pre-Qual'} via ${agent.name}`,
             html: opsHtml,
           }),
@@ -354,4 +361,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

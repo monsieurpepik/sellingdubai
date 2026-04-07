@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { createLogger } from '../_shared/logger.ts';
+import { createLogger } from "../_shared/logger.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -20,8 +20,14 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('get-analytics', req);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("get-analytics", req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -34,9 +40,9 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Token required" }), { status: 401, headers: cors });
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
     const now = new Date().toISOString();
@@ -94,7 +100,7 @@ Deno.serve(async (req: Request) => {
 
     const referralStats = {
       invited: referralData ? referralData.length : 0,
-      verified: referralData ? referralData.filter((r: { status: string }) => r.status === 'verified' || r.status === 'rewarded').length : 0,
+      verified: referralData ? referralData.filter((r: { status: string }) => r.status === "verified" || r.status === "rewarded").length : 0,
     };
 
     const thisMonth: Record<string, number> = {};
@@ -103,7 +109,7 @@ Deno.serve(async (req: Request) => {
 
     for (const e of (thisMonthEvents || [])) {
       thisMonth[e.event_type] = (thisMonth[e.event_type] || 0) + 1;
-      if (e.event_type === 'view') {
+      if (e.event_type === "view") {
         const day = e.created_at.slice(0, 10);
         dailyViews[day] = (dailyViews[day] || 0) + 1;
       }
@@ -130,23 +136,23 @@ Deno.serve(async (req: Request) => {
       .slice(0, 5)
       .map(([source, count]) => ({ source, count }));
 
-    log({ event: 'success', status: 200, agent_id: agentId });
+    log({ event: "success", status: 200, agent_id: agentId });
     return new Response(JSON.stringify({
       this_month: {
-        views: thisMonth['view'] || 0,
-        whatsapp_taps: thisMonth['whatsapp_tap'] || 0,
-        lead_submits: thisMonth['lead_submit'] || 0,
-        link_clicks: thisMonth['link_click'] || 0,
-        phone_taps: thisMonth['phone_tap'] || 0,
-        shares: thisMonth['share'] || 0,
+        views: thisMonth["view"] || 0,
+        whatsapp_taps: thisMonth["whatsapp_tap"] || 0,
+        lead_submits: thisMonth["lead_submit"] || 0,
+        link_clicks: thisMonth["link_click"] || 0,
+        phone_taps: thisMonth["phone_tap"] || 0,
+        shares: thisMonth["share"] || 0,
       },
       last_month: {
-        views: lastMonth['view'] || 0,
-        whatsapp_taps: lastMonth['whatsapp_tap'] || 0,
-        lead_submits: lastMonth['lead_submit'] || 0,
-        link_clicks: lastMonth['link_click'] || 0,
-        phone_taps: lastMonth['phone_tap'] || 0,
-        shares: lastMonth['share'] || 0,
+        views: lastMonth["view"] || 0,
+        whatsapp_taps: lastMonth["whatsapp_tap"] || 0,
+        lead_submits: lastMonth["lead_submit"] || 0,
+        link_clicks: lastMonth["link_click"] || 0,
+        phone_taps: lastMonth["phone_tap"] || 0,
+        shares: lastMonth["share"] || 0,
       },
       chart: chartData,
       top_referrers: topReferrers,
@@ -154,10 +160,12 @@ Deno.serve(async (req: Request) => {
       referral_stats: referralStats,
     }), { headers: cors });
   } catch (e) {
-    log({ event: 'error', status: 500, error: String(e) });
+    log({ event: "error", status: 500, error: String(e) });
     console.error("get-analytics error");
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: getCorsHeaders(req) });
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

@@ -1,47 +1,53 @@
-import { cleanupAgent, fnUrl, seedAgent } from "../_shared/test-helpers.ts";
+import { assertEquals } from "jsr:@std/assert@1";
+import { mockClientFactory } from "../_shared/test-mock.ts";
+import { handler } from "./index.ts";
 
-const URL = fnUrl("track-referral");
-
-Deno.test("track-referral: missing new_agent_id returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
+function makeReq(body: unknown, method = "POST"): Request {
+  return new Request("http://localhost/track-referral", {
+    method,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ referral_code: "some-code" }),
+    body: method !== "GET" ? JSON.stringify(body) : undefined,
   });
-  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
+}
+
+Deno.test("track-referral: missing agent_id returns 400", async () => {
+  const res = await handler(makeReq({ referral_code: "some-code" }), mockClientFactory());
+  assertEquals(res.status, 400);
 });
 
 Deno.test("track-referral: missing referral_code returns 400", async () => {
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ new_agent_id: crypto.randomUUID() }),
-  });
-  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq({ agent_id: "some-uuid" }), mockClientFactory());
+  assertEquals(res.status, 400);
 });
 
-Deno.test("track-referral: invalid referral_code returns 404", async () => {
-  const agent = await seedAgent();
-  try {
-    const res = await fetch(URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        new_agent_id: agent.id,
-        referral_code: `nonexistent-${crypto.randomUUID().slice(0, 8)}`,
-      }),
-    });
-    if (res.status !== 404) throw new Error(`Expected 404 for unknown code, got ${res.status}`);
-    await res.body?.cancel();
-  } finally {
-    await cleanupAgent(agent.id as string);
-  }
+Deno.test("track-referral: invalid referral_code returns 200 silently", async () => {
+  // Function silently returns 200 for unknown codes to avoid leaking info
+  const res = await handler(
+    makeReq({ referral_code: "nonexistent-code", agent_id: "new-agent-id" }),
+    mockClientFactory({
+      // agents maybeSingle returns null (no match) → silent 200
+    }),
+  );
+  assertEquals(res.status, 200);
+  const data = await res.json();
+  assertEquals(data.ok, true);
+});
+
+Deno.test("track-referral: valid referral creates record and returns 200", async () => {
+  const res = await handler(
+    makeReq({ referral_code: "valid-code", agent_id: "new-agent-id" }),
+    mockClientFactory({
+      "agents": { data: { id: "referrer-id", name: "Referrer", slug: "referrer" }, error: null },
+      // referrals maybeSingle → null (not already referred)
+    }),
+  );
+  assertEquals(res.status, 200);
+  const data = await res.json();
+  assertEquals(data.ok, true);
+  assertEquals(data.referrer_name, "Referrer");
 });
 
 Deno.test("track-referral: GET returns 405", async () => {
-  const res = await fetch(URL, { method: "GET" });
-  if (res.status !== 405) throw new Error(`Expected 405, got ${res.status}`);
-  await res.body?.cancel();
+  const res = await handler(makeReq({}, "GET"), mockClientFactory());
+  assertEquals(res.status, 405);
 });

@@ -7,7 +7,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createLogger } from '../_shared/logger.ts';
+import { createLogger } from "../_shared/logger.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -28,39 +28,44 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 function escCsv(val: string | null | undefined): string {
-  if (!val) return '';
+  if (!val) return "";
   const s = String(val);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return '"' + s.replace(/"/g, '""') + '"';
   }
   return s;
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('export-leads', req);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("export-leads", req);
   const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
-    const url = new URL(req.url);
     const authHeader = req.headers.get("authorization") || "";
     if (!authHeader.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Authorization header required." }), {
-        status: 401, headers: { ...cors, "Content-Type": "application/json" }
+        status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
     const token = authHeader.slice(7).trim();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token required." }), {
-        status: 401, headers: { ...cors, "Content-Type": "application/json" }
+        status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
     // Verify token — must be valid and not expired
@@ -75,13 +80,13 @@ Deno.serve(async (req: Request) => {
     if (linkErr || !link) {
       console.error("export-leads token verification failed");
       return new Response(JSON.stringify({ error: "Invalid or expired token." }), {
-        status: 401, headers: { ...cors, "Content-Type": "application/json" }
+        status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
     if (!link.used_at) {
       return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), {
-        status: 401, headers: { ...cors, "Content-Type": "application/json" }
+        status: 401, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -96,13 +101,14 @@ Deno.serve(async (req: Request) => {
     if (leadsErr) {
       console.error("export-leads fetch error");
       return new Response(JSON.stringify({ error: "Failed to fetch leads." }), {
-        status: 500, headers: { ...cors, "Content-Type": "application/json" }
+        status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
     // Build CSV
-    const headers = ['Name', 'Phone', 'Email', 'Budget', 'Property Type', 'Area', 'Message', 'Source', 'UTM Source', 'UTM Medium', 'UTM Campaign', 'Device', 'Status', 'Date'];
-    const rows = (leads || []).map(l => [
+    const headers = ["Name", "Phone", "Email", "Budget", "Property Type", "Area", "Message", "Source", "UTM Source", "UTM Medium", "UTM Campaign", "Device", "Status", "Date"];
+    // deno-lint-ignore no-explicit-any
+    const rows = (leads || []).map((l: any) => [
       escCsv(l.name),
       escCsv(l.phone),
       escCsv(l.email),
@@ -117,26 +123,28 @@ Deno.serve(async (req: Request) => {
       escCsv(l.device_type),
       escCsv(l.status),
       escCsv(l.created_at),
-    ].join(','));
+    ].join(","));
 
-    const csv = [headers.join(','), ...rows].join('\n');
+    const csv = [headers.join(","), ...rows].join("\n");
 
-    log({ event: 'success', status: 200, agent_id: link.agent_id });
+    log({ event: "success", status: 200, agent_id: link.agent_id });
     return new Response(csv, {
       status: 200,
       headers: {
         ...cors,
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="sellingdubai-leads-${new Date().toISOString().slice(0, 10)}.csv"`,
-      }
+      },
     });
   } catch (e) {
-    log({ event: 'error', status: 500, error: String(e) });
+    log({ event: "error", status: 500, error: String(e) });
     console.error("export-leads error");
     return new Response(JSON.stringify({ error: "Internal server error." }), {
-      status: 500, headers: { ...cors, "Content-Type": "application/json" }
+      status: 500, headers: { ...cors, "Content-Type": "application/json" },
     });
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

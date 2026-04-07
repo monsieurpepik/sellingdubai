@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { escHtml, getCorsHeaders, sanitize } from "../_shared/utils.ts";
-import { createLogger } from '../_shared/logger.ts';
+import { createLogger } from "../_shared/logger.ts";
 
 /**
  * refer-lead
@@ -10,10 +10,7 @@ import { createLogger } from '../_shared/logger.ts';
  * Sends notification to Agent B via email.
  */
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
-
 
 async function sendEmail(to: string, subject: string, html: string) {
   if (!RESEND_KEY) return;
@@ -29,8 +26,14 @@ async function sendEmail(to: string, subject: string, html: string) {
   }).catch(() => console.error("Email send failed"));
 }
 
-Deno.serve(async (req: Request) => {
-  const log = createLogger('refer-lead', req);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
+  const log = createLogger("refer-lead", req);
   const _start = Date.now();
   const origin = req.headers.get("origin");
   const cors = getCorsHeaders(origin);
@@ -53,7 +56,10 @@ Deno.serve(async (req: Request) => {
       });
     }
     const token = authHeader.slice(7);
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = _createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
     // Verify token — include used_at to check session is activated
     const { data: link } = await supabase
@@ -180,7 +186,7 @@ Deno.serve(async (req: Request) => {
 
     if (insertErr) {
       console.error("Insert error");
-      log({ event: 'error', agent_id: referrerId, status: 500, error: 'Failed to create referral' });
+      log({ event: "error", agent_id: referrerId, status: 500, error: "Failed to create referral" });
       return new Response(JSON.stringify({ error: "Failed to create referral" }), {
         status: 500, headers: { ...cors, "Content-Type": "application/json" },
       });
@@ -207,13 +213,13 @@ Deno.serve(async (req: Request) => {
           </table>
           <p style="color:#666;">Log in to your dashboard to accept this referral and view the full lead details.</p>
           <a href="https://agents.sellingdubai.ae/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">View Referral</a>
-        </div>`
+        </div>`,
       );
     }
 
     console.log(`Lead referral created: ${referrer.slug} → ${receiver.slug} (${leadName})`);
 
-    log({ event: 'success', agent_id: referrerId, status: 200 });
+    log({ event: "success", agent_id: referrerId, status: 200 });
     return new Response(JSON.stringify({
       ok: true,
       referral_id: referral.id,
@@ -222,7 +228,7 @@ Deno.serve(async (req: Request) => {
       status: 200, headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (err) {
-    log({ event: 'error', status: 500, error: String(err) });
+    log({ event: "error", status: 500, error: String(err) });
     console.error("refer-lead error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...cors, "Content-Type": "application/json" },
@@ -230,4 +236,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

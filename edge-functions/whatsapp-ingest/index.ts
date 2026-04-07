@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ===========================================
 // WHATSAPP INGEST v2 — Property Upload + Claude AI + Social Templates
 // ===========================================
@@ -892,7 +893,13 @@ const CORS = {
   "Content-Type": "application/json",
 };
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('whatsapp-ingest', req);
   const _start = Date.now();
   const url = new URL(req.url);
@@ -948,7 +955,7 @@ Deno.serve(async (req: Request) => {
     const senderPhone = msg.from;
     const msgType = msg.type;
 
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const supabase = _createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     // Find agent by WhatsApp number
     const cleanPhone = senderPhone.replace(/[^0-9]/g, '');
@@ -1226,4 +1233,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

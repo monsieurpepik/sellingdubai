@@ -33,7 +33,13 @@ function sanitizeUrl(val: string | undefined | null): string | null {
   return trimmed;
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('create-agent', req);
   const _start = Date.now();
   const cors = getCorsHeaders(req.headers.get("origin"));
@@ -59,7 +65,7 @@ Deno.serve(async (req: Request) => {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
@@ -369,4 +375,6 @@ Deno.serve(async (req: Request) => {
     console.error("create-agent error");
     return json({ error: "Something went wrong. Please try again." }, 500, cors);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

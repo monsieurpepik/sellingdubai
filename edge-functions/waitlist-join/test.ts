@@ -1,93 +1,92 @@
-import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { fnUrl } from '../_shared/test-helpers.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { handler } from "./index.ts";
+import { mockClientFactory } from "../_shared/test-mock.ts";
 
-const BASE = fnUrl('waitlist-join');
+Deno.env.set("SUPABASE_URL", "http://test.local");
+Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
+Deno.env.set("RESEND_API_KEY", "");
 
-// Helper: clean up waitlist entries created by tests
-async function cleanupWaitlist(email: string) {
-  const client = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+Deno.test("waitlist-join: GET returns 405", async () => {
+  const res = await handler(
+    new Request("http://localhost", { method: "GET" }),
+    mockClientFactory(),
   );
-  await client.from('waitlist').delete().eq('email', email);
-}
-
-Deno.test('waitlist-join: GET returns 405', async () => {
-  const res = await fetch(BASE, { method: 'GET' });
-  assertEquals(res.status, 405);
-  await res.body?.cancel();
+  if (res.status !== 405) throw new Error(`Expected 405, got ${res.status}`);
 });
 
-Deno.test('waitlist-join: missing name returns 400', async () => {
-  const res = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'test@example.com' }),
-  });
-  assertEquals(res.status, 400);
+Deno.test("waitlist-join: missing name returns 400", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "test@example.com" }),
+    }),
+    mockClientFactory(),
+  );
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
   const body = await res.json();
-  assertEquals(typeof body.error, 'string');
+  if (typeof body.error !== "string") throw new Error(`Expected error string, got: ${JSON.stringify(body)}`);
 });
 
-Deno.test('waitlist-join: name too short returns 400', async () => {
-  const res = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'A', email: 'test@example.com' }),
-  });
-  assertEquals(res.status, 400);
+Deno.test("waitlist-join: name too short returns 400", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "A", email: "test@example.com" }),
+    }),
+    mockClientFactory(),
+  );
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
   const body = await res.json();
-  assertEquals(typeof body.error, 'string');
+  if (typeof body.error !== "string") throw new Error(`Expected error string, got: ${JSON.stringify(body)}`);
 });
 
-Deno.test('waitlist-join: invalid email returns 400', async () => {
-  const res = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Alice', email: 'not-an-email' }),
-  });
-  assertEquals(res.status, 400);
+Deno.test("waitlist-join: invalid email returns 400", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Alice", email: "not-an-email" }),
+    }),
+    mockClientFactory(),
+  );
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
   const body = await res.json();
-  assertEquals(typeof body.error, 'string');
+  if (typeof body.error !== "string") throw new Error(`Expected error string, got: ${JSON.stringify(body)}`);
 });
 
-Deno.test('waitlist-join: valid submission returns success', async () => {
-  const email = `wl-test-${Date.now()}@example.com`;
-  const res = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Alice Test', email }),
-  });
-  assertEquals(res.status, 200);
+Deno.test("waitlist-join: valid submission returns success", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Alice Test", email: "alice@example.com" }),
+    }),
+    mockClientFactory({
+      "waitlist:count": { count: 42, error: null },
+    }),
+  );
+  if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   const body = await res.json();
-  assertEquals(body.success, true);
-  assertEquals(body.duplicate, false);
-  await cleanupWaitlist(email);
+  if (body.success !== true) throw new Error(`Expected success:true, got: ${JSON.stringify(body)}`);
+  if (body.duplicate !== false) throw new Error(`Expected duplicate:false, got: ${JSON.stringify(body)}`);
+  if (body.count !== 42) throw new Error(`Expected count:42, got: ${JSON.stringify(body)}`);
 });
 
-Deno.test('waitlist-join: duplicate email returns duplicate flag', async () => {
-  const email = `wl-dup-${Date.now()}@example.com`;
-  // First insert
-  const first = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Alice Dup', email }),
-  });
-  if (first.status !== 200) {
-    await first.body?.cancel();
-    throw new Error(`First insert failed with status ${first.status}`);
-  }
-  await first.body?.cancel();
-  // Second insert — same email
-  const res = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Alice Dup', email }),
-  });
-  assertEquals(res.status, 200);
+Deno.test("waitlist-join: duplicate email returns duplicate flag", async () => {
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Alice Dup", email: "alice-dup@example.com" }),
+    }),
+    mockClientFactory({
+      "waitlist": { data: null, error: { code: "23505", message: "duplicate key" } },
+      "waitlist:count": { count: 10, error: null },
+    }),
+  );
+  if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   const body = await res.json();
-  assertEquals(body.success, true);
-  assertEquals(body.duplicate, true);
-  await cleanupWaitlist(email);
+  if (body.success !== true) throw new Error(`Expected success:true, got: ${JSON.stringify(body)}`);
+  if (body.duplicate !== true) throw new Error(`Expected duplicate:true, got: ${JSON.stringify(body)}`);
 });

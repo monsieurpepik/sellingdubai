@@ -41,7 +41,13 @@ async function sendEmail(to: string, subject: string, html: string) {
   }).catch(() => console.error("Email send failed"));
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(
+  req: Request,
+  _createClient: CreateClientFn = createClient,
+): Promise<Response> {
   const log = createLogger('respond-to-match', req);
   const _start = Date.now();
   const origin = req.headers.get("origin");
@@ -66,7 +72,7 @@ Deno.serve(async (req: Request) => {
       });
     }
     const token = authHeader.slice(7);
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = _createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     const { data: link } = await supabase
       .from("magic_links")
@@ -294,4 +300,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));
