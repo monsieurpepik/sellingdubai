@@ -1,6 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe.configure({ mode: 'serial' });
+
 const AGENT_SLUG = 'boban-pepic';
 
 // Mock Supabase REST API response with minimal agent data

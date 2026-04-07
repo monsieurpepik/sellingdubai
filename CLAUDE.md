@@ -2,6 +2,17 @@
 
 Project-level instructions for Claude Code. These rules apply in every session.
 
+## Architect Skill
+
+This project has a registered skill at `~/.claude/skills/sellingdubai-architect/SKILL.md`.
+
+Invoke it at the start of any session involving code changes:
+```
+/sellingdubai-architect
+```
+
+The skill contains: session start protocol, god node list, critical render paths, hard constraints, known tech debt, schema summary, blast radius matrix, E2E test map, and pre-deploy gate reference.
+
 ## Performance Budget — Non-negotiable
 
 These rules exist because the site has been optimized from Performance 56 → 82 (Lighthouse) through disciplined asset management. Every rule below maps to a real regression we fixed.
