@@ -12,6 +12,16 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Load SUPABASE_URL and SUPABASE_ANON_KEY from .env if present (for local builds)
+# We extract only these two keys to avoid bash choking on values with < > & etc.
+if [ -f "$ROOT/.env" ]; then
+  _val=$(grep -E '^SUPABASE_URL=' "$ROOT/.env" | head -1 | cut -d= -f2-)
+  [ -n "$_val" ] && export SUPABASE_URL="$_val"
+  _val=$(grep -E '^SUPABASE_ANON_KEY=' "$ROOT/.env" | head -1 | cut -d= -f2-)
+  [ -n "$_val" ] && export SUPABASE_ANON_KEY="$_val"
+  unset _val
+fi
+
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
@@ -62,7 +72,8 @@ echo ""
 # ── 2. Silent catch blocks ────────────────────────────────────────────────────
 echo -e "${BOLD}2. Error observability${NC}"
 SILENT=$(grep -Ern 'catch\s*\([^)]*\)\s*\{\s*\}' js/ edge-functions/ \
-  --include="*.js" --include="*.ts" 2>/dev/null || true)
+  --include="*.js" --include="*.ts" \
+  --exclude-dir=node_modules --exclude-dir=.deno 2>/dev/null || true)
 if [ -n "$SILENT" ]; then
   fail "Silent catch blocks swallow errors with no log:"
   echo "$SILENT" | sed 's/^/    /'
