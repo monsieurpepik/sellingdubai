@@ -6,7 +6,7 @@ const AGENT_SLUG = 'boban-pepic';
 // Mock Supabase REST API response with minimal agent data
 // .single() sends Accept: application/vnd.pgrst.object+json — return a single object, not array
 function mockAgentData(page) {
-  return page.route('**/rest/v1/agents**', route => route.fulfill({
+  const routePromise = page.route('https://pjyorgedaxevxophpfib.supabase.co/rest/v1/agents*', route => route.fulfill({
     status: 200,
     contentType: 'application/vnd.pgrst.object+json',
     body: JSON.stringify({
@@ -47,11 +47,16 @@ function mockAgentData(page) {
       stripe_current_period_end: null
     })
   }));
+  page.on('console', msg => { if (msg.type() === 'error') console.log('CONSOLE ERROR:', msg.text()); });
+  page.on('pageerror', err => console.log('PAGE ERROR:', err.message, err.stack));
+  return routePromise;
 }
 
 test('Agent profile page loads and shows #agent-page', async ({ page }) => {
   await mockAgentData(page);
   await page.goto(`/a/${AGENT_SLUG}`);
+  const bodyHTML = await page.evaluate(() => document.getElementById('agent-page')?.className);
+  console.log('agent-page class:', bodyHTML);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
   await expect(page.locator('#loading')).not.toBeVisible();
 });
@@ -59,6 +64,8 @@ test('Agent profile page loads and shows #agent-page', async ({ page }) => {
 test('Nav claim CTA points to /join', async ({ page }) => {
   await mockAgentData(page);
   await page.goto(`/a/${AGENT_SLUG}`);
+  const bodyHTML = await page.evaluate(() => document.getElementById('agent-page')?.className);
+  console.log('agent-page class:', bodyHTML);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
 
   const claimBtn = page.locator('#nav-claim-btn');
@@ -69,6 +76,8 @@ test('Nav claim CTA points to /join', async ({ page }) => {
 test('Mortgage modal opens and closes', async ({ page }) => {
   await mockAgentData(page);
   await page.goto(`/a/${AGENT_SLUG}`);
+  const bodyHTML = await page.evaluate(() => document.getElementById('agent-page')?.className);
+  console.log('agent-page class:', bodyHTML);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
 
   // Open mortgage modal via the button
