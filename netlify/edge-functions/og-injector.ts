@@ -50,11 +50,15 @@ export default async (request: Request, context: Context) => {
   if (isBot(userAgent)) {
     try {
       const prerenderUrl = `${SUPABASE_URL}/functions/v1/prerender?slug=${encodeURIComponent(slug)}`;
+      const botCtrl = new AbortController();
+      const botTid = setTimeout(() => botCtrl.abort(), 5000);
       const prerenderRes = await fetch(prerenderUrl, {
         headers: {
           'User-Agent': userAgent,
         },
+        signal: botCtrl.signal,
       });
+      clearTimeout(botTid);
 
       if (prerenderRes.ok) {
         const html = await prerenderRes.text();
@@ -91,6 +95,8 @@ export default async (request: Request, context: Context) => {
   let agent: { name: string; tagline: string; photo_url: string; slug: string; verification_status: string } | null = null;
 
   try {
+    const ogCtrl = new AbortController();
+    const ogTid = setTimeout(() => ogCtrl.abort(), 3000);
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/agents?slug=eq.${encodeURIComponent(slug)}&select=name,tagline,photo_url,slug,verification_status`,
       {
@@ -98,8 +104,10 @@ export default async (request: Request, context: Context) => {
           'apikey': SUPABASE_ANON_KEY,
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
+        signal: ogCtrl.signal,
       }
     );
+    clearTimeout(ogTid);
 
     if (res.ok) {
       const agents = await res.json();
@@ -108,7 +116,7 @@ export default async (request: Request, context: Context) => {
       }
     }
   } catch {
-    // Supabase fetch failed — pass through without OG injection
+    // Supabase fetch failed or timed out — pass through without OG injection
   }
 
   // If no verified agent found, serve the page as-is (no OG tags)
