@@ -5,8 +5,8 @@
 // and exposed to dashboard.js via a window bridge in dashboard.html.
 // ==========================================
 
-import type { Property } from './state.js';
-import { escAttr, escHtml, optimizeImg } from './utils.js';
+import type { Property } from './state';
+import { escAttr, escHtml, optimizeImg } from './utils';
 
 // ==========================================
 // PUBLIC VIEWER CARD

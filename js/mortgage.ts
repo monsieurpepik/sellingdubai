@@ -2,11 +2,11 @@
 // MORTGAGE FLOW (Multi-step)
 // ==========================================
 
-import type { Database } from '../types/supabase.js';
-import { logEvent } from './analytics.js';
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config.js';
-import { currentAgent } from './state.js';
-import { escAttr, escHtml } from './utils.js';
+import type { Database } from '../types/supabase';
+import { logEvent } from './analytics';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config';
+import { currentAgent } from './state';
+import { escAttr, escHtml } from './utils';
 
 type MortgageRate = Database['public']['Tables']['mortgage_rates']['Row'];
 

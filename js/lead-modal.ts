@@ -2,9 +2,9 @@
 // LEAD MODAL
 // ==========================================
 
-import { logEvent } from './analytics.js';
-import { CAPTURE_URL } from './config.js';
-import { currentAgent } from './state.js';
+import { logEvent } from './analytics';
+import { CAPTURE_URL } from './config';
+import { currentAgent } from './state';
 
 // Track previously focused element for focus restoration
 let _previousFocus: Element | null = null;

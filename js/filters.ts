@@ -2,10 +2,10 @@
 // PROPERTY FILTERS (Mobile Overlay + Desktop Sidebar)
 // ==========================================
 
-import { logEvent } from './analytics.js';
-import { loadMoreProperties, loadProperties, propertiesHasMore, propertiesLoaded, renderSkeletonCards } from './properties.js';
-import { renderPropertyList } from './properties-render.js';
-import { allProperties, currentAgent, currentFilters, resetCurrentFilters, setAllProperties } from './state.js';
+import { logEvent } from './analytics';
+import { loadMoreProperties, loadProperties, propertiesHasMore, propertiesLoaded, renderSkeletonCards } from './properties';
+import { renderPropertyList } from './properties-render';
+import { allProperties, currentAgent, currentFilters, resetCurrentFilters, setAllProperties } from './state';
 
 // ==========================================
 // CAROUSEL INTERACTION HANDLERS

@@ -6,9 +6,9 @@
 // its components.ts dependency — in the async chunk rather than init.bundle.js.
 // ==========================================
 
-import { renderOffPlanCard, renderPropertyCard } from './components.js';
-import { initOffPlanCarousel } from './properties.js';
-import { allProperties, currentFilters } from './state.js';
+import { renderOffPlanCard, renderPropertyCard } from './components';
+import { initOffPlanCarousel } from './properties';
+import { allProperties, currentFilters } from './state';
 
 export function renderPropertyList(props: { listing_type?: string; [key: string]: unknown }[]) {
   const listEl = document.getElementById('prop-list');

@@ -1,4 +1,4 @@
-import { escHtml } from './utils.js';
+import { escHtml } from './utils';
 
 interface OffPlanMilestone { trigger: string; percentage?: number; }
 interface OffPlanProject { name?: string; minPrice?: number; milestones?: OffPlanMilestone[]; completionDate?: string; }
