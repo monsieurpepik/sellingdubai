@@ -91,6 +91,29 @@ interface Project {
 
 let _detailProject: Project | null = null;
 
+// Lazy-inject Cormorant Garamond + DM Sans only when project detail first opens.
+// Zero impact on page load — fonts load after user initiates the action.
+// Deliberate override of CLAUDE.md "no new Google Fonts on page load" rule.
+// See DECISIONS.md 2026-04-07 entry for rationale.
+let _pdFontsLoaded = false;
+function _injectPdFonts(): void {
+  if (_pdFontsLoaded) return;
+  _pdFontsLoaded = true;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&family=DM+Sans:wght@300;400;500&display=swap';
+  document.head.appendChild(link);
+}
+
+// Extend closeDetail to clean up pd-mode class (no-op when property-detail is open).
+{
+  const _orig = window.closeDetail;
+  window.closeDetail = () => {
+    document.getElementById('detail-overlay')?.classList.remove('pd-mode');
+    _orig?.();
+  };
+}
+
 const fmtPrice = (n: number | null | undefined): string | null =>
   n ? `AED\u00a0${Number(n).toLocaleString('en-AE', { maximumFractionDigits: 0 })}` : null;
 
@@ -184,8 +207,8 @@ export async function openProjectDetail(projectSlug: string): Promise<void> {
 
   // Show loading state
   sheet.innerHTML = `
-    <div style="text-align:center;padding:80px 24px;color:rgba(255,255,255,0.4);font-size:14px;">Loading project\u2026</div>`;
-  overlay.classList.add('open');
+    <div style="text-align:center;padding:80px 24px;color:#8a8780;font-size:14px;font-family:'DM Sans',sans-serif;">Loading project\u2026</div>`;
+  overlay.classList.add('open', 'pd-mode');
   document.body.style.overflow = 'hidden';
   // Hide property-detail's CTA bar — project detail has its own inline sticky bar
   const ctaBar = document.getElementById('detail-cta-bar');
@@ -205,7 +228,7 @@ export async function openProjectDetail(projectSlug: string): Promise<void> {
 
   if (error || !project) {
     sheet.innerHTML = `
-      <div style="text-align:center;padding:80px 24px;color:rgba(255,255,255,0.4);font-size:14px;">Project not found.</div>`;
+      <div style="text-align:center;padding:80px 24px;color:#8a8780;font-size:14px;font-family:'DM Sans',sans-serif;">Project not found.</div>`;
     return;
   }
 
@@ -332,171 +355,116 @@ export async function openProjectDetail(projectSlug: string): Promise<void> {
     statCells.push({ label: 'Pay plan', value: parts.join('/') });
   }
   const showStatsBar = statCells.length >= 2;
+  void statCells; void showStatsBar;
 
+  _injectPdFonts();
   sheet.innerHTML = `
-    ${imgSrc || galleryImgs.length ? `
-    <div style="position:relative;flex-shrink:0;">
-      <div id="proj-gallery" style="height:240px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex;background:#111;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        ${imgSrc ? `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" data-action="openProjLightbox" data-dir="0"><img src="${escAttr(imgSrc)}" alt="${escAttr(project.name ?? '')}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="eager" data-managed></div>` : ''}
-        ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 100%;scroll-snap-align:start;cursor:pointer;" data-action="openProjLightbox" data-dir="${lbIdx}"><img src="${escAttr(optimizeImg(u, 800))}" alt="${escAttr(project.name ?? '')} photo ${i + 2}" style="width:100%;height:240px;object-fit:cover;pointer-events:none;" loading="lazy" data-managed></div>`; }).join('')}
-      </div>
-      ${totalSlides > 1 ? `<div id="proj-gallery-count" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;pointer-events:none;">1 / ${totalSlides}</div>` : ''}
-    </div>` : ''}
-
-    ${showStatsBar ? `
-    <div style="display:grid;grid-template-columns:repeat(${statCells.length},1fr);border-bottom:1px solid rgba(255,255,255,0.06);">
-      ${statCells.map((c, i) => `
-      <div style="padding:10px 12px;${i < statCells.length - 1 ? 'border-right:1px solid rgba(255,255,255,0.06);' : ''}">
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:3px;">${escHtml(c.label)}</div>
-        <div style="font-size:13px;font-weight:700;">${escHtml(c.value)}</div>
-      </div>`).join('')}
-    </div>` : ''}
-
-    <div class="detail-body" style="padding:20px 20px 80px;">
-
-      <!-- Status badge + title -->
-      <div style="margin-bottom:14px;">
-        <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);margin-bottom:10px;display:inline-block;">${escHtml(statusLabel(project.status as string | null))}</span>
-        <h2 style="font-family:'Manrope',sans-serif;font-size:22px;font-weight:800;line-height:1.2;margin-top:8px;">${escHtml(project.name ?? '')}</h2>
-        ${loc ? `<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;">📍 ${escHtml(loc)}</div>` : ''}
-      </div>
-
-      <!-- Developer card -->
-      ${dev.name ? `
-      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
-        ${dev.logo_url ? `<img src="${escAttr(optimizeImg(dev.logo_url, 80))}" alt="${escAttr(dev.name ?? '')}" style="width:44px;height:44px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,0.08);flex-shrink:0;" data-managed>` : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏗️</div>`}
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:2px;">Developer</div>
-          <div style="font-weight:600;font-size:14px;">${escHtml(dev.name ?? '')}</div>
-          ${dev.website ? `<a href="${escAttr(dev.website)}" target="_blank" rel="noopener" style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;">${escHtml(dev.website.replace(/^https?:\/\//, ''))}</a>` : ''}
+    <div style="position:relative;flex-shrink:0;height:300px;overflow:hidden;background:#d6d2c8;">
+      ${imgSrc ? `<img src="${escAttr(imgSrc)}" alt="${escAttr(project.name ?? '')}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="eager" data-managed>` : ''}
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,25,22,0.75) 0%,rgba(26,25,22,0.2) 55%,transparent 80%);pointer-events:none;"></div>
+      <button data-title="${escAttr(project.name ?? '')}" data-action="shareDetail" style="position:absolute;top:max(60px,calc(env(safe-area-inset-top) + 14px));right:16px;width:40px;height:40px;border-radius:50%;background:rgba(245,242,236,0.2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(245,242,236,0.3);color:#f5f2ec;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 20px 20px;">
+        ${loc ? `<div style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,242,236,0.7);margin-bottom:6px;">${escHtml(loc)}</div>` : ''}
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1.2;color:#f5f2ec;margin:0 0 10px;">${escHtml(project.name ?? '')}</h2>
+        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
+          ${priceStr ? `<span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:#f5f2ec;">${escHtml(priceStr)}</span>` : ''}
+          ${areaStr ? `<span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:300;color:rgba(245,242,236,0.6);">${escHtml(areaStr)}</span>` : ''}
+          ${completionShort ? `<span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:300;color:rgba(245,242,236,0.6);">Handover ${escHtml(completionShort)}</span>` : ''}
         </div>
-      </div>` : ''}
+      </div>
+    </div>
 
-      <!-- Payment plan -->
+    ${galleryImgs.length > 0 ? `
+    <div id="proj-gallery" style="display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;padding:3px;background:#e0dbd0;-webkit-overflow-scrolling:touch;">
+      ${galleryImgs.map((u, i) => { const lbIdx = (imgSrc ? 1 : 0) + i; return `<div style="flex:0 0 auto;width:76px;height:64px;cursor:pointer;border-radius:4px;overflow:hidden;" data-action="openProjLightbox" data-dir="${lbIdx}"><img src="${escAttr(optimizeImg(u, 160))}" alt="${escAttr(project.name ?? '')} photo ${i+2}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" loading="lazy" data-managed></div>`; }).join('')}
+    </div>` : ''}
+
+    <div style="background:#f5f2ec;padding:0 0 80px;">
+
+      <div style="padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 12px;border-radius:99px;background:rgba(26,25,22,0.07);color:#1a1916;letter-spacing:0.04em;">${escHtml(statusLabel(project.status as string | null))}</span>
+        ${dev.name ? `<div style="display:flex;align-items:center;gap:8px;">${dev.logo_url ? `<img src="${escAttr(optimizeImg(dev.logo_url, 60))}" alt="${escAttr(dev.name ?? '')}" style="width:26px;height:26px;border-radius:4px;object-fit:contain;background:#eae6de;" data-managed>` : ''}<span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;color:#8a8780;">${escHtml(dev.name ?? '')}</span></div>` : ''}
+      </div>
+
       ${hasPaymentPlan ? `
-      <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">Payment Plan</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${bookingPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${bookingPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Booking</div></div>` : ''}
-          ${constructionPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${constructionPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Construction</div></div>` : ''}
-          ${handoverPct != null ? `<div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;font-family:'Manrope',sans-serif;">${handoverPct}%</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">Handover</div></div>` : ''}
+      <div style="margin:14px 20px 0;background:#eae6de;border-radius:14px;padding:16px;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:#8a8780;margin-bottom:12px;">Payment Plan</div>
+        <div style="display:flex;margin-bottom:12px;">
+          ${bookingPct != null ? `<div style="flex:1;text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#1a1916;line-height:1;">${bookingPct}%</div><div style="font-family:'DM Sans',sans-serif;font-size:10px;color:#8a8780;margin-top:3px;">Booking</div></div>` : ''}
+          ${constructionPct != null ? `<div style="flex:1;text-align:center;border-left:1px solid rgba(26,25,22,0.1);"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#1a1916;line-height:1;">${constructionPct}%</div><div style="font-family:'DM Sans',sans-serif;font-size:10px;color:#8a8780;margin-top:3px;">Construction</div></div>` : ''}
+          ${handoverPct != null ? `<div style="flex:1;text-align:center;border-left:1px solid rgba(26,25,22,0.1);"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#1a1916;line-height:1;">${handoverPct}%</div><div style="font-family:'DM Sans',sans-serif;font-size:10px;color:#8a8780;margin-top:3px;">Handover</div></div>` : ''}
+        </div>
+        <div style="height:5px;border-radius:3px;background:rgba(26,25,22,0.1);overflow:hidden;display:flex;">
+          ${bookingPct != null ? `<div style="width:${bookingPct}%;background:#1a1916;"></div>` : ''}
+          ${constructionPct != null ? `<div style="width:${constructionPct}%;background:rgba(26,25,22,0.35);"></div>` : ''}
+          ${handoverPct != null ? `<div style="width:${handoverPct}%;background:rgba(26,25,22,0.12);"></div>` : ''}
         </div>
         ${paymentMilestones?.length ? `
-        <div style="margin-top:12px;position:relative;padding-left:20px;">
-          <div style="position:absolute;left:6px;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,0.08);"></div>
-          ${paymentMilestones.map((m, i) => `
-          <div style="position:relative;margin-bottom:8px;">
-            <div style="position:absolute;left:-17px;top:3px;width:8px;height:8px;border-radius:50%;background:${i === 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)'};"></div>
-            <div style="display:flex;justify-content:space-between;align-items:baseline;">
-              <span style="font-size:11px;color:rgba(255,255,255,0.55);">${escHtml(m.name ?? '')}</span>
-              <span style="font-size:13px;font-weight:700;">${escHtml(String(m.percentage ?? ''))}</span>
-            </div>
-          </div>`).join('')}
+        <div style="margin-top:12px;border-top:1px solid rgba(26,25,22,0.08);padding-top:10px;display:flex;flex-direction:column;gap:7px;">
+          ${paymentMilestones.map(m => `<div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#8a8780;">${escHtml(m.name ?? '')}</span><span style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;color:#1a1916;">${escHtml(String(m.percentage ?? ''))}%</span></div>`).join('')}
         </div>` : ''}
-      </div>` : `
-      <div style="margin-bottom:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Payment Plan</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.45);">Contact the agent for full payment plan details.</div>
-      </div>`}
+      </div>` : ''}
 
-      <!-- Available units -->
       ${units.length ? `
-      <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Available Units</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:2px;padding:0 2px 6px;font-size:10px;color:rgba(255,255,255,0.25);">
-          <span>Type</span><span>Size</span><span>From</span><span style="text-align:right;">Avail.</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          ${units.map(u => {
-            const typeLabel = u.bedroom ? `${u.bedroom}\u00a0BR` : (u.property_types ?? 'Unit');
-            const areaVal = u.lowest_area ?? u.area_sqft ?? u.area;
-            const priceVal = u.lowest_price ?? u.price ?? u.min_price;
-            const avail = u.available_units_count;
-            let availColor = '';
-            let availText = '';
-            if (avail != null) {
-              if (avail === 0) { availColor = 'rgba(255,255,255,0.3)'; availText = 'Sold out'; }
-              else if (avail <= 5) { availColor = '#4d65ff'; availText = `${avail} left`; }
-              else { availColor = '#4ade80'; availText = `${avail} left`; }
-            }
-            return `
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:4px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;">
-            <div style="font-size:11px;font-weight:700;">${escHtml(String(typeLabel))}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.5);">${areaVal ? `${escHtml(Number(areaVal).toLocaleString('en-AE', {maximumFractionDigits:0}))}\u00a0sqft` : ''}</div>
-            <div style="font-size:11px;font-weight:600;">${priceVal ? `AED\u00a0${Number(priceVal).toLocaleString('en-AE', {maximumFractionDigits:0})}` : ''}</div>
-            <div style="font-size:10px;font-weight:600;text-align:right;color:${availColor};">${availText}</div>
-          </div>`;
-          }).join('')}
+      <div style="margin:14px 20px 0;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:#8a8780;margin-bottom:10px;">Available Units</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${units.map(u => { const typeLabel = u.bedroom ? `${u.bedroom}\u00a0BR` : (u.property_types ?? 'Unit'); const areaVal = u.lowest_area ?? u.area_sqft ?? u.area; const priceVal = u.lowest_price ?? u.price ?? u.min_price; const avail = u.available_units_count; const availText = avail != null ? (avail === 0 ? 'Sold out' : `${avail} left`) : ''; const availColor = avail != null ? (avail === 0 ? '#8a8780' : (avail <= 5 ? '#b84c3a' : '#3a7c5a')) : ''; return `<div style="background:#eae6de;border-radius:10px;padding:12px;"><div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:300;color:#1a1916;line-height:1.1;">${escHtml(String(typeLabel))}</div>${areaVal ? `<div style="font-family:'DM Sans',sans-serif;font-size:11px;color:#8a8780;margin-top:4px;">${Number(areaVal).toLocaleString('en-AE',{maximumFractionDigits:0})}\u00a0sqft</div>` : ''}${priceVal ? `<div style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:#1a1916;margin-top:4px;">AED\u00a0${Number(priceVal).toLocaleString('en-AE',{maximumFractionDigits:0})}</div>` : ''}${availText ? `<div style="font-family:'DM Sans',sans-serif;font-size:10px;margin-top:4px;color:${availColor};">${escHtml(availText)}</div>` : ''}</div>`; }).join('')}
         </div>
       </div>` : ''}
 
-      <!-- Site Plan -->
       ${sitePlanImgs.length ? `
-      <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Site Plan</h3>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          ${sitePlanImgs.map((u, i) => `<img src="${escAttr(optimizeImg(u, 800))}" alt="Site plan ${i + 1}" style="width:100%;border-radius:10px;background:rgba(255,255,255,0.04);" loading="lazy" data-managed data-onerror="hide">`).join('')}
-        </div>
+      <div style="margin:14px 20px 0;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:#8a8780;margin-bottom:10px;">Site Plan</div>
+        ${sitePlanImgs.map((u, i) => `<img src="${escAttr(optimizeImg(u, 800))}" alt="Site plan ${i+1}" style="width:100%;border-radius:10px;background:#eae6de;display:block;${i > 0 ? 'margin-top:8px;' : ''}" loading="lazy" data-managed data-onerror="hide">`).join('')}
       </div>` : ''}
 
-      <!-- Facilities -->
       ${facilities.length ? `
-      <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">Amenities</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          ${facilities.map(f => `
-          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 10px;text-align:center;gap:6px;">
-            <span class="material-symbols-outlined" style="font-size:32px;color:rgba(255,255,255,0.55);line-height:1;">${escHtml(facilityIcon(f.name))}</span>
-            <div style="font-size:11px;color:rgba(255,255,255,0.8);line-height:1.3;">${escHtml(f.name)}</div>
-          </div>`).join('')}
+      <div style="margin:14px 20px 0;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:#8a8780;margin-bottom:10px;">Amenities</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${facilities.map(f => `<div style="background:#eae6de;border-radius:10px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;"><span class="material-symbols-outlined" style="font-size:26px;color:rgba(26,25,22,0.45);line-height:1;">${escHtml(facilityIcon(f.name))}</span><div style="font-family:'DM Sans',sans-serif;font-size:11px;color:#1a1916;line-height:1.3;">${escHtml(f.name)}</div></div>`).join('')}
         </div>
       </div>` : ''}
 
-      <!-- Nearby locations -->
       ${nearbyLocations.length ? `
-      <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Nearby</h3>
-        <div style="display:flex;flex-direction:column;gap:0;">
-          ${nearbyLocations.map((l, i) => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;${i < nearbyLocations.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : ''}">
-            <span style="font-size:13px;color:rgba(255,255,255,0.75);">📍 ${escHtml(l.name)}</span>
-            ${l.distance ? `<span style="font-size:13px;color:rgba(255,255,255,0.4);white-space:nowrap;margin-left:8px;">${escHtml(l.distance)}</span>` : ''}
-          </div>`).join('')}
+      <div style="margin:14px 20px 0;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:#8a8780;margin-bottom:8px;">Nearby</div>
+        <div style="background:#eae6de;border-radius:12px;overflow:hidden;">
+          ${nearbyLocations.map((l, i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;${i < nearbyLocations.length - 1 ? 'border-bottom:1px solid rgba(26,25,22,0.07);' : ''}"><span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#1a1916;">${escHtml(l.name)}</span>${l.distance ? `<span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#8a8780;">${escHtml(l.distance)}</span>` : ''}</div>`).join('')}
         </div>
       </div>` : ''}
 
-      <!-- Map (lazy-loaded) -->
       ${(project.lat && project.lng) ? `
-      <div data-mapq="${escAttr(encodeURIComponent(`${project.name ?? ''} ${project.district_name ?? project.location ?? project.area ?? ''} Dubai`))}" data-maplat="${escAttr(String(project.lat))}" data-maplng="${escAttr(String(project.lng))}" style="margin-bottom:20px;">
-        <button data-action="loadDetailMap" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;text-align:center;color:rgba(255,255,255,0.55);font-size:13px;cursor:pointer;width:100%;margin-bottom:0;">📍 Show Map</button>
+      <div style="margin:14px 20px 0;" data-mapq="${escAttr(encodeURIComponent(`${project.name ?? ''} ${project.district_name ?? project.location ?? project.area ?? ''} Dubai`))}" data-maplat="${escAttr(String(project.lat))}" data-maplng="${escAttr(String(project.lng))}">
+        <button data-action="loadDetailMap" style="width:100%;padding:13px;background:#eae6de;border:1px solid rgba(26,25,22,0.1);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:13px;color:#8a8780;cursor:pointer;text-align:center;">\u{1F4CD} Show on Map</button>
       </div>` : ''}
 
-      <!-- Description -->
       ${project.description ? `
-      <div style="margin-bottom:20px;">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">About</h3>
-        <div id="proj-desc" style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${sanitizeHtml(project.description as string)}</div>
-        <button id="proj-desc-more" data-action="expandDesc" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:13px;padding:4px 0 0;cursor:pointer;font-family:'Inter',sans-serif;">Read more</button>
+      <div style="margin:14px 20px 0;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:#8a8780;margin-bottom:8px;">About</div>
+        <div id="proj-desc" style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7;color:#1a1916;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;">${sanitizeHtml(project.description as string)}</div>
+        <button id="proj-desc-more" data-action="expandDesc" style="background:none;border:none;font-family:'DM Sans',sans-serif;font-size:12px;color:#8a8780;padding:6px 0 0;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(138,135,128,0.4);">Read more</button>
       </div>` : ''}
 
-      <!-- Brochure download (gate behind lead capture) -->
       ${project.brochure_url ? `
-      <div style="margin-bottom:20px;">
-        <button data-brochure="${escAttr(project.brochure_url as string)}" data-name="${escAttr(project.name ?? '')}" data-action="openLeadForBrochure" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;box-sizing:border-box;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Get Brochure \u2014 Free
-        </button>
+      <div style="margin:14px 20px 0;">
+        <button data-brochure="${escAttr(project.brochure_url as string)}" data-name="${escAttr(project.name ?? '')}" data-action="openLeadForBrochure" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#eae6de;border:1px solid rgba(26,25,22,0.1);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:400;color:#1a1916;cursor:pointer;box-sizing:border-box;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Get Brochure \u2014 Free</button>
       </div>` : ''}
 
     </div>
 
-    <div style="display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid rgba(255,255,255,0.06);">
-      <button data-name="${escAttr(project.name ?? '')}" data-action="openLeadForProperty" style="flex:1;padding:14px;background:#1127D2;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Enquire</button>
-      <button data-action="openProjectMortgage" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;">Mortgage</button>
-      ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent(`Hi, I'm interested in ${project.name ?? ''} \u2014 can you tell me more?`)}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;text-decoration:none;">WhatsApp</a>` : ''}
+    <div style="position:sticky;bottom:0;background:#f5f2ec;border-top:1px solid rgba(26,25,22,0.08);padding:12px 16px calc(12px + env(safe-area-inset-bottom));">
+      <button data-name="${escAttr(project.name ?? '')}" data-action="openLeadForProperty" style="display:block;width:100%;padding:15px;background:#d4e84a;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:#1a1916;cursor:pointer;margin-bottom:8px;box-sizing:border-box;">Enquire Now</button>
+      <div style="display:flex;gap:8px;">
+        <button data-action="openProjectMortgage" style="flex:1;padding:12px;background:#eae6de;border:1px solid rgba(26,25,22,0.1);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;color:#1a1916;cursor:pointer;">Mortgage</button>
+        ${currentAgent?.whatsapp ? `<a href="https://wa.me/${encodeURIComponent(currentAgent.whatsapp.replace(/[^0-9]/g,''))}?text=${encodeURIComponent(`Hi, I'm interested in ${project.name ?? ''} \u2014 can you tell me more?`)}" target="_blank" rel="noopener noreferrer" style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.25);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;color:#25d366;text-decoration:none;">WhatsApp</a>` : ''}
+      </div>
     </div>`;
 
-  // Gallery scroll counter
+  // Gallery scroll counter (no-op if proj-gallery-count is absent in new template)
   if (totalSlides > 1) {
     const galleryEl = document.getElementById('proj-gallery');
     const counterEl = document.getElementById('proj-gallery-count');

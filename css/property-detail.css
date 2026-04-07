@@ -262,3 +262,13 @@
   color: #fff;
 }
 
+/* ── Project Detail pd-mode: cream palette override ───────────────────────── */
+.detail-overlay.pd-mode { background: #f5f2ec; }
+.detail-overlay.pd-mode .detail-sheet { background: #f5f2ec; padding-bottom: 0; }
+.detail-overlay.pd-mode .detail-back {
+  background: rgba(245,242,236,0.75); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); color: #1a1916;
+  box-shadow: 0 2px 12px rgba(26,25,22,0.12);
+}
+.detail-overlay.pd-mode .detail-back:hover { background: rgba(234,230,222,0.9); }
+

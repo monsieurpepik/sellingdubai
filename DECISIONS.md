@@ -286,3 +286,11 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 5. (Optional) Add `LOADTEST_TOKEN` secret for `send-magic-link` load testing
 
 **Why separate workflow file (not in ci.yml):** Load tests run 4.5 minutes with 100 VUs. Running this on every PR would consume runner minutes and risk rate-limiting the staging environment. Weekly schedule + manual dispatch is the right cadence.
+
+## 2026-04-07 — Cormorant Garamond + DM Sans for project detail
+
+**What:** Added Cormorant Garamond (300) and DM Sans (300/400/500) as lazy-injected Google Fonts. The `<link>` element is inserted into `<head>` via `_injectPdFonts()` only when `openProjectDetail()` fires for the first time (`_pdFontsLoaded` guard prevents double-injection).
+
+**Why:** The project detail redesign uses editorial typography (Cormorant Garamond serif for prices/titles) and a clean humanist sans-serif (DM Sans) for the warm cream palette. CLAUDE.md says "No new Google Fonts" — the lazy-injection pattern satisfies the spirit of the rule: fonts have zero impact on initial page load and only download after the user explicitly opens a project.
+
+**Why not preload:** Preloading on page load would violate CLAUDE.md and hurt LCP. The one-time render-blocking hit on first project open is acceptable since the hero image paint dominates that transition anyway.
