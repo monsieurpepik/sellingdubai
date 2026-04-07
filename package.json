@@ -21,7 +21,7 @@
     "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
-    "esbuild": "^0.27.4",
+    "esbuild": "^0.28.0",
     "netlify-cli": "^24.9.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^6.0.2"
