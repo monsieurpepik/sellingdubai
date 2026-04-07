@@ -33,7 +33,7 @@ console.log(`build-js: SUPABASE_URL=${url.slice(0, 40)}... (context: ${context})
 fs.mkdirSync('dist', { recursive: true });
 
 esbuild.build({
-  entryPoints: ['js/init.ts', 'js/agency-page.ts', 'js/event-delegation.js'],
+  entryPoints: ['js/init.ts', 'js/agency-page.ts', 'js/event-delegation.js', 'js/components.ts'],
   bundle: true,
   minify: true,
   sourcemap: true,
