@@ -221,25 +221,30 @@ async function init(): Promise<void> {
     // that expect the full row type. All referenced fields are present in the select list.
     const agentData = agent as unknown as Agent;
 
-    // Check ownership once — used both for the pending-profile gate and the edit button.
     const ownerToken = localStorage.getItem('sd_edit_token');
-    let isOwner = false;
-    if (ownerToken) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-magic-link`, { // await-ok: conditional on ownerToken, depends on agent.id from prior query
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: ownerToken })
-        });
-        if (res.ok) {
-          const data = await res.json() as { agent?: { id: string } };
-          if (data.agent && data.agent.id === agentData.id) isOwner = true;
-        }
-      } catch (_e) { /* silently fail — not critical */ }
-    }
 
+    // For pending profiles, ownership gates whether we show the profile or the pending screen.
+    // Must resolve before rendering.
     if (agentData.verification_status !== 'verified') {
-      if (!isOwner) {
+      let isOwnerPending = false;
+      if (ownerToken) {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 4000);
+          const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-magic-link`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: ownerToken }),
+            signal: ctrl.signal
+          });
+          clearTimeout(tid);
+          if (res.ok) {
+            const data = await res.json() as { agent?: { id: string } };
+            if (data.agent && data.agent.id === agentData.id) isOwnerPending = true;
+          }
+        } catch (_e) { /* silently fail — not owner or timed out */ }
+      }
+      if (!isOwnerPending) {
         const pendingNameEl = document.getElementById('pending-agent-name');
         if (pendingNameEl) pendingNameEl.textContent = agentData.name || 'This agent';
         showPage('pending');
@@ -249,6 +254,8 @@ async function init(): Promise<void> {
       document.getElementById('verification-pending-banner')?.classList.remove('hidden');
     }
 
+    // For verified profiles, render immediately — ownership check for the edit button
+    // runs async and does not block the page from showing.
     const { renderAgent, hydrateOgMeta, injectSchemaOrg, showEditButtonIfOwner } = await agentPagePromise;
     renderAgent(agentData);
 
@@ -256,9 +263,9 @@ async function init(): Promise<void> {
     try { injectSchemaOrg(agentData); } catch (e) { console.error('[schema-org]', e); }
     try { hydrateOgMeta(agentData); } catch (e) { console.error('[og-meta]', e); }
     try { trackPageView(agentData.id); } catch (e) { console.error('[analytics]', e); }
-    // Pass pre-resolved isOwner to avoid a second verify-magic-link network call.
-    // showEditButtonIfOwner falls back to its own fetch only if called without the second argument.
-    try { void showEditButtonIfOwner(agentData, ownerToken ? isOwner : undefined); } catch (e) { console.error('[owner-check]', e); }
+    // showEditButtonIfOwner runs its own verify-magic-link call non-blocking after render.
+    // Passing no second argument so it uses its own fetch path with a timeout.
+    try { void showEditButtonIfOwner(agentData); } catch (e) { console.error('[owner-check]', e); }
 
     // Detect /a/[agent-slug]/project/[project-slug] sub-path
     const pathParts = window.location.pathname.split('/').filter(Boolean);

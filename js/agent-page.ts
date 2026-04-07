@@ -424,11 +424,15 @@ export async function showEditButtonIfOwner(agent: Agent, preResolvedIsOwner?: b
   const token = localStorage.getItem('sd_edit_token');
   if (!token) return;
   try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 4000);
     const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-magic-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token })
+      body: JSON.stringify({ token }),
+      signal: ctrl.signal
     });
+    clearTimeout(tid);
     if (!res.ok) return;
     const data = await res.json() as { agent?: { id: string } };
     if (data.agent && data.agent.id === agent.id) {
