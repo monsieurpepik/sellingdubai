@@ -1,30 +1,21 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test.use({ viewport: { width: 390, height: 844 } });
+const AGENT_SLUG = 'boban-pepic';
 
-test('Landing page has no horizontal scroll at 390px width', async ({ page }) => {
-  await page.goto('/landing.html');
-  await page.waitForLoadState('domcontentloaded');
-
-  const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
-  const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
-
-  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
-});
-
-test('Index/agent page has no horizontal scroll at 390px width', async ({ page }) => {
-  await page.route('**/rest/v1/agents**', route => route.fulfill({
+// Mirror of journey3-buyer mockAgentData — .single() returns object, not array
+function mockAgentData(page) {
+  return page.route('**/rest/v1/agents**', route => route.fulfill({
     status: 200,
     contentType: 'application/vnd.pgrst.object+json',
     body: JSON.stringify({
       id: 'test-uuid-1234',
-      slug: 'boban-pepic',
+      slug: AGENT_SLUG,
       name: 'Boban Pepic',
       photo_url: null,
       background_image_url: null,
       verification_status: 'verified',
-      tagline: 'Luxury Specialist',
+      tagline: 'Test Tagline',
       bio: 'Test bio',
       phone: '+971501234567',
       dld_broker_number: null,
@@ -48,15 +39,30 @@ test('Index/agent page has no horizontal scroll at 390px width', async ({ page }
       facebook_pixel_id: null,
       ga4_measurement_id: null,
       show_golden_visa: false,
-      show_preapproval: false,
+      show_preapproval: true,
       tier: 'free',
       referral_code: null,
       stripe_subscription_status: null,
       stripe_current_period_end: null
     })
   }));
+}
 
-  await page.goto('/a/boban-pepic');
+test.use({ viewport: { width: 390, height: 844 } });
+
+test('Landing page has no horizontal scroll at 390px width', async ({ page }) => {
+  await page.goto('/landing.html');
+  await page.waitForLoadState('domcontentloaded');
+
+  const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+  const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+});
+
+test('Index/agent page has no horizontal scroll at 390px width', async ({ page }) => {
+  await mockAgentData(page);
+  await page.goto(`/a/${AGENT_SLUG}`);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
 
   const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
