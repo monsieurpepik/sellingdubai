@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -74,12 +74,12 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.base_ref }}
           path: base-branch
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           path: pr-branch
 
@@ -193,7 +193,7 @@ jobs:
     needs: ci
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -234,7 +234,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -304,7 +304,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
