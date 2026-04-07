@@ -40,7 +40,9 @@ echo ""
 
 # ── 1. Build ──────────────────────────────────────────────────────────────────
 echo -e "${BOLD}1. Build${NC}"
-if npm run build --silent 2>/dev/null; then
+BUILD_OUTPUT=$(npm run build 2>&1)
+BUILD_EXIT=$?
+if [ $BUILD_EXIT -eq 0 ]; then
   # Bundle size check (30KB = 30720 bytes)
   BUNDLE_BYTES=$(wc -c < dist/init.bundle.js 2>/dev/null | tr -d ' ')
   BUNDLE_KB=$(echo "scale=1; ${BUNDLE_BYTES:-0}/1024" | bc)
@@ -66,6 +68,7 @@ if npm run build --silent 2>/dev/null; then
   fi
 else
   fail "npm run build failed — fix build errors before deploying"
+  echo "$BUILD_OUTPUT" | tail -20
 fi
 echo ""
 
