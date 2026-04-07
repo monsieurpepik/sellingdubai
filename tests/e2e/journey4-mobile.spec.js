@@ -5,7 +5,7 @@ const AGENT_SLUG = 'boban-pepic';
 
 // Mirror of journey3-buyer mockAgentData — .single() returns object, not array
 function mockAgentData(page) {
-  return page.route('**/rest/v1/agents**', route => route.fulfill({
+  return page.route('https://pjyorgedaxevxophpfib.supabase.co/rest/v1/agents*', route => route.fulfill({
     status: 200,
     contentType: 'application/vnd.pgrst.object+json',
     body: JSON.stringify({

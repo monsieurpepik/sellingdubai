@@ -22,6 +22,12 @@ if (!url) {
   console.error('build-js: SUPABASE_URL is not set — set it in your environment or .env file');
   process.exit(1);
 }
+try {
+  new URL(url);
+} catch {
+  console.error(`build-js: SUPABASE_URL "${url}" is not a valid URL — must include https:// scheme (e.g. https://xxxx.supabase.co)`);
+  process.exit(1);
+}
 if (!key) {
   console.error('build-js: SUPABASE_ANON_KEY is not set — set it in your environment or .env file');
   process.exit(1);
