@@ -1,14 +1,18 @@
 // @ts-check
 (() => {
   // Credentials loaded from js/sd-config.js — update that file when rotating keys
-  /** @type {{ SUPABASE_URL: string; SUPABASE_ANON_KEY: string }} */
-  const cfg = window.SD_CONFIG;
-  const SUPABASE_URL = cfg.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = cfg.SUPABASE_ANON_KEY;
-  const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
-  const VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
-  const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
-  const PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
+  /** @type {string} */
+  let SUPABASE_URL;
+  /** @type {string} */
+  let SUPABASE_ANON_KEY;
+  /** @type {string} */
+  let MAGIC_LINK_URL;
+  /** @type {string} */
+  let VERIFY_TOKEN_URL;
+  /** @type {string} */
+  let ANALYTICS_URL;
+  /** @type {string} */
+  let PROPS_URL;
 
   /** @type {string | null} */
   let currentAgent = null;
@@ -22,8 +26,37 @@
   /** @type {string[]} */
   let propPhotos = [];
 
+  // ── Config ──
+  function resolveConfig() {
+    const cfg = window.SD_CONFIG;
+    SUPABASE_URL = cfg.SUPABASE_URL;
+    SUPABASE_ANON_KEY = cfg.SUPABASE_ANON_KEY;
+    MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
+    VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
+    ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
+    PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
+  }
+
   // ── Init ──
   function init() {
+    // sd-config.js is defer — same as us, so it should always be ready, but guard anyway.
+    if (!window.SD_CONFIG) {
+      let attempts = 0;
+      const poll = setInterval(() => {
+        attempts++;
+        if (window.SD_CONFIG) {
+          clearInterval(poll);
+          resolveConfig();
+          init();
+        } else if (attempts >= 20) {
+          clearInterval(poll);
+          console.error('[dashboard] SD_CONFIG not available after 2s');
+        }
+      }, 100);
+      return;
+    }
+    resolveConfig();
+
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const saved = localStorage.getItem('sd_edit_token');
