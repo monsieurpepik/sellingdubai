@@ -65,7 +65,7 @@ Deno.test("OPTIONS → 200 with CORS headers", async () => {
   // CORS headers should be present
   const origin = res.headers.get("access-control-allow-origin");
   const methods = res.headers.get("access-control-allow-methods");
-  assertEquals(typeof origin, "string");
+  assertEquals(origin, "https://www.sellingdubai.ae");
   assertEquals(methods?.includes("POST"), true);
 });
 
@@ -82,8 +82,7 @@ Deno.test("Invalid channel → 400", async () => {
   const res = await handler(req);
   assertEquals(res.status, 400);
   const body = await res.json();
-  assertEquals(typeof body.error, "string");
-  assertEquals(body.error.includes("channel must be one of"), true);
+  assertEquals(body.error, "channel must be one of: whatsapp, telegram, siri, vapi");
 });
 
 Deno.test("Missing Authorization header → 401", async () => {
@@ -109,43 +108,67 @@ Deno.test("Invalid token → 401", async () => {
 });
 
 Deno.test("Valid whatsapp request → 200 with reply and actions_taken", async () => {
-  // Set a dummy API key so the Anthropic SDK passes its validation check
-  Deno.env.set("ANTHROPIC_API_KEY", "sk-ant-test-key-for-unit-tests");
-  Deno.env.set("SUPABASE_URL", "http://127.0.0.1:54321");
-  Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
+  // Save original env vars
+  const savedApiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const savedUrl = Deno.env.get("SUPABASE_URL");
+  const savedKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  // used_at must be non-null for verifyMagicLinkToken to accept the link
-  const factory = mockClientFactory({
-    "magic_links": {
-      data: {
-        agent_id: TEST_AGENT_ID,
-        used_at: "2026-01-01T00:00:00.000Z",
-        revoked_at: null,
-        expires_at: null,
-      },
-      error: null,
-    },
-    "agents": {
-      data: { id: TEST_AGENT_ID, name: "Ahmed Al Nouri", agency_name: null },
-      error: null,
-    },
-    "whatsapp_sessions": { data: null, error: null },
-  });
-
-  const req = makeReq(
-    "POST",
-    { message: "How many leads do I have today?", channel: "whatsapp" },
-    { authorization: `Bearer ${TEST_TOKEN}` },
-  );
-
-  const restore = stubClaudeFetch("You have 3 leads today.");
   try {
-    const res = await handler(req, factory);
-    assertEquals(res.status, 200);
-    const body = await res.json();
-    assertEquals(typeof body.reply, "string");
-    assertEquals(Array.isArray(body.actions_taken), true);
+    // Set test values
+    Deno.env.set("ANTHROPIC_API_KEY", "sk-ant-test-key-for-unit-tests");
+    Deno.env.set("SUPABASE_URL", "http://127.0.0.1:54321");
+    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
+
+    // used_at must be non-null for verifyMagicLinkToken to accept the link
+    const factory = mockClientFactory({
+      "magic_links": {
+        data: {
+          agent_id: TEST_AGENT_ID,
+          used_at: "2026-01-01T00:00:00.000Z",
+          revoked_at: null,
+          expires_at: null,
+        },
+        error: null,
+      },
+      "agents": {
+        data: { id: TEST_AGENT_ID, name: "Ahmed Al Nouri", agency_name: null },
+        error: null,
+      },
+      "whatsapp_sessions": { data: null, error: null },
+    });
+
+    const req = makeReq(
+      "POST",
+      { message: "How many leads do I have today?", channel: "whatsapp" },
+      { authorization: `Bearer ${TEST_TOKEN}` },
+    );
+
+    const restore = stubClaudeFetch("You have 3 leads today.");
+    try {
+      const res = await handler(req, factory);
+      assertEquals(res.status, 200);
+      const body = await res.json();
+      assertEquals(typeof body.reply, "string");
+      assertEquals(Array.isArray(body.actions_taken), true);
+    } finally {
+      restore();
+    }
   } finally {
-    restore();
+    // Restore original env vars
+    if (savedApiKey !== undefined) {
+      Deno.env.set("ANTHROPIC_API_KEY", savedApiKey);
+    } else {
+      Deno.env.delete("ANTHROPIC_API_KEY");
+    }
+    if (savedUrl !== undefined) {
+      Deno.env.set("SUPABASE_URL", savedUrl);
+    } else {
+      Deno.env.delete("SUPABASE_URL");
+    }
+    if (savedKey !== undefined) {
+      Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", savedKey);
+    } else {
+      Deno.env.delete("SUPABASE_SERVICE_ROLE_KEY");
+    }
   }
 });
