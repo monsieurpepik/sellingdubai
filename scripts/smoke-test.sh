@@ -51,6 +51,7 @@ check "verify-magic-link"     "$SB/functions/v1/verify-magic-link"      "4"
 check "create-checkout"       "$SB/functions/v1/create-checkout"        "4"
 check "manage-properties"     "$SB/functions/v1/manage-properties"      "4"
 check "get-analytics"         "$SB/functions/v1/get-analytics"          "4"
+check "lead-nudger (health)"  "$SB/functions/v1/lead-nudger?secret=INVALID"               "4"
 
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
