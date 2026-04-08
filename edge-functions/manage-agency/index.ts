@@ -209,6 +209,46 @@ export async function handler(
     return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
+  // ── INVITE_AGENT ──
+  if (action === "invite_agent") {
+    const agencyId = typeof body.agency_id === "string" ? body.agency_id : "";
+    if (!agencyId) return new Response(JSON.stringify({ error: "Missing agency_id." }), { status: 400, headers: cors });
+    const { data: ownerAgency } = await supabase.from("agencies").select("id").eq("id", agencyId).eq("owner_agent_id", agentId).maybeSingle();
+    if (!ownerAgency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
+    const inviteToken = crypto.randomUUID();
+    const invitedEmail = typeof body.email === "string" && body.email.trim() ? body.email.trim().toLowerCase() : null;
+    const { error: insertErr } = await supabase.from("agent_invites").insert({
+      agency_id: agencyId,
+      token: inviteToken,
+      invited_email: invitedEmail,
+    });
+    if (insertErr) {
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to create invite' });
+      return new Response(JSON.stringify({ error: "Failed to create invite." }), { status: 500, headers: cors });
+    }
+    log({ event: 'success', agent_id: agentId, status: 200 });
+    return new Response(JSON.stringify({ invite_url: "/join?agency=" + inviteToken, token: inviteToken }), { headers: cors });
+  }
+
+  // ── GET_INVITES ──
+  if (action === "get_invites") {
+    const agencyId = typeof body.agency_id === "string" ? body.agency_id : "";
+    if (!agencyId) return new Response(JSON.stringify({ error: "Missing agency_id." }), { status: 400, headers: cors });
+    const { data: ownerAgency } = await supabase.from("agencies").select("id").eq("id", agencyId).eq("owner_agent_id", agentId).maybeSingle();
+    if (!ownerAgency) return new Response(JSON.stringify({ error: "Forbidden." }), { status: 403, headers: cors });
+    const { data: invites, error: fetchErr } = await supabase
+      .from("agent_invites")
+      .select("id, token, invited_email, used_at, created_at")
+      .eq("agency_id", agencyId)
+      .order("created_at", { ascending: false });
+    if (fetchErr) {
+      log({ event: 'error', agent_id: agentId, status: 500, error: 'Failed to fetch invites' });
+      return new Response(JSON.stringify({ error: "Failed to fetch invites." }), { status: 500, headers: cors });
+    }
+    log({ event: 'success', agent_id: agentId, status: 200 });
+    return new Response(JSON.stringify({ invites: invites ?? [] }), { headers: cors });
+  }
+
   log({ event: 'bad_request', agent_id: agentId, status: 400 });
   return new Response(JSON.stringify({ error: "Unknown action." }), { status: 400, headers: cors });
   } catch (e) {
