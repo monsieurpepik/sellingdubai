@@ -8,7 +8,8 @@ export type ToolName =
   | "get_listings"
   | "update_listing"
   | "get_stats"
-  | "get_brief";
+  | "get_brief"
+  | "get_cobrokes";
 
 export const TOOL_DEFINITIONS = [
   {
@@ -62,6 +63,11 @@ export const TOOL_DEFINITIONS = [
   {
     name: "get_brief",
     description: "Get a morning brief: leads needing follow-up + performance summary",
+    input_schema: { type: "object", properties: {}, required: [] },
+  },
+  {
+    name: "get_cobrokes",
+    description: "Get open cobroke requests for the agent.",
     input_schema: { type: "object", properties: {}, required: [] },
   },
 ];
@@ -168,6 +174,21 @@ export async function executeTool(
         executeTool("get_stats", {}, agentId, supabase),
       ]);
       return `Good morning! Here's your brief.\n\n${statsResult}\n\nRecent leads:\n${leadsResult}`;
+    }
+
+    case "get_cobrokes": {
+      const { data: cobrokes } = await supabase
+        .from("cobroke_requests")
+        .select("id, property_id, status, message, created_at, requesting_agent_id")
+        .or(`agent_id.eq.${agentId},requesting_agent_id.eq.${agentId}`)
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (!cobrokes || cobrokes.length === 0) return "You have no open cobroke requests.";
+      const lines = cobrokes.map((c: any) =>
+        `Cobroke #${c.id.slice(0, 8)} — ${c.status}${c.message ? ` — "${c.message}"` : ""}`
+      );
+      return `Your ${cobrokes.length} open cobroke requests:\n${lines.join("\n")}`;
     }
 
     default:
