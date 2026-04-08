@@ -9,7 +9,7 @@
 
 [build]
   publish = "."
-  command = "npm install --no-audit && npm run build"
+  command = "npm install --no-audit --ignore-scripts && node node_modules/esbuild/install.js && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
