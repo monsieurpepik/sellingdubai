@@ -265,57 +265,60 @@
     if (localStorage.getItem(`sd_onboard_dismissed_${currentAgent.id}`)) return;
 
     const a = currentAgent;
-    const hasPhoto = !!a.photo_url;
-    const hasBio = !!(a.tagline && a.tagline.trim().length > 10);
+    const hasPhoto    = !!a.photo_url;
+    const hasBio      = !!(a.tagline && a.tagline.trim().length > 0);
     const hasWhatsapp = !!(a.whatsapp && String(a.whatsapp).replace(/\D/g, '').length >= 8);
-    // Property count will be checked after analytics load — for now mark as pending
     const hasProperty = (a.property_count || 0) > 0;
-    const hasShared = !!localStorage.getItem(`sd_shared_${a.id}`);
+    const hasRera     = a.verification_status === 'verified';
 
     const steps = [
-      { id: 'ob-photo', done: hasPhoto },
-      { id: 'ob-bio', done: hasBio },
-      { id: 'ob-whatsapp', done: hasWhatsapp },
-      { id: 'ob-property', done: hasProperty },
-      { id: 'ob-share', done: hasShared },
+      { id: 'ob-photo',    check: 'ob-photo-check',    done: hasPhoto },
+      { id: 'ob-bio',      check: 'ob-bio-check',      done: hasBio },
+      { id: 'ob-whatsapp', check: 'ob-whatsapp-check', done: hasWhatsapp },
+      { id: 'ob-property', check: 'ob-property-check', done: hasProperty },
+      { id: 'ob-rera',     check: 'ob-rera-check',     done: hasRera },
     ];
 
     const completed = steps.filter(s => s.done).length;
     const total = steps.length;
+    const score = Math.round((completed / total) * 100);
 
-    // All done? Don't show
-    if (completed >= total) return;
-
-    // Show checklist
+    // Always show the card — agents can see their score even when complete
     document.getElementById('onboard-checklist').style.display = 'block';
-    document.getElementById('onboard-bar').style.width = `${(completed / total) * 100}%`;
+    document.getElementById('onboard-bar').style.width = `${score}%`;
+
+    const scoreEl = document.getElementById('onboard-score');
+    if (scoreEl) scoreEl.textContent = `${score}%`;
+
+    const subEl = document.getElementById('onboard-sub-text');
+    if (subEl) {
+      subEl.textContent = score === 100
+        ? 'Your profile is complete. Keep your listings up to date to maximise lead flow.'
+        : `${score}% complete — ${total - completed} step${total - completed !== 1 ? 's' : ''} remaining`;
+    }
 
     steps.forEach(s => {
-      const el = document.getElementById(s.id);
-      const check = document.getElementById(`${s.id}-check`);
+      const el  = document.getElementById(s.id);
+      const chk = document.getElementById(s.check);
+      if (!el || !chk) return;
       if (s.done) {
         el.classList.add('done');
-        check.innerHTML = '✓';
+        chk.innerHTML = '✓';
       } else {
         el.classList.remove('done');
-        check.innerHTML = '';
+        chk.innerHTML = '';
       }
     });
-  }
 
-  // Update property step after analytics loads
-  function updateOnboardPropertyStep(propertyCount) {
-    if (!currentAgent) return;
-    if (propertyCount > 0) {
-      const el = document.getElementById('ob-property');
-      const check = document.getElementById('ob-property-check');
-      if (el && !el.classList.contains('done')) {
-        el.classList.add('done');
-        check.innerHTML = '✓';
-        // Recalculate progress
-        const doneCount = document.querySelectorAll('.onboard-step.done').length;
-        document.getElementById('onboard-bar').style.width = `${(doneCount / 5) * 100}%`;
-        if (doneCount >= 5) document.getElementById('onboard-checklist').style.display = 'none';
+    // Update RERA action label based on status
+    const reraAction = document.getElementById('ob-rera-action');
+    if (reraAction) {
+      if (hasRera) {
+        reraAction.textContent = 'Verified ✓';
+      } else if (a.verification_status === 'pending') {
+        reraAction.textContent = 'Under review';
+      } else {
+        reraAction.textContent = 'Join to verify';
       }
     }
   }
@@ -353,7 +356,7 @@
       ).then(null, () => null);
       if (pRes?.ok) {
         const props = await pRes.json();
-        updateOnboardPropertyStep(props.length);
+        renderOnboarding();
       }
     }
   }
@@ -539,17 +542,6 @@
   window.copyProfileLink = () => {
     if (!currentAgent) return;
     const url = `https://sellingdubai.ae/a/${currentAgent.slug}`;
-    // Track share step for onboarding checklist
-    localStorage.setItem(`sd_shared_${currentAgent.id}`, '1');
-    const obShare = document.getElementById('ob-share');
-    const obShareCheck = document.getElementById('ob-share-check');
-    if (obShare && !obShare.classList.contains('done')) {
-      obShare.classList.add('done');
-      if (obShareCheck) obShareCheck.innerHTML = '✓';
-      const doneCount = document.querySelectorAll('.onboard-step.done').length;
-      document.getElementById('onboard-bar').style.width = `${(doneCount / 5) * 100}%`;
-      if (doneCount >= 5) document.getElementById('onboard-checklist').style.display = 'none';
-    }
 
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById('btn-share');
@@ -638,8 +630,8 @@
     propertiesCache = data.properties || [];
     propLimitReached = data.limit !== null && propertiesCache.length >= data.limit;
     renderPropertyCards(data.properties || [], data.limit, data.tier);
-    // Update onboarding property step
-    updateOnboardPropertyStep(propertiesCache.length);
+    // Update onboarding checklist
+    renderOnboarding();
     // Update add button state
     const addBtn = document.getElementById('btn-add-prop');
     if (addBtn) addBtn.disabled = propLimitReached;
