@@ -134,7 +134,7 @@ export async function handler(
     if (excludedPropertyIds.length > 0) {
       // Use not-in via multiple neq chained as OR-filter alternative:
       // Supabase JS doesn't have a native "not in" for UUIDs, so use filter
-      query = query.not("id", "in", `(${excludedPropertyIds.map((id) => `"${id}"`).join(",")})`);
+      query = query.not("id", "in", `(${excludedPropertyIds.join(",")})`);
     }
 
     // Optional filters
