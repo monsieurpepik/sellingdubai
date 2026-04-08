@@ -11,6 +11,9 @@
   publish = "."
   command = "npm install && npm run build"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 # Canonical domain: redirect www to bare domain
 [[redirects]]
   from = "https://www.sellingdubai.ae/*"
