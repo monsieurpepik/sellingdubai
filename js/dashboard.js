@@ -1014,7 +1014,7 @@
       const thumb = l.thumbnail_url
         ? `<img class="cobroke-card-thumb" src="${esc(l.thumbnail_url)}" alt="${esc(l.area || '')}" data-managed loading="lazy">`
         : `<div class="cobroke-card-thumb-placeholder">🏠</div>`;
-      const beds = l.bedrooms != null ? `${l.bedrooms} bed · ` : '';
+      const beds = l.bedrooms != null ? `${Number(l.bedrooms)} bed · ` : '';
       const agentName = esc(l.requesting_agent_name || 'Agent');
       const agencyName = l.requesting_agency_name ? ` · ${esc(l.requesting_agency_name)}` : '';
       return '<div class="cobroke-card" data-prop-id="' + esc(l.property_id) + '">' +
@@ -1132,7 +1132,7 @@
       const rows = deals.map(d => {
         const prop = Array.isArray(d.property) ? d.property[0] : d.property;
         const title = prop?.title || prop?.location || '—';
-        const statusCls = `cobroke-status-${d.status || 'requested'}`;
+        const statusCls = `cobroke-status-${(d.status || 'requested').replace(/[^a-z0-9-]/gi, '')}`;
         const statusLabel = (d.status || 'requested').charAt(0).toUpperCase() + (d.status || 'requested').slice(1);
         const date = d.created_at ? new Date(d.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
         const propLink = prop?.id ? `<a href="/property/${esc(prop.id)}" style="color:#818cf8;text-decoration:none;font-size:12px;">View</a>` : '—';
