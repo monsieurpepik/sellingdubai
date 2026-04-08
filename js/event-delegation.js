@@ -212,6 +212,15 @@ document.addEventListener('click', (e) => {
     case 'addMember':
       if (typeof window.addMember === 'function') window.addMember();
       break;
+    case 'toggleInvitePanel':
+      if (typeof window.toggleInvitePanel === 'function') window.toggleInvitePanel();
+      break;
+    case 'generateInvite':
+      if (typeof window.generateInvite === 'function') window.generateInvite();
+      break;
+    case 'copyInviteUrl':
+      if (typeof window.copyInviteUrl === 'function') window.copyInviteUrl();
+      break;
 
     // Join page (join.js)
     case 'verifyBroker':
