@@ -15,6 +15,11 @@ import Anthropic from "npm:@anthropic-ai/sdk";
 import { createLogger } from "../_shared/logger.ts";
 import { executeTool, TOOL_DEFINITIONS, type ToolName } from "../_shared/tool-executor.ts";
 
+/** The 5 tools exposed to Claude per spec. Extra tools in TOOL_DEFINITIONS are reserved for future use. */
+const AI_SECRETARY_TOOLS = TOOL_DEFINITIONS.filter((t) =>
+  ["get_leads", "get_listings", "get_stats", "get_cobrokes", "update_lead"].includes(t.name)
+);
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -223,7 +228,7 @@ async function runClaude(
     model: MODEL,
     max_tokens: 1024,
     system: systemPrompt,
-    tools: TOOL_DEFINITIONS as Anthropic.Tool[],
+    tools: AI_SECRETARY_TOOLS as Anthropic.Tool[],
     messages,
   });
 
@@ -263,7 +268,7 @@ async function runClaude(
       model: MODEL,
       max_tokens: 1024,
       system: systemPrompt,
-      tools: TOOL_DEFINITIONS as Anthropic.Tool[],
+      tools: AI_SECRETARY_TOOLS as Anthropic.Tool[],
       messages,
     });
   }
@@ -354,11 +359,11 @@ export async function handler(
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Resolve agent_id: try magic_link token first, then siri_token
+    // Resolve agent_id: try magic_link token first, then siri_token (siri/vapi only)
     let agentId: string | null = null;
 
     agentId = await verifyMagicLinkToken(token, supabase);
-    if (!agentId) {
+    if (!agentId && (channelStr === "siri" || channelStr === "vapi")) {
       agentId = await verifySiriToken(token, supabase);
     }
 
