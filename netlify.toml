@@ -9,7 +9,7 @@
 
 [build]
   publish = "."
-  command = "npm install && npm run build"
+  command = "npm install --no-audit && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
