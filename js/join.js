@@ -8,6 +8,15 @@ const REFERRAL_URL = `${SUPABASE_URL}/functions/v1/track-referral`;
 // Capture referral code from URL (?ref=CODE)
 const _refCode = new URLSearchParams(window.location.search).get('ref');
 
+// Capture agency invite token from URL (?agency=TOKEN)
+// Falls back to localStorage so it survives a page refresh mid-flow.
+let agencyToken = new URLSearchParams(window.location.search).get('agency')
+  || localStorage.getItem('agencyInviteToken')
+  || null;
+if (agencyToken) {
+  localStorage.setItem('agencyInviteToken', agencyToken);
+}
+
 let verifiedBroker = null;
 let createdSlug = null;
 let _otpSent = false;
@@ -302,6 +311,7 @@ async function createProfile(otpCode) {
       tiktok_url: document.getElementById('tiktok').value.trim() || null,
       linkedin_url: document.getElementById('linkedin').value.trim() || null,
       photo_base64: document.getElementById('onboard-photo-data').value || null,
+      ...(agencyToken ? { agency_invite_token: agencyToken } : {}),
     };
 
     // Manual verification path: include RERA card image and flag
@@ -517,6 +527,7 @@ function restoreFormState() {
 
 function clearFormState() {
   localStorage.removeItem(FORM_DRAFT_KEY);
+  localStorage.removeItem('agencyInviteToken');
 }
 
 // Attach save-on-input listeners to all persisted fields
