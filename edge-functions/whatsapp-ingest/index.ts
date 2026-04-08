@@ -1004,6 +1004,61 @@ export async function handler(
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
+    // === HANDLE INTERACTIVE BUTTON REPLY ===
+    if (msgType === "interactive") {
+      const buttonReply = msg.interactive?.button_reply;
+      if (!buttonReply?.id) {
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+
+      const [action, leadId] = buttonReply.id.split("_").reduce(
+        (acc: [string, string], part: string, i: number) =>
+          i === 0 ? [part, ""] : [acc[0], acc[1] ? `${acc[1]}_${part}` : part],
+        ["", ""],
+      );
+
+      if ((action === "contacted" || action === "archive") && leadId) {
+        const newStatus = action === "contacted" ? "contacted" : "archived";
+        const { error } = await supabase
+          .from("leads")
+          .update({ status: newStatus })
+          .eq("id", leadId)
+          .eq("agent_id", agent.id);
+
+        const replyText = error
+          ? "Couldn't update the lead. Try again."
+          : action === "contacted"
+            ? "✓ Lead marked as contacted."
+            : "✗ Lead archived.";
+        await sendWhatsAppReply(senderPhone, replyText);
+      } else if (action === "view" && leadId) {
+        const { data: lead } = await supabase
+          .from("leads")
+          .select("name, phone, email, budget_range, preferred_area, message, status, created_at")
+          .eq("id", leadId)
+          .eq("agent_id", agent.id)
+          .single();
+
+        if (lead) {
+          const lines = [
+            `👤 *${lead.name}*`,
+            lead.phone ? `📞 ${lead.phone}` : null,
+            lead.email ? `✉️ ${lead.email}` : null,
+            lead.budget_range ? `💰 ${lead.budget_range}` : null,
+            lead.preferred_area ? `📍 ${lead.preferred_area}` : null,
+            lead.message ? `💬 ${lead.message.slice(0, 200)}` : null,
+            `Status: ${lead.status}`,
+          ].filter(Boolean).join("\n");
+          await sendWhatsAppReply(senderPhone, lines);
+        } else {
+          await sendWhatsAppReply(senderPhone, "Lead not found.");
+        }
+      }
+
+      log({ event: "button_reply_handled", agent_id: agent.id, action, status: 200 });
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+
     // === HANDLE IMAGE MESSAGE ===
     if (msgType === "image") {
       const imageId = msg.image?.id;
