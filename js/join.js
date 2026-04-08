@@ -73,7 +73,10 @@ async function verifyBroker() {
   // when ENABLE_TEST_MODE is set. In production (where ENABLE_TEST_MODE is unset) 0 is rejected like any unknown BRN.
   const isTestBrn = raw === '0';
   const num = isTestBrn ? 0 : parseInt(raw, 10);
-  if (!isTestBrn && (!num || Number.isNaN(num))) { showError(1, 'Please enter a valid broker number.'); return; }
+  if (!isTestBrn) {
+    if (!num || Number.isNaN(num)) { showError(1, 'Please enter a valid RERA broker number.'); return; }
+    if (raw.length < 4 || raw.length > 7) { showError(1, 'RERA broker numbers are 4–7 digits. Check your RERA card.'); return; }
+  }
 
   setLoading('btn-verify', true, 'Checking registry...', true);
 
