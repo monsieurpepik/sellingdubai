@@ -34,6 +34,18 @@ interface AgentStats {
   properties_active: number;
 }
 
+interface AgentBreakdown {
+  agent_id: string;
+  name: string;
+  leads_received: number;
+  leads_contacted: number;
+  leads_converted: number;
+  response_time_median_hours: number | null;
+  active_listings: number;
+  cobrokes_sent: number;
+  cobrokes_received: number;
+}
+
 async function statsForAgent(
   agentId: string,
   name: string,
@@ -59,6 +71,83 @@ async function statsForAgent(
   return { agent_id: agentId, name, slug, photo_url, views_this_month: c(vTM), views_last_month: c(vLM), leads_this_month: c(lTM), leads_last_month: c(lLM), leads_all_time: c(lAll), wa_taps_this_month: c(waTM), properties_active: c(props) };
 }
 
+/** Compute median of an array of numbers. Returns null for empty arrays. */
+function median(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
+}
+
+async function breakdownForAgent(
+  agentId: string,
+  name: string,
+  thisMonthStart: string,
+  // deno-lint-ignore no-explicit-any
+  sb: any,
+): Promise<AgentBreakdown> {
+  // Fetch all month leads for this agent (need status + timestamps for response time)
+  const [leadsRes, activePropRes, cobrokesSentRes, cobrokesRecvRes] = await Promise.allSettled([
+    sb.from("leads")
+      .select("status, created_at, agent_notified_at")
+      .eq("agent_id", agentId)
+      .gte("created_at", thisMonthStart),
+    sb.from("properties")
+      .select("id", { count: "exact", head: true })
+      .eq("agent_id", agentId)
+      .eq("is_active", true),
+    sb.from("co_broke_deals")
+      .select("id", { count: "exact", head: true })
+      .eq("buying_agent_id", agentId)
+      .gte("created_at", thisMonthStart),
+    sb.from("co_broke_deals")
+      .select("id", { count: "exact", head: true })
+      .eq("listing_agent_id", agentId)
+      .gte("created_at", thisMonthStart),
+  ]);
+
+  // deno-lint-ignore no-explicit-any
+  const leads: any[] = leadsRes.status === "fulfilled" ? (leadsRes.value.data ?? []) : [];
+  // deno-lint-ignore no-explicit-any
+  const cnt = (r: PromiseSettledResult<any>) => r.status === "fulfilled" ? (r.value.count ?? 0) : 0;
+
+  const leadsReceived = leads.length;
+  const leadsContacted = leads.filter(
+    // deno-lint-ignore no-explicit-any
+    (l: any) => l.status === "contacted" || l.status === "converted",
+  ).length;
+  const leadsConverted = leads.filter(
+    // deno-lint-ignore no-explicit-any
+    (l: any) => l.status === "converted",
+  ).length;
+
+  // Response time: hours from created_at to agent_notified_at (proxy for first contact)
+  // Only for leads that have agent_notified_at set
+  const responseHours: number[] = leads
+    // deno-lint-ignore no-explicit-any
+    .filter((l: any) => l.agent_notified_at != null && l.created_at != null)
+    // deno-lint-ignore no-explicit-any
+    .map((l: any) => {
+      const diffMs = new Date(l.agent_notified_at).getTime() - new Date(l.created_at).getTime();
+      return diffMs / (1000 * 60 * 60);
+    })
+    .filter((h: number) => h >= 0); // discard negative diffs from bad data
+
+  return {
+    agent_id: agentId,
+    name,
+    leads_received: leadsReceived,
+    leads_contacted: leadsContacted,
+    leads_converted: leadsConverted,
+    response_time_median_hours: median(responseHours),
+    active_listings: cnt(activePropRes),
+    cobrokes_sent: cnt(cobrokesSentRes),
+    cobrokes_received: cnt(cobrokesRecvRes),
+  };
+}
+
 // deno-lint-ignore no-explicit-any
 type CreateClientFn = (url: string, key: string) => any;
 
@@ -74,8 +163,10 @@ export async function handler(
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return new Response(JSON.stringify({ error: "Invalid JSON." }), { status: 400, headers: cors }); }
 
-  const { token } = body;
+  const { token, breakdown } = body;
   if (!token || typeof token !== "string") return new Response(JSON.stringify({ error: "Missing token." }), { status: 401, headers: cors });
+
+  const wantBreakdown = breakdown === "agents";
 
   const sb = _createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
@@ -95,7 +186,9 @@ export async function handler(
   if (membersErr) return new Response(JSON.stringify({ error: "Internal error." }), { status: 500, headers: cors });
   if (!members || members.length === 0) {
     const empty = { views_this_month: 0, views_last_month: 0, leads_this_month: 0, leads_last_month: 0, leads_all_time: 0, wa_taps_this_month: 0, properties_active: 0 };
-    return new Response(JSON.stringify({ agency, agents: [], totals: empty }), { headers: cors });
+    const emptyResp: Record<string, unknown> = { agency, agents: [], totals: empty };
+    if (wantBreakdown) emptyResp.agents_breakdown = [];
+    return new Response(JSON.stringify(emptyResp), { headers: cors });
   }
 
   const now = new Date();
@@ -123,9 +216,22 @@ export async function handler(
     agents_count: members.length,
   };
 
+  const respBody: Record<string, unknown> = { agency, agents: agentStats, totals };
+
+  if (wantBreakdown) {
+    const settledBreakdown = await Promise.allSettled(
+      // deno-lint-ignore no-explicit-any
+      members.map((m: any) => breakdownForAgent(m.id, m.name, thisMonthStart, sb))
+    );
+    const agentsBreakdown: AgentBreakdown[] = settledBreakdown
+      .filter((r): r is PromiseFulfilledResult<AgentBreakdown> => r.status === "fulfilled")
+      .map(r => r.value);
+    respBody.agents_breakdown = agentsBreakdown;
+  }
+
   log({ event: "success", agent_id: agentId, status: 200 });
   log.flush(Date.now() - _start);
-  return new Response(JSON.stringify({ agency, agents: agentStats, totals }), { headers: cors });
+  return new Response(JSON.stringify(respBody), { headers: cors });
 }
 
 Deno.serve((req) => handler(req));
