@@ -650,7 +650,7 @@ async function transcribeAudio(mediaId: string): Promise<string | null> {
 
   try {
     // 1. Get media URL from WhatsApp
-    const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${mediaId}`, {
+    const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${encodeURIComponent(mediaId)}`, {
       headers: { Authorization: `Bearer ${WA_TOKEN}` },
     });
     if (!mediaRes.ok) return null;
@@ -689,33 +689,40 @@ async function routeToSecretary(
   senderPhone: string,
   agentId: string,
   message: string,
-  supabase: ReturnType<typeof createClient>,
 ): Promise<void> {
   const SECRETARY_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-secretary`;
-  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!SERVICE_KEY) {
+    await sendWhatsAppReply(senderPhone, "Configuration error. Please try again later.");
+    return;
+  }
 
   try {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), 25000); // 25s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
-    const res = await fetch(SECRETARY_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      signal: controller.signal,
-      body: JSON.stringify({ agent_id: agentId, message, channel: "whatsapp" }),
-    });
+    try {
+      const res = await fetch(SECRETARY_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${SERVICE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+        body: JSON.stringify({ agent_id: agentId, message, channel: "whatsapp" }),
+      });
 
-    if (!res.ok) {
-      await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
-      return;
-    }
+      if (!res.ok) {
+        await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
+        return;
+      }
 
-    const data = await res.json();
-    if (data.reply) {
-      await sendWhatsAppReply(senderPhone, data.reply);
+      const data = await res.json();
+      if (data.reply) {
+        await sendWhatsAppReply(senderPhone, data.reply);
+      }
+    } finally {
+      clearTimeout(timeoutId);
     }
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
@@ -759,60 +766,6 @@ type IntentResult =
   | { action: "get_help" }
   | { action: "add_property" }
   | { action: "unknown" };
-
-async function detectIntent(rawText: string): Promise<IntentResult> {
-  const CLAUDE_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!CLAUDE_KEY) return { action: "unknown" };
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": CLAUDE_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 120,
-        messages: [{
-          role: "user",
-          content: `Classify this WhatsApp message from a Dubai real estate agent. Return ONLY valid JSON, no markdown, no explanation.
-
-Intents:
-- share_property: wants a PDF brochure. Include "query" with property name or "" if unspecified.
-- update_status: wants to update a listing status. Include "query" (property name) and "status" (one of: sold|rented|under_offer|available|reserved|just_listed).
-- get_leads: wants to see today's leads/enquiries.
-- get_stats: wants analytics/stats/views.
-- get_help: greeting or asking for help.
-- add_property: looks like a property listing (price, bedrooms, location — no photo needed).
-- unknown: anything else.
-
-Message: "${rawText.replace(/\\/g, "\\\\").replace(/"/g, '\\"').slice(0, 300)}"
-
-Return JSON like: {"action":"get_stats"} or {"action":"share_property","query":"Marina tower"} or {"action":"update_status","query":"JBR villa","status":"sold"}`
-        }],
-      }),
-    });
-
-    if (!res.ok) {
-      return { action: "unknown" };
-    }
-
-    const data = await res.json();
-    const text = (data.content?.[0]?.text || "").trim();
-    const parsed = JSON.parse(text);
-
-    if (!parsed?.action) return { action: "unknown" };
-    const { action } = parsed;
-    if (action === "share_property") return { action, query: parsed.query || "" };
-    if (action === "update_status") return { action, query: parsed.query || "", status: parsed.status || "available" };
-    if (["get_leads", "get_stats", "get_help", "add_property", "unknown"].includes(action)) return { action } as IntentResult;
-    return { action: "unknown" };
-  } catch (_e) {
-    return { action: "unknown" };
-  }
-}
 
 // ── Update Property Status ──
 async function handleUpdateStatus(
@@ -1177,12 +1130,12 @@ export async function handler(
       await sendWhatsAppReply(senderPhone, "🎙️ Processing your voice note...");
       const transcript = await transcribeAudio(audioId);
 
-      if (!transcript) {
+      if (!transcript?.trim()) {
         await sendWhatsAppReply(senderPhone, "Couldn't transcribe the voice note. Please type your message instead.");
         return new Response(JSON.stringify({ success: true }), { headers: CORS });
       }
 
-      await routeToSecretary(senderPhone, agent.id, transcript, supabase);
+      await routeToSecretary(senderPhone, agent.id, transcript);
       log({ event: "voice_note_processed", agent_id: agent.id, status: 200 });
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
@@ -1193,7 +1146,7 @@ export async function handler(
       if (!rawText.trim()) {
         return new Response(JSON.stringify({ success: true }), { headers: CORS });
       }
-      await routeToSecretary(senderPhone, agent.id, rawText, supabase);
+      await routeToSecretary(senderPhone, agent.id, rawText);
       log({ event: "text_routed_to_secretary", agent_id: agent.id, status: 200 });
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
