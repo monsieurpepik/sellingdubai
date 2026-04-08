@@ -447,3 +447,134 @@
   @media (min-width: 769px) {
     .mobile-nav { display: none !important; }
   }
+
+  /* ── Cobroke Section ── */
+  .cobroke-section { margin-bottom: 32px; }
+  .cobroke-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .cobroke-tab {
+    padding: 10px 16px; font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,0.45); border: none; background: none;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: all 0.15s; font-family: 'Inter', sans-serif;
+  }
+  .cobroke-tab:hover { color: rgba(255,255,255,0.7); }
+  .cobroke-tab.active { color: #fff; border-bottom-color: #4d65ff; }
+
+  /* Filter bar */
+  .cobroke-filters {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;
+    margin-bottom: 20px; padding: 16px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+  }
+  .cobroke-filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .cobroke-filter-label {
+    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .cobroke-filter-input, .cobroke-filter-select {
+    padding: 8px 12px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+    color: #fff; font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+    min-width: 120px;
+  }
+  .cobroke-filter-input:focus, .cobroke-filter-select:focus { border-color: rgba(99,102,241,0.5); }
+  .cobroke-filter-select option { background: #1a1a1f; color: #fff; }
+  .cobroke-filter-apply {
+    padding: 8px 16px; border-radius: 8px; background: #fff; color: #0a0a0a;
+    font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.15s; align-self: flex-end;
+  }
+  .cobroke-filter-apply:hover { background: rgba(255,255,255,0.9); }
+  .cobroke-filter-apply:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Listing cards grid */
+  .cobroke-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .cobroke-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; overflow: hidden; transition: border-color 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .cobroke-card:hover { border-color: rgba(255,255,255,0.12); }
+  .cobroke-card-thumb {
+    width: 100%; height: 160px; object-fit: cover;
+    background: rgba(255,255,255,0.06); display: block;
+  }
+  .cobroke-card-thumb-placeholder {
+    width: 100%; height: 160px; background: rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; opacity: 0.3;
+  }
+  .cobroke-card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .cobroke-card-area { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; }
+  .cobroke-card-price { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .cobroke-card-type { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .cobroke-card-agent { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .cobroke-card-agent strong { color: rgba(255,255,255,0.65); }
+  .cobroke-card-footer { padding: 0 14px 14px; }
+  .cobroke-req-btn {
+    width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+    background: rgba(77,101,255,0.15); color: #818cf8;
+  }
+  .cobroke-req-btn:hover:not(:disabled) { background: rgba(77,101,255,0.25); }
+  .cobroke-req-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cobroke-req-btn.requested { background: rgba(34,197,94,0.1); color: #22c55e; }
+
+  /* Skeleton cards */
+  .cobroke-skel-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; overflow: hidden;
+  }
+  .cobroke-skel-thumb { height: 160px; }
+  .cobroke-skel-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .cobroke-skel-line { height: 12px; border-radius: 6px; }
+
+  /* Load more */
+  .cobroke-load-more {
+    text-align: center; margin-top: 20px;
+  }
+  .cobroke-load-more-btn {
+    padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6); cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+  .cobroke-load-more-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); color: #fff; }
+  .cobroke-load-more-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* My open cobrokes table */
+  .cobroke-table-wrap { overflow-x: auto; }
+  .cobroke-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  .cobroke-table th {
+    text-align: left; padding: 10px 12px;
+    font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .cobroke-table td {
+    padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.7); vertical-align: middle;
+  }
+  .cobroke-table tr:last-child td { border-bottom: none; }
+  .cobroke-status-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .cobroke-status-requested { background: rgba(77,101,255,0.15); color: #818cf8; }
+  .cobroke-status-accepted { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .cobroke-status-viewing { background: rgba(245,158,11,0.15); color: #fcd34d; }
+  .cobroke-status-completed { background: rgba(168,85,247,0.15); color: #a855f7; }
+  .cobroke-status-declined { background: rgba(239,68,68,0.12); color: #f87171; }
+
+  @media (max-width: 768px) {
+    .cobroke-grid { grid-template-columns: 1fr; }
+    .cobroke-filters { flex-direction: column; }
+    .cobroke-filter-input, .cobroke-filter-select { min-width: 0; width: 100%; }
+    .cobroke-filter-apply { width: 100%; }
+  }

@@ -231,6 +231,56 @@
       </div>
     </div>
 
+    <!-- Cobroke Section -->
+    <div class="cobroke-section" id="cobroke-section">
+      <div class="leads-header">
+        <span class="leads-title">Co-Brokerage</span>
+      </div>
+      <!-- Tabs -->
+      <div class="cobroke-tabs" role="tablist">
+        <button class="cobroke-tab active" role="tab" aria-selected="true" data-action="cobrokeTab" data-tab="browse" id="cobroke-tab-browse">Browse Listings</button>
+        <button class="cobroke-tab" role="tab" aria-selected="false" data-action="cobrokeTab" data-tab="mine" id="cobroke-tab-mine">My Requests</button>
+      </div>
+
+      <!-- Browse panel -->
+      <div id="cobroke-panel-browse">
+        <!-- Filters -->
+        <div class="cobroke-filters">
+          <div class="cobroke-filter-group">
+            <label class="cobroke-filter-label" for="cb-filter-area">Area</label>
+            <input type="text" class="cobroke-filter-input" id="cb-filter-area" placeholder="e.g. JBR, Downtown" autocomplete="off">
+          </div>
+          <div class="cobroke-filter-group">
+            <label class="cobroke-filter-label" for="cb-filter-type">Type</label>
+            <select class="cobroke-filter-select" id="cb-filter-type">
+              <option value="">All Types</option>
+              <option value="apartment">Apartment</option>
+              <option value="villa">Villa</option>
+              <option value="office">Office</option>
+              <option value="retail">Retail</option>
+              <option value="land">Land</option>
+            </select>
+          </div>
+          <div class="cobroke-filter-group">
+            <label class="cobroke-filter-label" for="cb-filter-price">Max Price (AED)</label>
+            <input type="number" class="cobroke-filter-input" id="cb-filter-price" placeholder="e.g. 5000000" min="0" style="min-width:140px;">
+          </div>
+          <button class="cobroke-filter-apply" id="cb-filter-btn" data-action="cobrokeApplyFilters">Apply Filters</button>
+        </div>
+        <!-- Cards -->
+        <div class="cobroke-grid" id="cobroke-grid"></div>
+        <!-- Load more -->
+        <div class="cobroke-load-more" id="cobroke-load-more" style="display:none;">
+          <button class="cobroke-load-more-btn" data-action="cobrokeLoadMore">Load more</button>
+        </div>
+      </div>
+
+      <!-- My requests panel -->
+      <div id="cobroke-panel-mine" style="display:none;">
+        <div id="cobroke-mine-list"></div>
+      </div>
+    </div>
+
     <!-- Properties Section -->
     <div class="props-section" id="props-section">
       <div class="props-header">

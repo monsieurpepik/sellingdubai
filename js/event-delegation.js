@@ -151,6 +151,20 @@ document.addEventListener('click', (e) => {
       if (typeof window.mortOpProceed === 'function') window.mortOpProceed();
       break;
 
+    // Cobroke (dashboard.js)
+    case 'cobrokeTab':
+      if (typeof window.cobrokeTab === 'function') window.cobrokeTab(el.dataset.tab);
+      break;
+    case 'cobrokeApplyFilters':
+      if (typeof window.cobrokeApplyFilters === 'function') window.cobrokeApplyFilters();
+      break;
+    case 'cobrokeLoadMore':
+      if (typeof window.cobrokeLoadMore === 'function') window.cobrokeLoadMore();
+      break;
+    case 'cobrokeRequest':
+      if (typeof window.cobrokeRequest === 'function') window.cobrokeRequest(el.dataset.propId);
+      break;
+
     // Dashboard (dashboard.js)
     case 'sendMagicLink':
       if (typeof window.sendMagicLink === 'function') window.sendMagicLink();
