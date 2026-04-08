@@ -114,6 +114,7 @@ async function verifyBroker() {
 
     setLoading('btn-verify', false, 'Verify My License');
     if (typeof gtag === 'function') gtag('event', 'step1_complete');
+    saveFormState();
     goStep(2);
   } catch (e) {
     setLoading('btn-verify', false, 'Verify My License');
@@ -463,6 +464,11 @@ const FORM_DRAFT_KEY = 'sd_join_draft';
 
 function saveFormState() {
   try {
+    // Determine current visible step
+    let currentStep = 1;
+    if (document.getElementById('step-2')?.classList.contains('active')) currentStep = 2;
+    if (document.getElementById('step-3')?.classList.contains('active')) currentStep = 3;
+
     localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify({
       displayName: document.getElementById('display-name').value,
       email:       document.getElementById('email').value,
@@ -473,6 +479,8 @@ function saveFormState() {
       youtube:     document.getElementById('youtube').value,
       tiktok:      document.getElementById('tiktok').value,
       linkedin:    document.getElementById('linkedin').value,
+      step: currentStep,
+      verifiedBroker: verifiedBroker || null,
     }));
   } catch(e) { console.warn('[join] Could not save form draft to localStorage:', e); }
 }
@@ -491,6 +499,19 @@ function restoreFormState() {
     if (s.youtube)     document.getElementById('youtube').value     = s.youtube;
     if (s.tiktok)      document.getElementById('tiktok').value      = s.tiktok;
     if (s.linkedin)    document.getElementById('linkedin').value    = s.linkedin;
+
+    // Resume step 2 if agent had already completed broker verification
+    if (s.step === 2 && s.verifiedBroker) {
+      verifiedBroker = s.verifiedBroker;
+      const name = titleCase(verifiedBroker.name_en || '');
+      document.getElementById('verify-name').textContent = name;
+      document.getElementById('verify-bn').textContent = `#${verifiedBroker.broker_number}`;
+      document.getElementById('verify-expiry').textContent = verifiedBroker.license_end || '—';
+      document.getElementById('verify-status').textContent = 'Active';
+      document.getElementById('step2-name').textContent = name;
+      if (s.displayName) document.getElementById('display-name').value = s.displayName;
+      goStep(2);
+    }
   } catch(e) { console.warn('[join] Could not restore form draft from localStorage:', e); }
 }
 
@@ -551,6 +572,7 @@ async function manualSubmit() {
   document.getElementById('step2-name').textContent = name;
   document.getElementById('display-name').value = name;
 
+  saveFormState();
   goStep(2);
 }
 
