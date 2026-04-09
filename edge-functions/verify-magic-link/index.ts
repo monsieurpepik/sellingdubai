@@ -110,6 +110,13 @@ export async function handler(
         .eq("id", link.id);
     }
 
+    // Update last_active_at for retention tracking (fire-and-forget)
+    supabase
+      .from("agents")
+      .update({ last_active_at: new Date().toISOString() })
+      .eq("id", link.agent_id)
+      .then(() => {}, () => {});
+
     // Return agent data — allowlist only the fields the dashboard needs
     const DASHBOARD_FIELDS = [
       'id', 'slug', 'full_name', 'name', 'email', 'phone',
@@ -128,7 +135,9 @@ export async function handler(
       'show_mortgage_calculator', 'show_properties', 'show_off_plan',
       'show_preapproval', 'show_golden_visa',
       'property_order', 'link_buttons',
-      'referral_code', 'referral_count',
+      'referral_code', 'referral_count', 'bonus_listings', 'bonus_listing_slots',
+      'open_for_cobroke', 'last_active_at',
+      'stripe_subscription_status', 'stripe_plan', 'stripe_current_period_end',
       'webhook_url', 'facebook_pixel_id', 'ga4_measurement_id',
     ];
     const safeAgent: Record<string, unknown> = {};

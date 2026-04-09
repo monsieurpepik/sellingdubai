@@ -343,6 +343,8 @@
       renderReferrers(data.top_referrers || []);
       renderLeads(data.recent_leads || []);
       loadReferralSection(data.referral_stats || null);
+      // Upgrade nudge for free agents with traction
+      showUpgradeNudge(data);
     }
 
     // Check property count for onboarding step (lightweight HEAD-style query — non-critical)
@@ -609,6 +611,35 @@
     });
   };
 
+  // ── Upgrade Nudge ──
+  function showUpgradeNudge(analyticsData) {
+    if (!currentAgent) return;
+    const tier = currentAgent.tier || 'free';
+    if (tier !== 'free') return; // only nudge free agents
+    const leads = (analyticsData.this_month || {}).lead_submits || 0;
+    const views = (analyticsData.this_month || {}).views || 0;
+    // Show nudge if agent has meaningful traction
+    if (leads < 3 && views < 50) return;
+
+    // Don't show if already dismissed this session
+    if (sessionStorage.getItem('sd_nudge_dismissed')) return;
+
+    const msg = leads >= 3
+      ? `You've received <strong>${leads} leads</strong> this month. Upgrade to Pro for lead export, 20 listings, and advanced analytics.`
+      : `Your profile has <strong>${views} views</strong> this month. Upgrade to Pro to unlock lead CRM and grow faster.`;
+
+    const nudge = document.createElement('div');
+    nudge.id = 'upgrade-nudge';
+    nudge.style.cssText = 'background:linear-gradient(135deg,rgba(17,39,210,0.12),rgba(17,39,210,0.04));border:1px solid rgba(17,39,210,0.15);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;';
+    nudge.innerHTML = `
+      <div style="flex:1;font-size:13px;color:rgba(255,255,255,0.7);line-height:1.55;">${msg}</div>
+      <a href="/pricing" style="background:#1127d2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit;">Upgrade</a>
+      <button onclick="this.parentElement.remove();sessionStorage.setItem('sd_nudge_dismissed','1')" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;" aria-label="Dismiss">&times;</button>
+    `;
+    const metrics = document.getElementById('metrics');
+    if (metrics) metrics.parentElement.insertBefore(nudge, metrics);
+  }
+
   // ── Lead Referral Modal ──
   window.openReferLeadModal = () => {
     const modal = document.getElementById('refer-lead-modal');
@@ -793,6 +824,10 @@
 
     if (propLimitReached) {
       limitNote.innerHTML = `Listing limit reached (${limit}). <a href="/pricing" style="color:#fff;font-weight:600;text-decoration:underline;">Upgrade to Pro or Premium</a> to add more.`;
+      limitNote.style.display = 'block';
+    } else if (limit !== null && props.length >= limit - 1 && props.length > 0) {
+      // Approaching limit nudge (1 slot left)
+      limitNote.innerHTML = `<span style="color:#f59e0b;">Almost full</span> \u2014 ${props.length}/${limit} listings used. <a href="/pricing" style="color:#fff;font-weight:600;text-decoration:underline;">Upgrade</a> for more slots.`;
       limitNote.style.display = 'block';
     } else {
       limitNote.style.display = 'none';
