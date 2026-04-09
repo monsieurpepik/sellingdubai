@@ -42,11 +42,13 @@ async function validateInitData(initData: string, botToken: string): Promise<Rec
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    // Constant-time comparison
-    if (computed.length !== hash.length) return null;
-    let diff = 0;
-    for (let i = 0; i < computed.length; i++) {
-      diff |= computed.charCodeAt(i) ^ hash.charCodeAt(i);
+    // Constant-time comparison — no early-return branch to prevent timing leaks
+    const hashLen = hash.length;
+    const computedLen = computed.length;
+    const maxLen = Math.max(hashLen, computedLen);
+    let diff = hashLen ^ computedLen; // encodes length mismatch in diff
+    for (let i = 0; i < maxLen; i++) {
+      diff |= computed.charCodeAt(i % computedLen) ^ hash.charCodeAt(i % hashLen);
     }
     if (diff !== 0) return null;
 
@@ -155,6 +157,7 @@ export async function handler(
         return new Response(JSON.stringify({ error: "Invalid or expired token" }), { status: 401, headers: cors });
       }
       if (session.auth_token_used) {
+        log({ event: "bot_auth_token_replay", status: 401 });
         return new Response(JSON.stringify({ error: "Token already used" }), { status: 401, headers: cors });
       }
 
@@ -176,12 +179,12 @@ export async function handler(
         .eq("token", bearerToken)
         .maybeSingle();
 
-      if (!magicLink?.agent_id || magicLink.revoked_at) {
+      if (!magicLink?.agent_id || magicLink.revoked_at || magicLink.used_at) {
         return new Response(JSON.stringify({ error: "Invalid session" }), { status: 401, headers: cors });
       }
 
       // Link the Telegram session to the agent
-      await supabase
+      const { error: updateError } = await supabase
         .from("telegram_sessions")
         .update({
           agent_id: magicLink.agent_id,
@@ -189,6 +192,11 @@ export async function handler(
           last_active: new Date().toISOString(),
         })
         .eq("id", session.id);
+
+      if (updateError) {
+        log({ event: "bot_auth_update_failed", error: String(updateError), status: 500 });
+        return new Response(JSON.stringify({ error: "Failed to link Telegram session" }), { status: 500, headers: cors });
+      }
 
       log({ event: "bot_auth_complete", agent_id: magicLink.agent_id, status: 200 });
       return new Response(
