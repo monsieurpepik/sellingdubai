@@ -85,6 +85,24 @@ Deno.test("rotates siri_token successfully", async () => {
   const res = await handler(req, factory);
   assertEquals(res.status, 200);
   const body = await res.json();
-  assertEquals(typeof body.siri_token, "string");
-  assertEquals(body.siri_token.length > 0, true);
+  assertEquals(body.siri_token, "new-uuid-1234");
+});
+
+Deno.test("rejects revoked magic link", async () => {
+  const factory = mockClientFactory({
+    "magic_links": {
+      data: {
+        agent_id: "agent-001",
+        revoked_at: "2026-01-01T00:00:00Z",
+        expires_at: FUTURE_DATE,
+        used_at: null,
+      },
+      error: null,
+    },
+  });
+  const req = makeReq({ token: "revoked-token" });
+  const res = await handler(req, factory);
+  assertEquals(res.status, 401);
+  const body = await res.json();
+  assertEquals(typeof body.error, "string");
 });

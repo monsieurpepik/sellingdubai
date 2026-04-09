@@ -85,6 +85,17 @@ export async function handler(req: Request, _createClient: ClientFactory): Promi
     return json({ error: "Failed to rotate token" }, 500);
   }
 
+  // After agents update succeeds, stamp the magic link as used
+  const { error: stampErr } = await supabase
+    .from("magic_links")
+    .update({ used_at: new Date().toISOString() })
+    .eq("token", token);
+
+  if (stampErr) {
+    console.error("Failed to stamp magic link used_at", stampErr);
+    // Non-fatal: rotation succeeded; warn but don't fail the request
+  }
+
   return json({ siri_token: updated.siri_token });
 }
 
