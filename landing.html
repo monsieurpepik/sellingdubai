@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<title>SellingDubai — The Operating System for Dubai Real Estate Agents</title>
+<title>SellingDubai — Your DLD-Verified Agent Profile in Under 2 Minutes</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M16 6L6 14v12a1 1 0 001 1h6v-7h6v7h6a1 1 0 001-1V14L16 6z' fill='%23fff'/%3E%3C/svg%3E">
-<meta name="description" content="DLD-verified agent profiles. Your leads, your brand, zero commission. Free forever."/>
+<meta name="description" content="DLD-verified agent profiles with lead capture, property listings, WhatsApp integration, and analytics. Free forever — go live in under 2 minutes."/>
 <link rel="canonical" href="https://sellingdubai.ae/"/>
-<meta property="og:title" content="SellingDubai — The Operating System for Dubai Real Estate Agents"/>
+<meta property="og:title" content="SellingDubai — Your DLD-Verified Agent Profile in Under 2 Minutes"/>
 <meta property="og:description" content="DLD-verified. Your leads. Your brand. Free."/>
 <meta property="og:image" content="https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80"/>
 <meta property="og:url" content="https://sellingdubai.ae"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="SellingDubai"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="SellingDubai — The Operating System for Dubai Real Estate Agents"/>
+<meta name="twitter:title" content="SellingDubai — Your DLD-Verified Agent Profile in Under 2 Minutes"/>
 <meta name="twitter:description" content="DLD-verified. Your leads. Your brand. Free."/>
 <meta name="twitter:image" content="https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80"/>
 <link rel="stylesheet" href="/landing-output.css">
@@ -158,10 +158,10 @@
     color: #0a0a0a; margin-bottom: 40px; display: block; }
   .hero-headline {
     font-family: 'Manrope', sans-serif; font-weight: 800;
-    font-size: clamp(30px, 6vw, 60px); color: #0a0a0a;
+    font-size: clamp(30px, 6vw, 52px); color: #0a0a0a;
     letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 20px;
   }
-  .hero-subline { font-size: 18px; font-weight: 400; color: #71717a; margin: 0 0 36px; }
+  .hero-subline { font-size: 17px; font-weight: 400; color: #71717a; margin: 0 0 36px; line-height: 1.55; }
   .hero-cta-btn {
     display: inline-block; background: #0a0a0a; color: #fff; border: none;
     cursor: pointer; padding: 16px 44px; border-radius: 14px;
@@ -240,6 +240,52 @@
   .landing-nav-login { font-size: 12px; font-weight: 600; color: #71717a; text-decoration: none; font-family: 'Manrope', sans-serif; padding: 6px 0; transition: color 0.15s; }
   .landing-nav-login:hover { color: #0a0a0a; }
 
+  /* ── Section shared ── */
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #1127D2; margin-bottom: 12px; }
+  .section-title { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: clamp(24px, 4vw, 38px); color: #0a0a0a; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 16px; }
+  .section-desc { font-size: 15px; color: #71717a; line-height: 1.6; max-width: 520px; }
+
+  /* ── Features grid ── */
+  .features-section { padding: 80px 24px; background: #fff; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 900px; margin: 48px auto 0; }
+  .feature-card { background: #fafafa; border: 1px solid #f0f0f0; border-radius: 16px; padding: 28px 24px; }
+  .feature-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 20px; }
+  .feature-card h3 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 16px; color: #0a0a0a; margin: 0 0 8px; }
+  .feature-card p { font-size: 13px; color: #71717a; line-height: 1.55; margin: 0; }
+
+  /* ── How it works ── */
+  .how-section { padding: 80px 24px; background: #fafafa; border-top: 1px solid #f0f0f0; }
+  .how-steps { display: flex; gap: 32px; max-width: 900px; margin: 48px auto 0; flex-wrap: wrap; justify-content: center; }
+  .how-step { text-align: center; flex: 1; min-width: 200px; max-width: 280px; }
+  .how-number { width: 44px; height: 44px; border-radius: 50%; background: #0a0a0a; color: #fff; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .how-step h3 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; color: #0a0a0a; margin: 0 0 8px; }
+  .how-step p { font-size: 13px; color: #71717a; line-height: 1.55; margin: 0; }
+
+  /* ── WhatsApp demo ── */
+  .wa-section { padding: 80px 24px; background: #fff; }
+  .wa-inner { display: flex; gap: 48px; max-width: 900px; margin: 0 auto; align-items: center; flex-wrap: wrap; }
+  .wa-text { flex: 1; min-width: 280px; }
+  .wa-mockup { flex: 0 0 300px; background: #1b1b1b; border-radius: 20px; padding: 24px; font-family: -apple-system, sans-serif; }
+  .wa-msg { border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.5; margin-bottom: 10px; max-width: 85%; }
+  .wa-msg-out { background: #005c4b; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+  .wa-msg-in { background: #202c33; color: #e9edef; border-bottom-left-radius: 4px; }
+  .wa-msg-caption { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  @media (max-width: 767px) { .wa-mockup { flex: 1 1 100%; max-width: 100%; } .wa-inner { gap: 32px; } }
+
+  /* ── Social proof ── */
+  .proof-section { padding: 80px 24px; background: #fafafa; border-top: 1px solid #f0f0f0; text-align: center; }
+  .proof-stats { display: flex; gap: 32px; justify-content: center; max-width: 700px; margin: 40px auto 0; flex-wrap: wrap; }
+  .proof-stat { flex: 1; min-width: 140px; }
+  .proof-stat-number { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 36px; color: #0a0a0a; letter-spacing: -0.03em; }
+  .proof-stat-label { font-size: 13px; color: #71717a; margin-top: 4px; }
+
+  /* ── Final CTA ── */
+  .final-cta-section { padding: 80px 24px; background: #0a0a0a; text-align: center; }
+  .final-cta-section h2 { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: clamp(24px, 4vw, 38px); color: #fff; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 12px; }
+  .final-cta-section p { font-size: 15px; color: rgba(255,255,255,0.5); margin: 0 0 32px; }
+  .final-cta-btn { display: inline-block; background: #fff; color: #0a0a0a; border: none; cursor: pointer; padding: 16px 44px; border-radius: 14px; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; font-family: 'Manrope', sans-serif; transition: opacity 0.15s; }
+  .final-cta-btn:hover { opacity: 0.85; }
+
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"AED","description":"Verified agent profile, up to 3 listings, basic analytics, and lead capture."},{"@type":"Offer","name":"Pro","price":"299","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"299","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Free plus up to 20 listings, advanced analytics, lead CRM, and custom branding."},{"@type":"Offer","name":"Premium","price":"799","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"799","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Pro plus unlimited listings, lead export, featured agent badge, and dedicated support."}],"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
 <style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}</style>
@@ -262,11 +308,11 @@
 <section class="hero-above-fold">
   <div class="hero-inner">
     <span class="hero-brand">SellingDubai</span>
-    <h1 class="hero-headline">The Operating System for Dubai Real Estate Agents</h1>
-    <p class="hero-subline">DLD-verified. Your leads. Your brand. Free.</p>
+    <h1 class="hero-headline">Your DLD-verified profile. Live in under 2 minutes.</h1>
+    <p class="hero-subline">A verified agent page with lead capture, property listings, WhatsApp integration, and analytics. Free forever — you own every lead.</p>
     <button class="hero-cta-btn" data-open-wizard>Claim Your Profile &rarr;</button>
     <p class="hero-agent-count">
-      <span id="agent-count-live">—</span> agents already on the platform
+      <span id="agent-count-live">—</span> verified agents already live
     </p>
   </div>
 </section>
@@ -326,22 +372,142 @@
 
 </div>
 
-<!-- ======== 3 FACTS ======== -->
-<section class="facts-row">
-  <div class="facts-inner">
-    <div class="fact">
-      <div class="fact-number">100%</div>
-      <div class="fact-label">Free to start — no credit card</div>
+<!-- ======== FEATURES GRID ======== -->
+<section class="features-section reveal" id="features">
+  <div style="text-align:center;">
+    <p class="section-label">What you get</p>
+    <h2 class="section-title" style="margin-left:auto;margin-right:auto;">Everything an agent needs. Nothing you don't.</h2>
+    <p class="section-desc" style="margin-left:auto;margin-right:auto;">No commission. No middlemen. Your profile, your leads, your brand.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(17,39,210,0.08);color:#1127D2;">
+        <span class="material-symbols-outlined">verified</span>
+      </div>
+      <h3>DLD-Verified Badge</h3>
+      <p>We verify your broker number directly with the Dubai Land Department. Buyers see the badge — instant trust.</p>
     </div>
-    <div class="fact">
-      <div class="fact-number">DLD</div>
-      <div class="fact-label">Verified badge on every profile</div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(37,211,102,0.08);color:#25d366;">
+        <span class="material-symbols-outlined">call</span>
+      </div>
+      <h3>WhatsApp Lead Capture</h3>
+      <p>Buyers tap one button to message you on WhatsApp. No forms, no delays — leads go directly to your phone.</p>
     </div>
-    <div class="fact">
-      <div class="fact-number">0%</div>
-      <div class="fact-label">Platform commission on your leads</div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,0,0,0.06);color:#0a0a0a;">
+        <span class="material-symbols-outlined">home_work</span>
+      </div>
+      <h3>Property Listings</h3>
+      <p>Upload listings with photos, prices, and specs. Send a photo on WhatsApp — AI writes the description for you.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,149,0,0.08);color:#f59e0b;">
+        <span class="material-symbols-outlined">analytics</span>
+      </div>
+      <h3>Real-Time Analytics</h3>
+      <p>See who views your profile, where they come from, and which listings get the most attention. Data you can act on.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.08);color:#8b5cf6;">
+        <span class="material-symbols-outlined">apartment</span>
+      </div>
+      <h3>Off-Plan Inventory</h3>
+      <p>Browse 500+ off-plan projects synced from the REM registry. Share brochures with buyers in one tap.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(236,72,153,0.08);color:#ec4899;">
+        <span class="material-symbols-outlined">share</span>
+      </div>
+      <h3>Link-in-Bio for Agents</h3>
+      <p>One link for your Instagram, TikTok, and business card. Your profile is your digital storefront.</p>
     </div>
   </div>
+</section>
+
+<!-- ======== HOW IT WORKS ======== -->
+<section class="how-section reveal" id="how">
+  <div style="text-align:center;">
+    <p class="section-label">How it works</p>
+    <h2 class="section-title" style="margin-left:auto;margin-right:auto;">Go live in 3 steps</h2>
+  </div>
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="how-number">1</div>
+      <h3>Enter your DLD broker number</h3>
+      <p>We pull your name and licence from the DLD registry automatically.</p>
+    </div>
+    <div class="how-step">
+      <div class="how-number">2</div>
+      <h3>Confirm your details</h3>
+      <p>Add your photo, WhatsApp, and tagline. Takes 60 seconds.</p>
+    </div>
+    <div class="how-step">
+      <div class="how-number">3</div>
+      <h3>You're live</h3>
+      <p>Your verified profile is ready to share. Start receiving leads immediately.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======== WHATSAPP AI DEMO ======== -->
+<section class="wa-section reveal">
+  <div class="wa-inner">
+    <div class="wa-text">
+      <p class="section-label">WhatsApp-first</p>
+      <h2 class="section-title">Send a photo. Get a listing.</h2>
+      <p class="section-desc" style="margin-bottom:24px;">WhatsApp a property photo with details — AI writes the title, description, Instagram caption, and TikTok caption. Your listing goes live instantly.</p>
+      <ul style="list-style:none;padding:0;margin:0;font-size:14px;color:#3f3f46;line-height:2;">
+        <li><span class="material-symbols-outlined" style="font-size:16px;color:#25d366;margin-right:6px;">check_circle</span> AI-generated professional descriptions</li>
+        <li><span class="material-symbols-outlined" style="font-size:16px;color:#25d366;margin-right:6px;">check_circle</span> Instagram &amp; TikTok captions included</li>
+        <li><span class="material-symbols-outlined" style="font-size:16px;color:#25d366;margin-right:6px;">check_circle</span> PDF brochure auto-generated</li>
+        <li><span class="material-symbols-outlined" style="font-size:16px;color:#25d366;margin-right:6px;">check_circle</span> Text commands: /my stats, /my leads, /share</li>
+      </ul>
+    </div>
+    <div class="wa-mockup" aria-hidden="true">
+      <div class="wa-msg wa-msg-out">
+        Marina Gate 1, 2BR, 1850 sqft, sea view, AED 3.2M
+        <div class="wa-msg-caption">Photo attached</div>
+      </div>
+      <div class="wa-msg wa-msg-in">
+        <strong>SellingDubai</strong><br>
+        <strong>Panoramic Sea Views at Marina Gate</strong><br><br>
+        Wake up to floor-to-ceiling marina views in this spacious 2-bedroom at Marina Gate 1. Premium finishes throughout with a lifestyle that puts you steps from the Walk and Beach.<br><br>
+        <span style="color:rgba(255,255,255,0.4);font-size:11px;">Listing live + IG caption + PDF brochure sent</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== SOCIAL PROOF ======== -->
+<section class="proof-section reveal">
+  <p class="section-label">Trusted by agents across Dubai</p>
+  <h2 class="section-title" style="margin-left:auto;margin-right:auto;">The numbers</h2>
+  <div class="proof-stats">
+    <div class="proof-stat">
+      <div class="proof-stat-number" id="proof-agents">—</div>
+      <div class="proof-stat-label">Verified agents</div>
+    </div>
+    <div class="proof-stat">
+      <div class="proof-stat-number">0%</div>
+      <div class="proof-stat-label">Commission on leads</div>
+    </div>
+    <div class="proof-stat">
+      <div class="proof-stat-number">&lt;2 min</div>
+      <div class="proof-stat-label">To go live</div>
+    </div>
+    <div class="proof-stat">
+      <div class="proof-stat-number">100%</div>
+      <div class="proof-stat-label">Free to start</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== FINAL CTA ======== -->
+<section class="final-cta-section reveal">
+  <h2>Ready to own your brand?</h2>
+  <p>Free forever. No credit card required. Go live in under 2 minutes.</p>
+  <button class="final-cta-btn" data-open-wizard>Claim Your Profile &rarr;</button>
 </section>
 
 </main>
@@ -352,9 +518,9 @@
     <div>
       <h4 class="text-[11px] font-bold text-white mb-6 uppercase tracking-widest opacity-80">Product</h4>
       <ul class="space-y-3">
-        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/join">Get Your Page</a></li>
+        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#features">Features</a></li>
+        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#how">How It Works</a></li>
         <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="/pricing">Pricing</a></li>
-        <li><a class="text-[11px] font-bold text-white/50 hover:text-white transition-colors" href="#faq">FAQ</a></li>
       </ul>
     </div>
     <div>

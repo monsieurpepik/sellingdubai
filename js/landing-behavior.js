@@ -31,6 +31,8 @@ document.querySelectorAll('.reveal').forEach((el) => { _revealObserver.observe(e
       if (!Number.isNaN(total) && total > 0) {
         var el = document.getElementById('agent-count-live');
         if (el) el.textContent = total.toLocaleString();
+        var proofEl = document.getElementById('proof-agents');
+        if (proofEl) proofEl.textContent = total.toLocaleString();
       }
     }
   }).catch(() => {});
