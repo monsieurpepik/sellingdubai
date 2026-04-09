@@ -417,6 +417,22 @@
   .toast.show { opacity: 1; }
 
   /* ── Mobile ── */
+  /* ── Co-Brokerage ── */
+  .cobroke-section { margin-bottom: 32px; }
+  .cobroke-intro { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .cobroke-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .cobroke-filter-select { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #fff; font-family: inherit; cursor: pointer; min-width: 120px; }
+  .cobroke-filter-select option { background: #111; color: #fff; }
+  .cobroke-listing { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+  .cobroke-listing-img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,0.06); flex-shrink: 0; }
+  .cobroke-listing-info { flex: 1; min-width: 0; }
+  .cobroke-listing-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cobroke-listing-meta { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 4px; }
+  .cobroke-listing-price { font-size: 13px; font-weight: 700; color: #1127d2; }
+  .cobroke-listing-agent { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+  .cobroke-request-btn { background: rgba(17,39,210,0.12); color: #6b8aff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: center; transition: background 0.15s; font-family: inherit; }
+  .cobroke-request-btn:hover { background: rgba(17,39,210,0.2); }
+
   @media (max-width: 768px) {
     .sidebar { display: none; }
     .main { margin-left: 0; padding: 16px; height: 100vh; height: 100dvh; }

@@ -609,6 +609,141 @@
     });
   };
 
+  // ── Lead Referral Modal ──
+  window.openReferLeadModal = () => {
+    const modal = document.getElementById('refer-lead-modal');
+    if (modal) modal.style.display = 'flex';
+  };
+  window.closeReferLeadModal = () => {
+    const modal = document.getElementById('refer-lead-modal');
+    if (modal) modal.style.display = 'none';
+  };
+  window.closeReferLeadModalIfBackdrop = (e) => {
+    if (e.target.id === 'refer-lead-modal') window.closeReferLeadModal();
+  };
+
+  window.sendLeadReferral = async () => {
+    const btn = document.getElementById('btn-send-referral');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+    try {
+      const REFER_URL = `${SUPABASE_URL}/functions/v1/refer-lead`;
+      const res = await fetch(REFER_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receiver_slug: document.getElementById('refer-receiver-slug')?.value?.trim() || '',
+          lead_name: document.getElementById('refer-lead-name')?.value?.trim() || '',
+          lead_phone: document.getElementById('refer-lead-phone')?.value?.trim() || '',
+          lead_email: document.getElementById('refer-lead-email')?.value?.trim() || '',
+          lead_budget_range: document.getElementById('refer-lead-budget')?.value?.trim() || '',
+          lead_property_type: document.getElementById('refer-lead-type')?.value?.trim() || '',
+          lead_preferred_area: document.getElementById('refer-lead-area')?.value?.trim() || '',
+          lead_notes: document.getElementById('refer-lead-notes')?.value?.trim() || '',
+          referral_fee_percent: Number(document.getElementById('refer-fee-percent')?.value) || 25,
+        }),
+      });
+      if (res.ok) {
+        showToast('Lead referral sent — the other agent will be notified by email');
+        window.closeReferLeadModal();
+        // Clear form
+        ['refer-receiver-slug','refer-lead-name','refer-lead-phone','refer-lead-email','refer-lead-budget','refer-lead-type','refer-lead-area','refer-lead-notes'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Referral failed — check the agent slug and try again');
+      }
+    } catch (_e) {
+      showToast('Network error — try again');
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Referral'; }
+  };
+
+  // ── Co-Brokerage ──
+  window.searchCobroke = async () => {
+    const area = document.getElementById('cobroke-area')?.value || '';
+    const type = document.getElementById('cobroke-type')?.value || '';
+    const resultsEl = document.getElementById('cobroke-results');
+    if (!resultsEl) return;
+    resultsEl.innerHTML = '<div style="padding:24px;text-align:center;font-size:13px;color:rgba(255,255,255,0.4);">Loading...</div>';
+
+    try {
+      const params = new URLSearchParams();
+      if (area) params.set('area', area);
+      if (type) params.set('type', type);
+      params.set('limit', '20');
+
+      const COBROKE_URL = `${SUPABASE_URL}/functions/v1/cobroke-listings`;
+      const res = await fetch(`${COBROKE_URL}?${params}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+      if (!res.ok) {
+        resultsEl.innerHTML = '<div class="empty-state" style="padding:24px;border:none;"><div class="empty-sub">Could not load listings. Try again.</div></div>';
+        return;
+      }
+      const data = await res.json();
+      const listings = data.listings || [];
+      const countEl = document.getElementById('cobroke-count');
+      if (countEl) countEl.textContent = `${listings.length} listing${listings.length !== 1 ? 's' : ''}`;
+
+      if (!listings.length) {
+        resultsEl.innerHTML = '<div class="empty-state" style="padding:24px;border:none;"><div class="empty-sub">No listings open for co-brokerage in this area. Try different filters.</div></div>';
+        return;
+      }
+
+      resultsEl.innerHTML = listings.map(function(l) {
+        const price = l.price ? ('AED ' + Number(l.price).toLocaleString()) : '';
+        const img = l.image_url
+          ? `/.netlify/images?url=${encodeURIComponent(l.image_url)}&w=160&fm=webp&q=80`
+          : '';
+        const imgTag = img
+          ? `<img class="cobroke-listing-img" src="${img}" alt="" loading="lazy">`
+          : '<div class="cobroke-listing-img"></div>';
+        const specs = [l.bedrooms ? l.bedrooms + 'BR' : '', l.property_type || '', l.location || ''].filter(Boolean).join(' · ');
+        return `<div class="cobroke-listing">
+          ${imgTag}
+          <div class="cobroke-listing-info">
+            <div class="cobroke-listing-title">${escDash(l.title || 'Property')}</div>
+            <div class="cobroke-listing-meta">${escDash(specs)}</div>
+            <div class="cobroke-listing-price">${escDash(price)}</div>
+            <div class="cobroke-listing-agent">Listed by ${escDash(l.agent_name || 'Agent')}</div>
+          </div>
+          <button class="cobroke-request-btn" onclick="requestCobroke('${l.id}')">Request Co-Broke</button>
+        </div>`;
+      }).join('');
+    } catch (_e) {
+      resultsEl.innerHTML = '<div class="empty-state" style="padding:24px;border:none;"><div class="empty-sub">Network error. Try again.</div></div>';
+    }
+  };
+
+  function escDash(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  window.requestCobroke = async (propertyId) => {
+    if (!authToken || !propertyId) return;
+    const btn = document.querySelector(`button[onclick="requestCobroke('${propertyId}')"]`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+    try {
+      const COBROKE_REQ_URL = `${SUPABASE_URL}/functions/v1/cobroke-request`;
+      const res = await fetch(COBROKE_REQ_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ property_id: propertyId }),
+      });
+      if (res.ok) {
+        if (btn) { btn.textContent = 'Requested'; btn.style.background = 'rgba(34,197,94,0.12)'; btn.style.color = '#22c55e'; }
+        showToast('Co-brokerage request sent');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        if (btn) { btn.disabled = false; btn.textContent = 'Request Co-Broke'; }
+        showToast(err.error || 'Request failed — try again');
+      }
+    } catch (_e) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Request Co-Broke'; }
+      showToast('Network error — try again');
+    }
+  };
+
   // ── Properties ──
   const PROP_STATUS_LABELS = {
     just_listed: 'Just Listed',
@@ -620,6 +755,11 @@
 
   window.scrollToProperties = () => {
     const el = document.getElementById('props-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  window.scrollToCobroke = () => {
+    const el = document.getElementById('cobroke-section');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 

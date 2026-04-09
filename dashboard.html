@@ -76,6 +76,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Properties
       </button>
+      <button class="nav-item" data-action="scrollToCobroke">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Co-Broke
+      </button>
       <a class="nav-item" id="nav-view-profile" href="/a/" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View Profile
@@ -217,7 +221,10 @@
     <div class="leads-section">
       <div class="leads-header">
         <span class="leads-title">Recent Leads</span>
-        <span class="leads-count" id="leads-count"></span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="leads-count" id="leads-count"></span>
+          <button class="btn-sm btn-ghost" data-action="openReferLeadModal" style="font-size:12px;">Refer a Lead</button>
+        </div>
       </div>
       <div id="leads-list">
         <div class="empty-state">
@@ -245,6 +252,50 @@
         </div>
       </div>
       <div class="props-limit-note" id="props-limit-note" style="display:none;"></div>
+    </div>
+
+    <!-- Co-Brokerage Network -->
+    <div class="cobroke-section" id="cobroke-section">
+      <div class="leads-header">
+        <span class="leads-title">Co-Brokerage Network</span>
+        <span class="leads-count" id="cobroke-count"></span>
+      </div>
+      <div class="cobroke-intro">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(17,39,210,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1127d2" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Bring your buyer to another agent's listing</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.5;">Browse properties open for co-brokerage. When a deal closes, you earn a buying-agent commission. SellingDubai takes 5%.</div>
+          </div>
+        </div>
+      </div>
+      <div class="cobroke-filters" id="cobroke-filters">
+        <select class="cobroke-filter-select" id="cobroke-area">
+          <option value="">All Areas</option>
+          <option value="downtown">Downtown</option>
+          <option value="marina">Dubai Marina</option>
+          <option value="palm">Palm Jumeirah</option>
+          <option value="jbr">JBR</option>
+          <option value="business bay">Business Bay</option>
+          <option value="creek harbour">Creek Harbour</option>
+          <option value="jumeirah">Jumeirah</option>
+        </select>
+        <select class="cobroke-filter-select" id="cobroke-type">
+          <option value="">All Types</option>
+          <option value="apartment">Apartment</option>
+          <option value="villa">Villa</option>
+          <option value="townhouse">Townhouse</option>
+          <option value="penthouse">Penthouse</option>
+        </select>
+        <button class="btn-sm btn-primary" id="btn-cobroke-search" data-action="searchCobroke">Browse Listings</button>
+      </div>
+      <div id="cobroke-results">
+        <div class="empty-state" style="padding:24px;border:none;">
+          <div class="empty-sub">Tap "Browse Listings" to see properties open for co-brokerage</div>
+        </div>
+      </div>
     </div>
 
     <!-- Referral Invite Section -->
@@ -394,6 +445,66 @@
     <div class="modal-footer">
       <button class="btn-sm btn-ghost" data-action="closePropModal">Cancel</button>
       <button class="btn-sm btn-primary" id="btn-save-prop" data-action="savePropModal">Save Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Refer Lead Modal -->
+<div class="modal-overlay" id="refer-lead-modal" data-action="closeReferLeadModalIfBackdrop" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Refer a Lead</h3>
+      <button class="modal-close" data-action="closeReferLeadModal" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:16px;line-height:1.5;">Pass a lead to another agent. When the deal closes, you earn a referral fee (5-50%). Platform fee: 10%.</p>
+      <div>
+        <div class="modal-label">Receiving Agent (slug or name) *</div>
+        <input type="text" class="modal-input" id="refer-receiver-slug" placeholder="e.g. ahmed-al-mansouri">
+      </div>
+      <div class="modal-row">
+        <div>
+          <div class="modal-label">Lead Name *</div>
+          <input type="text" class="modal-input" id="refer-lead-name" placeholder="Client name">
+        </div>
+        <div>
+          <div class="modal-label">Phone</div>
+          <input type="tel" class="modal-input" id="refer-lead-phone" placeholder="+971 50 123 4567">
+        </div>
+      </div>
+      <div class="modal-row">
+        <div>
+          <div class="modal-label">Email</div>
+          <input type="email" class="modal-input" id="refer-lead-email" placeholder="client@email.com">
+        </div>
+        <div>
+          <div class="modal-label">Budget Range</div>
+          <input type="text" class="modal-input" id="refer-lead-budget" placeholder="e.g. 1M-3M AED">
+        </div>
+      </div>
+      <div class="modal-row">
+        <div>
+          <div class="modal-label">Property Type</div>
+          <input type="text" class="modal-input" id="refer-lead-type" placeholder="e.g. Apartment">
+        </div>
+        <div>
+          <div class="modal-label">Preferred Area</div>
+          <input type="text" class="modal-input" id="refer-lead-area" placeholder="e.g. Marina">
+        </div>
+      </div>
+      <div>
+        <div class="modal-label">Notes</div>
+        <input type="text" class="modal-input" id="refer-lead-notes" placeholder="Any context for the receiving agent">
+      </div>
+      <div>
+        <div class="modal-label">Your Referral Fee %</div>
+        <input type="number" class="modal-input" id="refer-fee-percent" value="25" min="5" max="50" style="max-width:100px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">5% minimum, 50% maximum. Platform takes 10% of commission.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost" data-action="closeReferLeadModal">Cancel</button>
+      <button class="btn-sm btn-primary" id="btn-send-referral" data-action="sendLeadReferral">Send Referral</button>
     </div>
   </div>
 </div>
