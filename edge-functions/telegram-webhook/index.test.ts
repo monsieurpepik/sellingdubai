@@ -36,7 +36,7 @@ Deno.test("telegram-webhook: /start command → sends auth prompt", async () => 
   const origUrl = Deno.env.get("SUPABASE_URL");
   const origKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  Deno.env.set("TELEGRAM_WEBHOOK_SECRET", "");
+  Deno.env.delete("TELEGRAM_WEBHOOK_SECRET");
   Deno.env.set("TELEGRAM_BOT_TOKEN", "test-token");
   Deno.env.set("SUPABASE_URL", "http://127.0.0.1:54321");
   Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-key");
@@ -64,6 +64,9 @@ Deno.test("telegram-webhook: /start command → sends auth prompt", async () => 
     const res = await handler(req, () => mock);
     assertEquals(res.status, 200);
     assertEquals(sentMessages.length >= 1, true);
+    const welcomeMsg = sentMessages[0] as { chat_id: number; text: string };
+    assertEquals(welcomeMsg.chat_id, 12345);
+    assertEquals(welcomeMsg.text.includes("Welcome") || welcomeMsg.text.includes("/start"), true);
   } finally {
     globalThis.fetch = originalFetch;
     if (origSecret === undefined) Deno.env.delete("TELEGRAM_WEBHOOK_SECRET");
@@ -83,7 +86,7 @@ Deno.test("telegram-webhook: unauthenticated non-start message → prompts auth"
   const origUrl = Deno.env.get("SUPABASE_URL");
   const origKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  Deno.env.set("TELEGRAM_WEBHOOK_SECRET", "");
+  Deno.env.delete("TELEGRAM_WEBHOOK_SECRET");
   Deno.env.set("TELEGRAM_BOT_TOKEN", "test-token");
   Deno.env.set("SUPABASE_URL", "http://127.0.0.1:54321");
   Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-key");
@@ -112,6 +115,9 @@ Deno.test("telegram-webhook: unauthenticated non-start message → prompts auth"
     const res = await handler(req, () => mock);
     assertEquals(res.status, 200);
     assertEquals(sentMessages.length >= 1, true);
+    const promptMsg = sentMessages[0] as { chat_id: number; text: string };
+    assertEquals(promptMsg.chat_id, 12345);
+    assertEquals(promptMsg.text.includes("/start"), true);
   } finally {
     globalThis.fetch = originalFetch;
     if (origSecret === undefined) Deno.env.delete("TELEGRAM_WEBHOOK_SECRET");

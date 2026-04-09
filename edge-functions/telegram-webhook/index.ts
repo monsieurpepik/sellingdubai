@@ -16,25 +16,35 @@ async function sendTelegramMessage(
   const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
   if (!BOT_TOKEN) return;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
   try {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown", ...extra }),
     });
-  } catch (_e) { /* fire and forget */ }
+  } catch (_e) { /* fire and forget */ } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function answerCallbackQuery(callbackQueryId: string, text?: string): Promise<void> {
   const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
   if (!BOT_TOKEN) return;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
   try {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
       body: JSON.stringify({ callback_query_id: callbackQueryId, text }),
     });
-  } catch (_e) { /* ignore */ }
+  } catch (_e) { /* ignore */ } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // ── Auth Flow ───────────────────────────────────────────────────────────────
@@ -206,14 +216,14 @@ export async function handler(
   _createClient: CreateClientFn = createClient,
 ): Promise<Response> {
   const log = createLogger("telegram-webhook", req);
-  const _start = Date.now();
+  const start = Date.now();
 
   if (req.method !== "POST") {
     return new Response("OK", { status: 200 });
   }
 
   const expectedSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
-  if (expectedSecret) {
+  if (expectedSecret != null && expectedSecret !== "") {
     const receivedSecret = req.headers.get("x-telegram-bot-api-secret-token");
     if (receivedSecret !== expectedSecret) {
       return new Response("Forbidden", { status: 403 });
@@ -224,10 +234,14 @@ export async function handler(
     // deno-lint-ignore no-explicit-any
     const update: any = await req.json();
 
-    const supabase = _createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!SUPABASE_URL || !SERVICE_KEY) {
+      log({ event: "config_error", status: 500 });
+      return new Response("OK", { status: 200 });
+    }
+
+    const supabase = _createClient(SUPABASE_URL, SERVICE_KEY);
 
     // ── Callback query (inline button press) ──────────────────────────────
     if (update.callback_query) {
@@ -235,6 +249,8 @@ export async function handler(
       const chatId: number = cq.message?.chat?.id;
       const telegramUserId: number = cq.from?.id;
       const data: string = cq.data || "";
+
+      if (!chatId || !telegramUserId) return new Response("OK", { status: 200 });
 
       await answerCallbackQuery(cq.id);
 
@@ -252,7 +268,9 @@ export async function handler(
 
       if (data.startsWith("lead_contacted_") || data.startsWith("lead_archived_")) {
         const isContacted = data.startsWith("lead_contacted_");
-        const leadId = data.replace("lead_contacted_", "").replace("lead_archived_", "");
+        const leadId = isContacted
+          ? data.slice("lead_contacted_".length)
+          : data.slice("lead_archived_".length);
         const newStatus = isContacted ? "contacted" : "archived";
 
         const { error } = await supabase
@@ -279,6 +297,8 @@ export async function handler(
     const telegramUserId: number = message.from?.id;
     const messageText: string = message.text || "";
 
+    if (!chatId || !telegramUserId) return new Response("OK", { status: 200 });
+
     if (messageText === "/start") {
       await startAuthFlow(chatId, telegramUserId, supabase);
       log({ event: "start_command", status: 200 });
@@ -295,7 +315,9 @@ export async function handler(
 
     if (!isAuthenticated) {
       if (session) {
-        await handlePendingAuth(chatId, telegramUserId, messageText, supabase);
+        if (messageText.trim()) {
+          await handlePendingAuth(chatId, telegramUserId, messageText, supabase);
+        }
       } else {
         await sendTelegramMessage(
           chatId,
@@ -334,7 +356,7 @@ export async function handler(
     log({ event: "error", status: 500, error: String(e) });
     return new Response("OK", { status: 200 }); // Always 200 to Telegram — never retry
   } finally {
-    log.flush(Date.now() - _start);
+    log.flush(Date.now() - start);
   }
 }
 
