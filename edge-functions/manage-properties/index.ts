@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
+import { resolveEffectiveTier as _resolveEffectiveTier } from '../_shared/tier.ts';
 
 // deno-lint-ignore no-explicit-any
 type CreateClientFn = (url: string, key: string) => any;
@@ -23,21 +24,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-function resolveEffectiveTier(agent: {
-  tier?: string;
-  stripe_subscription_status?: string;
-  stripe_current_period_end?: string;
-}): string {
-  const tier = agent.tier ?? "free";
-  if (tier === "free") return "free";
-  if (agent.stripe_subscription_status === "past_due" && agent.stripe_current_period_end) {
-    const graceEnd = new Date(agent.stripe_current_period_end);
-    graceEnd.setDate(graceEnd.getDate() + 7);
-    if (new Date() > graceEnd) return "free";
-  }
-  if (agent.stripe_subscription_status === "canceled") return "free";
-  return tier;
-}
+// Re-export shared tier resolution (kept as local alias for minimal diff)
+const resolveEffectiveTier = _resolveEffectiveTier;
 
 function tierLimit(tier: string): number | null {
   if (tier === "premium") return null;

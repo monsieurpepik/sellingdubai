@@ -19,6 +19,8 @@
 //     }
 //   });
 
+import { captureException } from './sentry.ts';
+
 export interface LogPayload {
   event: string;
   agent_id?: string;
@@ -58,6 +60,11 @@ export function createLogger(functionName: string, req: Request): Logger {
       };
       entries.push(entry);
       console.log(JSON.stringify(entry));
+
+      // Auto-report errors to Sentry (fire-and-forget)
+      if (payload.event === 'error' && payload.error) {
+        captureException(new Error(payload.error), { function: functionName, request_id });
+      }
     },
     {
       flush(durationMs: number): void {

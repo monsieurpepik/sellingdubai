@@ -8,6 +8,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
+import { resolveEffectiveTier, TIER_LIMITS } from "../_shared/tier.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",
@@ -87,6 +88,20 @@ export async function handler(
     if (!link.used_at) {
       return new Response(JSON.stringify({ error: "Session not activated. Please use the login link sent to your email." }), {
         status: 401, headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
+    // Tier gate: lead export requires Pro or Premium
+    const { data: agent } = await supabase
+      .from("agents")
+      .select("tier, stripe_subscription_status, stripe_current_period_end")
+      .eq("id", link.agent_id)
+      .single();
+
+    const effectiveTier = agent ? resolveEffectiveTier(agent) : "free";
+    if (!TIER_LIMITS[effectiveTier]?.leads_export) {
+      return new Response(JSON.stringify({ error: "Lead export requires a Pro or Premium plan." }), {
+        status: 403, headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
