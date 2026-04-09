@@ -107,6 +107,72 @@ Deno.test("Invalid token → 401", async () => {
   assertEquals(body.error, "Invalid or expired token.");
 });
 
+Deno.test("ai-secretary: rejects invalid Bearer token", async () => {
+  const client = mockClientFactory({
+    agents: { data: null, error: null },
+    whatsapp_sessions: { data: null, error: null },
+  });
+  const req = makeReq(
+    "POST",
+    { message: "check my leads", channel: "siri" },
+    { authorization: "Bearer invalid-token-uuid" },
+  );
+  const res = await handler(req, client);
+  assertEquals(res.status, 401);
+  const body = await res.json();
+  assertEquals(body.error, "Invalid token");
+});
+
+Deno.test("ai-secretary: resolves agent from valid Bearer token", async () => {
+  const savedApiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const savedUrl = Deno.env.get("SUPABASE_URL");
+  const savedKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  try {
+    Deno.env.set("ANTHROPIC_API_KEY", "sk-ant-test-key-for-unit-tests");
+    Deno.env.set("SUPABASE_URL", "http://127.0.0.1:54321");
+    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
+
+    const mockAgent = { id: "agent-from-token", name: "Fatima", siri_token: "valid-uuid" };
+    const mockSession = { agent_id: "agent-from-token", turns: [], last_active: new Date().toISOString() };
+    const client = mockClientFactory({
+      agents: { data: mockAgent, error: null },
+      whatsapp_sessions: { data: mockSession, error: null },
+      leads: { data: [], error: null },
+      properties: { data: null, error: null, count: 0 },
+    });
+    const req = makeReq(
+      "POST",
+      { message: "check my leads", channel: "siri" },
+      { authorization: "Bearer valid-uuid" },
+    );
+    const restore = stubClaudeFetch("You have 0 leads.");
+    try {
+      const res = await handler(req, client);
+      // Should not be 401 — agent was resolved from token
+      assertEquals(res.status !== 401, true);
+    } finally {
+      restore();
+    }
+  } finally {
+    if (savedApiKey !== undefined) {
+      Deno.env.set("ANTHROPIC_API_KEY", savedApiKey);
+    } else {
+      Deno.env.delete("ANTHROPIC_API_KEY");
+    }
+    if (savedUrl !== undefined) {
+      Deno.env.set("SUPABASE_URL", savedUrl);
+    } else {
+      Deno.env.delete("SUPABASE_URL");
+    }
+    if (savedKey !== undefined) {
+      Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", savedKey);
+    } else {
+      Deno.env.delete("SUPABASE_SERVICE_ROLE_KEY");
+    }
+  }
+});
+
 Deno.test("Valid whatsapp request → 200 with reply and actions_taken", async () => {
   // Save original env vars
   const savedApiKey = Deno.env.get("ANTHROPIC_API_KEY");

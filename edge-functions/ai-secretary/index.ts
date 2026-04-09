@@ -359,12 +359,35 @@ export async function handler(
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Resolve agent_id: try magic_link token first, then siri_token (siri/vapi only)
-    let agentId: string | null = null;
+    // Siri/VAPI Bearer path: resolve agent from siri_token first
+    let resolvedAgentId: string | undefined;
+    if (channelStr === "siri" || channelStr === "vapi") {
+      const { data: tokenAgent } = await supabase
+        .from("agents")
+        .select("id")
+        .eq("siri_token", token)
+        .maybeSingle();
+      if (tokenAgent) {
+        resolvedAgentId = tokenAgent.id;
+      } else {
+        // Fall through to magic_link check below
+      }
+    }
 
-    agentId = await verifyMagicLinkToken(token, supabase);
+    // Resolve agent_id: try magic_link token if not already resolved via siri_token
+    let agentId: string | null = resolvedAgentId ?? null;
+
+    if (!agentId) {
+      agentId = await verifyMagicLinkToken(token, supabase);
+    }
+
+    // For siri/vapi: if magic_link also fails, report invalid token
     if (!agentId && (channelStr === "siri" || channelStr === "vapi")) {
-      agentId = await verifySiriToken(token, supabase);
+      log({ event: "auth_failed", status: 401 });
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: cors,
+      });
     }
 
     if (!agentId) {
