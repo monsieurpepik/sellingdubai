@@ -189,6 +189,21 @@ echo ""
 
 # ── 8b. Plan B edge function presence ────────────────────────────────────────
 # Verify new Plan B functions exist in edge-functions/ (supabase/functions is a symlink to it).
+
+# v2.0 Phase 3 — AI Secretary + Telegram env var checks
+check_env() {
+  local var="$1"
+  if [ -z "${!var:-}" ]; then
+    warn "Env var ${var} is not set — required for AI Secretary / Telegram features"
+  else
+    pass "Env var ${var} is set"
+  fi
+}
+check_env "ANTHROPIC_API_KEY"
+check_env "OPENAI_API_KEY"
+check_env "TELEGRAM_BOT_TOKEN"
+check_env "TELEGRAM_WEBHOOK_SECRET"
+
 PLANB_FUNCTIONS=("cobroke-discover")
 PLANB_MISSING=""
 for fn in "${PLANB_FUNCTIONS[@]}"; do

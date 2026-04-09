@@ -54,6 +54,14 @@ check "get-analytics"         "$SB/functions/v1/get-analytics"          "4"
 check "lead-nudger (health)"  "$SB/functions/v1/lead-nudger?secret=INVALID"               "4"
 check "cobroke-discover"      "$SB/functions/v1/cobroke-discover"                          "4"
 
+# v2.0 Phase 3 — AI Secretary + Telegram
+# ai-secretary — OPTIONS should return 200
+check "ai-secretary OPTIONS"         "$SB/functions/v1/ai-secretary"        "2"
+# telegram-webhook — GET with no secret → 200 (Telegram always expects 200)
+check "telegram-webhook GET"         "$SB/functions/v1/telegram-webhook"    "2"
+# verify-telegram-init — OPTIONS should return 200
+check "verify-telegram-init OPTIONS" "$SB/functions/v1/verify-telegram-init" "2"
+
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 echo ""
