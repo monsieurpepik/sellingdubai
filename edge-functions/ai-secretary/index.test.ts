@@ -94,8 +94,8 @@ Deno.test("Missing Authorization header → 401", async () => {
 });
 
 Deno.test("Invalid token → 401", async () => {
-  // Default mock: magic_links returns NOT_FOUND (no override provided)
-  const factory = mockClientFactory({});
+  // Bearer path: siri_token lookup returns null → 401 "Invalid token"
+  const factory = mockClientFactory({ agents: { data: null, error: null } });
   const req = makeReq(
     "POST",
     { message: "hello", channel: "whatsapp" },
@@ -104,7 +104,7 @@ Deno.test("Invalid token → 401", async () => {
   const res = await handler(req, factory);
   assertEquals(res.status, 401);
   const body = await res.json();
-  assertEquals(body.error, "Invalid or expired token.");
+  assertEquals(body.error, "Invalid token");
 });
 
 Deno.test("ai-secretary: rejects invalid Bearer token", async () => {
@@ -149,8 +149,8 @@ Deno.test("ai-secretary: resolves agent from valid Bearer token", async () => {
     const restore = stubClaudeFetch("You have 0 leads.");
     try {
       const res = await handler(req, client);
-      // Should not be 401 — agent was resolved from token
-      assertEquals(res.status !== 401, true);
+      // Should be 200 — agent was resolved from token
+      assertEquals(res.status, 200);
     } finally {
       restore();
     }

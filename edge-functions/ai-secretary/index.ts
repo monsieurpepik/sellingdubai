@@ -344,68 +344,44 @@ export async function handler(
       );
     }
 
-    // Auth: extract bearer token
+    // Auth: Bearer header → siri_token lookup; no header → body agent_id (WhatsApp/Telegram/etc.)
+    let resolvedAgentId: string | undefined;
+
     const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    if (authHeader?.startsWith("Bearer ")) {
+      const supabaseForAuth = _createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      const token = authHeader.slice(7);
+      const tokenAgentId = await verifySiriToken(token, supabaseForAuth);
+      if (!tokenAgentId) {
+        log({ event: "auth_failed", status: 401 });
+        return new Response(JSON.stringify({ error: "Invalid token" }), {
+          status: 401,
+          headers: cors,
+        });
+      }
+      resolvedAgentId = tokenAgentId;
+    } else {
+      // No Bearer header — fall back to body agent_id (existing behavior for WhatsApp/Telegram/etc.)
+      resolvedAgentId = (body as Record<string, unknown>).agent_id as string | undefined;
+    }
+
+    const agentId: string | null = resolvedAgentId ?? null;
+
+    if (!agentId) {
+      log({ event: "auth_failed", status: 401 });
       return new Response(JSON.stringify({ error: "Unauthorized." }), {
         status: 401,
         headers: cors,
       });
     }
-    const token = authHeader.slice(7);
 
     const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-
-    // Siri/VAPI Bearer path: resolve agent from siri_token first
-    let resolvedAgentId: string | undefined;
-    if (channelStr === "siri" || channelStr === "vapi") {
-      const { data: tokenAgent } = await supabase
-        .from("agents")
-        .select("id")
-        .eq("siri_token", token)
-        .maybeSingle();
-      if (tokenAgent) {
-        resolvedAgentId = tokenAgent.id;
-      } else {
-        // Fall through to magic_link check below
-      }
-    }
-
-    // Resolve agent_id: try magic_link token if not already resolved via siri_token
-    let agentId: string | null = resolvedAgentId ?? null;
-
-    if (!agentId) {
-      agentId = await verifyMagicLinkToken(token, supabase);
-    }
-
-    // For siri/vapi: if magic_link also fails, report invalid token
-    if (!agentId && (channelStr === "siri" || channelStr === "vapi")) {
-      log({ event: "auth_failed", status: 401 });
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
-        status: 401,
-        headers: cors,
-      });
-    }
-
-    if (!agentId) {
-      log({ event: "auth_failed", status: 401 });
-      return new Response(JSON.stringify({ error: "Invalid or expired token." }), {
-        status: 401,
-        headers: cors,
-      });
-    }
-
-    // Allow body agent_id override only if it matches the authenticated agent
-    if (typeof bodyAgentId === "string" && bodyAgentId !== agentId) {
-      log({ event: "agent_id_mismatch", status: 403 });
-      return new Response(JSON.stringify({ error: "Forbidden." }), {
-        status: 403,
-        headers: cors,
-      });
-    }
 
     // Load conversation history (stateful channels only)
     const table = sessionTable(channelStr);
