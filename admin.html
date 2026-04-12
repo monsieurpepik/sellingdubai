@@ -588,16 +588,18 @@
   <div class="login-card">
     <div class="login-logo">SellingDubai<span>/admin</span></div>
     <div class="login-tagline">Internal admin panel — authorized access only</div>
-    <label class="login-label" for="login-token">Admin token</label>
-    <input
-      type="password"
-      id="login-token"
-      placeholder="Enter admin token"
-      autocomplete="current-password"
-      spellcheck="false"
-    />
-    <button id="login-btn" class="btn-primary">Sign in</button>
-    <div id="login-error" role="alert" aria-live="polite"></div>
+    <form id="login-form" novalidate>
+      <label class="login-label" for="token-input">Admin token</label>
+      <input
+        type="password"
+        id="token-input"
+        placeholder="Enter admin token"
+        autocomplete="current-password"
+        spellcheck="false"
+      />
+      <button id="login-btn" class="btn-primary" type="submit">Sign in</button>
+      <div id="login-error" role="alert" aria-live="polite"></div>
+    </form>
   </div>
 </div>
 
