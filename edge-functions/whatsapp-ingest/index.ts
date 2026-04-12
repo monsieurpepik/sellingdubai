@@ -13,6 +13,7 @@
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
+import { rateLimitByKey } from '../_shared/rate-limit.ts';
 
 // Resolve the effective tier, honouring the 7-day grace period on past_due.
 // If payment failed but we're still within period_end + 7 days, keep paid tier.
@@ -992,6 +993,14 @@ export async function handler(
 
     // Find agent by WhatsApp number
     const cleanPhone = senderPhone.replace(/[^0-9]/g, '');
+
+    // Per-phone rate limit: max 20 messages per 60 seconds (distributed, via Upstash)
+    const { limited: phoneRateLimited } = await rateLimitByKey(`rate:whatsapp:${cleanPhone}`, 20, 60);
+    if (phoneRateLimited) {
+      log({ event: 'rate_limit_exceeded', status: 429 });
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+
     const { data: agent, error: agentErr } = await supabase
       .from("agents")
       .select("id, name, slug, whatsapp, tier, stripe_subscription_status, stripe_current_period_end")

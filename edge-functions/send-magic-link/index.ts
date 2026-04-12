@@ -10,6 +10,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
+import { rateLimitByKey } from "../_shared/rate-limit.ts";
 
 // deno-lint-ignore no-explicit-any
 type CreateClientFn = (url: string, key: string) => any;
@@ -75,7 +76,16 @@ export async function handler(
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    // Per-email rate limit: max 3 requests per 15 min (distributed, via Upstash)
+    const { limited } = await rateLimitByKey(`rate:magic-link:${cleanEmail}`, 3, 900);
+    if (limited) {
+      // Silent success — don't reveal rate limit
+      log({ event: 'rate_limit_exceeded', status: 429 });
+      return new Response(
+        JSON.stringify({ success: true, message: "If this email is registered, you'll receive a magic link." }),
+        { status: 200, headers: cors }
+      );
+    }
 
     // Find agent by email
     const { data: agent, error: agentErr } = await supabase
@@ -87,22 +97,6 @@ export async function handler(
     if (agentErr || !agent) {
       // Don't reveal if email exists or not — always show success
       // This prevents email enumeration attacks
-      return new Response(
-        JSON.stringify({ success: true, message: "If this email is registered, you'll receive a magic link." }),
-        { status: 200, headers: cors }
-      );
-    }
-
-    // Per-agent rate limit: max 3 links in 15 min
-    const { count: agentRecentCount } = await supabase
-      .from("magic_links")
-      .select("id", { count: "exact", head: true })
-      .eq("agent_id", agent.id)
-      .gt("created_at", fifteenMinAgo);
-
-    if ((agentRecentCount || 0) >= 3) {
-      // Silent success — don't reveal rate limit
-      log({ event: 'rate_limit_exceeded', status: 429 });
       return new Response(
         JSON.stringify({ success: true, message: "If this email is registered, you'll receive a magic link." }),
         { status: 200, headers: cors }
