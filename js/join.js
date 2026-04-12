@@ -8,6 +8,15 @@ const REFERRAL_URL = `${SUPABASE_URL}/functions/v1/track-referral`;
 // Capture referral code from URL (?ref=CODE)
 const _refCode = new URLSearchParams(window.location.search).get('ref');
 
+// Capture agency invite token from URL (?agency=TOKEN)
+// Falls back to localStorage so it survives a page refresh mid-flow.
+let agencyToken = new URLSearchParams(window.location.search).get('agency')
+  || localStorage.getItem('agencyInviteToken')
+  || null;
+if (agencyToken) {
+  localStorage.setItem('agencyInviteToken', agencyToken);
+}
+
 let verifiedBroker = null;
 let createdSlug = null;
 let _otpSent = false;
@@ -73,7 +82,10 @@ async function verifyBroker() {
   // when ENABLE_TEST_MODE is set. In production (where ENABLE_TEST_MODE is unset) 0 is rejected like any unknown BRN.
   const isTestBrn = raw === '0';
   const num = isTestBrn ? 0 : parseInt(raw, 10);
-  if (!isTestBrn && (!num || Number.isNaN(num))) { showError(1, 'Please enter a valid broker number.'); return; }
+  if (!isTestBrn) {
+    if (!num || Number.isNaN(num)) { showError(1, 'Please enter a valid RERA broker number.'); return; }
+    if (raw.length < 4 || raw.length > 7) { showError(1, 'RERA broker numbers are 4–7 digits. Check your RERA card.'); return; }
+  }
 
   setLoading('btn-verify', true, 'Checking registry...', true);
 
@@ -111,6 +123,7 @@ async function verifyBroker() {
 
     setLoading('btn-verify', false, 'Verify My License');
     if (typeof gtag === 'function') gtag('event', 'step1_complete');
+    saveFormState();
     goStep(2);
   } catch (e) {
     setLoading('btn-verify', false, 'Verify My License');
@@ -298,6 +311,7 @@ async function createProfile(otpCode) {
       tiktok_url: document.getElementById('tiktok').value.trim() || null,
       linkedin_url: document.getElementById('linkedin').value.trim() || null,
       photo_base64: document.getElementById('onboard-photo-data').value || null,
+      ...(agencyToken ? { agency_invite_token: agencyToken } : {}),
     };
 
     // Manual verification path: include RERA card image and flag
@@ -460,6 +474,11 @@ const FORM_DRAFT_KEY = 'sd_join_draft';
 
 function saveFormState() {
   try {
+    // Determine current visible step
+    let currentStep = 1;
+    if (document.getElementById('step-2')?.classList.contains('active')) currentStep = 2;
+    if (document.getElementById('step-3')?.classList.contains('active')) currentStep = 3;
+
     localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify({
       displayName: document.getElementById('display-name').value,
       email:       document.getElementById('email').value,
@@ -470,6 +489,8 @@ function saveFormState() {
       youtube:     document.getElementById('youtube').value,
       tiktok:      document.getElementById('tiktok').value,
       linkedin:    document.getElementById('linkedin').value,
+      step: currentStep,
+      verifiedBroker: verifiedBroker || null,
     }));
   } catch(e) { console.warn('[join] Could not save form draft to localStorage:', e); }
 }
@@ -488,11 +509,25 @@ function restoreFormState() {
     if (s.youtube)     document.getElementById('youtube').value     = s.youtube;
     if (s.tiktok)      document.getElementById('tiktok').value      = s.tiktok;
     if (s.linkedin)    document.getElementById('linkedin').value    = s.linkedin;
+
+    // Resume step 2 if agent had already completed broker verification
+    if (s.step === 2 && s.verifiedBroker) {
+      verifiedBroker = s.verifiedBroker;
+      const name = titleCase(verifiedBroker.name_en || '');
+      document.getElementById('verify-name').textContent = name;
+      document.getElementById('verify-bn').textContent = `#${verifiedBroker.broker_number}`;
+      document.getElementById('verify-expiry').textContent = verifiedBroker.license_end || '—';
+      document.getElementById('verify-status').textContent = 'Active';
+      document.getElementById('step2-name').textContent = name;
+      if (s.displayName) document.getElementById('display-name').value = s.displayName;
+      goStep(2);
+    }
   } catch(e) { console.warn('[join] Could not restore form draft from localStorage:', e); }
 }
 
 function clearFormState() {
   localStorage.removeItem(FORM_DRAFT_KEY);
+  localStorage.removeItem('agencyInviteToken');
 }
 
 // Attach save-on-input listeners to all persisted fields
@@ -548,6 +583,7 @@ async function manualSubmit() {
   document.getElementById('step2-name').textContent = name;
   document.getElementById('display-name').value = name;
 
+  saveFormState();
   goStep(2);
 }
 

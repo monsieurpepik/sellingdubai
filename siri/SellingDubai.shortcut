@@ -1,0 +1,18 @@
+# SellingDubai Siri Shortcut placeholder
+# Replace this file with the real .shortcut binary built in the iOS Shortcuts app.
+#
+# Shortcut logic (build in iOS Shortcuts app):
+# 1. Action: Ask for Input (Dictation) — prompt: 'What would you like to do?'
+# 2. Action: Get contents of URL
+#    URL: https://pjyorgedaxevxophpfib.supabase.co/functions/v1/ai-secretary
+#    Method: POST
+#    Headers: Authorization = Bearer [stored siri_token], Content-Type = application/json
+#    Body (JSON): { 'message': [Dictation result], 'channel': 'siri' }
+# 3. Action: Get dictionary value 'reply' from response
+# 4. Action: Speak text [reply]
+#
+# Agent onboarding:
+# 1. Agent opens dashboard > AI Secretary > copies their Siri token
+# 2. Agent taps 'Add Siri Shortcut' — downloads this file
+# 3. iOS Shortcuts opens — agent sets their token in the URL header variable
+# 4. Agent sets trigger phrase (e.g. 'Hey Siri, SellingDubai')

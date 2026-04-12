@@ -86,6 +86,36 @@
     #create-section { display: none; }
     #auth-gate { display: none; }
     #loading { display: block; }
+    /* Team Performance table */
+    .perf-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .perf-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    .perf-table th { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; user-select: none; white-space: nowrap; }
+    .perf-table th:hover { color: rgba(255,255,255,0.7); }
+    .perf-table th .sort-icon { display: inline-block; margin-left: 4px; opacity: 0.4; font-size: 10px; }
+    .perf-table th.sorted .sort-icon { opacity: 1; }
+    .perf-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; vertical-align: middle; }
+    .perf-table tr:last-child td { border-bottom: none; }
+    .perf-table .bench-row td { background: rgba(255,255,255,0.025); color: rgba(255,255,255,0.45); font-size: 12px; }
+    .perf-table .bench-row td:first-child { font-weight: 600; color: rgba(255,255,255,0.35); }
+    .top-badge { display: inline-flex; align-items: center; margin-left: 5px; font-size: 11px; color: #fbbf24; }
+    .perf-loading { text-align: center; padding: 32px; color: rgba(255,255,255,0.3); font-size: 13px; }
+    /* Invite section */
+    .invite-form { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; margin-top: 16px; }
+    .invite-form .form-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+    .invite-form .form-row input { flex: 1; min-width: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .invite-form .form-row input:focus { border-color: rgba(255,255,255,0.3); }
+    .invite-result { margin-top: 12px; }
+    .invite-url-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .invite-url-row input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: rgba(255,255,255,0.8); font-size: 12px; font-family: "Courier New", monospace; outline: none; }
+    .invite-url-row .btn { flex-shrink: 0; padding: 8px 14px; font-size: 12px; }
+    .invite-list { margin-top: 16px; }
+    .invite-list-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .invite-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; flex-wrap: wrap; }
+    .invite-item:last-child { border-bottom: none; }
+    .invite-item .invite-email { flex: 1; color: rgba(255,255,255,0.7); min-width: 120px; }
+    .invite-item .invite-date { font-size: 11px; color: rgba(255,255,255,0.3); }
+    .invite-status-used { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 99px; font-size: 10px; font-weight: 600; background: rgba(34,197,94,0.12); color: #4ade80; }
+    .invite-status-pending { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 99px; font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); }
   </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#000000">
@@ -142,7 +172,31 @@
           <div class="profile-link">Public profile: <a id="agency-profile-link" href="#" target="_blank"></a></div>
         </div>
         <div class="agency-header-actions">
+          <button class="btn btn-secondary" id="btn-invite-agent" data-action="toggleInvitePanel">Invite Agent</button>
           <button class="btn btn-secondary" data-action="toggleEditPanel">Edit Agency</button>
+        </div>
+      </div>
+
+      <div id="invite-panel" style="display:none; margin-bottom:24px;">
+        <div class="invite-form">
+          <div class="section-title" style="margin-bottom:12px;">Invite Agent</div>
+          <div class="invite-form-inner">
+            <div class="form-row">
+              <input type="email" id="invite-email" placeholder="Agent email (optional)">
+              <button class="btn btn-primary" id="btn-gen-invite" data-action="generateInvite">Generate Invite Link</button>
+            </div>
+            <div id="invite-result" class="invite-result" style="display:none;">
+              <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:4px;">Share this link with your agent:</div>
+              <div class="invite-url-row">
+                <input type="text" id="invite-url-display" readonly>
+                <button class="btn btn-secondary" id="btn-copy-invite" data-action="copyInviteUrl">Copy</button>
+              </div>
+            </div>
+          </div>
+          <div id="invite-list-wrap" class="invite-list" style="display:none;">
+            <div class="invite-list-title">Pending &amp; Used Invites</div>
+            <div id="invite-list-items"></div>
+          </div>
         </div>
       </div>
 
@@ -185,6 +239,30 @@
         <div class="add-member-row">
           <input type="email" id="add-member-email" placeholder="Agent email address...">
           <button class="btn btn-secondary" id="btn-add-member" data-action="addMember">Add Agent</button>
+        </div>
+      </div>
+
+      <div class="section" id="team-perf-section" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">Team Performance</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.35);">This month</div>
+        </div>
+        <div id="team-perf-loading" class="perf-loading">Loading performance data…</div>
+        <div class="perf-table-wrap" id="team-perf-table-wrap" style="display:none;">
+          <table class="perf-table" id="team-perf-table">
+            <thead>
+              <tr>
+                <th data-col="name" data-type="string">Agent <span class="sort-icon">↕</span></th>
+                <th data-col="leads_received" data-type="number">Leads Received <span class="sort-icon">↕</span></th>
+                <th data-col="leads_contacted" data-type="number">Leads Contacted <span class="sort-icon">↕</span></th>
+                <th data-col="response_time_median_hours" data-type="number">Response Time <span class="sort-icon">↕</span></th>
+                <th data-col="active_listings" data-type="number">Active Listings <span class="sort-icon">↕</span></th>
+                <th data-col="cobrokes_sent" data-type="number">Cobrokes Sent <span class="sort-icon">↕</span></th>
+                <th data-col="cobrokes_received" data-type="number">Cobrokes Recv <span class="sort-icon">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="team-perf-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>

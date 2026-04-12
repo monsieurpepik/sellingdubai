@@ -113,34 +113,37 @@
     <!-- Onboarding Checklist (hidden when complete) -->
     <div class="onboard" id="onboard-checklist" style="display:none;">
       <button class="onboard-dismiss" data-action="dismissOnboarding" title="Dismiss" aria-label="Dismiss">&times;</button>
-      <div class="onboard-title">Get your profile live</div>
-      <div class="onboard-sub">Complete these steps to start getting leads from your SellingDubai profile.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="onboard-title" style="margin-bottom:0;">Profile Completeness</div>
+        <div id="onboard-score" style="font-size:22px;font-weight:800;color:#fff;">0%</div>
+      </div>
+      <div class="onboard-sub" id="onboard-sub-text">Complete these steps to start getting leads from your SellingDubai profile.</div>
       <div class="onboard-progress"><div class="onboard-bar" id="onboard-bar" style="width:0%"></div></div>
       <div class="onboard-steps" id="onboard-steps">
-        <a class="onboard-step" id="ob-photo" href="/edit">
+        <a class="onboard-step" id="ob-photo" href="/edit" title="Agents with a photo get 3× more profile views">
           <span class="onboard-check" id="ob-photo-check"></span>
           <span class="onboard-step-label">Upload your profile photo</span>
           <span class="onboard-step-action">Add →</span>
         </a>
-        <a class="onboard-step" id="ob-bio" href="/edit">
+        <a class="onboard-step" id="ob-bio" href="/edit" title="A tagline tells buyers what you specialise in">
           <span class="onboard-check" id="ob-bio-check"></span>
           <span class="onboard-step-label">Add your tagline</span>
           <span class="onboard-step-action">Add →</span>
         </a>
-        <a class="onboard-step" id="ob-whatsapp" href="/edit">
+        <a class="onboard-step" id="ob-whatsapp" href="/edit" title="Agents with WhatsApp get 2× more direct enquiries">
           <span class="onboard-check" id="ob-whatsapp-check"></span>
           <span class="onboard-step-label">Add your WhatsApp number</span>
           <span class="onboard-step-action">Add →</span>
         </a>
-        <div class="onboard-step" id="ob-property" data-action="openAddListing" style="cursor:pointer;">
+        <div class="onboard-step" id="ob-property" data-action="openAddListing" style="cursor:pointer;" title="Listings are the #1 reason clients tap WhatsApp">
           <span class="onboard-check" id="ob-property-check"></span>
           <span class="onboard-step-label">Add your first property listing</span>
           <span class="onboard-step-action">Add →</span>
         </div>
-        <div class="onboard-step" id="ob-share" data-action="copyProfileLink" style="cursor:pointer;">
-          <span class="onboard-check" id="ob-share-check"></span>
-          <span class="onboard-step-label">Share your profile link</span>
-          <span class="onboard-step-action">Copy →</span>
+        <div class="onboard-step" id="ob-rera" style="cursor:default;" title="RERA verification unlocks your public profile">
+          <span class="onboard-check" id="ob-rera-check"></span>
+          <span class="onboard-step-label">RERA verification (pending review)</span>
+          <span class="onboard-step-action" id="ob-rera-action">Pending</span>
         </div>
       </div>
     </div>
@@ -228,6 +231,56 @@
       </div>
     </div>
 
+    <!-- Cobroke Section -->
+    <div class="cobroke-section" id="cobroke-section">
+      <div class="leads-header">
+        <span class="leads-title">Co-Brokerage</span>
+      </div>
+      <!-- Tabs -->
+      <div class="cobroke-tabs" role="tablist">
+        <button class="cobroke-tab active" role="tab" aria-selected="true" data-action="cobrokeTab" data-tab="browse" id="cobroke-tab-browse">Browse Listings</button>
+        <button class="cobroke-tab" role="tab" aria-selected="false" data-action="cobrokeTab" data-tab="mine" id="cobroke-tab-mine">My Requests</button>
+      </div>
+
+      <!-- Browse panel -->
+      <div id="cobroke-panel-browse">
+        <!-- Filters -->
+        <div class="cobroke-filters">
+          <div class="cobroke-filter-group">
+            <label class="cobroke-filter-label" for="cb-filter-area">Area</label>
+            <input type="text" class="cobroke-filter-input" id="cb-filter-area" placeholder="e.g. JBR, Downtown" autocomplete="off">
+          </div>
+          <div class="cobroke-filter-group">
+            <label class="cobroke-filter-label" for="cb-filter-type">Type</label>
+            <select class="cobroke-filter-select" id="cb-filter-type">
+              <option value="">All Types</option>
+              <option value="apartment">Apartment</option>
+              <option value="villa">Villa</option>
+              <option value="office">Office</option>
+              <option value="retail">Retail</option>
+              <option value="land">Land</option>
+            </select>
+          </div>
+          <div class="cobroke-filter-group">
+            <label class="cobroke-filter-label" for="cb-filter-price">Max Price (AED)</label>
+            <input type="number" class="cobroke-filter-input" id="cb-filter-price" placeholder="e.g. 5000000" min="0" style="min-width:140px;">
+          </div>
+          <button class="cobroke-filter-apply" id="cb-filter-btn" data-action="cobrokeApplyFilters">Apply Filters</button>
+        </div>
+        <!-- Cards -->
+        <div class="cobroke-grid" id="cobroke-grid"></div>
+        <!-- Load more -->
+        <div class="cobroke-load-more" id="cobroke-load-more" style="display:none;">
+          <button class="cobroke-load-more-btn" data-action="cobrokeLoadMore">Load more</button>
+        </div>
+      </div>
+
+      <!-- My requests panel -->
+      <div id="cobroke-panel-mine" style="display:none;">
+        <div id="cobroke-mine-list"></div>
+      </div>
+    </div>
+
     <!-- Properties Section -->
     <div class="props-section" id="props-section">
       <div class="props-header">
@@ -282,6 +335,34 @@
         </div>
       </div>
     </div>
+      <!-- AI Secretary -->
+      <div class="secretary-section" id="secretary-section" style="display:none">
+        <div class="leads-header">
+          <span class="leads-title">AI Secretary</span>
+        </div>
+        <div class="secretary-card">
+          <div class="secretary-row">
+            <div class="secretary-label">Secretary number</div>
+            <div class="secretary-value-row">
+              <span id="secretary-phone" class="secretary-value"></span>
+              <button class="btn-sm btn-outline" data-action="copySecretaryPhone">Copy</button>
+            </div>
+          </div>
+          <div class="secretary-row">
+            <div class="secretary-label">Siri shortcut token</div>
+            <div class="secretary-value-row">
+              <code id="secretary-token" class="secretary-value"></code>
+              <button class="btn-sm btn-outline" data-action="copySecretaryToken">Copy</button>
+              <button class="btn-sm btn-ghost" data-action="rotateSiriToken">Rotate</button>
+            </div>
+          </div>
+          <div class="secretary-row">
+            <a href="/siri/SellingDubai.shortcut" download="SellingDubai.shortcut" class="btn-sm btn-primary">
+              Add Siri Shortcut
+            </a>
+          </div>
+        </div>
+      </div>
   </main>
 
   <!-- Mobile bottom nav -->

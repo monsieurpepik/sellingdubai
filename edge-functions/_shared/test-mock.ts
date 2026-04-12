@@ -41,6 +41,7 @@ function makeBuilder(
   tableName: string,
 ): Record<string, unknown> {
   let isCount = false;
+  let isCountWithData = false; // count:"exact" without head:true — returns data + count
   let isWrite = false;
 
   const getResponse = (key: string, fallback: MockResponse): MockResponse =>
@@ -50,7 +51,12 @@ function makeBuilder(
     select(...args: unknown[]) {
       const opts = args[1];
       if (opts && typeof opts === "object" && (opts as Record<string, unknown>).count) {
-        isCount = true;
+        const isHead = !!(opts as Record<string, unknown>).head;
+        if (isHead) {
+          isCount = true;
+        } else {
+          isCountWithData = true;
+        }
       }
       return builder;
     },
@@ -66,6 +72,7 @@ function makeBuilder(
     lte(_col: string, _val: unknown) { return builder; },
     in(_col: string, _vals: unknown[]) { return builder; },
     is(_col: string, _val: unknown) { return builder; },
+    ilike(_col: string, _pattern: string) { return builder; },
     not(_col: string, _op: string, _val: unknown) { return builder; },
     or(_filter: string) { return builder; },
     limit(_n: number) { return builder; },
@@ -97,7 +104,16 @@ function makeBuilder(
       _reject?: (reason: unknown) => unknown,
     ) {
       let result: MockResponse;
-      if (isCount) {
+      if (isCountWithData) {
+        // count:"exact" without head:true — return data array + count
+        const r = responses[tableName];
+        const countR = responses[`${tableName}:count`];
+        const data = r
+          ? (Array.isArray(r.data) ? r.data : r.data != null ? [r.data] : [])
+          : [];
+        const count = countR?.count ?? r?.count ?? data.length;
+        result = { data, count, error: r?.error ?? null };
+      } else if (isCount) {
         result = getResponse(`${tableName}:count`, COUNT_ZERO);
       } else if (isWrite) {
         const writeKey = `${tableName}:write`;

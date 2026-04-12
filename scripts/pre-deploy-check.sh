@@ -187,6 +187,39 @@ if grep -q "SUPABASE_URL=${PROD_URL}" supabase/.env 2>/dev/null; then
 fi
 echo ""
 
+# ── 8b. Plan B edge function presence ────────────────────────────────────────
+# Verify new Plan B functions exist in edge-functions/ (supabase/functions is a symlink to it).
+
+# v2.0 Phase 3 — AI Secretary + Telegram env var checks
+check_env() {
+  local var="$1"
+  if [ -z "${!var:-}" ]; then
+    warn "Env var ${var} is not set — required for AI Secretary / Telegram features"
+  else
+    pass "Env var ${var} is set"
+  fi
+}
+check_env "ANTHROPIC_API_KEY"
+check_env "OPENAI_API_KEY"
+check_env "TELEGRAM_BOT_TOKEN"
+check_env "TELEGRAM_WEBHOOK_SECRET"
+check_env "VAPI_SERVER_SECRET"
+check_env "VAPI_WEBHOOK_URL"
+
+PLANB_FUNCTIONS=("cobroke-discover" "vapi-webhook" "rotate-siri-token")
+PLANB_MISSING=""
+for fn in "${PLANB_FUNCTIONS[@]}"; do
+  if [ ! -f "edge-functions/${fn}/index.ts" ]; then
+    PLANB_MISSING="${PLANB_MISSING}\n    edge-functions/${fn}/index.ts"
+  fi
+done
+if [ -n "$PLANB_MISSING" ]; then
+  fail "Plan B edge functions missing from edge-functions/ directory:$PLANB_MISSING"
+else
+  pass "Plan B edge functions present (cobroke-discover, vapi-webhook, rotate-siri-token)"
+fi
+echo ""
+
 # ── 9. Integration test reminder ─────────────────────────────────────────────
 echo -e "${BOLD}9. Integration tests${NC}"
 if grep -q "127.0.0.1" supabase/.env 2>/dev/null; then

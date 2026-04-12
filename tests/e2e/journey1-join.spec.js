@@ -74,3 +74,30 @@ test('Join page: Create My Profile triggers send-otp and shows OTP section', asy
 
   await expect(page.locator('#otp-section')).toBeVisible({ timeout: 5000 });
 });
+
+test('Join page: refreshing after step-1 verification resumes at step-2', async ({ page }) => {
+  await page.route('**/verify-broker**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      verified: true,
+      license_active: true,
+      broker: { name_en: 'Resume Test Agent', broker_number: '55555', license_end: '2027-06-30' }
+    })
+  }));
+
+  await page.goto('/join.html');
+  await page.locator('#broker-number').fill('55555');
+  await page.locator('#btn-verify').click();
+  // Wait for step 2 to become visible
+  await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
+
+  // Reload the page to simulate returning agent
+  await page.reload();
+  await page.waitForLoadState('domcontentloaded');
+
+  // Should resume at step 2 without needing to re-verify
+  await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('#step-1')).not.toBeVisible();
+  await expect(page.locator('#verify-bn')).toContainText('55555');
+});

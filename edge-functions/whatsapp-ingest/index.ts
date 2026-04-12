@@ -642,6 +642,93 @@ async function sendWhatsAppReply(to: string, text: string) {
   } catch (_e) { /* reply failed silently */ }
 }
 
+// ── Whisper Audio Transcription ──
+async function transcribeAudio(mediaId: string): Promise<string | null> {
+  const WA_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+  const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY");
+  if (!WA_TOKEN || !OPENAI_KEY) return null;
+
+  try {
+    // 1. Get media URL from WhatsApp
+    const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${encodeURIComponent(mediaId)}`, {
+      headers: { Authorization: `Bearer ${WA_TOKEN}` },
+    });
+    if (!mediaRes.ok) return null;
+    const mediaData = await mediaRes.json();
+    if (!mediaData.url) return null;
+
+    // 2. Download the audio
+    const audioRes = await fetch(mediaData.url, {
+      headers: { Authorization: `Bearer ${WA_TOKEN}` },
+    });
+    if (!audioRes.ok) return null;
+    const audioBytes = new Uint8Array(await audioRes.arrayBuffer());
+    const contentType = audioRes.headers.get("content-type") || "audio/ogg";
+    const ext = contentType.includes("mp4") ? "mp4" : contentType.includes("mpeg") ? "mp3" : "ogg";
+
+    // 3. Send to OpenAI Whisper
+    const form = new FormData();
+    form.append("file", new Blob([audioBytes], { type: contentType }), `audio.${ext}`);
+    form.append("model", "whisper-1");
+
+    const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${OPENAI_KEY}` },
+      body: form,
+    });
+    if (!whisperRes.ok) return null;
+    const whisperData = await whisperRes.json();
+    return (whisperData.text as string) || null;
+  } catch (_e) {
+    return null;
+  }
+}
+
+// ── AI Secretary Routing ──
+async function routeToSecretary(
+  senderPhone: string,
+  agentId: string,
+  message: string,
+): Promise<void> {
+  const SECRETARY_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-secretary`;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!SERVICE_KEY) {
+    await sendWhatsAppReply(senderPhone, "Configuration error. Please try again later.");
+    return;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
+    try {
+      const res = await fetch(SECRETARY_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${SERVICE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+        body: JSON.stringify({ agent_id: agentId, message, channel: "whatsapp" }),
+      });
+
+      if (!res.ok) {
+        await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.reply) {
+        await sendWhatsAppReply(senderPhone, data.reply);
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (_e) {
+    await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
+  }
+}
+
 async function downloadAndUploadImage(supabase: ReturnType<typeof createClient>, mediaId: string, agentSlug: string): Promise<string | null> {
   const WA_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
   if (!WA_TOKEN) return null;
@@ -679,60 +766,6 @@ type IntentResult =
   | { action: "get_help" }
   | { action: "add_property" }
   | { action: "unknown" };
-
-async function detectIntent(rawText: string): Promise<IntentResult> {
-  const CLAUDE_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!CLAUDE_KEY) return { action: "unknown" };
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": CLAUDE_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 120,
-        messages: [{
-          role: "user",
-          content: `Classify this WhatsApp message from a Dubai real estate agent. Return ONLY valid JSON, no markdown, no explanation.
-
-Intents:
-- share_property: wants a PDF brochure. Include "query" with property name or "" if unspecified.
-- update_status: wants to update a listing status. Include "query" (property name) and "status" (one of: sold|rented|under_offer|available|reserved|just_listed).
-- get_leads: wants to see today's leads/enquiries.
-- get_stats: wants analytics/stats/views.
-- get_help: greeting or asking for help.
-- add_property: looks like a property listing (price, bedrooms, location — no photo needed).
-- unknown: anything else.
-
-Message: "${rawText.replace(/\\/g, "\\\\").replace(/"/g, '\\"').slice(0, 300)}"
-
-Return JSON like: {"action":"get_stats"} or {"action":"share_property","query":"Marina tower"} or {"action":"update_status","query":"JBR villa","status":"sold"}`
-        }],
-      }),
-    });
-
-    if (!res.ok) {
-      return { action: "unknown" };
-    }
-
-    const data = await res.json();
-    const text = (data.content?.[0]?.text || "").trim();
-    const parsed = JSON.parse(text);
-
-    if (!parsed?.action) return { action: "unknown" };
-    const { action } = parsed;
-    if (action === "share_property") return { action, query: parsed.query || "" };
-    if (action === "update_status") return { action, query: parsed.query || "", status: parsed.status || "available" };
-    if (["get_leads", "get_stats", "get_help", "add_property", "unknown"].includes(action)) return { action } as IntentResult;
-    return { action: "unknown" };
-  } catch (_e) {
-    return { action: "unknown" };
-  }
-}
 
 // ── Update Property Status ──
 async function handleUpdateStatus(
@@ -971,6 +1004,61 @@ export async function handler(
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
+    // === HANDLE INTERACTIVE BUTTON REPLY ===
+    if (msgType === "interactive") {
+      const buttonReply = msg.interactive?.button_reply;
+      if (!buttonReply?.id) {
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+
+      const [action, leadId] = buttonReply.id.split("_").reduce(
+        (acc: [string, string], part: string, i: number) =>
+          i === 0 ? [part, ""] : [acc[0], acc[1] ? `${acc[1]}_${part}` : part],
+        ["", ""],
+      );
+
+      if ((action === "contacted" || action === "archive") && leadId) {
+        const newStatus = action === "contacted" ? "contacted" : "archived";
+        const { error } = await supabase
+          .from("leads")
+          .update({ status: newStatus })
+          .eq("id", leadId)
+          .eq("agent_id", agent.id);
+
+        const replyText = error
+          ? "Couldn't update the lead. Try again."
+          : action === "contacted"
+            ? "✓ Lead marked as contacted."
+            : "✗ Lead archived.";
+        await sendWhatsAppReply(senderPhone, replyText);
+      } else if (action === "view" && leadId) {
+        const { data: lead } = await supabase
+          .from("leads")
+          .select("name, phone, email, budget_range, preferred_area, message, status, created_at")
+          .eq("id", leadId)
+          .eq("agent_id", agent.id)
+          .single();
+
+        if (lead) {
+          const lines = [
+            `👤 *${lead.name}*`,
+            lead.phone ? `📞 ${lead.phone}` : null,
+            lead.email ? `✉️ ${lead.email}` : null,
+            lead.budget_range ? `💰 ${lead.budget_range}` : null,
+            lead.preferred_area ? `📍 ${lead.preferred_area}` : null,
+            lead.message ? `💬 ${lead.message.slice(0, 200)}` : null,
+            `Status: ${lead.status}`,
+          ].filter(Boolean).join("\n");
+          await sendWhatsAppReply(senderPhone, lines);
+        } else {
+          await sendWhatsAppReply(senderPhone, "Lead not found.");
+        }
+      }
+
+      log({ event: "button_reply_handled", agent_id: agent.id, action, status: 200 });
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+
     // === HANDLE IMAGE MESSAGE ===
     if (msgType === "image") {
       const imageId = msg.image?.id;
@@ -1086,142 +1174,35 @@ export async function handler(
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
-    // === HANDLE TEXT MESSAGE ===
-    if (msgType === "text") {
-      const rawText = msg.text?.body || "";
-      const intent = await detectIntent(rawText);
-
-      const agencyCtx = await resolveAgencyContext(agent.id, supabase);
-
-      switch (intent.action) {
-        case "get_help":
-          await sendWhatsAppReply(senderPhone,
-            `Hey ${agent.name}! 👋\n\nTo add a property:\n\n📸 *Send a photo* with a caption like:\n_Marina View 2BR, AED 2.5M, sea view, furnished_\n\nI'll create a professional listing with AI description + Instagram & TikTok captions ready to post.\n\nCommands:\n• *"my stats"* — profile analytics\n• *"my leads"* — today's enquiries\n• *"my link"* — your profile link\n• *"remove last"* — remove last property\n• *"social"* — get social templates for your latest listing\n• *"share [title]"* — generate a PDF brochure\n• *"mark [title] as sold"* — update listing status`
-          );
-          break;
-
-        case "get_stats": {
-          const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-          const targetIds = agencyCtx ? agencyCtx.agentIds : [agent.id];
-          const label = agencyCtx ? agencyCtx.agencyName : "Your Stats";
-          const [viewsRes, waTapsRes, leadsRes] = await Promise.allSettled([
-            supabase.from("page_events").select("id", { count: "exact", head: true }).in("agent_id", targetIds).eq("event_type", "view").gte("created_at", thisMonthStart),
-            supabase.from("page_events").select("id", { count: "exact", head: true }).in("agent_id", targetIds).eq("event_type", "whatsapp_tap").gte("created_at", thisMonthStart),
-            supabase.from("page_events").select("id", { count: "exact", head: true }).in("agent_id", targetIds).eq("event_type", "lead_submit").gte("created_at", thisMonthStart),
-          ]);
-          const views = viewsRes.status === "fulfilled" ? viewsRes.value.count : 0;
-          const waTaps = waTapsRes.status === "fulfilled" ? waTapsRes.value.count : 0;
-          const leads = leadsRes.status === "fulfilled" ? leadsRes.value.count : 0;
-          let statsMsg = `📊 *${label} — This Month*\n\n👁️ Profile Views: *${views || 0}*\n💬 WhatsApp Taps: *${waTaps || 0}*\n📩 Leads: *${leads || 0}*\n\nKeep sharing your link to grow! 🚀`;
-          if (agencyCtx) {
-            statsMsg += `\n\n👥 *Team: ${agencyCtx.agentIds.length} agents*`;
-          }
-          await sendWhatsAppReply(senderPhone, statsMsg);
-          break;
-        }
-
-        case "get_leads":
-          await handleGetLeads(senderPhone, agent.id, supabase, agencyCtx ?? undefined);
-          break;
-
-        case "share_property":
-          await handleShareCommand(senderPhone, agent.id, agent.slug, intent.query, supabase);
-          break;
-
-        case "update_status":
-          await handleUpdateStatus(senderPhone, agent.id, intent.query, intent.status, supabase);
-          break;
-
-        case "add_property": {
-          const parsed = parsePropertyCaption(rawText);
-          if (parsed.title && parsed.title.length > 3) {
-            // Listing limit enforcement (same as image path)
-            const effectiveTierText = resolveEffectiveTier(agent);
-            const LISTING_LIMITS_TEXT: Record<string, number> = { free: 3, pro: 20, premium: Infinity };
-            const limitText = LISTING_LIMITS_TEXT[effectiveTierText] ?? 3;
-            if (limitText !== Infinity) {
-              const { count: activeCountText } = await supabase
-                .from("properties")
-                .select("id", { count: "exact", head: true })
-                .eq("agent_id", agent.id)
-                .eq("is_active", true);
-              if ((activeCountText ?? 0) >= limitText) {
-                const upgradeMsg = effectiveTierText === "free"
-                  ? `You've reached the ${limitText}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai.ae/pricing`
-                  : `You've reached the ${limitText}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai.ae/pricing`;
-                await sendWhatsAppReply(senderPhone, upgradeMsg);
-                break;
-              }
-            }
-            const aiResult = await generateListingWithClaude(parsed, agent.name);
-            const finalTitle = aiResult?.title || parsed.title;
-            const { error: propErr } = await supabase
-              .from("properties")
-              .insert({
-                agent_id: agent.id, title: finalTitle,
-                description: aiResult?.description || null,
-                property_type: parsed.type || null, bedrooms: parsed.bedrooms || null,
-                location: parsed.area || null, features: parsed.features.length > 0 ? parsed.features : null,
-                source: "whatsapp", is_active: true, status: "available",
-              });
-            if (!propErr) {
-              let reply = `✅ Listed *${finalTitle}*\n\n💡 Send a photo next time for a better listing!`;
-              if (aiResult?.igCaption) reply += `\n\n📸 *Instagram:*\n${aiResult.igCaption}`;
-              await sendWhatsAppReply(senderPhone, reply);
-            }
-          } else {
-            await sendWhatsAppReply(senderPhone, `Send a *photo with a caption* to list a property, or type *"help"* for commands.`);
-          }
-          break;
-        }
-
-        default: {
-          const lowerText = rawText.toLowerCase();
-          if (lowerText.includes("my link") || lowerText.includes("profile link")) {
-            await sendWhatsAppReply(senderPhone,
-              `Here's your profile link:\n\nhttps://sellingdubai.ae/a/${agent.slug}\n\nPaste it in your Instagram bio, WhatsApp status, or email signature.`
-            );
-          } else if (lowerText.includes("remove last") || lowerText.includes("delete last")) {
-            const { data: lastProp } = await supabase
-              .from("properties").select("id, title")
-              .eq("agent_id", agent.id).order("created_at", { ascending: false }).limit(1).single();
-            if (lastProp) {
-              await supabase.from("properties").delete().eq("id", lastProp.id).eq("agent_id", agent.id);
-              await sendWhatsAppReply(senderPhone, `🗑️ Removed: *${lastProp.title}*`);
-            } else {
-              await sendWhatsAppReply(senderPhone, "No properties to remove.");
-            }
-          } else if (lowerText.includes("social") || lowerText.includes("template") || lowerText.includes("instagram") || lowerText.includes("tiktok")) {
-            const { data: lastProp } = await supabase
-              .from("properties").select("title, description, price, property_type, bedrooms, location, features")
-              .eq("agent_id", agent.id).order("created_at", { ascending: false }).limit(1).single();
-            if (lastProp) {
-              const parsedProp = {
-                title: lastProp.title || '', price: lastProp.price ? `AED ${lastProp.price.toLocaleString()}` : null,
-                type: lastProp.property_type, bedrooms: lastProp.bedrooms, bathrooms: null,
-                area: lastProp.location, sqft: null, features: lastProp.features || [],
-              };
-              const aiResult = await generateListingWithClaude(parsedProp, agent.name);
-              if (aiResult?.igCaption) {
-                await sendWhatsAppReply(senderPhone, `📸 *Instagram caption for "${lastProp.title}":*\n\n${aiResult.igCaption}`);
-              }
-              if (aiResult?.tiktokCaption) {
-                await sendWhatsAppReply(senderPhone, `🎬 *TikTok caption:*\n\n${aiResult.tiktokCaption}`);
-              }
-              if (!aiResult) {
-                await sendWhatsAppReply(senderPhone, "Couldn't generate templates right now. Try again in a moment.");
-              }
-            } else {
-              await sendWhatsAppReply(senderPhone, "No properties listed yet. Send a photo to create your first listing!");
-            }
-          } else {
-            await sendWhatsAppReply(senderPhone, `Send a *photo with a caption* to list a property, or type *"help"* for commands.`);
-          }
-          break;
-        }
+    // === HANDLE AUDIO MESSAGE (voice notes) ===
+    if (msgType === "audio") {
+      const audioId = msg.audio?.id;
+      if (!audioId) {
+        await sendWhatsAppReply(senderPhone, "Couldn't process that voice note. Please try again.");
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
       }
 
-      log({ event: 'success', agent_id: agent.id, status: 200 });
+      await sendWhatsAppReply(senderPhone, "🎙️ Processing your voice note...");
+      const transcript = await transcribeAudio(audioId);
+
+      if (!transcript?.trim()) {
+        await sendWhatsAppReply(senderPhone, "Couldn't transcribe the voice note. Please type your message instead.");
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+
+      await routeToSecretary(senderPhone, agent.id, transcript);
+      log({ event: "voice_note_processed", agent_id: agent.id, status: 200 });
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+
+    // === HANDLE TEXT MESSAGE (route to AI secretary) ===
+    if (msgType === "text") {
+      const rawText = msg.text?.body || "";
+      if (!rawText.trim()) {
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+      await routeToSecretary(senderPhone, agent.id, rawText);
+      log({ event: "text_routed_to_secretary", agent_id: agent.id, status: 200 });
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 

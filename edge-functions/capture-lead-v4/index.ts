@@ -152,6 +152,70 @@ function buildEmailHtml(
 </html>`;
 }
 
+// Build truncated masked phone for display (privacy: show last 4 digits only)
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/[^0-9]/g, "");
+  if (digits.length < 4) return "****";
+  return `+${digits.slice(0, digits.length - 4).replace(/./g, "*")}${digits.slice(-4)}`;
+}
+
+async function sendLeadNotificationWhatsApp(
+  agentWhatsapp: string,
+  lead: { id: string; name: string; phone?: string; email?: string; budget_range?: string; preferred_area?: string },
+): Promise<void> {
+  const WA_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+  const WA_PHONE_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+  if (!WA_TOKEN || !WA_PHONE_ID) return;
+
+  const to = agentWhatsapp.replace(/[^0-9]/g, "");
+  if (!to || to.length < 7) return;
+
+  // Build message body (max 1024 chars for body text)
+  const contactLine = lead.phone ? maskPhone(lead.phone) : (lead.email ?? "—");
+  const details: string[] = [];
+  if (lead.preferred_area) details.push(lead.preferred_area);
+  if (lead.budget_range) details.push(`Budget: ${lead.budget_range}`);
+  const detailLine = details.join(" | ") || "No details";
+
+  const bodyText = `📩 New Lead: *${lead.name.slice(0, 60)}*\n${detailLine}\n📞 ${contactLine}`;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      await fetch(`https://graph.facebook.com/v18.0/${WA_PHONE_ID}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${WA_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to,
+          type: "interactive",
+          interactive: {
+            type: "button",
+            body: { text: bodyText },
+            action: {
+              buttons: [
+                { type: "reply", reply: { id: `contacted_${lead.id}`, title: "✓ Contacted" } },
+                { type: "reply", reply: { id: `view_${lead.id}`, title: "📋 View" } },
+                { type: "reply", reply: { id: `archive_${lead.id}`, title: "✗ Archive" } },
+              ],
+            },
+          },
+        }),
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (_e) {
+    // Notification failure is non-fatal — lead is already saved
+  }
+}
+
 // deno-lint-ignore no-explicit-any
 type CreateClientFn = (url: string, key: string) => any;
 
@@ -243,7 +307,7 @@ export async function handler(
     // Find agent
     const { data: agent, error: agentErr } = await supabase
       .from("agents")
-      .select("id, name, slug, email, webhook_url, facebook_pixel_id, facebook_capi_token")
+      .select("id, name, slug, email, whatsapp, webhook_url, facebook_pixel_id, facebook_capi_token")
       .eq("slug", agent_slug)
       .eq("verification_status", "verified")
       .single();
@@ -354,6 +418,18 @@ export async function handler(
       }
     } else {
       console.warn("Email skipped — no RESEND_API_KEY or agent has no email. Agent:", agent.slug);
+    }
+
+    // 1b. WhatsApp interactive lead notification
+    if (agent.whatsapp) {
+      sendLeadNotificationWhatsApp(agent.whatsapp, {
+        id: lead.id,
+        name: lead.name,
+        phone: lead.phone ?? undefined,
+        email: lead.email ?? undefined,
+        budget_range: lead.budget_range ?? undefined,
+        preferred_area: lead.preferred_area ?? undefined,
+      }).catch(() => {}); // fire-and-forget
     }
 
     // 2. Webhook (CRM integration)

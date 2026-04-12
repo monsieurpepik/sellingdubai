@@ -151,6 +151,20 @@ document.addEventListener('click', (e) => {
       if (typeof window.mortOpProceed === 'function') window.mortOpProceed();
       break;
 
+    // Cobroke (dashboard.js)
+    case 'cobrokeTab':
+      if (typeof window.cobrokeTab === 'function') window.cobrokeTab(el.dataset.tab);
+      break;
+    case 'cobrokeApplyFilters':
+      if (typeof window.cobrokeApplyFilters === 'function') window.cobrokeApplyFilters();
+      break;
+    case 'cobrokeLoadMore':
+      if (typeof window.cobrokeLoadMore === 'function') window.cobrokeLoadMore();
+      break;
+    case 'cobrokeRequest':
+      if (typeof window.cobrokeRequest === 'function') window.cobrokeRequest(el.dataset.propId);
+      break;
+
     // Dashboard (dashboard.js)
     case 'sendMagicLink':
       if (typeof window.sendMagicLink === 'function') window.sendMagicLink();
@@ -211,6 +225,15 @@ document.addEventListener('click', (e) => {
       break;
     case 'addMember':
       if (typeof window.addMember === 'function') window.addMember();
+      break;
+    case 'toggleInvitePanel':
+      if (typeof window.toggleInvitePanel === 'function') window.toggleInvitePanel();
+      break;
+    case 'generateInvite':
+      if (typeof window.generateInvite === 'function') window.generateInvite();
+      break;
+    case 'copyInviteUrl':
+      if (typeof window.copyInviteUrl === 'function') window.copyInviteUrl();
       break;
 
     // Join page (join.js)
@@ -366,6 +389,17 @@ document.addEventListener('click', (e) => {
       break;
     case 'confirmCrop':
       if (typeof window.confirmCrop === 'function') window.confirmCrop();
+      break;
+
+    // AI Secretary (dashboard.js)
+    case 'copySecretaryPhone':
+      if (typeof window.copySecretaryPhone === 'function') window.copySecretaryPhone();
+      break;
+    case 'copySecretaryToken':
+      if (typeof window.copySecretaryToken === 'function') window.copySecretaryToken();
+      break;
+    case 'rotateSiriToken':
+      if (typeof window.rotateSiriToken === 'function') window.rotateSiriToken();
       break;
   }
 });

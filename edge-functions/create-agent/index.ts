@@ -54,6 +54,7 @@ export async function handler(
       tagline, calendly_url, instagram_url, youtube_url,
       tiktok_url, linkedin_url, photo_base64,
       manual_verification, rera_image_base64, rera_file_type,
+      agency_invite_token,
     } = body;
 
     if (!display_name || !email || !whatsapp) {
@@ -89,6 +90,22 @@ export async function handler(
       .from("email_verification_codes")
       .update({ verified: true })
       .eq("id", otpRecord.id);
+
+    // --- Agency invite token validation ---
+    let agencyId: string | null = null;
+    if (agency_invite_token) {
+      const { data: invite, error: inviteError } = await supabase
+        .from("agent_invites")
+        .select("id, agency_id, used_at")
+        .eq("token", agency_invite_token)
+        .is("used_at", null)
+        .single();
+
+      if (inviteError || !invite) {
+        return json({ error: "Invalid or already-used invite token" }, 400, cors);
+      }
+      agencyId = invite.agency_id;
+    }
 
     const { data: existingByEmail } = await supabase
       .from("agents")
@@ -172,6 +189,7 @@ export async function handler(
       email_verified: true,
       is_active: true,
       tier: "free",
+      ...(agencyId ? { agency_id: agencyId } : {}),
     };
 
     if (isAutoVerified) {
@@ -194,6 +212,14 @@ export async function handler(
     if (insertError || !agent) {
       console.error("Agent insert error");
       return json({ error: "Registration failed. Please try again." }, 500, cors);
+    }
+
+    // Mark invite as used now that the agent row is committed
+    if (agency_invite_token) {
+      await supabase
+        .from("agent_invites")
+        .update({ used_at: new Date().toISOString() })
+        .eq("token", agency_invite_token);
     }
 
     if (photo_base64) {
