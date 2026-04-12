@@ -31,6 +31,32 @@ check() {
   fi
 }
 
+# check_post: POST with a JSON body and assert the response is one of the allowed codes.
+# Usage: check_post <label> <url> <body> <allowed_codes_pattern>
+# allowed_codes_pattern is a grep ERE — e.g. "^(200|429)$"
+# Fails on any code not matching. Use for endpoints where a GET would give a misleading result.
+check_post() {
+  local label="$1"
+  local url="$2"
+  local body="$3"
+  local allowed="$4"   # ERE matched against the numeric status code
+
+  local status
+  status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d "$body" \
+    "$url")
+
+  if echo "$status" | grep -qE "$allowed"; then
+    echo "  PASS  [$status] $label"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL  [$status] $label — expected $allowed  ($url)"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
 echo ""
 echo "=== Smoke Test: $BASE ==="
 echo ""
@@ -46,13 +72,23 @@ echo "-- Edge functions (expect 4xx — no auth provided) --"
 # These should return 400/401/405, not 500/502. A 5xx here means the function
 # crashed on startup (bad deploy, missing env var, syntax error, etc.).
 check "capture-lead-v4"       "$SB/functions/v1/capture-lead-v4"       "4"
-check "send-magic-link"       "$SB/functions/v1/send-magic-link"        "4"
 check "verify-magic-link"     "$SB/functions/v1/verify-magic-link"      "4"
 check "create-checkout"       "$SB/functions/v1/create-checkout"        "4"
 check "manage-properties"     "$SB/functions/v1/manage-properties"      "4"
 check "get-analytics"         "$SB/functions/v1/get-analytics"          "4"
 check "lead-nudger (health)"  "$SB/functions/v1/lead-nudger?secret=INVALID"               "4"
 check "cobroke-discover"      "$SB/functions/v1/cobroke-discover"                          "4"
+
+echo ""
+echo "-- send-magic-link auth gate (POST with real body) --"
+# Must return 200 (unknown email — silent success) or 429 (rate limited).
+# 401 = JWT verification is blocking unauthenticated requests (verify_jwt broke).
+# 500 = function crashed, likely a Resend misconfiguration or missing env var.
+# A GET to this endpoint returns 405, which is why we use check_post here.
+check_post "send-magic-link (no JWT gate)" \
+  "$SB/functions/v1/send-magic-link" \
+  '{"email":"smoke-test-probe@sellingdubai.com","destination":"/dashboard"}' \
+  "^(200|429)$"
 
 # v2.0 Phase 3 — AI Secretary + Telegram
 # ai-secretary — OPTIONS should return 200
