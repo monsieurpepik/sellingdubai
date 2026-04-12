@@ -564,8 +564,19 @@ async function pingFn(fn: string): Promise<void> {
       signal: AbortSignal.timeout(6000),
     });
     const ms = Date.now() - start;
-    const ok = res.status < 500;
-    row.children[1].innerHTML = `<span class="badge badge--${ok ? "active" : "error"}">${ok ? `${res.status} OK` : `${res.status} Error`}</span>`;
+    let badgeClass: string;
+    let label: string;
+    if (res.status === 200 && ms > 2000) {
+      badgeClass = "badge--pending";
+      label = `${res.status} Slow`;
+    } else if (res.status === 200) {
+      badgeClass = "badge--active";
+      label = `${res.status} OK`;
+    } else {
+      badgeClass = "badge--error";
+      label = `${res.status} Error`;
+    }
+    row.children[1].innerHTML = `<span class="badge ${badgeClass}">${label}</span>`;
     row.children[2].textContent = `${ms}ms`;
   } catch {
     const ms = Date.now() - start;
