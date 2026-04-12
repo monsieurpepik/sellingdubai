@@ -89,3 +89,22 @@
   enabled = false
   port = 54327
   backend = "postgres"
+
+# Public-facing functions called before a user has a session token.
+# verify_jwt = false disables Supabase's platform-level JWT gate so
+# unauthenticated browsers can reach these endpoints. Each function
+# implements its own auth/rate-limiting internally.
+[functions.send-magic-link]
+verify_jwt = false
+
+[functions.verify-magic-link]
+verify_jwt = false
+
+[functions.capture-lead-v4]
+verify_jwt = false
+
+[functions.send-otp]
+verify_jwt = false
+
+[functions.verify-broker]
+verify_jwt = false
