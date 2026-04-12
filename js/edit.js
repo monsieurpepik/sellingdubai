@@ -263,7 +263,7 @@
       if (!igStoredState || igReturnedState !== igStoredState) {
         showToast('Instagram authorization failed: state mismatch. Please try again.');
       } else {
-        exchangeInstagramCode(oauthCode);
+        exchangeInstagramCode(oauthCode, igStoredState);
       }
       localStorage.removeItem('sd_ig_csrf_state');
       const cleanUrl = window.location.pathname + (window.location.search.replace(/[?&]code=[^&]+/, '').replace(/[?&]ig_callback=[^&]+/, '').replace(/[?&]state=[^&]+/, '').replace(/^\?$/, '') || '');
@@ -295,7 +295,7 @@
     fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'get_auth_url' }),
+      body: JSON.stringify({ action: 'get_auth_url', token: authToken }),
     }).then((res) => res.json()).then((data) => {
       if (data.url) {
         if (data.state) localStorage.setItem('sd_ig_csrf_state', data.state);
@@ -312,7 +312,7 @@
     });
   };
 
-  function exchangeInstagramCode(code) {
+  function exchangeInstagramCode(code, state) {
     if (!authToken) return;
 
     const btn = document.getElementById('btn-ig-connect');
@@ -322,7 +322,7 @@
     fetch(`${SUPABASE_URL}/functions/v1/instagram-auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'exchange_code', code, token: authToken }),
+      body: JSON.stringify({ action: 'exchange_code', code, token: authToken, state }),
     }).then((res) => res.json()).then((data) => {
       if (data.success) {
         document.getElementById('ig-disconnected').style.display = 'none';
