@@ -58,19 +58,8 @@ export async function handler(
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
-    // Validate email service config before any logic — fail fast with a clear log.
     const RESEND_KEY_CHECK = Deno.env.get("RESEND_API_KEY") || "";
     const RESEND_FROM_CHECK = Deno.env.get("RESEND_FROM") || "";
-    if (!RESEND_KEY_CHECK) {
-      console.error("[send-magic-link] RESEND_API_KEY is not set");
-      log({ event: 'misconfigured', status: 503, error: 'missing_RESEND_API_KEY' });
-      return new Response(JSON.stringify({ error: "Email service misconfigured" }), { status: 503, headers: cors });
-    }
-    if (!RESEND_FROM_CHECK || !RESEND_FROM_CHECK.includes("@")) {
-      console.error("[send-magic-link] RESEND_FROM is not set or missing @:", RESEND_FROM_CHECK || "(empty)");
-      log({ event: 'misconfigured', status: 503, error: 'missing_RESEND_FROM' });
-      return new Response(JSON.stringify({ error: "Email service misconfigured" }), { status: 503, headers: cors });
-    }
 
     const { email, destination } = await req.json();
 
