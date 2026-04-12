@@ -1,5 +1,16 @@
 # Architecture Decisions Log
 
+## 2026-04-12 — Premium motion layer on landing.html (Cormorant Garamond, cursor, noise, count-up)
+
+**What:** Added five premium additions to `landing.html` without changing layout or copy:
+1. Cormorant Garamond 300 (italic + roman) loaded async via `data-async-css` pattern — used only for the hero H1 split into two visual lines.
+2. SVG fractalNoise texture at 4% opacity via `::after` pseudo-element on `.noise-texture` — applied to footer (`bg-[#171719]` section). Inline data URI, zero external requests.
+3. Custom cursor (8px dot + 32px ring) with hover expand — guarded behind `@media (pointer: fine)` and JS `matchMedia` check; no-op on touch devices.
+4. Stagger-in scroll animation for the three fact cards (0/150/300ms `transition-delay`) using the existing `.reveal` / IntersectionObserver pattern in `landing-behavior.js`.
+5. Count-up animation for the "100%" fact card stat (0→100 over 1.2s, ease-out cubic) via its own IntersectionObserver in an inline `<script>`.
+
+**Why Cormorant Garamond is acceptable here despite the "no new Google Fonts" rule:** The existing DECISIONS.md (2026-04-07) established precedent for Cormorant Garamond on project-detail via lazy injection. Here it is loaded via the same non-blocking `data-async-css` preload pattern as Manrope/Inter — zero LCP impact. It is above-fold but render-blocking only in `<noscript>` fallback. The hero H1 falls back to `Georgia, serif` until the font loads.
+
 ## 2026-04-12 — BILLING_LIVE moved from build-time patch to runtime feature flag
 
 **What:** Removed the Netlify build-time `BILLING_LIVE` env var patch from `scripts/build-js.js`. `pricing.js` now reads `window.SD_FLAGS?.BILLING_LIVE` instead of a hardcoded constant. `window.SD_FLAGS` is populated by `loadFeatureFlags()` in `js/sd-config.js`, which calls the `get-flags` edge function (60s in-memory cache).

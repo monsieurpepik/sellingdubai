@@ -91,6 +91,39 @@ Run `npm run check` — it automates all checks below. Fix any errors before dep
 ### Diff review
 - [ ] Run `git diff` and scan for obviously broken patterns: raw Supabase URLs, `href="#"` or waitlist anchors on primary CTAs, hardcoded field names that diverge from the DB schema, `?? "pro"` fallbacks in webhook handlers
 
+## Session Rules
+
+### Model Selection
+- Use **Opus** for planning, architecture decisions, and debugging complex issues
+- Use **Sonnet** for all code execution
+- Use `ultrathink` keyword in prompts when solving hard architectural problems
+
+### Context Management
+- Run `/compact` manually at 50% context usage — never let it auto-compact
+- Use `/clear` when switching to a completely unrelated task mid-session
+- `/rename` sessions that are important and in-progress (e.g. `[TODO - REM sync refactor]`)
+
+### Session Start Protocol
+Before touching any file in a new session, read in order:
+1. `CLAUDE.md` — constraints
+2. `DECISIONS.md` — why things are the way they are
+3. `supabase/SCHEMA.md` — data model
+
+Then state what you're about to change before the first edit.
+
+## End-of-Task Verification Gate
+
+At the end of every task turn, verify before declaring done:
+- Did the change touch any god node? (`js/config.ts`, `js/init.ts`, `edge-functions/_shared/utils.ts`, `scripts/build-js.js`)
+- Does `npm run check` still pass?
+- Is `DECISIONS.md` updated if an architectural choice was made?
+
+## Anti-Patterns — Do Not Follow
+
+- Do NOT commit one file at a time. Commits are logical units of work.
+- Do NOT auto-compact. Manual `/compact` at 50% only.
+- Do NOT proceed without reading `DECISIONS.md` first in a new session.
+
 ## Known Production Gotchas
 
 - `send-magic-link` and all public auth functions require `verify_jwt = false` in `supabase/config.toml` AND `--no-verify-jwt` on deploy. Local dev masks this with `--no-verify-jwt` in `dev.sh`. If login breaks in production, check this first.
