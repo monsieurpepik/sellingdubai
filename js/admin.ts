@@ -41,7 +41,6 @@ async function callAdmin(
 
   if (res.status === 401) {
     clearToken();
-    showLogin("Session expired. Please log in again.");
     throw new Error("Session expired");
   }
 
@@ -112,9 +111,10 @@ async function attemptLogin(token: string): Promise<void> {
     await callAdmin("get_overview");
     showApp();
     navigate(location.hash.slice(1) || "overview");
-  } catch {
+  } catch (err) {
     clearToken();
-    showLogin("Invalid token. Try again.");
+    const msg = err instanceof Error ? err.message : "Login failed";
+    showLogin(msg === "Session expired" ? "Session expired. Please log in again." : `Login failed: ${msg}`);
   } finally {
     btn.disabled = false;
     btn.textContent = "Enter";
