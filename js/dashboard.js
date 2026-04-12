@@ -1079,7 +1079,7 @@
         const d = await res.json().then(null, () => ({}));
         if (!append) {
           const grid = document.getElementById('cobroke-grid');
-          if (grid) grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">Could not load listings</div><div class="empty-sub">' + esc(d.error || 'Please try again') + '</div></div>';
+          if (grid) grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">Could not load listings</div><div class="empty-sub">${esc(d.error || 'Please try again')}</div></div>`;
         }
         return;
       }
@@ -1342,10 +1342,6 @@
   function fmtDate(iso) {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  function esc(str) {
-    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   window.scrollToContacts = function () {
