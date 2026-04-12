@@ -37,6 +37,7 @@ const context = process.env.CONTEXT || process.env.NODE_ENV || 'unknown';
 console.log(`build-js: SUPABASE_URL=${url.slice(0, 40)}... (context: ${context})`);
 
 fs.mkdirSync('dist', { recursive: true });
+fs.rmSync('dist/chunks', { recursive: true, force: true });
 
 esbuild.build({
   entryPoints: ['js/init.ts', 'js/agency-page.ts', 'js/event-delegation.js', 'js/components.ts', 'js/admin.ts', 'js/agents.ts'],

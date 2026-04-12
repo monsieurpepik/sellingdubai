@@ -247,7 +247,7 @@
     const btn = document.getElementById('btn-manage-billing');
     btn.disabled = true;
     btn.textContent = 'Opening…';
-    const res = await fetch('https://pjyorgedaxevxophpfib.supabase.co/functions/v1/create-portal-session', {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-portal-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: authToken }),

@@ -28,7 +28,7 @@ export function logEvent(eventType: string, metadata: Record<string, unknown>): 
     metadata: { ...metadata, referrer_source: referrerSource, device: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop' },
     referrer: document.referrer || null,
   };
-  fetch(LOG_EVENT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(() => {});
+  fetch(LOG_EVENT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch((e) => { (window as any).Sentry?.captureException(e, { level: 'info' }); });
 }
 
 export async function trackPageView(agentId?: string): Promise<void> {

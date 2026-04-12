@@ -1,5 +1,5 @@
 // @ts-check
-const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+const SUPABASE_URL = window.__SD_SUPABASE_URL__ || 'https://pjyorgedaxevxophpfib.supabase.co';
 const VERIFY_URL = `${SUPABASE_URL}/functions/v1/verify-broker`;
 const CREATE_URL = `${SUPABASE_URL}/functions/v1/create-agent`;
 const OTP_URL = `${SUPABASE_URL}/functions/v1/send-otp`;

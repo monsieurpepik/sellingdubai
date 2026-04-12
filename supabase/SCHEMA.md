@@ -47,7 +47,7 @@ Primary profile table. One row per registered agent.
 | email | TEXT | |
 | phone | TEXT | |
 | whatsapp | TEXT | |
-| bio | TEXT | |
+| tagline | TEXT | |
 | photo_url | TEXT | Served via Netlify Image CDN |
 | is_active | BOOLEAN DEFAULT true | |
 | verification_status | TEXT | 'unverified' \| 'pending' \| 'verified' |

@@ -1,6 +1,6 @@
 // @ts-check
 (() => {
-  const SUPABASE_URL = 'https://pjyorgedaxevxophpfib.supabase.co';
+  const SUPABASE_URL = window.__SD_SUPABASE_URL__ || 'https://pjyorgedaxevxophpfib.supabase.co';
   const MAGIC_LINK_URL = `${SUPABASE_URL}/functions/v1/send-magic-link`;
   const VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
   const UPDATE_URL = `${SUPABASE_URL}/functions/v1/update-agent`;

@@ -33,7 +33,7 @@ document.querySelectorAll('.reveal').forEach((el) => { _revealObserver.observe(e
         if (el) el.textContent = total.toLocaleString();
       }
     }
-  }).catch(() => {});
+  }).catch((e) => { if (window.Sentry) window.Sentry.captureException(e, { level: 'info' }); });
 })();
 
 // Lazy-load GA4 after page load with 2-second delay

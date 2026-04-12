@@ -1,5 +1,17 @@
 # Architecture Decisions Log
 
+## 2026-04-12 — Platform audit fixes (C-1, C-2, C-3, W-1, W-3, W-4)
+
+**What:** Applied all critical and warning fixes from full platform audit.
+- C-1: Removed unused Supabase CDN `<script defer>` from `agency.html` — `agency-page.bundle.js` imports from `./config` (esbuild-bundled), `window.supabase` was never used on this page.
+- C-2: Fixed `dashboard.js` `openBillingPortal()` — replaced hardcoded `pjyorgedaxevxophpfib.supabase.co` URL with module-level `SUPABASE_URL` variable (already set via `resolveConfig()`).
+- C-3: Fixed `supabase/SCHEMA.md` — corrected column name `bio` → `tagline` to match actual DB schema.
+- W-1: `join.js`, `edit.js`, `agency-dashboard.js` — replaced hardcoded Supabase URLs with `window.__SD_SUPABASE_URL__ || fallback`. `__SD_SUPABASE_URL__` is set by `dist/release-config.js` (blocking, no defer) which loads before all defer scripts.
+- W-3: Added `fs.rmSync('dist/chunks', { recursive: true, force: true })` to `scripts/build-js.js` before each build to prevent stale chunk accumulation.
+- W-4: Added `Sentry.captureException(e, { level: 'info' })` to silent `.catch(() => {})` in `js/analytics.ts` and `js/landing-behavior.js` (agent count fetch).
+
+**Why:** Audit revealed hardcoded prod URLs risk pointing at prod during staging deploys, stale chunks inflate deploy size, and silent catches blind Sentry to analytics failures.
+
 ## 2026-04-12 — Full landing.html redesign (WhatsApp AI demo, feature cards, stats, ticker, magnetic CTA)
 
 **What:** Replaced the single-section landing page body with a full multi-section layout. All existing constraints preserved (wizard modal IDs, Supabase agent count, script load order). New sections added:
