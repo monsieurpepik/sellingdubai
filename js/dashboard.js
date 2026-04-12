@@ -1264,22 +1264,33 @@
     const phoneEl = document.getElementById('secretary-phone');
     const tokenEl = document.getElementById('secretary-token');
     if (phoneEl) phoneEl.textContent = (window.SD_CONFIG && window.SD_CONFIG.VAPI_PHONE_NUMBER) || 'Not configured';
-    if (tokenEl) tokenEl.textContent = agent.siri_token || 'Loading…';
+    if (tokenEl) tokenEl.textContent = agent.siri_token || '—';
     section.style.display = '';
   }
 
   window.copySecretaryPhone = function () {
     const phone = document.getElementById('secretary-phone')?.textContent || '';
-    navigator.clipboard.writeText(phone).catch(() => {});
+    const btn = document.querySelector('[data-action="copySecretaryPhone"]');
+    navigator.clipboard.writeText(phone).then(() => {
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
+    }, (err) => {
+      window.reportError?.('copySecretaryPhone', err);
+    });
   };
 
   window.copySecretaryToken = function () {
     const token = document.getElementById('secretary-token')?.textContent || '';
-    navigator.clipboard.writeText(token).catch(() => {});
+    const btn = document.querySelector('[data-action="copySecretaryToken"]');
+    navigator.clipboard.writeText(token).then(() => {
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
+    }, (err) => {
+      window.reportError?.('copySecretaryToken', err);
+    });
   };
 
   window.rotateSiriToken = async function () {
     if (!authToken) return;
+    const btn = document.querySelector('[data-action="rotateSiriToken"]');
     try {
       const res = await fetch(ROTATE_SIRI_URL, {
         method: 'POST',
@@ -1290,8 +1301,10 @@
       const data = await res.json();
       const tokenEl = document.getElementById('secretary-token');
       if (tokenEl) tokenEl.textContent = data.siri_token;
+      if (btn) { btn.textContent = 'Rotated!'; setTimeout(() => { btn.textContent = 'Rotate'; }, 1500); }
     } catch (err) {
       window.reportError?.('rotateSiriToken', err);
+      if (btn) { btn.textContent = 'Failed — refresh'; setTimeout(() => { btn.textContent = 'Rotate'; }, 3000); }
     }
   };
 

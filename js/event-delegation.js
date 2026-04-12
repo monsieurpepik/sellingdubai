@@ -393,13 +393,13 @@ document.addEventListener('click', (e) => {
 
     // AI Secretary (dashboard.js)
     case 'copySecretaryPhone':
-      window.copySecretaryPhone && window.copySecretaryPhone();
+      if (typeof window.copySecretaryPhone === 'function') window.copySecretaryPhone();
       break;
     case 'copySecretaryToken':
-      window.copySecretaryToken && window.copySecretaryToken();
+      if (typeof window.copySecretaryToken === 'function') window.copySecretaryToken();
       break;
     case 'rotateSiriToken':
-      window.rotateSiriToken && window.rotateSiriToken();
+      if (typeof window.rotateSiriToken === 'function') window.rotateSiriToken();
       break;
   }
 });
