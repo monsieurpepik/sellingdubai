@@ -603,7 +603,7 @@ export async function handler(
       supabase
         .from("contact_reminders")
         .insert(reminders)
-        .then(({ error }) => {
+        .then(({ error }: { error: unknown }) => {
           if (error) console.error("contact_reminders insert failed");
         });
 
@@ -617,7 +617,7 @@ export async function handler(
           interaction_type: "lead_captured",
           notes: lead.message || null,
         })
-        .then(({ error }) => {
+        .then(({ error }: { error: unknown }) => {
           if (error) console.error("contact_interactions insert failed");
         });
     }
