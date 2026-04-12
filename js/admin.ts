@@ -114,7 +114,7 @@ async function attemptLogin(token: string): Promise<void> {
   } catch (err) {
     clearToken();
     const msg = err instanceof Error ? err.message : "Login failed";
-    showLogin(msg === "Session expired" ? "Session expired. Please log in again." : `Login failed: ${msg}`);
+    showLogin(msg === "Session expired" ? "Invalid token. Please try again." : `Login failed: ${msg}`);
   } finally {
     btn.disabled = false;
     btn.textContent = "Enter";
