@@ -120,7 +120,20 @@ function applyFiltersAndRender(): void {
     return;
   }
 
-  grid.innerHTML = filtered.map(renderCard).join('');
+  const JOIN_CTA = `<div class="agent-card agent-card-join" role="listitem">
+  <div class="join-card-icon" aria-hidden="true">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+    </svg>
+  </div>
+  <div class="join-card-heading">Are you a Dubai agent?</div>
+  <div class="join-card-sub">Get your verified profile and start receiving leads today.</div>
+  <a class="card-cta join-card-cta" href="/join">Get Your Profile</a>
+</div>`;
+
+  grid.innerHTML = filtered.map(renderCard).join('') + JOIN_CTA;
   countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'agent' : 'agents'}`;
 }
 

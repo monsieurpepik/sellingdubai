@@ -275,6 +275,42 @@ header .container {
 }
 .card-cta:hover { opacity: 0.8; }
 
+/* ── Join CTA card ── */
+.agent-card-join {
+  border: 2px dashed rgba(212, 232, 74, 0.5);
+  background: rgba(212, 232, 74, 0.04);
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  gap: 12px;
+}
+.agent-card-join:hover {
+  border-color: #d4e84a;
+  background: rgba(212, 232, 74, 0.08);
+  box-shadow: none;
+  transform: none;
+}
+.join-card-icon {
+  color: #5a6600;
+  margin-bottom: 4px;
+}
+.join-card-heading {
+  font-family: 'Manrope', -apple-system, sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: #1a1916;
+}
+.join-card-sub {
+  font-size: 13px;
+  color: rgba(26, 25, 22, 0.55);
+  line-height: 1.5;
+}
+.join-card-cta {
+  background: #d4e84a;
+  color: #1a1916;
+  margin-top: 4px;
+}
+.join-card-cta:hover { opacity: 0.85; }
+
 /* ── Empty state ── */
 .empty-state {
   grid-column: 1 / -1;
