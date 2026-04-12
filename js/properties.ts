@@ -94,11 +94,14 @@ function injectDemoPhotos(p: Property): Property {
 let propertiesLoaded = false;
 let propertiesError: string | null = null;
 let propertiesCache: Property[] = [];
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 12;
 let propertiesOffset = 0;
 let propertiesHasMore = false;
 let propertiesAgentId = '';
 let propertiesLoadingMore = false;
+let propertiesTotalCount = 0;
+
+const PROPS_COLS = 'id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active';
 
 export async function loadProperties(agentId: string): Promise<Property[]> {
   if (propertiesLoaded && propertiesAgentId && agentId !== propertiesAgentId) {
@@ -108,27 +111,41 @@ export async function loadProperties(agentId: string): Promise<Property[]> {
     propertiesOffset = 0;
     propertiesHasMore = false;
     propertiesLoadingMore = false;
+    propertiesTotalCount = 0;
   }
   if (propertiesLoaded) return propertiesCache;
   propertiesError = null;
   propertiesAgentId = agentId;
-  const { data: props, error } = await supabase
-    .from('properties')
-    .select('id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active')
-    .eq('agent_id', agentId)
-    .neq('is_active', false)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false })
-    .range(0, PAGE_SIZE - 1);
-  if (error) {
-    propertiesError = error.message;
-    console.error('[properties] Failed to load properties:', error.message);
+
+  // Fetch first page and total count in parallel
+  const [pageResult, countResult] = await Promise.allSettled([
+    supabase
+      .from('properties')
+      .select(PROPS_COLS)
+      .eq('agent_id', agentId)
+      .neq('is_active', false)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .range(0, PAGE_SIZE - 1),
+    supabase
+      .from('properties')
+      .select('id', { count: 'exact', head: true })
+      .eq('agent_id', agentId)
+      .neq('is_active', false),
+  ]);
+
+  if (pageResult.status === 'rejected' || pageResult.value.error) {
+    const err = pageResult.status === 'rejected' ? String(pageResult.reason) : pageResult.value.error!.message;
+    propertiesError = err;
+    console.error('[properties] Failed to load properties:', err);
     return [];
   }
-  const page = (props || []).map(p => injectDemoPhotos(p as Property));
+
+  const page = (pageResult.value.data || []).map(p => injectDemoPhotos(p as Property));
+  propertiesTotalCount = countResult.status === 'fulfilled' ? (countResult.value.count ?? page.length) : page.length;
   propertiesCache = page;
   propertiesOffset = page.length;
-  propertiesHasMore = page.length === PAGE_SIZE;
+  propertiesHasMore = page.length === PAGE_SIZE && propertiesOffset < propertiesTotalCount;
   propertiesLoaded = true;
   return propertiesCache;
 }
@@ -139,7 +156,7 @@ export async function loadMoreProperties(): Promise<Property[]> {
   try {
     const { data: props, error } = await supabase
       .from('properties')
-      .select('id,title,image_url,additional_photos,price,location,property_type,bedrooms,bathrooms,area_sqft,features,description,listing_type,status,developer,handover_date,payment_plan,dld_permit,reference_number,sort_order,created_at,is_active')
+      .select(PROPS_COLS)
       .eq('agent_id', propertiesAgentId)
       .neq('is_active', false)
       .order('sort_order', { ascending: true })
@@ -152,14 +169,14 @@ export async function loadMoreProperties(): Promise<Property[]> {
     const page = (props || []).map(p => injectDemoPhotos(p as Property));
     propertiesCache = [...propertiesCache, ...page];
     propertiesOffset += page.length;
-    propertiesHasMore = page.length === PAGE_SIZE;
+    propertiesHasMore = page.length === PAGE_SIZE && propertiesOffset < propertiesTotalCount;
     return page;
   } finally {
     propertiesLoadingMore = false;
   }
 }
 
-export { propertiesError, propertiesHasMore, propertiesLoaded };
+export { propertiesError, propertiesHasMore, propertiesLoaded, propertiesTotalCount };
 
 
 // Heart / favorite toggle

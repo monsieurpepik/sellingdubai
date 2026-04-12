@@ -7,7 +7,7 @@
 // ==========================================
 
 import { renderOffPlanCard, renderPropertyCard } from './components';
-import { initOffPlanCarousel } from './properties';
+import { initOffPlanCarousel, propertiesTotalCount } from './properties';
 import { allProperties, currentFilters } from './state';
 
 export function renderPropertyList(props: { listing_type?: string; [key: string]: unknown }[]) {
@@ -50,8 +50,11 @@ export function renderPropertyList(props: { listing_type?: string; [key: string]
   // Standard property list
   html += standardProps.map((p, i) => renderPropertyCard(p, i)).join('');
 
-  const totalCount = props.length;
-  countEl!.textContent = `${totalCount} ${totalCount === 1 ? 'property' : 'properties'}`;
+  const loadedCount = props.length;
+  const total = propertiesTotalCount > loadedCount ? propertiesTotalCount : loadedCount;
+  countEl!.textContent = loadedCount < total
+    ? `Showing ${loadedCount} of ${total} ${total === 1 ? 'property' : 'properties'}`
+    : `${total} ${total === 1 ? 'property' : 'properties'}`;
   listEl!.innerHTML = html;
 
   // Init carousel swipe if off-plan cards exist
