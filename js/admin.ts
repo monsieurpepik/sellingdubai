@@ -515,7 +515,7 @@ async function renderAudit(c: HTMLElement): Promise<void> {
           : data.entries.map((e) => `
             <tr>
               <td class="mono">${escHtml(e.action)}</td>
-              <td class="mono">${e.target_agent_id ? escHtml(e.target_agent_id.slice(0, 8)) + "…" : "—"}</td>
+              <td class="mono">${e.target_agent_id ? `${escHtml(e.target_agent_id.slice(0, 8))}…` : "—"}</td>
               <td class="mono details-cell">${escHtml(JSON.stringify(e.details))}</td>
               <td class="mono">${fmtTime(e.created_at)}</td>
             </tr>`).join("")}
