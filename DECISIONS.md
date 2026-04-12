@@ -1,5 +1,18 @@
 # Architecture Decisions Log
 
+## 2026-04-12 — Full landing.html redesign (WhatsApp AI demo, feature cards, stats, ticker, magnetic CTA)
+
+**What:** Replaced the single-section landing page body with a full multi-section layout. All existing constraints preserved (wizard modal IDs, Supabase agent count, script load order). New sections added:
+1. Social proof ticker in hero — CSS `@keyframes` marquee, 28s loop, duplicated items for seamless loop, no JS.
+2. WhatsApp AI demo — dark section with CSS-only chat animation (3 elements: buyer bubble, typing indicator, AI response, each on a 12s `animation-iteration-count: infinite` cycle with staggered `@keyframes`). No library.
+3. Feature cards grid — 4 cards (DLD Verified, Your Link, Off-Plan, Analytics) with IntersectionObserver `.reveal` stagger via existing `landing-behavior.js` observer.
+4. Stats section — dark with `noise-texture`, 3 stat numbers using existing `countUp()` + `data-count-to` pattern via IntersectionObserver.
+5. DLD badge pulse — `setInterval(10000)` triggers CSS `@keyframes badge-pulse` box-shadow ripple.
+6. Magnetic CTA button — `mousemove` within button bounds applies `transform: translate()` at 0.28 strength; `mouseleave` eases back via `cubic-bezier(0.23, 1, 0.32, 1)`. Pointer-fine devices only.
+7. `.noise-texture::after` applied to both dark sections (WA demo + stats + footer). Existing CSS, just wider use.
+
+**No new third-party scripts.** No new fonts (Cormorant Garamond already approved above). All images already CDN-transformed. The `0%` stat counter is intentional — easeOutCubic from 0→0 renders as "0%" instantly, which is correct.
+
 ## 2026-04-12 — Premium motion layer on landing.html (Cormorant Garamond, cursor, noise, count-up)
 
 **What:** Added five premium additions to `landing.html` without changing layout or copy:

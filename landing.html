@@ -49,71 +49,6 @@
     background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
     background-size: 24px 24px;
   }
-  .phone-shadow {
-    filter: drop-shadow(0 30px 50px rgba(0,0,0,0.15));
-  }
-
-  /* Phone mockup — iPhone 16 Pro style */
-  .phone-frame {
-    width: 260px;
-    height: 520px;
-    background: #2c2c2e;
-    border-radius: 44px;
-    padding: 8px;
-    position: relative;
-    border: 1.5px solid #48484a;
-  }
-  .phone-frame-lg {
-    width: 280px;
-    height: auto;
-    overflow: hidden;
-    border-radius: 40px;
-  }
-  /* Dynamic Island */
-  .phone-dynamic-island {
-    position: absolute;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90px;
-    height: 26px;
-    background: #000;
-    border-radius: 20px;
-    z-index: 10;
-  }
-  /* Legacy notch — hidden */
-  .phone-notch {
-    display: none;
-  }
-  .phone-screen {
-    width: 100%;
-    height: 100%;
-    border-radius: 36px;
-    overflow: hidden;
-    position: relative;
-  }
-  .phone-screen-bg {
-    width: 100%;
-    height: 100%;
-    border-radius: 36px;
-    overflow: hidden;
-    position: relative;
-    background-color: #0a0a0a;
-    background-image: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.10) 40%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.40) 100%), url('/.netlify/images?url=https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg&w=800&fm=webp&q=80');
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
-  }
-  .phone-screen-content {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    scrollbar-width: none;
-    padding-top: 44px;
-  }
-  .phone-screen-content::-webkit-scrollbar { display: none; }
 
   /* FAQ accordion */
   .faq-item .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
@@ -136,8 +71,6 @@
   @media (max-width: 768px) { .sticky-cta { display: block; } }
   @media (max-width: 767px) { .dot-pattern { display: none; } }
 
-  /* Language switcher */
-
   /* RTL support */
   [dir="rtl"] { text-align: right; }
   [dir="rtl"] .brand-logo { letter-spacing: 0.06em; }
@@ -153,8 +86,10 @@
     min-height: 100svh;
     display: flex; align-items: center; justify-content: center;
     text-align: center; padding: 40px 24px; background: #fff;
+    flex-direction: column;
+    overflow: hidden;
   }
-  .hero-inner { max-width: 560px; margin: 0 auto; }
+  .hero-inner { max-width: 560px; margin: 0 auto; width: 100%; }
   .hero-brand { font-family: 'Manrope', sans-serif; font-weight: 800;
     letter-spacing: 0.25em; text-transform: uppercase; font-size: 12px;
     color: #0a0a0a; margin-bottom: 40px; display: block; }
@@ -168,9 +103,10 @@
     display: inline-block; background: #0a0a0a; color: #fff; border: none;
     cursor: pointer; padding: 16px 44px; border-radius: 14px;
     font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
-    font-family: 'Manrope', sans-serif; transition: opacity 0.15s;
+    font-family: 'Manrope', sans-serif;
+    will-change: transform;
   }
-  .hero-cta-btn:hover, .hero-cta-btn:focus-visible { opacity: 0.8; }
+  .hero-cta-btn:hover, .hero-cta-btn:focus-visible { opacity: 0.85; }
   .hero-agent-count { font-size: 13px; color: #a1a1aa; margin: 16px 0 0; }
 
   /* ── Facts row ── */
@@ -255,14 +191,11 @@
     letter-spacing: -0.01em; margin-top: 8px;
   }
 
-  /* ── Stagger delays for fact cards ── */
+  /* ── Stagger delays ── */
   .stagger-0 { transition-delay: 0ms; }
-  .stagger-1 { transition-delay: 150ms; }
-  .stagger-2 { transition-delay: 300ms; }
-
-  /* ── Slide from right ── */
-  .slide-right { opacity: 0; transform: translateX(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
-  .slide-right.visible { opacity: 1; transform: translateX(0); }
+  .stagger-1 { transition-delay: 120ms; }
+  .stagger-2 { transition-delay: 240ms; }
+  .stagger-3 { transition-delay: 360ms; }
 
   /* ── Noise texture on dark sections ── */
   .noise-texture { position: relative; }
@@ -270,7 +203,9 @@
     content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.04;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat; background-size: 200px 200px;
+    z-index: 0;
   }
+  .noise-texture > * { position: relative; z-index: 1; }
 
   /* ── Custom cursor (pointer devices only) ── */
   @media (pointer: fine) {
@@ -289,6 +224,234 @@
     }
     .cursor-ring.hover { width: 44px; height: 44px; opacity: 0.5; }
     .cursor-dot.hover { width: 4px; height: 4px; }
+  }
+
+  /* ── Social proof ticker ── */
+  .ticker-wrapper {
+    width: 100%; overflow: hidden;
+    margin-bottom: 40px;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+  .ticker-track {
+    display: flex; gap: 56px; white-space: nowrap;
+    animation: ticker-scroll 28s linear infinite;
+    width: max-content;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    font-size: 12px; color: #a1a1aa; letter-spacing: 0.04em; flex-shrink: 0;
+    font-family: 'Manrope', sans-serif; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .ticker-sep { color: #d4d4d8; }
+
+  /* ── Feature cards section ── */
+  .features-section {
+    padding: 96px 24px; background: #fff; border-top: 1px solid #f0f0f0;
+  }
+  .features-label {
+    text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #a1a1aa; margin-bottom: 20px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .features-headline {
+    text-align: center; font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 300; font-size: clamp(28px, 4vw, 44px);
+    color: #0a0a0a; letter-spacing: -0.01em; margin: 0 0 56px; line-height: 1.2;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px; max-width: 760px; margin: 0 auto;
+  }
+  @media (max-width: 560px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature-card {
+    background: #fafafa; border: 1px solid #f0f0f0; border-radius: 20px;
+    padding: 32px 28px;
+  }
+  .feature-card-icon {
+    font-size: 22px; margin-bottom: 16px; display: block;
+    color: #0a0a0a;
+  }
+  .feature-card-title {
+    font-size: 15px; font-weight: 700; color: #0a0a0a; margin: 0 0 8px;
+    font-family: 'Manrope', sans-serif; letter-spacing: -0.01em;
+  }
+  .feature-card-body {
+    font-size: 13px; color: #71717a; line-height: 1.6; margin: 0;
+  }
+
+  /* ── WhatsApp AI demo section ── */
+  .wa-section {
+    background: #0a0a0a; padding: 96px 24px;
+  }
+  .wa-inner {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  @media (max-width: 720px) {
+    .wa-inner { grid-template-columns: 1fr; gap: 48px; }
+    .wa-phone-wrap { display: flex; justify-content: center; }
+  }
+  .wa-copy-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); margin-bottom: 16px; font-family: 'Manrope', sans-serif;
+  }
+  .wa-copy-headline {
+    font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 300;
+    font-size: clamp(28px, 4vw, 42px); color: #fff; letter-spacing: -0.01em;
+    line-height: 1.2; margin: 0 0 20px;
+  }
+  .wa-copy-body {
+    font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.65; margin: 0 0 32px;
+  }
+  .wa-check-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .wa-check-list li {
+    font-size: 13px; color: rgba(255,255,255,0.55); display: flex; align-items: center; gap: 10px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .wa-check-list li::before {
+    content: ''; width: 16px; height: 16px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3.5 3.5L13 5' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-size: 14px; background-position: center; background-repeat: no-repeat;
+  }
+
+  /* ── Phone frame for WA demo ── */
+  .wa-phone {
+    width: 220px; height: 420px; background: #1c1c1e; border-radius: 40px;
+    padding: 6px; border: 1.5px solid #3a3a3c; position: relative; flex-shrink: 0;
+  }
+  .wa-phone-island {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    width: 76px; height: 22px; background: #000; border-radius: 16px; z-index: 2;
+  }
+  .wa-phone-screen {
+    width: 100%; height: 100%; border-radius: 34px; overflow: hidden;
+    background: #ece5dd; display: flex; flex-direction: column;
+  }
+  .wa-header {
+    background: #075e54; padding: 32px 12px 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .wa-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: #128c7e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff; font-weight: 700; flex-shrink: 0;
+  }
+  .wa-header-name { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .wa-header-status { font-size: 9px; color: rgba(255,255,255,0.65); }
+  .wa-messages {
+    flex: 1; padding: 12px 8px; display: flex; flex-direction: column;
+    gap: 8px; justify-content: flex-end; overflow: hidden;
+  }
+  .wa-bubble {
+    max-width: 76%; padding: 7px 10px; border-radius: 10px;
+    font-size: 10px; line-height: 1.45; position: relative;
+  }
+  .wa-bubble-buyer {
+    background: #fff; border-radius: 10px 10px 10px 2px; align-self: flex-start;
+    color: #111;
+    opacity: 0;
+    animation: wa-buyer 12s ease infinite;
+  }
+  .wa-bubble-ai {
+    background: #dcf8c6; border-radius: 10px 10px 2px 10px; align-self: flex-end;
+    color: #111;
+    opacity: 0;
+    animation: wa-ai 12s ease infinite;
+  }
+  .wa-typing {
+    background: #fff; border-radius: 10px 10px 10px 2px;
+    align-self: flex-start; padding: 10px 12px;
+    display: flex; align-items: center; gap: 3px;
+    opacity: 0;
+    animation: wa-typing-anim 12s ease infinite;
+    width: 44px;
+  }
+  .wa-typing-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: #aaa;
+    animation: dot-bounce 1.2s ease infinite;
+  }
+  .wa-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .wa-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  @keyframes wa-buyer {
+    0%, 4% { opacity: 0; transform: translateY(6px); }
+    9%, 72% { opacity: 1; transform: translateY(0); }
+    85%, 100% { opacity: 0; transform: translateY(0); }
+  }
+  @keyframes wa-typing-anim {
+    0%, 14% { opacity: 0; }
+    17%, 30% { opacity: 1; }
+    35%, 100% { opacity: 0; }
+  }
+  @keyframes wa-ai {
+    0%, 35% { opacity: 0; transform: translateY(6px); }
+    40%, 72% { opacity: 1; transform: translateY(0); }
+    85%, 100% { opacity: 0; transform: translateY(0); }
+  }
+  .wa-bubble-time { font-size: 8px; color: #888; text-align: right; margin-top: 2px; }
+
+  /* ── Stats section ── */
+  .stats-section {
+    background: #0f0f0f; padding: 80px 24px; border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .stats-inner { max-width: 760px; margin: 0 auto; text-align: center; }
+  .stats-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); margin-bottom: 48px; font-family: 'Manrope', sans-serif;
+  }
+  .stats-grid {
+    display: flex; gap: 0; justify-content: center; flex-wrap: wrap;
+  }
+  .stat-item {
+    flex: 1; min-width: 180px; padding: 32px 24px;
+    border-right: 1px solid rgba(255,255,255,0.07);
+  }
+  .stat-item:last-child { border-right: none; }
+  @media (max-width: 600px) {
+    .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .stat-item:last-child { border-bottom: none; }
+  }
+  .stat-number {
+    font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: clamp(40px, 6vw, 64px); color: #fff;
+    letter-spacing: -0.04em; line-height: 1; margin-bottom: 10px;
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.5;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  /* ── DLD badge ── */
+  .dld-badge-wrap { display: flex; justify-content: center; margin-bottom: 56px; }
+  .dld-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px; padding: 10px 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: rgba(255,255,255,0.7); font-family: 'Manrope', sans-serif;
+  }
+  .dld-badge.pulsing {
+    animation: badge-pulse 0.8s ease;
+  }
+  @keyframes badge-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.25); }
+    60% { box-shadow: 0 0 0 14px rgba(255,255,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  }
+  .dld-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0;
   }
 
 </style>
@@ -311,6 +474,30 @@
 
 <!-- ======== ABOVE-FOLD HERO ======== -->
 <section class="hero-above-fold">
+
+  <!-- Social proof ticker -->
+  <div class="ticker-wrapper" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-item">Ahmed Al Mansouri <span class="ticker-sep">·</span> RERA Certified</span>
+      <span class="ticker-item">Sara Khalid <span class="ticker-sep">·</span> Luxury Specialist</span>
+      <span class="ticker-item">James Chen <span class="ticker-sep">·</span> Off-Plan Expert</span>
+      <span class="ticker-item">Maria Santos <span class="ticker-sep">·</span> Investment Advisor</span>
+      <span class="ticker-item">Omar Farooq <span class="ticker-sep">·</span> DLD Verified</span>
+      <span class="ticker-item">Priya Kapoor <span class="ticker-sep">·</span> Property Consultant</span>
+      <span class="ticker-item">Michael Brown <span class="ticker-sep">·</span> Marina Specialist</span>
+      <span class="ticker-item">Layla Hassan <span class="ticker-sep">·</span> Buyer's Agent</span>
+      <!-- duplicate for seamless loop -->
+      <span class="ticker-item">Ahmed Al Mansouri <span class="ticker-sep">·</span> RERA Certified</span>
+      <span class="ticker-item">Sara Khalid <span class="ticker-sep">·</span> Luxury Specialist</span>
+      <span class="ticker-item">James Chen <span class="ticker-sep">·</span> Off-Plan Expert</span>
+      <span class="ticker-item">Maria Santos <span class="ticker-sep">·</span> Investment Advisor</span>
+      <span class="ticker-item">Omar Farooq <span class="ticker-sep">·</span> DLD Verified</span>
+      <span class="ticker-item">Priya Kapoor <span class="ticker-sep">·</span> Property Consultant</span>
+      <span class="ticker-item">Michael Brown <span class="ticker-sep">·</span> Marina Specialist</span>
+      <span class="ticker-item">Layla Hassan <span class="ticker-sep">·</span> Buyer's Agent</span>
+    </div>
+  </div>
+
   <div class="hero-inner">
     <span class="hero-brand">SellingDubai</span>
     <h1 class="hero-headline">
@@ -318,7 +505,9 @@
       <span class="hero-headline-line2">Not the other way.</span>
     </h1>
     <p class="hero-subline">DLD-verified. Your leads. Your brand. Free.</p>
-    <button class="hero-cta-btn" data-open-wizard>Claim Your Profile &rarr;</button>
+    <div style="display:inline-block;">
+      <button class="hero-cta-btn js-magnetic" data-open-wizard>Claim Your Profile &rarr;</button>
+    </div>
     <p class="hero-agent-count">
       <span id="agent-count-live">—</span> agents already on the platform
     </p>
@@ -380,11 +569,118 @@
 
 </div>
 
+<!-- ======== WHATSAPP AI DEMO ======== -->
+<section class="wa-section noise-texture" aria-label="WhatsApp AI assistant demo">
+  <div class="wa-inner">
+    <div class="wa-copy reveal">
+      <p class="wa-copy-label">WhatsApp AI</p>
+      <h2 class="wa-copy-headline">Your AI answers while you're showing a property.</h2>
+      <p class="wa-copy-body">Every buyer gets an instant, personalised response — even when you're on site. No lead left behind.</p>
+      <ul class="wa-check-list">
+        <li>Answers availability questions instantly</li>
+        <li>Qualifies leads before you call back</li>
+        <li>Books viewings on your behalf</li>
+        <li>Hands off to you when it matters</li>
+      </ul>
+    </div>
+
+    <div class="wa-phone-wrap reveal stagger-1">
+      <div class="wa-phone" aria-hidden="true">
+        <div class="wa-phone-island"></div>
+        <div class="wa-phone-screen">
+          <!-- WhatsApp header -->
+          <div class="wa-header">
+            <div class="wa-avatar">SD</div>
+            <div>
+              <div class="wa-header-name">SellingDubai AI</div>
+              <div class="wa-header-status">online</div>
+            </div>
+          </div>
+          <!-- Chat messages — CSS animated -->
+          <div class="wa-messages">
+            <div class="wa-bubble wa-bubble-buyer">
+              Is this apartment still available?
+              <div class="wa-bubble-time">9:41 AM</div>
+            </div>
+            <div class="wa-typing">
+              <div class="wa-typing-dot"></div>
+              <div class="wa-typing-dot"></div>
+              <div class="wa-typing-dot"></div>
+            </div>
+            <div class="wa-bubble wa-bubble-ai">
+              Yes! It's available. The agent is DLD‑verified with 12+ years in Dubai. Want me to schedule a viewing?
+              <div class="wa-bubble-time">9:41 AM ✓✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== FEATURE CARDS ======== -->
+<section class="features-section" aria-label="Platform features">
+  <p class="features-label">What you get</p>
+  <h2 class="features-headline">Everything an agent needs.<br>Nothing they don't.</h2>
+  <div class="features-grid">
+    <div class="feature-card reveal stagger-0">
+      <span class="material-symbols-outlined feature-card-icon">verified</span>
+      <h3 class="feature-card-title">DLD Verified Badge</h3>
+      <p class="feature-card-body">Every profile is verified against the Dubai Land Department register. Buyers trust the badge.</p>
+    </div>
+    <div class="feature-card reveal stagger-1">
+      <span class="material-symbols-outlined feature-card-icon">link</span>
+      <h3 class="feature-card-title">Your Link, Your Brand</h3>
+      <p class="feature-card-body">One URL — sellingdubai.ae/a/your-name — for your Instagram bio, business card, and WhatsApp status.</p>
+    </div>
+    <div class="feature-card reveal stagger-2">
+      <span class="material-symbols-outlined feature-card-icon">apartment</span>
+      <h3 class="feature-card-title">Off-Plan Projects</h3>
+      <p class="feature-card-body">Showcase Dubai's latest developments with live unit availability synced directly from REM.</p>
+    </div>
+    <div class="feature-card reveal stagger-3">
+      <span class="material-symbols-outlined feature-card-icon">analytics</span>
+      <h3 class="feature-card-title">Lead Analytics</h3>
+      <p class="feature-card-body">See who's viewing your profile, which listings get the most clicks, and when buyers reach out.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======== STATS ======== -->
+<section class="stats-section noise-texture" aria-label="Platform statistics">
+  <div class="stats-inner">
+    <!-- DLD badge with pulse -->
+    <div class="dld-badge-wrap">
+      <div class="dld-badge" id="dld-pulse-badge" aria-label="DLD Verified Platform">
+        <span class="dld-badge-dot"></span>
+        DLD Verified Platform
+      </div>
+    </div>
+
+    <p class="stats-label">By the numbers</p>
+
+    <div class="stats-grid">
+      <div class="stat-item reveal stagger-0">
+        <span class="stat-number" data-count-to="100" data-count-suffix="%">100%</span>
+        <span class="stat-label">Free to start<br>No credit card required</span>
+      </div>
+      <div class="stat-item reveal stagger-1">
+        <span class="stat-number" data-count-to="0" data-count-suffix="%">0%</span>
+        <span class="stat-label">Commission on your leads<br>They're yours, always</span>
+      </div>
+      <div class="stat-item reveal stagger-2">
+        <span class="stat-number" data-count-to="70" data-count-suffix="%">70%</span>
+        <span class="stat-label">Mortgage commission<br>vs 30% industry standard</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ======== 3 FACTS ======== -->
 <section class="facts-row">
   <div class="facts-inner">
     <div class="fact reveal stagger-0">
-      <div class="fact-number" data-count-to="100" data-count-suffix="%">100%</div>
+      <div class="fact-number">Free</div>
       <div class="fact-label">Free to start — no credit card</div>
     </div>
     <div class="fact reveal stagger-1">
@@ -456,8 +752,10 @@
 
 <script>
 (function () {
-  // Custom cursor — pointer devices only
-  if (window.matchMedia('(pointer: fine)').matches) {
+  var isPointerFine = window.matchMedia('(pointer: fine)').matches;
+
+  // ── Custom cursor ──
+  if (isPointerFine) {
     var dot = document.querySelector('.cursor-dot');
     var ring = document.querySelector('.cursor-ring');
     if (dot && ring) {
@@ -475,14 +773,40 @@
     }
   }
 
-  // Count-up animation
+  // ── Magnetic CTA button ──
+  if (isPointerFine) {
+    var magnetBtn = document.querySelector('.js-magnetic');
+    if (magnetBtn) {
+      var magnetActive = false;
+      magnetBtn.addEventListener('mousemove', function (e) {
+        var rect = this.getBoundingClientRect();
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top + rect.height / 2;
+        var dx = e.clientX - cx;
+        var dy = e.clientY - cy;
+        magnetBtn.style.transition = 'transform 0.1s ease, opacity 0.15s';
+        magnetBtn.style.transform = 'translate(' + (dx * 0.28) + 'px, ' + (dy * 0.28) + 'px)';
+        magnetActive = true;
+      });
+      magnetBtn.addEventListener('mouseleave', function () {
+        if (magnetActive) {
+          magnetBtn.style.transition = 'transform 0.55s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.15s';
+          magnetBtn.style.transform = 'translate(0, 0)';
+          magnetActive = false;
+        }
+      });
+    }
+  }
+
+  // ── Count-up animation ──
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
   function countUp(el, to, suffix, duration) {
     var start = null;
+    var from = parseInt(el.textContent, 10) || 0;
     function step(ts) {
       if (!start) start = ts;
       var progress = Math.min((ts - start) / duration, 1);
-      el.textContent = Math.floor(easeOutCubic(progress) * to) + suffix;
+      el.textContent = Math.round(from + easeOutCubic(progress) * (to - from)) + suffix;
       if (progress < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
@@ -502,6 +826,17 @@
       });
     }, { threshold: 0.5 });
     countEls.forEach(function (el) { countObs.observe(el); });
+  }
+
+  // ── DLD badge pulse every 10s ──
+  var dldBadge = document.getElementById('dld-pulse-badge');
+  if (dldBadge) {
+    setInterval(function () {
+      dldBadge.classList.remove('pulsing');
+      // Force reflow to restart animation
+      void dldBadge.offsetWidth;
+      dldBadge.classList.add('pulsing');
+    }, 10000);
   }
 }());
 </script>
