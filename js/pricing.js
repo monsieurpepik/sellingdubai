@@ -28,9 +28,6 @@ faqItems.forEach((item) => {
   });
 });
 
-// Flip to true via BILLING_LIVE=true env var in Netlify (patched at build time by scripts/build-js.js)
-const BILLING_LIVE = false;
-
 // Redirect to /edit for re-auth, preserving plan+interval for retry on return
 function redirectToAuth(plan, interval) {
   sessionStorage.setItem('sd_pending_checkout', JSON.stringify({ plan: plan, interval: interval }));
@@ -38,7 +35,7 @@ function redirectToAuth(plan, interval) {
 }
 
 async function startCheckout(plan, interval, btn) {
-  if (!BILLING_LIVE) {
+  if (!window.SD_FLAGS?.BILLING_LIVE) {
     if (btn) {
       const original = btn.textContent;
       btn.textContent = 'Billing coming soon';
@@ -90,7 +87,7 @@ async function startCheckout(plan, interval, btn) {
 
 // On return from /edit after re-auth, auto-retry the pending checkout
 const pending = sessionStorage.getItem('sd_pending_checkout');
-if (pending && localStorage.getItem('sd_edit_token') && BILLING_LIVE) {
+if (pending && localStorage.getItem('sd_edit_token') && window.SD_FLAGS?.BILLING_LIVE) {
   sessionStorage.removeItem('sd_pending_checkout');
   try {
     const _p = JSON.parse(pending);

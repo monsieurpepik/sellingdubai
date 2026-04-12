@@ -1,5 +1,11 @@
 # Architecture Decisions Log
 
+## 2026-04-12 — BILLING_LIVE moved from build-time patch to runtime feature flag
+
+**What:** Removed the Netlify build-time `BILLING_LIVE` env var patch from `scripts/build-js.js`. `pricing.js` now reads `window.SD_FLAGS?.BILLING_LIVE` instead of a hardcoded constant. `window.SD_FLAGS` is populated by `loadFeatureFlags()` in `js/sd-config.js`, which calls the `get-flags` edge function (60s in-memory cache).
+
+**Why:** Enabling billing no longer requires a full Netlify redeploy — flipping the flag in the `feature_flags` DB table takes effect within 60 seconds across all visitors. Removes the `BILLING_LIVE` env var from Netlify project settings (no longer read).
+
 ## 2026-04-06 — Biome linting: formatter disabled, linter only in CI
 
 **What:** Added Biome v2 (`@biomejs/biome@2.4.10`) as a dev dependency with a `biome.json` config covering `js/**` and `scripts/**`. The formatter is disabled (`"formatter": { "enabled": false }`). The linter runs in CI as a blocking gate via `npm run lint`.

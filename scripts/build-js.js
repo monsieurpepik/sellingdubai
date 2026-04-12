@@ -64,23 +64,5 @@ fs.writeFileSync(
 );
 console.log(`build-js: dist/release-config.js written (SENTRY_RELEASE=${sha})`);
 
-// Patch js/pricing.js BILLING_LIVE flag from build-time env var.
-// The source file defaults to false; Netlify sets BILLING_LIVE=true in production.
-// Safe to run in-place: Netlify CI starts from a fresh clone each deploy.
-// Locally, BILLING_LIVE defaults to false so this is a no-op.
-const billingLive = process.env.BILLING_LIVE === 'true';
-const pricingPath = 'js/pricing.js';
-const pricingSource = fs.readFileSync(pricingPath, 'utf8');
-// Replace whichever boolean is currently present — idempotent for repeated local builds.
-const pricingPatched = pricingSource.replace(
-  /(?:const|var) BILLING_LIVE = (true|false);/,
-  `const BILLING_LIVE = ${billingLive};`
-);
-if (pricingPatched === pricingSource && !/(?:const|var) BILLING_LIVE = (true|false);/.test(pricingSource)) {
-  console.error('build-js: BILLING_LIVE patch failed — declaration not found in js/pricing.js');
-  process.exit(1);
-}
-if (pricingPatched !== pricingSource) {
-  fs.writeFileSync(pricingPath, pricingPatched, 'utf8');
-  console.log(`build-js: js/pricing.js BILLING_LIVE patched to ${billingLive}`);
-}
+// BILLING_LIVE is now runtime-driven via window.SD_FLAGS.BILLING_LIVE (feature_flags table).
+// No build-time patching needed.

@@ -1,0 +1,2 @@
+[functions.get-flags]
+verify_jwt = false
