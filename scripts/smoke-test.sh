@@ -62,6 +62,12 @@ check "telegram-webhook GET"         "$SB/functions/v1/telegram-webhook"    "2"
 # verify-telegram-init — OPTIONS should return 200
 check "verify-telegram-init OPTIONS" "$SB/functions/v1/verify-telegram-init" "2"
 
+# v2.0 Phase 4 — Voice layer (VAPI + Siri)
+# vapi-webhook — POST with no secret → 4xx (function boots, rejects unauthenticated request)
+check "vapi-webhook"                 "$SB/functions/v1/vapi-webhook"        "4"
+# rotate-siri-token — POST with no auth → 4xx
+check "rotate-siri-token"            "$SB/functions/v1/rotate-siri-token"   "4"
+
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 echo ""

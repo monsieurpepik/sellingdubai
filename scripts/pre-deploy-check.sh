@@ -203,8 +203,9 @@ check_env "ANTHROPIC_API_KEY"
 check_env "OPENAI_API_KEY"
 check_env "TELEGRAM_BOT_TOKEN"
 check_env "TELEGRAM_WEBHOOK_SECRET"
+check_env "VAPI_SERVER_SECRET"
 
-PLANB_FUNCTIONS=("cobroke-discover")
+PLANB_FUNCTIONS=("cobroke-discover" "vapi-webhook" "rotate-siri-token")
 PLANB_MISSING=""
 for fn in "${PLANB_FUNCTIONS[@]}"; do
   if [ ! -f "edge-functions/${fn}/index.ts" ]; then
@@ -214,7 +215,7 @@ done
 if [ -n "$PLANB_MISSING" ]; then
   fail "Plan B edge functions missing from edge-functions/ directory:$PLANB_MISSING"
 else
-  pass "Plan B edge functions present (cobroke-discover)"
+  pass "Plan B edge functions present (cobroke-discover, vapi-webhook, rotate-siri-token)"
 fi
 echo ""
 
