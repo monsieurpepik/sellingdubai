@@ -91,3 +91,9 @@ Run `npm run check` — it automates all checks below. Fix any errors before dep
 ### Diff review
 - [ ] Run `git diff` and scan for obviously broken patterns: raw Supabase URLs, `href="#"` or waitlist anchors on primary CTAs, hardcoded field names that diverge from the DB schema, `?? "pro"` fallbacks in webhook handlers
 
+## Known Production Gotchas
+
+- `send-magic-link` and all public auth functions require `verify_jwt = false` in `supabase/config.toml` AND `--no-verify-jwt` on deploy. Local dev masks this with `--no-verify-jwt` in `dev.sh`. If login breaks in production, check this first.
+- `RESEND_FROM` must be set as a Supabase secret pointing to a Resend-verified domain. Fallback to hardcoded address is unreliable.
+- DKIM records in Netlify DNS must match exactly what Resend shows — they rotate keys periodically. If emails stop delivering, check resend.com/logs first.
+
