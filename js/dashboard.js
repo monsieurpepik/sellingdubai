@@ -13,6 +13,8 @@
   let ANALYTICS_URL;
   /** @type {string} */
   let PROPS_URL;
+  /** @type {string} */
+  let ROTATE_SIRI_URL;
 
   /** @type {string | null} */
   let currentAgent = null;
@@ -35,6 +37,7 @@
     VERIFY_TOKEN_URL = `${SUPABASE_URL}/functions/v1/verify-magic-link`;
     ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
     PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
+    ROTATE_SIRI_URL = `${SUPABASE_URL}/functions/v1/rotate-siri-token`;
   }
 
   // ── Init ──
@@ -187,6 +190,7 @@
     renderBillingCard();
     loadProperties();
     initCobrokeSection();
+    renderSecretarySection(currentAgent);
   }
 
   // ── Billing Card ──
@@ -1252,6 +1256,44 @@
   }
 
   // ── End Cobroke ────────────────────────────────────────────────────────────
+
+  // ── AI Secretary Section ──
+  function renderSecretarySection(agent) {
+    const section = document.getElementById('secretary-section');
+    if (!section || !agent) return;
+    const phoneEl = document.getElementById('secretary-phone');
+    const tokenEl = document.getElementById('secretary-token');
+    if (phoneEl) phoneEl.textContent = (window.SD_CONFIG && window.SD_CONFIG.VAPI_PHONE_NUMBER) || 'Not configured';
+    if (tokenEl) tokenEl.textContent = agent.siri_token || 'Loading…';
+    section.style.display = '';
+  }
+
+  window.copySecretaryPhone = function () {
+    const phone = document.getElementById('secretary-phone')?.textContent || '';
+    navigator.clipboard.writeText(phone).catch(() => {});
+  };
+
+  window.copySecretaryToken = function () {
+    const token = document.getElementById('secretary-token')?.textContent || '';
+    navigator.clipboard.writeText(token).catch(() => {});
+  };
+
+  window.rotateSiriToken = async function () {
+    if (!authToken) return;
+    try {
+      const res = await fetch(ROTATE_SIRI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken }),
+      });
+      if (!res.ok) throw new Error('Failed to rotate token');
+      const data = await res.json();
+      const tokenEl = document.getElementById('secretary-token');
+      if (tokenEl) tokenEl.textContent = data.siri_token;
+    } catch (err) {
+      window.reportError?.('rotateSiriToken', err);
+    }
+  };
 
   // Handle Enter key on email input
   document.getElementById('auth-email').addEventListener('keydown', (e) => {

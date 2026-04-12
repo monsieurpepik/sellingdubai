@@ -390,6 +390,17 @@ document.addEventListener('click', (e) => {
     case 'confirmCrop':
       if (typeof window.confirmCrop === 'function') window.confirmCrop();
       break;
+
+    // AI Secretary (dashboard.js)
+    case 'copySecretaryPhone':
+      window.copySecretaryPhone && window.copySecretaryPhone();
+      break;
+    case 'copySecretaryToken':
+      window.copySecretaryToken && window.copySecretaryToken();
+      break;
+    case 'rotateSiriToken':
+      window.rotateSiriToken && window.rotateSiriToken();
+      break;
   }
 });
 
