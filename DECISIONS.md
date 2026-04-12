@@ -300,3 +300,21 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 **Why:** The project detail redesign uses editorial typography (Cormorant Garamond serif for prices/titles) and a clean humanist sans-serif (DM Sans) for the warm cream palette. CLAUDE.md says "No new Google Fonts" — the lazy-injection pattern satisfies the spirit of the rule: fonts have zero impact on initial page load and only download after the user explicitly opens a project.
 
 **Why not preload:** Preloading on page load would violate CLAUDE.md and hurt LCP. The one-time render-blocking hit on first project open is acceptable since the hero image paint dominates that transition anyway.
+
+## 2026-04-12 — Instagram OAuth CSRF fix (stateless HMAC state)
+
+**What:** `get_auth_url` now requires a valid magic-link `token`, validates the agent, and returns a CSRF state of the form `nonce.HMAC(IG_APP_SECRET, agent_id.nonce)`. `exchange_code` accepts the `state` param, recomputes the HMAC, and rejects mismatches with a constant-time comparison.
+
+**Why:** The previous flow generated a random `csrfState` but never stored it server-side and never validated it in `exchange_code` — any code could be exchanged regardless of state. An attacker who could trick an agent into initiating the OAuth flow could inject their own authorization code.
+
+**Why stateless HMAC (no DB table):** The HMAC binds the state to the specific agent_id from the magic-link token. An attacker cannot forge a valid state without knowing `IG_APP_SECRET`. No new migration or DB storage needed.
+
+## 2026-04-12 — WhatsApp webhook CORS wildcard removed; Meta IP allowlisting added
+
+**What:** Removed `Access-Control-Allow-Origin: *` and `Access-Control-Allow-Headers: content-type` from the `whatsapp-ingest` response headers. Added CIDR-based IP allowlisting (14 Meta webhook ranges) that runs before body parsing. `X-Hub-Signature-256` HMAC verification remains in place.
+
+**Why remove CORS:** CORS headers govern browser-initiated cross-origin requests. Meta's webhook infrastructure makes server-to-server HTTP calls — there is no browser involved, no preflight, and no same-origin policy in play. The `Access-Control-Allow-Origin: *` was cosmetically wrong (implied browser access was expected) and provided zero security value.
+
+**Why IP allowlisting:** Defense-in-depth. If a request arrives from outside Meta's known IP ranges it is rejected immediately without touching the body. The HMAC check (primary protection) still runs for all passing requests.
+
+**Caveat:** Meta publishes their IP ranges but may add new ranges without notice. If webhooks stop being received after a Meta infrastructure change, check whether new CIDRs need to be added to `META_WEBHOOK_CIDRS` in `whatsapp-ingest/index.ts`.
