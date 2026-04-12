@@ -195,6 +195,7 @@
     initCobrokeSection();
     renderSecretarySection(currentAgent);
     loadContacts();
+    renderQrSection();
   }
 
   // ── Billing Card ──
@@ -1585,6 +1586,57 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Error — retry'; setTimeout(() => { btn.textContent = 'Save Note'; }, 2000); }
     }
   };
+
+  // ── QR Code ──
+  function renderQrSection() {
+    const a = currentAgent;
+    if (!a?.slug) return;
+    const profileUrl = `https://sellingdubai.ae/a/${a.slug}`;
+    const qrBase = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(profileUrl)}`;
+
+    const img = document.getElementById('qr-img');
+    if (img) img.src = `${qrBase}&size=300x300`;
+
+    const dlPng = document.getElementById('qr-dl-png');
+    if (dlPng) {
+      dlPng.addEventListener('click', () => {
+        dlPng.disabled = true;
+        dlPng.textContent = 'Downloading…';
+        fetch(`${qrBase}&size=1000x1000`)
+          .then(r => r.blob())
+          .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `sellingdubai-${a.slug}-qr.png`;
+            anchor.click();
+            URL.revokeObjectURL(url);
+          })
+          .catch(() => showToast('Download failed — check your connection'))
+          .finally(() => { dlPng.disabled = false; dlPng.textContent = 'Download for business card'; });
+      });
+    }
+
+    const dlSvg = document.getElementById('qr-dl-svg');
+    if (dlSvg) {
+      dlSvg.addEventListener('click', () => {
+        dlSvg.disabled = true;
+        dlSvg.textContent = 'Downloading…';
+        fetch(`${qrBase}&size=1000x1000&format=svg`)
+          .then(r => r.blob())
+          .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `sellingdubai-${a.slug}-qr.svg`;
+            anchor.click();
+            URL.revokeObjectURL(url);
+          })
+          .catch(() => showToast('Download failed — check your connection'))
+          .finally(() => { dlSvg.disabled = false; dlSvg.textContent = 'Download for print (SVG)'; });
+      });
+    }
+  }
 
   init();
 })();
