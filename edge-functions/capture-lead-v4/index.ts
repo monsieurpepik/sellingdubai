@@ -537,6 +537,91 @@ export async function handler(
       .update({ agent_notified_at: new Date().toISOString() })
       .eq("id", lead.id);
 
+    // === SMART REMINDERS — fire-and-forget, never blocks response ===
+    // Schedule 5 follow-up reminders for this contact
+    if (lead.phone) {
+      const area = lead.preferred_area?.trim() || "Dubai";
+      const contactName = lead.name.trim();
+      const contactPhone = lead.phone.trim();
+      const now = new Date();
+
+      const addDays = (d: number) => {
+        const t = new Date(now);
+        t.setDate(t.getDate() + d);
+        return t.toISOString();
+      };
+      const addMonths = (m: number) => {
+        const t = new Date(now);
+        t.setMonth(t.getMonth() + m);
+        return t.toISOString();
+      };
+
+      const reminders = [
+        {
+          agent_id: agent.id,
+          contact_phone: contactPhone,
+          contact_name: contactName,
+          reminder_type: "follow_up",
+          scheduled_for: addDays(3),
+          message_draft: `Hi ${contactName}, just checking in — have you had a chance to explore the properties I sent? Happy to arrange viewings at your convenience.`,
+        },
+        {
+          agent_id: agent.id,
+          contact_phone: contactPhone,
+          contact_name: contactName,
+          reminder_type: "reconnect",
+          scheduled_for: addDays(30),
+          message_draft: `Hi ${contactName}, it's been a month since we connected. The ${area} market has seen some new listings — want me to send over the latest options?`,
+        },
+        {
+          agent_id: agent.id,
+          contact_phone: contactPhone,
+          contact_name: contactName,
+          reminder_type: "market_update",
+          scheduled_for: addMonths(6),
+          message_draft: `Hi ${contactName}, Dubai ${area} prices have moved since we last spoke. Several properties in your range have come to market. Worth a quick catch-up?`,
+        },
+        {
+          agent_id: agent.id,
+          contact_phone: contactPhone,
+          contact_name: contactName,
+          reminder_type: "anniversary",
+          scheduled_for: addMonths(12),
+          message_draft: `Hi ${contactName}, it's been a year since we connected! Hope everything is going well. If you're still looking or thinking about investing in Dubai, I'd love to help.`,
+        },
+        {
+          agent_id: agent.id,
+          contact_phone: contactPhone,
+          contact_name: contactName,
+          reminder_type: "refinance_check",
+          scheduled_for: addMonths(18),
+          message_draft: `Hi ${contactName}, with current EIBOR rates it might be worth reviewing your mortgage options. Happy to connect you with our broker for a free review.`,
+        },
+      ];
+
+      // Fire-and-forget — do not await, never block the response
+      supabase
+        .from("contact_reminders")
+        .insert(reminders)
+        .then(({ error }) => {
+          if (error) console.error("contact_reminders insert failed");
+        });
+
+      // Log the lead_captured interaction
+      supabase
+        .from("contact_interactions")
+        .insert({
+          agent_id: agent.id,
+          contact_phone: contactPhone,
+          contact_name: contactName,
+          interaction_type: "lead_captured",
+          notes: lead.message || null,
+        })
+        .then(({ error }) => {
+          if (error) console.error("contact_interactions insert failed");
+        });
+    }
+
     log({ event: 'lead_captured', agent_id: agent.id, status: 200 });
     return new Response(
       JSON.stringify({

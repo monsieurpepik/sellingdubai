@@ -15,6 +15,8 @@
   let PROPS_URL;
   /** @type {string} */
   let ROTATE_SIRI_URL;
+  /** @type {string} */
+  let CONTACTS_URL;
 
   /** @type {string | null} */
   let currentAgent = null;
@@ -38,6 +40,7 @@
     ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/get-analytics`;
     PROPS_URL = `${SUPABASE_URL}/functions/v1/manage-properties`;
     ROTATE_SIRI_URL = `${SUPABASE_URL}/functions/v1/rotate-siri-token`;
+    CONTACTS_URL = `${SUPABASE_URL}/functions/v1/contact-timeline`;
   }
 
   // ── Init ──
@@ -191,6 +194,7 @@
     loadProperties();
     initCobrokeSection();
     renderSecretarySection(currentAgent);
+    loadContacts();
   }
 
   // ── Billing Card ──
@@ -1312,6 +1316,275 @@
   document.getElementById('auth-email').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendMagicLink();
   });
+
+  // ── Contacts / Timeline ──
+  let _timelinePhone = null;
+  let _timelineName = null;
+
+  const INTERACTION_LABELS = {
+    lead_captured: 'Lead captured',
+    whatsapp_message: 'WhatsApp message',
+    mortgage_inquiry: 'Mortgage inquiry',
+    property_view: 'Property view',
+    manual_note: 'Note',
+    reconnect_sent: 'Reconnect sent',
+  };
+
+  const REMINDER_LABELS = {
+    follow_up: 'Follow-up',
+    reconnect: 'Reconnect',
+    anniversary: 'Anniversary',
+    market_update: 'Market update',
+    refinance_check: 'Refinance check',
+  };
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  window.scrollToContacts = function () {
+    document.querySelectorAll('.dashboard-section').forEach(s => { s.style.display = 'none'; });
+    const section = document.getElementById('contacts-section');
+    if (section) section.style.display = '';
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-action="scrollToContacts"]')?.classList.add('active');
+    loadContacts();
+  };
+
+  async function loadContacts() {
+    if (!authToken || !CONTACTS_URL) return;
+    const listEl = document.getElementById('contacts-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<p class="contacts-loading">Loading…</p>';
+    try {
+      const [contactsRes, dueRes] = await Promise.allSettled([
+        fetch(CONTACTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get_contacts', token: authToken }) }).then(r => r.json()),
+        fetch(CONTACTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get_reminders_due', token: authToken }) }).then(r => r.json()),
+      ]);
+      const contacts = contactsRes.status === 'fulfilled' ? (contactsRes.value.contacts ?? []) : [];
+      const due = dueRes.status === 'fulfilled' ? (dueRes.value.reminders ?? []) : [];
+      renderDueRemindersBanner(due);
+      renderContactsList(contacts);
+    } catch (err) {
+      listEl.innerHTML = '<p class="contacts-error">Failed to load contacts.</p>';
+      window.reportError?.('loadContacts', err);
+    }
+  }
+
+  function renderContactsList(contacts) {
+    const listEl = document.getElementById('contacts-list');
+    if (!listEl) return;
+    if (!contacts.length) {
+      listEl.innerHTML = '<p class="contacts-empty">No contacts yet. Contacts appear when leads are captured.</p>';
+      return;
+    }
+    listEl.innerHTML = contacts.map(c => {
+      const overdue = c.is_overdue ? ' overdue' : '';
+      const reminderHtml = c.next_reminder_at
+        ? `<span class="contact-reminder${overdue}">${esc(REMINDER_LABELS[c.next_reminder_type] || c.next_reminder_type)} · ${fmtDate(c.next_reminder_at)}</span>`
+        : '';
+      return `<div class="contact-row" data-action="openContactTimeline" data-phone="${esc(c.contact_phone)}" data-name="${esc(c.contact_name || c.contact_phone)}">
+        <div class="contact-info">
+          <span class="contact-name">${esc(c.contact_name || c.contact_phone)}</span>
+          <span class="contact-phone">${esc(c.contact_phone)}</span>
+        </div>
+        <div class="contact-meta">
+          <span class="contact-last">${esc(INTERACTION_LABELS[c.last_interaction_type] || c.last_interaction_type)} · ${fmtDate(c.last_interaction_at)}</span>
+          ${reminderHtml}
+        </div>
+        <span class="contact-arrow">›</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDueRemindersBanner(reminders) {
+    const banner = document.getElementById('due-reminders-banner');
+    if (!banner) return;
+    if (!reminders.length) { banner.style.display = 'none'; return; }
+    banner.style.display = '';
+    const badgeEl = document.getElementById('nav-reminders-badge');
+    if (badgeEl) { badgeEl.textContent = reminders.length; badgeEl.style.display = ''; }
+    banner.innerHTML = `<p class="due-banner-title"><strong>${reminders.length} reminder${reminders.length > 1 ? 's' : ''} due</strong></p>` +
+      reminders.map(r => {
+        const phone = encodeURIComponent((r.contact_phone || '').replace(/\D/g, ''));
+        const msg = encodeURIComponent(r.message_draft || '');
+        const waUrl = `https://wa.me/${phone}?text=${msg}`;
+        return `<div class="due-reminder-row">
+          <div class="due-reminder-info">
+            <span class="due-name">${esc(r.contact_name || r.contact_phone)}</span>
+            <span class="due-type">${esc(REMINDER_LABELS[r.reminder_type] || r.reminder_type)}</span>
+          </div>
+          <div class="due-reminder-actions">
+            <a href="${esc(waUrl)}" target="_blank" rel="noopener" class="btn-wa">WhatsApp</a>
+            <button data-action="dismissReminder" data-reminder-id="${esc(r.id)}" class="btn-dismiss">Dismiss</button>
+            <button data-action="snoozeReminder" data-reminder-id="${esc(r.id)}" data-days="7" class="btn-snooze">Snooze 7d</button>
+          </div>
+        </div>`;
+      }).join('');
+  }
+
+  window.openContactTimeline = async function (phone, name) {
+    _timelinePhone = phone;
+    _timelineName = name;
+    const modal = document.getElementById('timeline-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    document.getElementById('timeline-contact-name').textContent = name || phone;
+    document.getElementById('timeline-content').innerHTML = '<p class="timeline-loading">Loading…</p>';
+    try {
+      const res = await fetch(CONTACTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_contact', token: authToken, contact_phone: phone }),
+      });
+      const data = await res.json();
+      renderTimelineContent(data.interactions ?? [], data.reminders ?? [], phone);
+    } catch (err) {
+      document.getElementById('timeline-content').innerHTML = '<p class="timeline-error">Failed to load timeline.</p>';
+      window.reportError?.('openContactTimeline', err);
+    }
+  };
+
+  function renderTimelineContent(interactions, reminders, phone) {
+    const el = document.getElementById('timeline-content');
+    if (!el) return;
+    const items = [
+      ...interactions.map(i => ({ ...i, _kind: 'interaction', _ts: i.created_at })),
+      ...reminders.map(r => ({ ...r, _kind: 'reminder', _ts: r.scheduled_for })),
+    ].sort((a, b) => new Date(a._ts).getTime() - new Date(b._ts).getTime());
+
+    if (!items.length) {
+      el.innerHTML = '<p class="timeline-empty">No history yet.</p>';
+      return;
+    }
+
+    el.innerHTML = items.map(item => {
+      if (item._kind === 'interaction') {
+        return `<div class="timeline-item interaction">
+          <span class="ti-icon">💬</span>
+          <div class="ti-body">
+            <span class="ti-label">${esc(INTERACTION_LABELS[item.interaction_type] || item.interaction_type)}</span>
+            <span class="ti-date">${fmtDate(item.created_at)}</span>
+            ${item.notes ? `<p class="ti-notes">${esc(item.notes)}</p>` : ''}
+          </div>
+        </div>`;
+      }
+      const isDue = !item.sent_at && !item.dismissed_at && new Date(item.scheduled_for) < new Date();
+      const status = item.dismissed_at ? 'dismissed' : item.sent_at ? 'sent' : isDue ? 'overdue' : 'pending';
+      const phoneClean = encodeURIComponent((phone || '').replace(/\D/g, ''));
+      const msg = encodeURIComponent(item.message_draft || '');
+      const waUrl = `https://wa.me/${phoneClean}?text=${msg}`;
+      const actionBtns = (status === 'pending' || status === 'overdue')
+        ? `<div class="ti-actions">
+            <a href="${esc(waUrl)}" target="_blank" rel="noopener" class="btn-wa btn-wa-sm" data-action="markReminderSent" data-reminder-id="${esc(item.id)}">WhatsApp</a>
+            <button data-action="snoozeReminder" data-reminder-id="${esc(item.id)}" data-days="7" class="btn-snooze btn-snooze-sm">+7d</button>
+            <button data-action="snoozeReminder" data-reminder-id="${esc(item.id)}" data-days="30" class="btn-snooze btn-snooze-sm">+30d</button>
+            <button data-action="dismissReminder" data-reminder-id="${esc(item.id)}" class="btn-dismiss btn-dismiss-sm">Dismiss</button>
+           </div>`
+        : '';
+      return `<div class="timeline-item reminder ${status}">
+        <span class="ti-icon">🔔</span>
+        <div class="ti-body">
+          <span class="ti-label">${esc(REMINDER_LABELS[item.reminder_type] || item.reminder_type)}</span>
+          <span class="ti-date">${fmtDate(item.scheduled_for)} · <em class="ti-status">${status}</em></span>
+          ${item.message_draft ? `<p class="ti-notes ti-draft">${esc(item.message_draft)}</p>` : ''}
+          ${actionBtns}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.closeTimelineModal = function () {
+    const modal = document.getElementById('timeline-modal');
+    if (modal) modal.style.display = 'none';
+    _timelinePhone = null;
+    _timelineName = null;
+  };
+
+  window.closeTimelineModalIfBackdrop = function (e) {
+    if (e.target === document.getElementById('timeline-modal')) window.closeTimelineModal();
+  };
+
+  window.dismissReminder = async function (reminderId) {
+    if (!reminderId || !authToken) return;
+    try {
+      await fetch(CONTACTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dismiss_reminder', token: authToken, reminder_id: reminderId }),
+      });
+    } catch (err) { window.reportError?.('dismissReminder', err); }
+    if (_timelinePhone) window.openContactTimeline(_timelinePhone, _timelineName);
+    else loadContacts();
+  };
+
+  window.snoozeReminder = async function (reminderId, days) {
+    if (!reminderId || !authToken) return;
+    try {
+      await fetch(CONTACTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'snooze_reminder', token: authToken, reminder_id: reminderId, snooze_days: days }),
+      });
+    } catch (err) { window.reportError?.('snoozeReminder', err); }
+    if (_timelinePhone) window.openContactTimeline(_timelinePhone, _timelineName);
+    else loadContacts();
+  };
+
+  window.markReminderSent = async function (reminderId) {
+    if (!reminderId || !authToken) return;
+    try {
+      await fetch(CONTACTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dismiss_reminder', token: authToken, reminder_id: reminderId }),
+      });
+    } catch (err) { window.reportError?.('markReminderSent', err); }
+    if (_timelinePhone) window.openContactTimeline(_timelinePhone, _timelineName);
+  };
+
+  window.addNoteOpen = function () {
+    const modal = document.getElementById('note-modal');
+    if (modal) modal.style.display = 'flex';
+    const textarea = document.getElementById('note-text');
+    if (textarea) { textarea.value = ''; textarea.focus(); }
+  };
+
+  window.closeNoteModal = function () {
+    const modal = document.getElementById('note-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.closeNoteModalIfBackdrop = function (e) {
+    if (e.target === document.getElementById('note-modal')) window.closeNoteModal();
+  };
+
+  window.saveNote = async function () {
+    const textarea = document.getElementById('note-text');
+    const note = textarea?.value?.trim();
+    if (!note || !_timelinePhone || !authToken) return;
+    const btn = document.querySelector('[data-action="saveNote"]');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch(CONTACTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_note', token: authToken, contact_phone: _timelinePhone, note }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed');
+      window.closeNoteModal();
+      window.openContactTimeline(_timelinePhone, _timelineName);
+    } catch (err) {
+      window.reportError?.('saveNote', err);
+      if (btn) { btn.disabled = false; btn.textContent = 'Error — retry'; setTimeout(() => { btn.textContent = 'Save Note'; }, 2000); }
+    }
+  };
 
   init();
 })();

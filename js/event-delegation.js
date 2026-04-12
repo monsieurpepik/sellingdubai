@@ -175,6 +175,39 @@ document.addEventListener('click', (e) => {
     case 'scrollToProperties':
       if (typeof window.scrollToProperties === 'function') window.scrollToProperties();
       break;
+    case 'scrollToContacts':
+      if (typeof window.scrollToContacts === 'function') window.scrollToContacts();
+      break;
+    case 'openContactTimeline':
+      if (typeof window.openContactTimeline === 'function') window.openContactTimeline(el.dataset.phone, el.dataset.name);
+      break;
+    case 'closeTimelineModal':
+      if (typeof window.closeTimelineModal === 'function') window.closeTimelineModal();
+      break;
+    case 'closeTimelineModalIfBackdrop':
+      if (e.target === el && typeof window.closeTimelineModal === 'function') window.closeTimelineModal();
+      break;
+    case 'dismissReminder':
+      if (typeof window.dismissReminder === 'function') window.dismissReminder(el.dataset.reminderId);
+      break;
+    case 'snoozeReminder':
+      if (typeof window.snoozeReminder === 'function') window.snoozeReminder(el.dataset.reminderId, Number(el.dataset.days));
+      break;
+    case 'markReminderSent':
+      if (typeof window.markReminderSent === 'function') window.markReminderSent(el.dataset.reminderId);
+      break;
+    case 'addNoteOpen':
+      if (typeof window.addNoteOpen === 'function') window.addNoteOpen();
+      break;
+    case 'closeNoteModal':
+      if (typeof window.closeNoteModal === 'function') window.closeNoteModal();
+      break;
+    case 'closeNoteModalIfBackdrop':
+      if (e.target === el && typeof window.closeNoteModal === 'function') window.closeNoteModal();
+      break;
+    case 'saveNote':
+      if (typeof window.saveNote === 'function') window.saveNote();
+      break;
     case 'logout':
       if (typeof window.logout === 'function') window.logout();
       break;

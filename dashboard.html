@@ -80,6 +80,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View Profile
       </a>
+      <button class="nav-item" data-action="scrollToContacts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Contacts
+        <span class="nav-badge" id="nav-reminders-badge" style="display:none;"></span>
+      </button>
       <div class="nav-divider"></div>
       <a class="nav-item" href="/pricing">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
@@ -335,6 +340,32 @@
         </div>
       </div>
     </div>
+    <!-- Contacts Section -->
+    <div class="contacts-section" id="contacts-section" style="display:none;">
+      <div class="leads-header">
+        <span class="leads-title">Contacts</span>
+        <span class="leads-count" id="contacts-count"></span>
+      </div>
+
+      <!-- Due reminders banner -->
+      <div id="reminders-due-banner" style="display:none;">
+        <div class="reminders-due-header">
+          <span class="reminders-due-title">Follow-ups due</span>
+          <span class="reminders-due-count" id="reminders-due-count"></span>
+        </div>
+        <div id="reminders-due-list"></div>
+      </div>
+
+      <!-- Contact list -->
+      <div id="contacts-list">
+        <div class="empty-state">
+          <div class="empty-icon">👥</div>
+          <div class="empty-title">No contacts yet</div>
+          <div class="empty-sub">Contacts appear automatically when leads come in through your profile</div>
+        </div>
+      </div>
+    </div>
+
       <!-- AI Secretary -->
       <div class="secretary-section" id="secretary-section" style="display:none">
         <div class="leads-header">
@@ -383,6 +414,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Properties
     </button>
+    <button data-action="scrollToContacts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Contacts
+    </button>
     <a href="/pricing" id="mobile-upgrade">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       Upgrade
@@ -392,6 +427,42 @@
       Sign Out
     </button>
   </nav>
+</div>
+
+<!-- Contact Timeline Modal -->
+<div class="modal-overlay" id="timeline-modal" data-action="closeTimelineModalIfBackdrop">
+  <div class="modal-card modal-card--timeline">
+    <div class="modal-header">
+      <div>
+        <h3 id="timeline-contact-name" style="margin:0 0 2px;"></h3>
+        <div id="timeline-contact-phone" style="font-size:12px;color:rgba(255,255,255,0.4);"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-sm btn-ghost" data-action="addNoteOpen">+ Note</button>
+        <button class="modal-close" data-action="closeTimelineModal" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body" id="timeline-body" style="max-height:70vh;overflow-y:auto;">
+      <div id="timeline-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal-overlay" id="note-modal" data-action="closeNoteModalIfBackdrop">
+  <div class="modal-card" style="max-width:480px;">
+    <div class="modal-header">
+      <h3>Add Note</h3>
+      <button class="modal-close" data-action="closeNoteModal" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <textarea class="modal-input" id="note-text" rows="4" placeholder="What happened in this interaction?" style="resize:vertical;min-height:80px;"></textarea>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn-sm btn-ghost" data-action="closeNoteModal">Cancel</button>
+        <button class="btn-sm btn-primary" data-action="saveNote">Save Note</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Add / Edit Property Modal -->

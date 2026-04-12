@@ -318,3 +318,17 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 **Why IP allowlisting:** Defense-in-depth. If a request arrives from outside Meta's known IP ranges it is rejected immediately without touching the body. The HMAC check (primary protection) still runs for all passing requests.
 
 **Caveat:** Meta publishes their IP ranges but may add new ranges without notice. If webhooks stop being received after a Meta infrastructure change, check whether new CIDRs need to be added to `META_WEBHOOK_CIDRS` in `whatsapp-ingest/index.ts`.
+
+## 2026-04-12 — Contact Timeline feature
+
+**What:** Added `contact_interactions` and `contact_reminders` tables (migration `20260412000007_contact_timeline.sql`), a new `contact-timeline` edge function, smart reminder seeding in `capture-lead-v4`, and a Contacts tab in the dashboard with timeline modal.
+
+**Smart reminder seeding (fire-and-forget):** After a lead is captured, `capture-lead-v4` inserts 5 reminders (+3d follow_up, +30d reconnect, +6mo market_update, +12mo anniversary, +18mo refinance_check) and a `lead_captured` interaction using a fire-and-forget `.then().catch()` pattern — no `await`. This keeps lead capture response latency unaffected.
+
+**Edge function actions:** `get_contacts` (server-side deduplication — one row per phone with latest interaction + next pending reminder), `get_contact` (full timeline for a phone), `get_reminders_due` (overdue reminders for dashboard badge), `dismiss_reminder`, `snooze_reminder` (7 or 30 days), `add_note`.
+
+**Auth:** Same magic-link `token` pattern as all other edge functions — no new auth mechanism.
+
+**WhatsApp links:** `wa.me/<phone>?text=<draft>` URLs generated client-side from `message_draft` stored in `contact_reminders`. No server round-trip for sending.
+
+**No new third-party scripts:** All UI rendered via vanilla JS templates in `dashboard.js` consistent with existing dashboard patterns.
