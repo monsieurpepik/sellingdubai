@@ -70,7 +70,7 @@ async function getOverview(sb: SB): Promise<Response> {
       sb.from("leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonthStart),
       sb.from("properties").select("id", { count: "exact", head: true }).eq("is_active", true),
       sb.from("agents")
-        .select("id, name, email, created_at, plan")
+        .select("id, name, email, created_at, tier")
         .order("created_at", { ascending: false })
         .limit(10),
     ]);
@@ -99,12 +99,12 @@ async function getAgents(sb: SB, params: Record<string, any>): Promise<Response>
 
   let q = sb
     .from("agents")
-    .select("id, name, email, slug, plan, created_at, is_active, agency_id")
+    .select("id, name, email, slug, tier, created_at, is_active, agency_id")
     .order("created_at", { ascending: false })
     .range(offset, offset + (limit as number) - 1);
 
   if (search) q = q.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
-  if (plan) q = q.eq("plan", plan);
+  if (plan) q = q.eq("tier", plan);
 
   const { data, error } = await q;
   if (error) return json({ error: "DB error." }, 500);
@@ -118,7 +118,7 @@ async function getLeads(sb: SB, params: Record<string, any>): Promise<Response> 
 
   let q = sb
     .from("leads")
-    .select("id, name, email, phone, agent_id, status, source, created_at, budget")
+    .select("id, name, email, phone, agent_id, status, source, created_at, budget_range")
     .order("created_at", { ascending: false })
     .range(offset, offset + (limit as number) - 1);
 
@@ -134,12 +134,12 @@ async function getRevenue(sb: SB): Promise<Response> {
   const [paidAgents, subEvents] = await Promise.allSettled([
     sb
       .from("agents")
-      .select("id, name, email, plan, created_at")
-      .neq("plan", "free")
+      .select("id, name, email, tier, created_at")
+      .neq("tier", "free")
       .order("created_at", { ascending: false }),
     sb
       .from("subscription_events")
-      .select("agent_id, event_type, amount, created_at, plan")
+      .select("agent_id, event_type, amount_cents, created_at, tier")
       .order("created_at", { ascending: false })
       .limit(200),
   ]);

@@ -203,7 +203,7 @@ async function renderOverview(c: HTMLElement): Promise<void> {
           <tr>
             <td>${escHtml(a.name)}</td>
             <td class="mono">${escHtml(a.email)}</td>
-            <td><span class="badge badge--${escAttr(a.plan ?? "free")}">${escHtml(a.plan ?? "free")}</span></td>
+            <td><span class="badge badge--${escAttr(a.tier ?? "free")}">${escHtml(a.tier ?? "free")}</span></td>
             <td class="mono">${fmtDate(a.created_at)}</td>
           </tr>`).join("")}
       </tbody>
@@ -214,7 +214,7 @@ async function renderOverview(c: HTMLElement): Promise<void> {
 
 interface AgentRow {
   id: string; name: string; email: string; slug: string;
-  plan: string; created_at: string; is_active: boolean;
+  tier: string; created_at: string; is_active: boolean;
 }
 
 let agentsSearch = "";
@@ -252,7 +252,7 @@ async function renderAgents(c: HTMLElement): Promise<void> {
               <td>${escHtml(a.name)}</td>
               <td class="mono">${escHtml(a.email)}</td>
               <td class="mono">${escHtml(a.slug)}</td>
-              <td><span class="badge badge--${escAttr(a.plan ?? "free")}">${escHtml(a.plan ?? "free")}</span></td>
+              <td><span class="badge badge--${escAttr(a.tier ?? "free")}">${escHtml(a.tier ?? "free")}</span></td>
               <td><span class="badge badge--${a.is_active ? "active" : "suspended"}">${a.is_active ? "active" : "suspended"}</span></td>
               <td class="mono">${fmtDate(a.created_at)}</td>
               <td class="actions-cell">
@@ -326,7 +326,7 @@ async function renderAgents(c: HTMLElement): Promise<void> {
 
 interface LeadRow {
   id: string; name: string; email: string; phone: string; agent_id: string;
-  status: string; source: string; created_at: string; budget: number | null;
+  status: string; source: string; created_at: string; budget_range: string | null;
 }
 
 let leadsStatus = "";
@@ -362,7 +362,7 @@ async function renderLeads(c: HTMLElement): Promise<void> {
               <td class="mono">${escHtml(l.phone)}</td>
               <td><span class="badge badge--${escAttr(l.status ?? "new")}">${escHtml(l.status ?? "new")}</span></td>
               <td>${escHtml(l.source)}</td>
-              <td class="mono">${l.budget ? `AED ${l.budget.toLocaleString()}` : "—"}</td>
+              <td class="mono">${escHtml(l.budget_range ?? "—")}</td>
               <td class="mono">${fmtTime(l.created_at)}</td>
             </tr>`).join("")}
       </tbody>
@@ -384,8 +384,8 @@ async function renderLeads(c: HTMLElement): Promise<void> {
 
 // ─── Page: Revenue ───────────────────────────────────────────────────────────
 
-interface PaidAgent { id: string; name: string; email: string; plan: string; created_at: string; }
-interface SubEvent  { agent_id: string; event_type: string; amount: number | null; created_at: string; plan: string; }
+interface PaidAgent { id: string; name: string; email: string; tier: string; created_at: string; }
+interface SubEvent  { agent_id: string; event_type: string; amount_cents: number | null; created_at: string; tier: string; }
 
 const PLAN_PRICE: Record<string, number> = { pro: 99, premium: 299 };
 
@@ -396,7 +396,7 @@ async function renderRevenue(c: HTMLElement): Promise<void> {
   };
 
   const mrr = data.paid_agents.reduce(
-    (acc, a) => acc + (PLAN_PRICE[a.plan] ?? 0),
+    (acc, a) => acc + (PLAN_PRICE[a.tier] ?? 0),
     0,
   );
 
@@ -424,7 +424,7 @@ async function renderRevenue(c: HTMLElement): Promise<void> {
             <tr>
               <td>${escHtml(a.name)}</td>
               <td class="mono">${escHtml(a.email)}</td>
-              <td><span class="badge badge--${escAttr(a.plan)}">${escHtml(a.plan)}</span></td>
+              <td><span class="badge badge--${escAttr(a.tier)}">${escHtml(a.tier)}</span></td>
               <td class="mono">${fmtDate(a.created_at)}</td>
             </tr>`).join("")}
       </tbody>
@@ -438,8 +438,8 @@ async function renderRevenue(c: HTMLElement): Promise<void> {
           : data.subscription_events.slice(0, 50).map((e) => `
             <tr>
               <td>${escHtml(e.event_type)}</td>
-              <td>${escHtml(e.plan)}</td>
-              <td class="mono">${e.amount != null ? `$${e.amount}` : "—"}</td>
+              <td>${escHtml(e.tier)}</td>
+              <td class="mono">${e.amount_cents != null ? `$${(e.amount_cents / 100).toLocaleString()}` : "—"}</td>
               <td class="mono">${fmtTime(e.created_at)}</td>
             </tr>`).join("")}
       </tbody>
