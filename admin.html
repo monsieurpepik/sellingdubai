@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SellingDubai Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" />
+  </noscript>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0c0c0d;
+      --surface:   #141416;
+      --surface-2: #1c1c1f;
+      --border:    #2a2a2d;
+      --text:      #e2e0db;
+      --text-muted:#8a8884;
+      --accent:    #d4e84a;
+      --accent-dim:#b0c23a;
+      --danger:    #e84a4a;
+      --warning:   #e8a44a;
+      --success:   #4ae87a;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'Geist Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+      --sidebar-w: 220px;
+      --radius:    6px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    button {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      transition: opacity .15s, background .15s;
+    }
+    button:hover { opacity: .85; }
+    button:active { opacity: .7; }
+
+    input, select {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--text-muted); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      text-align: left;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface-2); }
+
+    /* ── Layout ───────────────────────────────────────────────────────── */
+    #app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -.01em;
+    }
+    .sidebar-logo span {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    nav { flex: 1; padding: 8px 0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 0;
+      transition: color .15s, background .15s;
+      user-select: none;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .nav-item:hover { color: var(--text); background: var(--surface-2); }
+    .nav-item.active { color: var(--accent); background: rgba(212, 232, 74, .07); }
+    .nav-item .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      opacity: .7;
+    }
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+    #logout-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 7px 12px;
+    }
+    #logout-btn:hover { border-color: var(--danger); color: var(--danger); opacity: 1; }
+
+    /* ── Main content ─────────────────────────────────────────────────── */
+    #main {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-header {
+      padding: 24px 28px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .page-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .page-body {
+      padding: 24px 28px;
+      flex: 1;
+    }
+
+    .page-section { display: none; height: 100%; flex-direction: column; }
+    .page-section.active { display: flex; }
+
+    /* ── Login overlay ────────────────────────────────────────────────── */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    #login-overlay.hidden { display: none; }
+
+    .login-card {
+      width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+    }
+    .login-logo {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .login-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    .login-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    #login-token {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    #login-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #0c0c0d;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px;
+    }
+    #login-btn:hover { background: var(--accent-dim); opacity: 1; }
+    #login-error {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--danger);
+      min-height: 18px;
+    }
+
+    /* ── Cards / stat grid ────────────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .stat-sub .accent { color: var(--accent); }
+
+    /* ── Table wrapper ────────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .table-toolbar input { flex: 1; min-width: 160px; max-width: 280px; }
+    .table-toolbar select { width: 140px; }
+    .table-overflow { overflow-x: auto; }
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .pagination {
+      display: flex;
+      gap: 6px;
+    }
+    .pagination button {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+    .pagination button:disabled { opacity: .35; cursor: not-allowed; }
+    .pagination button.current {
+      background: var(--accent);
+      color: #0c0c0d;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── Badges ───────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: rgba(74,232,122,.12); color: var(--success); }
+    .badge-red    { background: rgba(232,74,74,.12);  color: var(--danger); }
+    .badge-yellow { background: rgba(232,164,74,.12); color: var(--warning); }
+    .badge-accent { background: rgba(212,232,74,.12); color: var(--accent); }
+    .badge-muted  { background: var(--surface-2); color: var(--text-muted); }
+
+    /* ── Action buttons ───────────────────────────────────────────────── */
+    .btn-danger {
+      background: rgba(232,74,74,.12);
+      color: var(--danger);
+      border: 1px solid rgba(232,74,74,.25);
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+    .btn-danger:hover { background: rgba(232,74,74,.22); opacity: 1; }
+    .btn-warning {
+      background: rgba(232,164,74,.12);
+      color: var(--warning);
+      border: 1px solid rgba(232,164,74,.25);
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+    .btn-warning:hover { background: rgba(232,164,74,.22); opacity: 1; }
+    .btn-default {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+    .btn-default:hover { border-color: var(--text-muted); opacity: 1; }
+    .btn-primary {
+      background: var(--accent);
+      color: #0c0c0d;
+      font-weight: 600;
+    }
+
+    /* ── Toggle switch ────────────────────────────────────────────────── */
+    .visually-hidden {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .toggle { display: inline-flex; align-items: center; cursor: pointer; gap: 10px; }
+    .toggle-track {
+      width: 36px; height: 20px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      position: relative;
+      transition: background .2s, border-color .2s;
+      flex-shrink: 0;
+    }
+    .flag-toggle:checked + .toggle-track {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: transform .2s, background .2s;
+    }
+    .flag-toggle:checked + .toggle-track .toggle-thumb {
+      transform: translateX(16px);
+      background: #0c0c0d;
+    }
+    .flag-toggle:focus-visible + .toggle-track {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .toggle-name {
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .toggle-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Feature flags table ──────────────────────────────────────────── */
+    .flags-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .flag-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .flag-row:last-child { border-bottom: none; }
+    .flag-row:hover { background: var(--surface-2); }
+    .flag-info { flex: 1; min-width: 0; }
+
+    /* ── Platform health ──────────────────────────────────────────────── */
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .health-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .health-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--text-muted);
+    }
+    .health-dot.ok       { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .health-dot.degraded { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
+    .health-dot.pinging  { background: var(--warning); animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+    .health-fn {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .health-status {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Audit log ────────────────────────────────────────────────────── */
+    .mono { font-family: var(--font-mono); font-size: 12px; }
+    .text-muted { color: var(--text-muted); }
+    .text-danger { color: var(--danger); }
+    .text-accent { color: var(--accent); }
+
+    /* ── Loading / empty states ───────────────────────────────────────── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 13px;
+      gap: 8px;
+    }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── Recent signups list ──────────────────────────────────────────── */
+    .recent-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .recent-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      font-size: 13px;
+    }
+    .recent-row:last-child { border-bottom: none; }
+    .recent-name { font-weight: 500; }
+    .recent-email { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .recent-meta { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+    /* ── Revenue section ──────────────────────────────────────────────── */
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      margin-top: 24px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* ── Scrollbar ────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ── Login overlay ──────────────────────────────────────────────────── -->
+<div id="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">SellingDubai<span>/admin</span></div>
+    <div class="login-tagline">Internal admin panel — authorized access only</div>
+    <label class="login-label" for="login-token">Admin token</label>
+    <input
+      type="password"
+      id="login-token"
+      placeholder="Enter admin token"
+      autocomplete="current-password"
+      spellcheck="false"
+    />
+    <button id="login-btn" class="btn-primary">Sign in</button>
+    <div id="login-error" role="alert" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- ── App shell ───────────────────────────────────────────────────────── -->
+<div id="app" aria-hidden="true">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" role="navigation" aria-label="Admin navigation">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SellingDubai<span>/admin</span></div>
+    </div>
+
+    <nav>
+      <button class="nav-item active" data-page="overview" title="Overview">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="1" y="1" width="6" height="6" rx="1"/>
+          <rect x="9" y="1" width="6" height="6" rx="1"/>
+          <rect x="1" y="9" width="6" height="6" rx="1"/>
+          <rect x="9" y="9" width="6" height="6" rx="1"/>
+        </svg>
+        Overview
+      </button>
+
+      <button class="nav-item" data-page="agents" title="Agents">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="8" cy="5" r="3"/>
+          <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+        Agents
+      </button>
+
+      <button class="nav-item" data-page="leads" title="Leads">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M8 1L10 5H14L11 8L12 13L8 10L4 13L5 8L2 5H6L8 1Z"/>
+        </svg>
+        Leads
+      </button>
+
+      <button class="nav-item" data-page="revenue" title="Revenue">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M8 1v14M5 4h4.5a2.5 2.5 0 0 1 0 5H5m0 0h5a2.5 2.5 0 0 1 0 5H5"/>
+        </svg>
+        Revenue
+      </button>
+
+      <button class="nav-item" data-page="flags" title="Feature Flags">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M3 1v14"/>
+          <path d="M3 3h8l-2 3 2 3H3"/>
+        </svg>
+        Feature Flags
+      </button>
+
+      <button class="nav-item" data-page="audit" title="Audit Log">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="2" y="2" width="12" height="12" rx="1"/>
+          <path d="M5 6h6M5 9h4"/>
+        </svg>
+        Audit Log
+      </button>
+
+      <button class="nav-item" data-page="health" title="Platform Health">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M1 8h3l2-5 2 10 2-6 2 4h3"/>
+        </svg>
+        Platform Health
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="logout-btn" type="button">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main id="main">
+
+    <!-- Overview -->
+    <section id="page-overview" class="page-section active" aria-label="Overview">
+      <div class="page-header">
+        <h1 class="page-title">Overview</h1>
+        <span class="page-subtitle">Platform at a glance</span>
+      </div>
+      <div class="page-body" id="overview-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+    <!-- Agents -->
+    <section id="page-agents" class="page-section" aria-label="Agents">
+      <div class="page-header">
+        <h1 class="page-title">Agents</h1>
+        <span class="page-subtitle">All registered agents</span>
+      </div>
+      <div class="page-body" id="agents-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+    <!-- Leads -->
+    <section id="page-leads" class="page-section" aria-label="Leads">
+      <div class="page-header">
+        <h1 class="page-title">Leads</h1>
+        <span class="page-subtitle">All captured leads</span>
+      </div>
+      <div class="page-body" id="leads-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+    <!-- Revenue -->
+    <section id="page-revenue" class="page-section" aria-label="Revenue">
+      <div class="page-header">
+        <h1 class="page-title">Revenue</h1>
+        <span class="page-subtitle">Subscription overview</span>
+      </div>
+      <div class="page-body" id="revenue-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+    <!-- Feature Flags -->
+    <section id="page-flags" class="page-section" aria-label="Feature Flags">
+      <div class="page-header">
+        <h1 class="page-title">Feature Flags</h1>
+        <span class="page-subtitle">Runtime feature toggles</span>
+      </div>
+      <div class="page-body" id="flags-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+    <!-- Audit Log -->
+    <section id="page-audit" class="page-section" aria-label="Audit Log">
+      <div class="page-header">
+        <h1 class="page-title">Audit Log</h1>
+        <span class="page-subtitle">Admin action history</span>
+      </div>
+      <div class="page-body" id="audit-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+    <!-- Platform Health -->
+    <section id="page-health" class="page-section" aria-label="Platform Health">
+      <div class="page-header">
+        <h1 class="page-title">Platform Health</h1>
+        <span class="page-subtitle">Edge function status</span>
+      </div>
+      <div class="page-body" id="health-body">
+        <div class="loading"><span class="spinner"></span> Loading…</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="dist/admin.bundle.js"></script>
+</body>
+</html>
