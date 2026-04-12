@@ -58,6 +58,20 @@ export async function handler(
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
+    // Validate email service config before any logic — fail fast with a clear log.
+    const RESEND_KEY_CHECK = Deno.env.get("RESEND_API_KEY") || "";
+    const RESEND_FROM_CHECK = Deno.env.get("RESEND_FROM") || "";
+    if (!RESEND_KEY_CHECK) {
+      console.error("[send-magic-link] RESEND_API_KEY is not set");
+      log({ event: 'misconfigured', status: 503, error: 'missing_RESEND_API_KEY' });
+      return new Response(JSON.stringify({ error: "Email service misconfigured" }), { status: 503, headers: cors });
+    }
+    if (!RESEND_FROM_CHECK || !RESEND_FROM_CHECK.includes("@")) {
+      console.error("[send-magic-link] RESEND_FROM is not set or missing @:", RESEND_FROM_CHECK || "(empty)");
+      log({ event: 'misconfigured', status: 503, error: 'missing_RESEND_FROM' });
+      return new Response(JSON.stringify({ error: "Email service misconfigured" }), { status: 503, headers: cors });
+    }
+
     const { email, destination } = await req.json();
 
     if (!email || typeof email !== "string") {
@@ -146,10 +160,10 @@ export async function handler(
     const buttonText = dest === '/dashboard' ? 'Go to My Dashboard' : 'Edit My Profile';
 
     // Send email via Resend (with 1 retry on failure)
-    const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
-    if (RESEND_KEY) {
+    // RESEND_KEY_CHECK and RESEND_FROM_CHECK already validated at top of handler.
+    if (RESEND_KEY_CHECK) {
       const emailPayload = {
-        from: Deno.env.get("RESEND_FROM") || "Boban at SellingDubai <boban@sellingdubai.com>",
+        from: RESEND_FROM_CHECK,
         to: [agent.email],
         subject: "Sign in to edit your SellingDubai profile",
         html: `
@@ -178,7 +192,7 @@ export async function handler(
 
       const sendEmail = () => fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${RESEND_KEY_CHECK}`, "Content-Type": "application/json" },
         body: JSON.stringify(emailPayload),
       });
 
