@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Dubai's Verified Real Estate Agents — SellingDubai</title>
+  <meta name="description" content="Browse verified real estate agents in Dubai. Find DLD-verified agents, view their listings, and connect directly.">
+  <link rel="canonical" href="https://sellingdubai.ae/agents">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M16 6L6 14v12a1 1 0 001 1h6v-7h6v7h6a1 1 0 001-1V14L16 6z' fill='%23fff'/%3E%3C/svg%3E">
+  <meta property="og:title" content="Dubai's Verified Real Estate Agents — SellingDubai">
+  <meta property="og:description" content="Browse verified real estate agents in Dubai. Find DLD-verified agents, view their listings, and connect directly.">
+  <meta property="og:image" content="https://sellingdubai.ae/sellingdubailogo.png">
+  <meta property="og:url" content="https://sellingdubai.ae/agents">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SellingDubai">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dubai's Verified Real Estate Agents — SellingDubai">
+  <meta name="twitter:description" content="Browse verified real estate agents in Dubai. Find DLD-verified agents, view their listings, and connect directly.">
+  <link rel="preload" href="/css/fonts.css" as="style" data-async-css>
+  <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BXMRWM9ZM1"></script>
+  <script src="/js/gtag-init.js" defer></script>
+  <script src="/js/async-css.js" defer></script>
+  <link rel="stylesheet" href="/css/agents.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#f5f2ec">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="container">
+    <a href="/" class="logo">SellingDubai</a>
+    <a href="/join" class="header-cta">List Your Profile</a>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="hero">
+    <div class="container">
+      <h1>Dubai's Verified Real Estate Agents</h1>
+      <p class="hero-sub">Browse profiles, view listings, and connect directly.</p>
+      <div id="agent-count-badge" class="agent-count" aria-live="polite" aria-atomic="true"></div>
+
+      <div class="search-wrap" role="search">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Search by name or agency…"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          aria-label="Search agents by name or agency"
+        >
+      </div>
+
+      <div class="filter-chips" role="group" aria-label="Filter agents">
+        <button class="chip active" data-filter="all">All Agents</button>
+        <button class="chip" data-filter="dld">
+          <span class="chip-dot chip-dot-verified" aria-hidden="true"></span>
+          DLD Verified
+        </button>
+        <button class="chip" data-filter="pro">
+          <span class="chip-dot chip-dot-pro" aria-hidden="true"></span>
+          Pro
+        </button>
+        <button class="chip" data-filter="premium">
+          <span class="chip-dot chip-dot-premium" aria-hidden="true"></span>
+          Premium
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="listing-section" aria-label="Agent listings">
+    <div class="container">
+      <div class="results-bar">
+        <span id="results-count" class="results-count" aria-live="polite" aria-atomic="true"></span>
+      </div>
+      <div id="agent-grid" class="agent-grid" role="list" aria-label="Agent profiles">
+        <!-- Skeleton cards rendered by JS until data loads -->
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skel skel-avatar"></div>
+          <div class="skel skel-line" style="width:70%"></div>
+          <div class="skel skel-line-sm" style="width:50%"></div>
+          <div class="skel skel-btn"></div>
+        </div>
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skel skel-avatar"></div>
+          <div class="skel skel-line" style="width:65%"></div>
+          <div class="skel skel-line-sm" style="width:55%"></div>
+          <div class="skel skel-btn"></div>
+        </div>
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skel skel-avatar"></div>
+          <div class="skel skel-line" style="width:72%"></div>
+          <div class="skel skel-line-sm" style="width:48%"></div>
+          <div class="skel skel-btn"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 SellingDubai. All rights reserved. | <a href="/" class="footer-link">Home</a> | <a href="/pricing" class="footer-link">Pricing</a> | <a href="/support" class="footer-link">Support</a></p>
+  </div>
+</footer>
+
+<script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
+<script src="/dist/release-config.js"></script>
+<script src="/js/sentry-init.js" defer></script>
+<script type="module" src="/dist/agents.bundle.js"></script>
+<script src="/js/register-sw.js" defer></script>
+</body>
+</html>
