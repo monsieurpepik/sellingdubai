@@ -921,9 +921,51 @@ async function handleGetLeads(
 }
 
 // ── Main Handler ──
+
+// Meta's published webhook IP ranges (updated 2025-04).
+// Source: https://developers.facebook.com/docs/messenger-platform/webhooks
+// Defense-in-depth: the primary auth is X-Hub-Signature-256 HMAC verification below.
+// Note: CORS headers are intentionally absent — this endpoint only receives
+// server-to-server POST requests from Meta's infrastructure. CORS governs
+// browser-initiated cross-origin requests; it has no effect here and a wildcard
+// Access-Control-Allow-Origin would be misleading and unnecessary.
+const META_WEBHOOK_CIDRS = [
+  '31.13.24.0/21',
+  '31.13.64.0/18',
+  '45.64.40.0/22',
+  '66.220.144.0/20',
+  '69.63.176.0/20',
+  '69.171.224.0/19',
+  '74.119.76.0/22',
+  '103.4.96.0/22',
+  '129.134.0.0/17',
+  '157.240.0.0/17',
+  '173.252.64.0/18',
+  '179.60.192.0/22',
+  '185.60.216.0/22',
+  '204.15.20.0/22',
+];
+
+function ipToInt(ip: string): number {
+  const p = ip.split('.').map(Number);
+  return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]) >>> 0;
+}
+
+function isInCidr(ip: string, cidr: string): boolean {
+  const [base, bits] = cidr.split('/');
+  const prefix = Number(bits);
+  const mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+  return (ipToInt(ip) & mask) === (ipToInt(base) & mask);
+}
+
+function isMetaIp(raw: string): boolean {
+  if (!raw) return false;
+  const ip = raw.split(',')[0].trim(); // X-Forwarded-For may be comma-separated
+  if (ip.includes(':')) return false;  // skip IPv6 — Meta uses IPv4 for webhooks
+  return META_WEBHOOK_CIDRS.some(cidr => isInCidr(ip, cidr));
+}
+
 const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "content-type",
   "Content-Type": "application/json",
 };
 
@@ -937,6 +979,14 @@ export async function handler(
   const log = createLogger('whatsapp-ingest', req);
   const _start = Date.now();
   const url = new URL(req.url);
+
+  // IP allowlisting — only accept requests from Meta's webhook infrastructure.
+  // Cloudflare sets CF-Connecting-IP; fall back to X-Forwarded-For on other proxies.
+  const clientIp = req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || '';
+  if (!isMetaIp(clientIp)) {
+    log({ event: 'ip_blocked', status: 403, ip: clientIp.slice(0, 45) });
+    return new Response('Forbidden', { status: 403 });
+  }
 
   // === WEBHOOK VERIFICATION (GET) ===
   if (req.method === "GET") {
