@@ -99,7 +99,4 @@ export async function handler(req: Request, _createClient: ClientFactory): Promi
   return json({ siri_token: updated.siri_token });
 }
 
-// Netlify/Supabase deploy shim
-// deno-lint-ignore no-explicit-any
-const _self = self as any;
-_self.handler = (req: Request) => handler(req, createClient);
+Deno.serve((req) => handler(req, createClient));

@@ -204,6 +204,7 @@ check_env "OPENAI_API_KEY"
 check_env "TELEGRAM_BOT_TOKEN"
 check_env "TELEGRAM_WEBHOOK_SECRET"
 check_env "VAPI_SERVER_SECRET"
+check_env "VAPI_WEBHOOK_URL"
 
 PLANB_FUNCTIONS=("cobroke-discover" "vapi-webhook" "rotate-siri-token")
 PLANB_MISSING=""
