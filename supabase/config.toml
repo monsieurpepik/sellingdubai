@@ -108,3 +108,15 @@ verify_jwt = false
 
 [functions.verify-broker]
 verify_jwt = false
+
+[functions.log-event]
+verify_jwt = false
+
+[functions.get-flags]
+verify_jwt = false
+
+[functions.fetch-eibor]
+verify_jwt = false
+
+[functions.capture-project-lead]
+verify_jwt = false
