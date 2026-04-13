@@ -3,12 +3,27 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  "Content-Type": "application/json",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.sellingdubai.ae",
+  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
+  "https://staging.sellingdubai.com",
+];
+const IS_LOCAL_DEV = (Deno.env.get("SUPABASE_URL") ?? "").startsWith("http://127.0.0.1");
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") || "";
+  const isLocalOrigin = IS_LOCAL_DEV &&
+    (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
+  const allowedOrigin = isLocalOrigin ? origin
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]);
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "content-type, authorization",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Content-Type": "application/json",
+  };
+}
 
 interface CacheEntry {
   flags: Record<string, boolean>;
@@ -42,15 +57,16 @@ async function getFlags(): Promise<Record<string, boolean>> {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
+  const cors = getCorsHeaders(req);
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "GET") {
-    return new Response(JSON.stringify({ error: "Method not allowed." }), { status: 405, headers: CORS_HEADERS });
+    return new Response(JSON.stringify({ error: "Method not allowed." }), { status: 405, headers: cors });
   }
 
   try {
     const flags = await getFlags();
-    return new Response(JSON.stringify({ flags }), { status: 200, headers: CORS_HEADERS });
+    return new Response(JSON.stringify({ flags }), { status: 200, headers: cors });
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: CORS_HEADERS });
+    return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: cors });
   }
 });

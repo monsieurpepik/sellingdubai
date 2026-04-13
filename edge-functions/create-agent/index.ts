@@ -373,7 +373,7 @@ export async function handler(
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>",
+            from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
             to: [cleanEmail],
             subject,
             html: bodyHtml,

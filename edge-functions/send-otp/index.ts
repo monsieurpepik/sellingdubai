@@ -128,7 +128,7 @@ export async function handler(
     let emailSent = false;
 
     if (RESEND_KEY) {
-      const fromAddress = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>";
+      const fromAddress = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>";
 
       const emailHtml = `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:420px;margin:0 auto;padding:40px 24px;">
