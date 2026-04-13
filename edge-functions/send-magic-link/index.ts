@@ -59,7 +59,7 @@ export async function handler(
 
   try {
     const RESEND_KEY_CHECK = Deno.env.get("RESEND_API_KEY") || "";
-    const RESEND_FROM_CHECK = Deno.env.get("RESEND_FROM") || "";
+    const RESEND_FROM_CHECK = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>";
 
     const { email, destination } = await req.json();
 
