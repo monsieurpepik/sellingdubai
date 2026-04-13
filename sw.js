@@ -1,5 +1,6 @@
-const CACHE_NAME = 'sd-v2';
-const PRECACHE = ['/', '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
+const CACHE_NAME = 'sd-v3';
+// '/' removed — HTML is handled network-first in the fetch handler
+const PRECACHE = ['/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(PRECACHE)));
@@ -18,6 +19,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
+  const url = new URL(e.request.url);
+
   // Navigation requests (HTML pages) — network first, cache fallback.
   // Ensures new deploys are visible immediately without a hard refresh.
   if (e.request.mode === 'navigate') {
@@ -33,15 +36,21 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Static assets (JS, CSS, fonts, images) — cache first, network fallback.
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-        return res;
-      });
-    })
-  );
+  // Hashed chunks + self-hosted fonts — cache first (content-addressed, immutable).
+  if (url.pathname.startsWith('/dist/chunks/') || url.pathname.startsWith('/fonts/')) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(res => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
+  // All other assets (entry bundle, CSS, icons, etc.) — passthrough.
+  // Browser handles HTTP cache revalidation per server headers (no-cache on /dist/*.js).
 });
