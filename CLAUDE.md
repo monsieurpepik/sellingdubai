@@ -24,7 +24,7 @@ These rules exist because the site has been optimized from Performance 56 → 82
 
 ### Third-Party Scripts
 - No new third-party scripts without explicit approval. Every script must justify its weight in `DECISIONS.md`.
-- Current approved third-party scripts: Sentry (`browser.sentry-cdn.com`), Supabase JS CDN, Google Fonts, Google Analytics/GTM, Facebook Pixel.
+- Current approved third-party scripts: Sentry (`browser.sentry-cdn.com`), Supabase JS CDN (`cdn.jsdelivr.net/@supabase/supabase-js@2.49.4`), Google Fonts, Google Analytics/GTM, Facebook Pixel.
 - Any new edge function call on page load must be non-blocking — use `Promise.allSettled()`, never `await` in sequence.
 
 ### Images
