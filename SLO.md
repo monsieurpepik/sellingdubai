@@ -30,13 +30,14 @@ baseline) and is monitored via Sentry alerts.
 
 ## Latency
 
-| Endpoint | Metric | Target | Basis |
-|----------|--------|--------|-------|
-| `capture-lead-v4` | p95 response time | < 800ms | Load test baseline + YC DD expectation for lead funnel |
-| `send-magic-link` | p95 response time | < 1000ms | Load test baseline |
-| `manage-properties` list | p95 response time | < 1000ms | Load test baseline |
-| `og-injector` | p95 response time | < 1000ms | Netlify edge function, measured in load test |
-| Page load (Lighthouse) | Performance score | ≥ 80 | Current baseline ~82; regression alert at < 80 |
+| Endpoint | Metric | Target | Confirmed baseline | Basis |
+|----------|--------|--------|-------------------|-------|
+| Netlify CDN `/a/[slug]` | p95 response time | < 800ms | 279ms @ 10 VUs | k6 Run 7 — 2026-04-14 |
+| `get-flags` | p95 response time | < 500ms | 289ms @ 30 VUs | k6 Run 7 — 2026-04-14 |
+| `capture-lead-v4` | p95 response time | < 1000ms | 517ms @ 20 VUs | k6 Run 7 — 2026-04-14 |
+| PostgREST `/projects` | p95 response time | < 800ms | 150ms @ 20 VUs | k6 Run 7 — 2026-04-14 |
+| `send-magic-link` | p95 response time | < 1000ms | not yet baselined | — |
+| Page load (Lighthouse) | Performance score | ≥ 80 | 99 | Lighthouse CI — 2026-04-14 |
 
 **Measurement:** k6 load test results committed to `LOAD-TEST-RESULTS.md`; re-run before each release.
 

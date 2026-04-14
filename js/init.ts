@@ -194,6 +194,7 @@ document.addEventListener('keydown', (e) => {
 async function init(): Promise<void> {
   const slug = getAgentSlug();
   if (!slug) { showPage('error'); return; }
+  if (!supabase) { showPage('error'); return; }
 
   // Show skeleton shimmer immediately
   document.getElementById('loading')?.classList.add('hidden');

@@ -22,4 +22,10 @@ if (!SUPABASE_ANON_KEY) {
 export const CAPTURE_URL = `${SUPABASE_URL}/functions/v1/capture-lead-v4`;
 export const LOG_EVENT_URL = `${SUPABASE_URL}/functions/v1/log-event`;
 
-export const supabase: SupabaseClient<Database> = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Guard against CDN load failure (ad blockers, transient network issues).
+// If window.supabase is undefined, we log the error and export null-cast — init.ts
+// checks !supabase before any call and shows the error page instead of throwing.
+if (!window.supabase) {
+  console.error('[config] Supabase CDN failed to load — window.supabase is undefined. Check for ad blockers or network issues blocking cdn.jsdelivr.net.');
+}
+export const supabase: SupabaseClient<Database> = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) as SupabaseClient<Database>;

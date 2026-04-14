@@ -18,17 +18,18 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 }
 
 const AGENT = {
-  email:       'loadtest@sellingdubai.com',
-  name:        'Load Test Agent',
-  slug:        'loadtest',
-  brn:         'TEST-123',
-  phone:       '+971501234567',
-  agency_name: 'Load Test Agency',
-  is_verified: true,
-  tier:        'pro',
+  email:               'loadtest@sellingdubai.com',
+  name:                'Load Test Agent',
+  slug:                'loadtest',
+  rera_brn:            'TEST-123',
+  phone:               '+971501234567',
+  agency_name:         'Load Test Agency',
+  verification_status: 'verified',
+  is_active:           true,
+  tier:                'premium',
 };
 
-const res = await fetch(`${SUPABASE_URL}/rest/v1/agents?on_conflict=email`, {
+const res = await fetch(`${SUPABASE_URL}/rest/v1/agents?on_conflict=slug`, {
   method:  'POST',
   headers: {
     'Content-Type':  'application/json',
@@ -55,7 +56,7 @@ if (!agent?.id) {
 
 console.log(`\nLoad test agent ready:`);
 console.log(`  ID:    ${agent.id}`);
+console.log(`  Slug:  ${AGENT.slug}`);
 console.log(`  Email: ${AGENT.email}`);
-console.log(`  BRN:   ${AGENT.brn}`);
-console.log(`\nSet this in load-test.sh:`);
-console.log(`  TEST_AGENT_ID=${agent.id}`);
+console.log(`\nThe load test uses slug '${AGENT.slug}' by default — no env var needed.`);
+console.log(`To override: export TEST_AGENT_SLUG=${AGENT.slug}`);
