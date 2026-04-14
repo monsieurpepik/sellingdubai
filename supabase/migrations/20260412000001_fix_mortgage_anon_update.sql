@@ -8,6 +8,7 @@ DROP POLICY IF EXISTS "anon can update mortgage applications" ON mortgage_applic
 DROP POLICY IF EXISTS "anon_update_mortgage" ON mortgage_applications;
 
 -- Authenticated agents may only update their own mortgage applications.
+DROP POLICY IF EXISTS "agent can update own mortgage applications" ON mortgage_applications;
 CREATE POLICY "agent can update own mortgage applications"
   ON mortgage_applications
   FOR UPDATE

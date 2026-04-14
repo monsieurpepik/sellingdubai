@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.developers (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE public.developers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "developers_public_read" ON public.developers;
 CREATE POLICY "developers_public_read" ON public.developers FOR SELECT USING (true);
 
 -- -----------------------------------------------------------------------------
@@ -34,6 +35,8 @@ CREATE TABLE IF NOT EXISTS public.page_views (
   viewed_at    timestamptz DEFAULT now()
 );
 ALTER TABLE public.page_views ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "page_views_anon_insert" ON public.page_views;
+DROP POLICY IF EXISTS "page_views_agent_read"  ON public.page_views;
 CREATE POLICY "page_views_anon_insert" ON public.page_views FOR INSERT WITH CHECK (true);
 CREATE POLICY "page_views_agent_read"  ON public.page_views FOR SELECT USING (auth.uid()::text = agent_id::text);
 
@@ -50,6 +53,8 @@ CREATE TABLE IF NOT EXISTS public.link_clicks (
   clicked_at  timestamptz DEFAULT now()
 );
 ALTER TABLE public.link_clicks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "link_clicks_anon_insert" ON public.link_clicks;
+DROP POLICY IF EXISTS "link_clicks_agent_read"  ON public.link_clicks;
 CREATE POLICY "link_clicks_anon_insert" ON public.link_clicks FOR INSERT WITH CHECK (true);
 CREATE POLICY "link_clicks_agent_read"  ON public.link_clicks FOR SELECT USING (auth.uid()::text = agent_id::text);
 
@@ -64,5 +69,7 @@ CREATE TABLE IF NOT EXISTS public.email_signups (
   created_at timestamptz DEFAULT now()
 );
 ALTER TABLE public.email_signups ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "email_signups_anon_insert" ON public.email_signups;
+DROP POLICY IF EXISTS "email_signups_agent_read"  ON public.email_signups;
 CREATE POLICY "email_signups_anon_insert" ON public.email_signups FOR INSERT WITH CHECK (true);
 CREATE POLICY "email_signups_agent_read"  ON public.email_signups FOR SELECT USING (auth.uid()::text = agent_id::text);

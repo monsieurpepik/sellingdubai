@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.dld_projects (
   project_end_date    date
 );
 ALTER TABLE public.dld_projects ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "dld_projects_public_read" ON public.dld_projects;
 CREATE POLICY "dld_projects_public_read" ON public.dld_projects FOR SELECT USING (true);
 
 -- -----------------------------------------------------------------------------
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS public.dld_transactions (
   created_at       timestamptz DEFAULT now()
 );
 ALTER TABLE public.dld_transactions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "dld_transactions_agent_read" ON public.dld_transactions;
 CREATE POLICY "dld_transactions_agent_read" ON public.dld_transactions FOR SELECT USING (auth.uid()::text = agent_id::text);
 
 -- -----------------------------------------------------------------------------
@@ -53,6 +55,7 @@ CREATE TABLE IF NOT EXISTS public.subscription_events (
   created_at       timestamptz DEFAULT now()
 );
 ALTER TABLE public.subscription_events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "subscription_events_agent_read" ON public.subscription_events;
 CREATE POLICY "subscription_events_agent_read" ON public.subscription_events FOR SELECT USING (auth.uid()::text = agent_id::text);
 
 -- -----------------------------------------------------------------------------
@@ -79,4 +82,5 @@ CREATE TABLE IF NOT EXISTS public.project_units (
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE public.project_units ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "project_units_public_read" ON public.project_units;
 CREATE POLICY "project_units_public_read" ON public.project_units FOR SELECT USING (true);

@@ -21,6 +21,7 @@ ALTER TABLE agent_invites ENABLE ROW LEVEL SECURITY;
 -- the join page can verify a token without requiring the visitor to be signed in.
 -- All mutations (INSERT / UPDATE / DELETE) are handled exclusively by edge
 -- functions running under the service role and therefore bypass RLS entirely.
+DROP POLICY IF EXISTS "anon can read unused invites" ON agent_invites;
 CREATE POLICY "anon can read unused invites"
   ON agent_invites
   FOR SELECT

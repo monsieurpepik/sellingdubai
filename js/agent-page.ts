@@ -132,9 +132,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
   if (agent.dld_broker_number || agent.broker_number) {
     trustChips.push(`<span class="trust-chip">BRN ${escHtml(String(agent.dld_broker_number ?? agent.broker_number ?? ''))}</span>`);
   }
-  if (agent.dld_verified) {
-    trustChips.push(`<span class="trust-chip trust-chip-active"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> DLD Verified</span>`);
-  } else if (agent.verification_status === 'verified') {
+  if (agent.dld_verified || agent.verification_status === 'verified') {
     trustChips.push(`<span class="trust-chip trust-chip-active"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> RERA Licensed</span>`);
   }
   if (trustBar && trustChips.length) {
