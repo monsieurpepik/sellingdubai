@@ -328,7 +328,7 @@ Off-plan project inventory synced from REM API.
 | property_types | TEXT[] | GIN indexed |
 | min_area_sqft | NUMERIC | |
 | max_area_sqft | NUMERIC | |
-| payment_plan_detail | TEXT | |
+| payment_plan_detail | JSONB | DEFAULT NULL |
 | gallery_images | TEXT[] | GIN indexed |
 | floor_plan_urls | TEXT[] | |
 | available_units | INTEGER | |
