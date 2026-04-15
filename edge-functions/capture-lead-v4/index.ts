@@ -531,11 +531,15 @@ export async function handler(
       }
     }
 
-    // Update notification timestamp — must be inside try so errors are caught
-    await supabase
-      .from("leads")
-      .update({ agent_notified_at: new Date().toISOString() })
-      .eq("id", lead.id);
+    // Update notification timestamp — non-fatal; lead is already saved
+    try {
+      await supabase
+        .from("leads")
+        .update({ agent_notified_at: new Date().toISOString() })
+        .eq("id", lead.id);
+    } catch (notifyErr) {
+      log.error('agent_notified_at update failed — lead saved, notification tracking missed', { leadId: lead.id, error: notifyErr });
+    }
 
     // === SMART REMINDERS — fire-and-forget, never blocks response ===
     // Schedule 5 follow-up reminders for this contact

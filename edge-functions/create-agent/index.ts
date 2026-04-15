@@ -219,10 +219,14 @@ export async function handler(
 
     // Mark invite as used now that the agent row is committed
     if (agency_invite_token) {
-      await supabase
+      const { error: inviteError } = await supabase
         .from("agent_invites")
         .update({ used_at: new Date().toISOString() })
         .eq("token", agency_invite_token);
+      if (inviteError) {
+        log.error('Failed to mark invite as used', { inviteToken: agency_invite_token, error: inviteError });
+        return new Response(JSON.stringify({ error: 'Registration failed. Please try again.' }), { status: 500 });
+      }
     }
 
     if (photo_base64) {
