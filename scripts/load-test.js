@@ -17,8 +17,8 @@
 //
 // Production guard: refuses to run against bare sellingdubai.com.
 
-import http from 'k6/http';
 import { check, sleep } from 'k6';
+import http from 'k6/http';
 import { Rate, Trend } from 'k6/metrics';
 
 // --- Environment -------------------------------------------------------
