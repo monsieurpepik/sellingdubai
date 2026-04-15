@@ -955,12 +955,12 @@ async function routeToSecretary(
   senderPhone: string,
   agentId: string,
   message: string,
-): Promise<void> {
+): Promise<string | null> {
   const SECRETARY_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-secretary`;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!SERVICE_KEY) {
     await sendWhatsAppReply(senderPhone, "Configuration error. Please try again later.");
-    return;
+    return null;
   }
 
   try {
@@ -980,18 +980,21 @@ async function routeToSecretary(
 
       if (!res.ok) {
         await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
-        return;
+        return null;
       }
 
       const data = await res.json();
       if (data.reply) {
         await sendWhatsAppReply(senderPhone, data.reply);
+        return data.reply as string;
       }
+      return null;
     } finally {
       clearTimeout(timeoutId);
     }
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "I couldn't process that right now. Try again in a moment.");
+    return null;
   }
 }
 
@@ -1089,6 +1092,102 @@ async function handleUpdateStatus(
     available: "Available 🟢", reserved: "Reserved 🔒", just_listed: "Just Listed ✨",
   };
   await sendWhatsAppReply(senderPhone, `✅ *${matchedProp.title}* updated to *${STATUS_LABELS[status] || status}*`);
+}
+
+// ── RSI: Buyer Signal Extraction ──
+function extractBuyerSignals(text: string): { budget: number | null; timeline: number | null } {
+  let budget: number | null = null;
+  let timeline: number | null = null;
+
+  // Budget — "2M", "2 million", "AED 2,000,000", "2000000"
+  const mMatch = text.match(/(\d+(?:\.\d+)?)\s*M(?:illion)?/i);
+  if (mMatch) {
+    budget = Math.round(parseFloat(mMatch[1]) * 1_000_000);
+  } else {
+    const aedMatch = text.match(/(?:AED\s*)?(\d[\d,]{4,})/i);
+    if (aedMatch) {
+      const n = parseInt(aedMatch[1].replace(/,/g, ''), 10);
+      if (n >= 100_000) budget = n; // ignore small numbers
+    }
+  }
+
+  // Timeline — "next month"=1, "this year"/"6 months"=6, "2 years"=24, etc.
+  if (/next\s+month/i.test(text)) {
+    timeline = 1;
+  } else if (/this\s+year|within\s+(?:the\s+)?year/i.test(text)) {
+    timeline = 6;
+  } else {
+    const moMatch = text.match(/(\d+)\s*month/i);
+    if (moMatch) timeline = Math.min(parseInt(moMatch[1], 10), 120);
+    else {
+      const yrMatch = text.match(/(\d+)\s*year/i);
+      if (yrMatch) timeline = Math.min(parseInt(yrMatch[1], 10) * 12, 120);
+    }
+  }
+
+  return { budget, timeline };
+}
+
+// Heuristic: does the AI reply contain a qualifying question?
+function isQualifyingQuestion(reply: string): boolean {
+  return /\?/.test(reply) &&
+    /budget|timeline|when|bedroom|bed|area|looking|purpose|invest|end.?user|visa|family|ready/i.test(reply);
+}
+
+// ── RSI: Session Outcome Labeling ──
+// Fire-and-forget — never blocks the WhatsApp reply path.
+async function updateSessionRsiSignals(
+  supabase: ReturnType<typeof createClient>,
+  agentId: string,
+  rawText: string,
+  aiReply: string | null,
+): Promise<void> {
+  const now = new Date().toISOString();
+
+  const { data: sess } = await supabase
+    .from('whatsapp_sessions')
+    .select('id, turn_count, agent_replied_at, outcome, last_active, buyer_budget_aed, buyer_timeline_months, qualifying_question_count')
+    .eq('agent_id', agentId)
+    .maybeSingle();
+
+  if (!sess) return; // ai-secretary will create the session on first message
+
+  // RULE 2 — Close stale session with implicit outcome
+  const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 h
+  const sessionAge = Date.now() - new Date(sess.last_active).getTime();
+  if (sessionAge > SESSION_TTL_MS && (sess.outcome === 'unknown' || sess.outcome == null)) {
+    const outcome = sess.agent_replied_at
+      ? 'qualified'
+      : (sess.turn_count ?? 0) >= 3 ? 'no_response' : 'unknown';
+    const source = sess.agent_replied_at
+      ? 'implicit_reply'
+      : (sess.turn_count ?? 0) >= 3 ? 'implicit_no_reply' : null;
+    if (outcome !== 'unknown') {
+      await supabase.from('whatsapp_sessions').update({
+        outcome,
+        outcome_source: source,
+        outcome_set_at: now,
+      }).eq('id', sess.id);
+    }
+    return; // stale session closed; ai-secretary will open a fresh one
+  }
+
+  // RULE 1 + RULE 3 — Increment counters and extract buyer signals
+  const signals = extractBuyerSignals(rawText);
+  // deno-lint-ignore no-explicit-any
+  const updates: Record<string, any> = {
+    turn_count: (sess.turn_count ?? 0) + 1,
+    // agent_replied_at: first message in session = agent engaged = strongest qualified signal
+    agent_replied_at: sess.agent_replied_at ?? now,
+    last_active: now,
+  };
+  if (signals.budget && !sess.buyer_budget_aed) updates.buyer_budget_aed = signals.budget;
+  if (signals.timeline && !sess.buyer_timeline_months) updates.buyer_timeline_months = signals.timeline;
+  if (aiReply && isQualifyingQuestion(aiReply)) {
+    updates.qualifying_question_count = (sess.qualifying_question_count ?? 0) + 1;
+  }
+
+  await supabase.from('whatsapp_sessions').update(updates).eq('id', sess.id);
 }
 
 // ── AGENCY CONTEXT ──
@@ -1547,8 +1646,30 @@ export async function handler(
       if (!rawText.trim()) {
         return new Response(JSON.stringify({ success: true }), { headers: CORS });
       }
-      await routeToSecretary(senderPhone, agent.id, rawText);
+
+      // RULE 4 — Explicit agent outcome tag (GOOD/BAD/1/2).
+      // Handle before routing to secretary — never prompt for this, just accept it.
+      const trimmedUpper = rawText.trim().toUpperCase();
+      if (trimmedUpper === 'GOOD' || trimmedUpper === '1' || trimmedUpper === 'BAD' || trimmedUpper === '2') {
+        const isGood = trimmedUpper === 'GOOD' || trimmedUpper === '1';
+        const outcome = isGood ? 'qualified' : 'unqualified';
+        await supabase.from('whatsapp_sessions').update({
+          outcome,
+          outcome_source: 'agent_tag',
+          outcome_set_at: new Date().toISOString(),
+        }).eq('agent_id', agent.id);
+        await sendWhatsAppReply(senderPhone, isGood ? '✓ Marked as good lead.' : '✓ Marked as bad lead.');
+        log({ event: 'outcome_tagged', agent_id: agent.id, outcome, status: 200 });
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+
+      // Route to secretary and capture reply for RSI signal extraction
+      const aiReply = await routeToSecretary(senderPhone, agent.id, rawText);
       log({ event: "text_routed_to_secretary", agent_id: agent.id, status: 200 });
+
+      // RULES 1+2+3 — Fire-and-forget session tracking; never blocks the reply path
+      updateSessionRsiSignals(supabase, agent.id, rawText, aiReply).catch(() => {});
+
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
