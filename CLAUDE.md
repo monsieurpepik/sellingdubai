@@ -124,6 +124,23 @@ At the end of every task turn, verify before declaring done:
 - Do NOT auto-compact. Manual `/compact` at 50% only.
 - Do NOT proceed without reading `DECISIONS.md` first in a new session.
 
+## Agent Discipline Rules
+
+These rules apply to every Claude Code session that touches existing code:
+
+- Touch ONLY the files necessary for the specific fix requested
+- Do NOT refactor adjacent code that wasn't broken
+- Do NOT improve code that wasn't in scope
+- If you find another issue while fixing something, add it to CONCERNS.md — do not fix it in the same session
+- Show git diff --stat before every commit
+- If diff touches more than 3 files for a single bug fix, explain why each file was necessary
+- Never use phrases like "while I was in here I also..." — that signals unsolicited scope creep
+- npm run check must pass before every commit
+
+Audit sessions and fix sessions are separate:
+- Audit session: read and document only, zero code changes
+- Fix session: fix only what was explicitly scoped
+
 ## Known Production Gotchas
 
 - `send-magic-link` and all public auth functions require `verify_jwt = false` in `supabase/config.toml` AND `--no-verify-jwt` on deploy. Local dev masks this with `--no-verify-jwt` in `dev.sh`. If login breaks in production, check this first.

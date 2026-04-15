@@ -5,6 +5,7 @@
 // For the top 30 priority-developer projects, fetches detail endpoint for enrichment.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 const REM_LIST_URL   = "https://my.remapp.ae/api/public/websites_project_list";
 const REM_DETAIL_URL = "https://my.remapp.ae/api/public/websites_project_detail";
@@ -111,7 +112,69 @@ async function batchRun<T>(
   }
 }
 
-Deno.serve(async (req: Request) => {
+// Reports a schema validation failure to Sentry via the HTTP store API (no SDK).
+// Awaited before returning error responses so the event is sent before Deno terminates.
+async function reportToSentry(
+  message: string,
+  extra: Record<string, unknown> = {},
+): Promise<void> {
+  const dsn = Deno.env.get("SENTRY_DSN");
+  if (!dsn) return;
+  try {
+    const parsed = new URL(dsn);
+    const key = parsed.username;
+    const projectId = parsed.pathname.replace(/^\//, "");
+    const storeUrl = `${parsed.protocol}//${parsed.host}/api/${projectId}/store/`;
+    const isLocal = (Deno.env.get("SUPABASE_URL") ?? "").startsWith("http://127.0.0.1");
+    await fetch(storeUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Sentry-Auth": `Sentry sentry_version=7, sentry_client=sync-rem-offplan/1.0, sentry_key=${key}`,
+      },
+      body: JSON.stringify({
+        event_id: crypto.randomUUID().replace(/-/g, ""),
+        timestamp: new Date().toISOString(),
+        level: "error",
+        platform: "other",
+        environment: isLocal ? "development" : "production",
+        logger: "sync-rem-offplan",
+        message,
+        extra,
+      }),
+    });
+  } catch {
+    // Never let Sentry reporting break the sync
+  }
+}
+
+// Returns field-level issues for a raw REM list item. Empty array means valid.
+function getValidationIssues(p: unknown): string[] {
+  if (typeof p !== "object" || p === null) return ["item is not an object"];
+  const obj = p as Record<string, unknown>;
+  const issues: string[] = [];
+  if (typeof obj.id !== "number") {
+    issues.push(`id: expected number, got ${typeof obj.id} (${JSON.stringify(obj.id)})`);
+  }
+  if (typeof obj.title !== "string" || !(obj.title as string).trim()) {
+    issues.push(`title: expected non-empty string, got ${typeof obj.title}`);
+  }
+  if (typeof obj.developer_name !== "string" || !(obj.developer_name as string).trim()) {
+    issues.push(`developer_name: expected non-empty string, got ${typeof obj.developer_name}`);
+  }
+  if (typeof obj.status !== "string") {
+    issues.push(`status: expected string, got ${typeof obj.status}`);
+  }
+  if (!Array.isArray(obj.property_category)) {
+    issues.push(`property_category: expected array, got ${typeof obj.property_category}`);
+  }
+  return issues;
+}
+
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(req: Request, _createClient: CreateClientFn = createClient): Promise<Response> {
   if (req.method !== "POST" && req.method !== "GET") {
     return new Response(JSON.stringify({ error: "Method not allowed." }), {
       status: 405, headers: { "Content-Type": "application/json" },
@@ -145,7 +208,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const sb = createClient(
+  const sb = _createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
@@ -153,7 +216,7 @@ Deno.serve(async (req: Request) => {
   const syncStarted = new Date().toISOString();
 
   // ── 1. Fetch from REM list endpoint ──────────────────────────────────────────
-  let remData: { status: boolean; data: RemProject[] };
+  let remData: { status: boolean; data: unknown[] };
   try {
     const remRes = await fetch(REM_LIST_URL, {
       method: "POST",
@@ -174,14 +237,55 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // ── 2. Filter: Dubai only, exclude Out Of Stock, deduplicate by id ───────────
+  // ── 2. Validate + filter: Dubai only, exclude Out Of Stock, deduplicate by id ─
   const seenIds = new Set<number>();
-  const eligible = remData.data.filter((p) => {
-    if (p.city_name !== "Dubai" || p.status === "Out Of Stock") return false;
-    if (seenIds.has(p.id)) return false;
-    seenIds.add(p.id);
-    return true;
-  });
+  const eligible: RemProject[] = [];
+  const validationFailures: Array<{ index: number; rem_id: unknown; issues: string[] }> = [];
+
+  for (let i = 0; i < remData.data.length; i++) {
+    const p = remData.data[i];
+    const issues = getValidationIssues(p);
+    if (issues.length > 0) {
+      const obj = typeof p === "object" && p !== null ? p as Record<string, unknown> : {};
+      validationFailures.push({ index: i, rem_id: obj.id ?? null, issues });
+      continue;
+    }
+    const proj = p as RemProject;
+    if (proj.city_name !== "Dubai" || proj.status === "Out Of Stock") continue;
+    if (seenIds.has(proj.id)) continue;
+    seenIds.add(proj.id);
+    eligible.push(proj);
+  }
+
+  // Abort if >50% of records fail validation — signals a breaking API schema change.
+  const failureRate = remData.data.length > 0
+    ? validationFailures.length / remData.data.length
+    : 0;
+  if (failureRate > 0.5) {
+    await reportToSentry(
+      `sync-rem-offplan: aborted — ${validationFailures.length}/${remData.data.length} projects failed schema validation`,
+      {
+        failure_rate_pct: Math.round(failureRate * 100),
+        sample_failures: validationFailures.slice(0, 10),
+      },
+    );
+    return new Response(
+      JSON.stringify({
+        error: "REM API schema validation failed. Check Sentry.",
+        validation_failures: validationFailures.length,
+        total: remData.data.length,
+      }),
+      { status: 502, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Report partial failures to Sentry but continue processing the valid projects.
+  if (validationFailures.length > 0) {
+    await reportToSentry(
+      `sync-rem-offplan: ${validationFailures.length} projects skipped due to schema validation failures`,
+      { failures: validationFailures },
+    );
+  }
 
   // ── 3. Identify top-30 priority projects for enrichment ──────────────────────
   const isPriority = (p: RemProject) =>
@@ -358,6 +462,7 @@ Deno.serve(async (req: Request) => {
   return new Response(JSON.stringify({
     synced_at:             syncStarted,
     total_from_api:        remData.data.length,
+    validation_skipped:    validationFailures.length,
     dubai_active:          eligible.length,
     developers_upserted:   devRows.length,
     projects_synced:       projectRows.length,
@@ -366,4 +471,6 @@ Deno.serve(async (req: Request) => {
     priority_enriched:     enrichmentMap.size,
     priority_requested:    prioritySorted.length,
   }), { status: 200, headers: { "Content-Type": "application/json" } });
-});
+}
+
+Deno.serve((req) => handler(req));

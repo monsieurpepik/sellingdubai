@@ -7,13 +7,15 @@ const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SITE_URL = 'https://sellingdubai.ae';
 const DEFAULT_IMAGE = `https://sellingdubai.ae/.netlify/images?url=${encodeURIComponent(SUPABASE_URL + '/storage/v1/object/public/agent-images/dubai-skyline.jpg')}&w=1200&fm=webp&q=80`;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
 
 function escHtml(s: string): string {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(req: Request, _createClient: CreateClientFn = createClient): Promise<Response> {
+  const supabase = _createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const log = createLogger('prerender', req);
   const _start = Date.now();
   const corsHeaders = {
@@ -73,7 +75,9 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));
 
 function renderAgentPage(agent: any, properties: any[]): string {
   // Keep raw values — only escape at the point of insertion

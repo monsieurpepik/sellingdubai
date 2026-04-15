@@ -569,10 +569,11 @@ Full commitments: `SLO.md`
 
 | Metric | Endpoint | Target |
 |--------|----------|--------|
-| Latency p95 | `capture-lead-v4` | < 800 ms |
+| Latency p95 | Netlify CDN (`/a/[slug]`) | < 800 ms |
+| Latency p95 | `capture-lead-v4` | < 1000 ms |
+| Latency p95 | `get-flags` | < 500 ms |
+| Latency p95 | PostgREST `/projects` | < 800 ms |
 | Latency p95 | `send-magic-link` | < 1000 ms |
-| Latency p95 | `manage-properties` (list) | < 1000 ms |
-| Latency p95 | `og-injector` (Netlify edge) | < 1000 ms |
 | 5xx error rate | All edge functions | < 0.1% |
 | Lighthouse score | Page load | >= 80 |
 | Availability | Frontend (Netlify) | 99.99% / month |
@@ -604,8 +605,11 @@ brew install k6
 deno run --allow-env --allow-net scripts/seed-loadtest-agent.ts
 export TEST_AGENT_ID=<uuid-from-seeder>
 
-# Run the test
-./scripts/load-test.sh
+# Run against staging
+npm run load-test:staging
+
+# Or directly
+k6 run scripts/load-test.js
 ```
 
 Production guard: the script refuses to run against the bare `sellingdubai.com` domain to prevent load testing the live site.

@@ -2,6 +2,7 @@
 // In-memory cache with 60s TTL so the DB isn't hit on every page load.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.sellingdubai.ae",

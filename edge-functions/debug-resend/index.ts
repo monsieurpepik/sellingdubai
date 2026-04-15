@@ -1,6 +1,6 @@
 import { createLogger } from '../_shared/logger.ts';
 
-Deno.serve(async (req: Request) => {
+export async function handler(req: Request): Promise<Response> {
   const log = createLogger('debug-resend', req);
   const _start = Date.now();
   try {
@@ -9,4 +9,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve(handler);

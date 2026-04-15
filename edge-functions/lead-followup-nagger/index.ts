@@ -15,6 +15,7 @@
 // ===========================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
 
 // Escape HTML to prevent XSS in email templates
 function escHtml(s: string): string {
@@ -45,7 +46,10 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(req: Request, _createClient: CreateClientFn = createClient): Promise<Response> {
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -76,7 +80,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const supabase = createClient(
+    const supabase = _createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
@@ -195,4 +199,6 @@ Deno.serve(async (req: Request) => {
       { status: 500, headers: cors }
     );
   }
-});
+}
+
+Deno.serve((req) => handler(req));

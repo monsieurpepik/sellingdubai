@@ -20,7 +20,10 @@ async function hmacHex(secret: string, message: string): Promise<string> {
   return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-Deno.serve(async (req: Request) => {
+// deno-lint-ignore no-explicit-any
+type CreateClientFn = (url: string, key: string) => any;
+
+export async function handler(req: Request, _createClient: CreateClientFn = createClient): Promise<Response> {
   const log = createLogger('instagram-auth', req);
   const _start = Date.now();
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
@@ -30,7 +33,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const { action, code, token, state } = await req.json();
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = _createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     // Helper: validate magic link token and return authenticated agent_id
     async function getAgentIdFromToken(t: string): Promise<string | null> {
@@ -241,4 +244,6 @@ Deno.serve(async (req: Request) => {
   } finally {
     log.flush(Date.now() - _start);
   }
-});
+}
+
+Deno.serve((req) => handler(req));

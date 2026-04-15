@@ -13,7 +13,9 @@
     "test:functions": "PATH=\"$HOME/.deno/bin:$PATH\" deno test --config supabase/functions/deno.json --allow-net --allow-env --allow-read supabase/functions/*/test.ts supabase/functions/*/index.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check js/ scripts/ --no-errors-on-unmatched",
-    "test": "npm run test:functions"
+    "test": "npm run test:functions",
+    "load-test": "k6 run scripts/load-test.js",
+    "load-test:staging": "BASE_URL=https://staging.sellingdubai.com k6 run scripts/load-test.js"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
