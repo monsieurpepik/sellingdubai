@@ -132,6 +132,98 @@ Deno.test("stripe-webhook: invoice.payment_failed marks agent past_due", async (
   if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
 });
 
+// ─── C6 fix: DB error → 500 so Stripe retries ─────────────────────────────
+
+Deno.test("stripe-webhook: customer.subscription.deleted — agents.update DB error returns 500", async () => {
+  const event = {
+    id: "evt_deleted_dberr",
+    type: "customer.subscription.deleted",
+    data: {
+      object: {
+        id: "sub_test_err",
+        customer: "cus_test_err",
+        metadata: { agent_id: "agent-dberr-1" },
+        status: "canceled",
+        items: { data: [{ price: { id: "price_test" } }] },
+      },
+    },
+  };
+  const body = JSON.stringify(event);
+  const sig = await signStripePayload(body, "whsec_test_dummy_secret");
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Stripe-Signature": sig },
+      body,
+    }),
+    mockClientFactory({
+      "agents:write": { data: null, error: { message: "connection timeout" } },
+    }),
+  );
+  if (res.status !== 500) throw new Error(`Expected 500 so Stripe retries, got ${res.status}`);
+});
+
+Deno.test("stripe-webhook: invoice.payment_failed — agents.update DB error returns 500", async () => {
+  const event = {
+    id: "evt_failed_dberr",
+    type: "invoice.payment_failed",
+    data: {
+      object: {
+        subscription: "sub_test_err2",
+        customer: "cus_test_err2",
+        subscription_details: { metadata: { agent_id: "agent-dberr-2" } },
+      },
+    },
+  };
+  const body = JSON.stringify(event);
+  const sig = await signStripePayload(body, "whsec_test_dummy_secret");
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Stripe-Signature": sig },
+      body,
+    }),
+    mockClientFactory({
+      "agents:write": { data: null, error: { message: "connection timeout" } },
+    }),
+  );
+  if (res.status !== 500) throw new Error(`Expected 500 so Stripe retries, got ${res.status}`);
+});
+
+Deno.test("stripe-webhook: subscription_events insert failure does not affect 200 response", async () => {
+  // subscription_events is fire-and-forget — insert failure must never cause a 500
+  const event = {
+    id: "evt_se_fail",
+    type: "customer.subscription.deleted",
+    data: {
+      object: {
+        id: "sub_test_sfail",
+        customer: "cus_test_sfail",
+        metadata: { agent_id: "agent-sfail-1" },
+        status: "canceled",
+        items: { data: [{ price: { id: "price_test" } }] },
+      },
+    },
+  };
+  const body = JSON.stringify(event);
+  const sig = await signStripePayload(body, "whsec_test_dummy_secret");
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Stripe-Signature": sig },
+      body,
+    }),
+    mockClientFactory({
+      // agents:write succeeds; subscription_events:write fails — response should still be 200
+      "agents:write": { data: null, error: null },
+      "subscription_events:write": { data: null, error: { message: "table not found" } },
+    }),
+  );
+  if (res.status !== 200) throw new Error(`Expected 200 (subscription_events failure is fire-and-forget), got ${res.status}`);
+  const data = await res.json();
+  if (!data.received) throw new Error(`Expected received:true`);
+});
+
 // checkout.session.completed requires a live Stripe API call to fetch the subscription
 Deno.test.ignore("stripe-webhook: checkout.session.completed updates agent tier (requires Stripe API)", async () => {
   throw new Error("Requires real Stripe test subscription. Run with live STRIPE_SECRET_KEY.");

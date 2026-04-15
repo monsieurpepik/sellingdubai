@@ -168,7 +168,7 @@ export async function handler(
         }
         const periodEnd = new Date((sub.current_period_end as number) * 1000).toISOString();
 
-        await supabase.from("agents").update({
+        const { error: updateErr1 } = await supabase.from("agents").update({
           tier:                      resolved.tier,
           stripe_subscription_id:    subscriptionId,
           stripe_customer_id:        customerId,
@@ -176,6 +176,20 @@ export async function handler(
           stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
         }).eq("id", agentId);
+
+        if (updateErr1) {
+          throw new Error(`agents.update failed (checkout.session.completed): ${updateErr1.message}`);
+        }
+
+        await supabase.from("subscription_events").insert({
+          agent_id:        agentId,
+          stripe_event_id: event.id as string,
+          event_type:      eventType,
+          tier:            resolved.tier,
+          metadata:        { subscription_id: subscriptionId, customer_id: customerId, plan: resolved.plan },
+        }).then(({ error: seErr }: { error: unknown }) => {
+          if (seErr) console.error("[stripe-webhook] subscription_events insert failed (checkout.session.completed)", seErr);
+        });
 
         console.log(`checkout.session.completed: agent ${agentId} → ${resolved.tier}`);
         break;
@@ -200,13 +214,27 @@ export async function handler(
         const periodEnd = new Date((data.current_period_end as number) * 1000).toISOString();
         const status = data.status as string;
 
-        await supabase.from("agents").update({
+        const { error: updateErr2 } = await supabase.from("agents").update({
           tier:                      resolved.tier,
           stripe_subscription_id:    subscriptionId,
           stripe_subscription_status: status,
           stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
         }).eq("id", agentId);
+
+        if (updateErr2) {
+          throw new Error(`agents.update failed (customer.subscription.updated): ${updateErr2.message}`);
+        }
+
+        await supabase.from("subscription_events").insert({
+          agent_id:        agentId,
+          stripe_event_id: event.id as string,
+          event_type:      eventType,
+          tier:            resolved.tier,
+          metadata:        { subscription_id: subscriptionId, customer_id: customerId, plan: resolved.plan, status },
+        }).then(({ error: seErr }: { error: unknown }) => {
+          if (seErr) console.error("[stripe-webhook] subscription_events insert failed (customer.subscription.updated)", seErr);
+        });
 
         console.log(`subscription.updated: agent ${agentId} → ${resolved.tier}, status=${status}`);
         break;
@@ -222,13 +250,27 @@ export async function handler(
           break;
         }
 
-        await supabase.from("agents").update({
+        const { error: updateErr3 } = await supabase.from("agents").update({
           tier:                      "free",
           stripe_subscription_id:    null,
           stripe_subscription_status: "canceled",
           stripe_plan:               null,
           stripe_current_period_end: null,
         }).eq("id", agentId);
+
+        if (updateErr3) {
+          throw new Error(`agents.update failed (customer.subscription.deleted): ${updateErr3.message}`);
+        }
+
+        await supabase.from("subscription_events").insert({
+          agent_id:        agentId,
+          stripe_event_id: event.id as string,
+          event_type:      eventType,
+          tier:            "free",
+          metadata:        { customer_id: customerId },
+        }).then(({ error: seErr }: { error: unknown }) => {
+          if (seErr) console.error("[stripe-webhook] subscription_events insert failed (customer.subscription.deleted)", seErr);
+        });
 
         console.log(`subscription.deleted: agent ${agentId} → free`);
         break;
@@ -263,12 +305,26 @@ export async function handler(
           break;
         }
 
-        await supabase.from("agents").update({
+        const { error: updateErr4 } = await supabase.from("agents").update({
           tier:                      resolved.tier,
           stripe_subscription_status: "active",
           stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
         }).eq("id", agentId);
+
+        if (updateErr4) {
+          throw new Error(`agents.update failed (invoice.payment_succeeded): ${updateErr4.message}`);
+        }
+
+        await supabase.from("subscription_events").insert({
+          agent_id:        agentId,
+          stripe_event_id: event.id as string,
+          event_type:      eventType,
+          tier:            resolved.tier,
+          metadata:        { subscription_id: subscriptionId, customer_id: customerId, plan: resolved.plan },
+        }).then(({ error: seErr }: { error: unknown }) => {
+          if (seErr) console.error("[stripe-webhook] subscription_events insert failed (invoice.payment_succeeded)", seErr);
+        });
 
         console.log(`invoice.payment_succeeded: agent ${agentId} cleared to active`);
         break;
@@ -292,9 +348,23 @@ export async function handler(
 
         // Set status to past_due but leave tier + period_end untouched.
         // Feature gates will check: if past_due AND now > period_end + 7 days → treat as free.
-        await supabase.from("agents").update({
+        const { error: updateErr5 } = await supabase.from("agents").update({
           stripe_subscription_status: "past_due",
         }).eq("id", agentId);
+
+        if (updateErr5) {
+          throw new Error(`agents.update failed (invoice.payment_failed): ${updateErr5.message}`);
+        }
+
+        await supabase.from("subscription_events").insert({
+          agent_id:        agentId,
+          stripe_event_id: event.id as string,
+          event_type:      eventType,
+          tier:            null,
+          metadata:        { subscription_id: subscriptionId, customer_id: customerId },
+        }).then(({ error: seErr }: { error: unknown }) => {
+          if (seErr) console.error("[stripe-webhook] subscription_events insert failed (invoice.payment_failed)", seErr);
+        });
 
         console.log(`invoice.payment_failed: agent ${agentId} marked past_due (tier preserved during grace period)`);
         break;
