@@ -531,14 +531,21 @@ export async function handler(
       }
     }
 
-    // Update notification timestamp — non-fatal; lead is already saved
+    // Update notification timestamp + schedule quality follow-up in 1 hour
+    // (follow-up only if agent has WhatsApp — that's how the button reply arrives)
     try {
+      const notifyPayload: Record<string, string> = {
+        agent_notified_at: new Date().toISOString(),
+      };
+      if (agent.whatsapp) {
+        notifyPayload.quality_followup_due_at = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      }
       await supabase
         .from("leads")
-        .update({ agent_notified_at: new Date().toISOString() })
+        .update(notifyPayload)
         .eq("id", lead.id);
     } catch (notifyErr) {
-      log.error('agent_notified_at update failed — lead saved, notification tracking missed', { leadId: lead.id, error: notifyErr });
+      log.error('notification update failed — lead saved, tracking missed', { leadId: lead.id, error: notifyErr });
     }
 
     // === SMART REMINDERS — fire-and-forget, never blocks response ===

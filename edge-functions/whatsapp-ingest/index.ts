@@ -1489,6 +1489,24 @@ export async function handler(
         } else {
           await sendWhatsAppReply(senderPhone, "Lead not found.");
         }
+      } else if (action === "quality" && leadId) {
+        // leadId format from button ID "quality_1_<uuid>" → leadId = "1_<uuid>"
+        const sepIdx = leadId.indexOf("_");
+        if (sepIdx !== -1) {
+          const rating = parseInt(leadId.slice(0, sepIdx), 10); // 1 = good, 2 = not qualified
+          const actualLeadId = leadId.slice(sepIdx + 1);
+          if ((rating === 1 || rating === 2) && actualLeadId) {
+            await supabase
+              .from("leads")
+              .update({ quality_rating: rating, rated_at: new Date().toISOString() })
+              .eq("id", actualLeadId)
+              .eq("agent_id", agent.id);
+            const replyText = rating === 1
+              ? "✓ Got it — marked as genuine buyer."
+              : "✓ Got it — marked as not qualified.";
+            await sendWhatsAppReply(senderPhone, replyText);
+          }
+        }
       }
 
       log({ event: "button_reply_handled", agent_id: agent.id, action, status: 200 });
