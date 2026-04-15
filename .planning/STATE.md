@@ -113,6 +113,12 @@ Overall: [██████████] 100%
 - Need `supabase db pull` diff to confirm no prod column discrepancies in reconstructed base schema
 - Need to know the correct GitHub repo path to fix the CI badge URL in README (currently placeholder `sellingdubai/sellingdubai-app`)
 
+## Bug Fixes Post-Initiative
+
+- **bfc5961** (2026-04-15) — C1 RESOLVED: `create-agent` invite token now validated before OTP is consumed
+- **c622b06** (2026-04-15) — C6+C7 RESOLVED: `stripe-webhook` checks `agents.update()` errors on all 5 handlers; all handlers write `subscription_events` audit log
+- **d26c028** (2026-04-15) — `agent-page.ts` / `properties.ts`: og-image fallback, skeleton cleanup on error, error vs empty state distinction, `available_units` interface corrected to match DB shape
+
 ## Phase 5 Summary (COMPLETE — 2026-04-05)
 
 ### What was done
