@@ -1168,6 +1168,16 @@ async function updateSessionRsiSignals(
         outcome_source: source,
         outcome_set_at: now,
       }).eq('id', sess.id);
+
+      // Record outcome in ai_conversation_outcomes for analytics
+      supabase.from('ai_conversation_outcomes').insert({
+        session_id: sess.id,
+        agent_id: agentId,
+        turn_count: sess.turn_count ?? 0,
+        outcome,
+      }).then(({ error: oErr }: { error: unknown }) => {
+        if (oErr) console.error('ai_conversation_outcomes insert failed');
+      });
     }
     return; // stale session closed; ai-secretary will open a fresh one
   }
