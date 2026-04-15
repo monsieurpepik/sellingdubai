@@ -555,6 +555,271 @@ async function sendWhatsAppDocument(to: string, mediaId: string, filename: strin
   } catch (_e) { /* send failed silently */ }
 }
 
+// ── Profile Photo Update ──
+async function handleProfilePhotoUpdate(
+  senderPhone: string,
+  agent: { id: string; slug: string },
+  mediaId: string,
+  supabase: ReturnType<typeof createClient>,
+) {
+  const WA_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+  if (!WA_TOKEN) {
+    await sendWhatsAppReply(senderPhone, "Photo upload unavailable. Please try again later.");
+    return;
+  }
+  try {
+    const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${mediaId}`, {
+      headers: { Authorization: `Bearer ${WA_TOKEN}` },
+    });
+    if (!mediaRes.ok) throw new Error("media fetch failed");
+    const mediaData = await mediaRes.json();
+    if (!mediaData.url) throw new Error("no media url");
+
+    const imgRes = await fetch(mediaData.url, { headers: { Authorization: `Bearer ${WA_TOKEN}` } });
+    if (!imgRes.ok) throw new Error("image download failed");
+    const imgBytes = new Uint8Array(await imgRes.arrayBuffer());
+    const contentType = imgRes.headers.get("content-type") || "image/jpeg";
+    const ext = contentType.includes("png") ? "png" : "jpg";
+
+    const photoPath = `agents/${agent.id}/photo.${ext}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("agent-images")
+      .upload(photoPath, imgBytes, { contentType, upsert: true });
+    if (uploadErr) throw new Error("upload failed");
+
+    const { data: urlData } = supabase.storage.from("agent-images").getPublicUrl(photoPath);
+    await supabase.from("agents").update({ photo_url: urlData.publicUrl }).eq("id", agent.id);
+
+    await sendWhatsAppReply(
+      senderPhone,
+      `✅ Profile photo updated!\n\nView your profile: https://sellingdubai.ae/a/${agent.slug}`,
+    );
+  } catch (_e) {
+    await sendWhatsAppReply(senderPhone, "Failed to update profile photo. Please try again.");
+  }
+}
+
+// ── WhatsApp Onboarding (unknown numbers) ──
+function slugifyName(text: string): string {
+  return text.toLowerCase().trim()
+    .replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+async function saveOnboardingState(
+  agentId: string,
+  state: Record<string, unknown>,
+  supabase: ReturnType<typeof createClient>,
+) {
+  await supabase.from("whatsapp_sessions").upsert(
+    { agent_id: agentId, turns: [{ role: "onboarding", content: JSON.stringify(state) }], last_active: new Date().toISOString() },
+    { onConflict: "agent_id" },
+  );
+}
+
+async function startOnboarding(
+  senderPhone: string,
+  cleanPhone: string,
+  supabase: ReturnType<typeof createClient>,
+) {
+  const provisionalSlug = `wa-pending-${crypto.randomUUID().slice(0, 12)}`;
+  const { data: newAgent, error: insertErr } = await supabase
+    .from("agents")
+    .insert({
+      name: "Pending",
+      slug: provisionalSlug,
+      whatsapp: `+${cleanPhone}`,
+      is_active: false,
+      email_verified: false,
+      verification_status: "pending_registration",
+      tier: "free",
+    })
+    .select("id, slug")
+    .single();
+
+  if (insertErr || !newAgent) {
+    await sendWhatsAppReply(senderPhone, "Something went wrong. Please visit sellingdubai.ae/join to register.");
+    return;
+  }
+
+  const state = { step: "awaiting_name", data: {} };
+  await saveOnboardingState(newAgent.id, state, supabase);
+  await sendWhatsAppReply(
+    senderPhone,
+    "👋 *Welcome to SellingDubai!*\n\nI'll help you set up your agent profile in a few quick steps.\n\nWhat's your full name?",
+  );
+}
+
+async function completeOnboarding(
+  senderPhone: string,
+  agentId: string,
+  provisionalSlug: string,
+  state: Record<string, any>,
+  supabase: ReturnType<typeof createClient>,
+) {
+  let realSlug = slugifyName(state.data.name);
+  const { data: slugCheck } = await supabase
+    .from("agents").select("id").eq("slug", realSlug).neq("id", agentId).limit(1);
+  if (slugCheck && slugCheck.length > 0) {
+    realSlug = `${realSlug}-${Math.floor(Math.random() * 9000 + 1000)}`;
+  }
+
+  const updates: Record<string, unknown> = {
+    name: state.data.name,
+    slug: realSlug,
+    email: state.data.email,
+    email_verified: true,
+    is_active: true,
+    referral_code: realSlug,
+    verification_status: state.data.is_auto_verified ? "verified" : "pending",
+    ...(state.data.broker_number ? {
+      broker_number: state.data.broker_number,
+      dld_broker_number: String(state.data.broker_number),
+      dld_broker_id: state.data.dld_broker_id || null,
+    } : {}),
+    ...(state.data.is_auto_verified ? {
+      license_verified: true,
+      dld_verified: true,
+      verified_at: new Date().toISOString(),
+    } : { license_verified: false, dld_verified: false }),
+  };
+
+  const { error: updateErr } = await supabase.from("agents").update(updates).eq("id", agentId);
+  if (updateErr) {
+    await sendWhatsAppReply(senderPhone, "Something went wrong. Please visit sellingdubai.ae/join to complete registration.");
+    return;
+  }
+
+  const editToken = crypto.randomUUID();
+  await supabase.from("magic_links").insert({
+    agent_id: agentId,
+    token: editToken,
+    expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  });
+
+  // Clear onboarding session so AI secretary can take over
+  await supabase.from("whatsapp_sessions").delete().eq("agent_id", agentId);
+
+  const profileUrl = `https://sellingdubai.ae/a/${realSlug}`;
+  const dashboardUrl = `https://sellingdubai.ae/edit?token=${editToken}`;
+
+  const msg = state.data.is_auto_verified
+    ? `🎉 *You're live on SellingDubai!*\n\n🔗 Your profile:\n${profileUrl}\n\n📊 Dashboard:\n${dashboardUrl}\n\nShare your profile link to start getting leads!`
+    : `✅ *Profile created!*\n\nOur team will verify your profile within 24 hours.\n\n📊 Dashboard:\n${dashboardUrl}\n\nWe'll message you when you go live.`;
+  await sendWhatsAppReply(senderPhone, msg);
+
+  // Welcome email (fire-and-forget)
+  const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
+  if (RESEND_KEY && state.data.email) {
+    fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
+        to: [state.data.email],
+        subject: state.data.is_auto_verified ? "You're live on SellingDubai!" : "Profile under review — SellingDubai",
+        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;"><h1 style="font-size:22px;color:#111;">Hi ${state.data.name}!</h1><p style="color:#555;">Your SellingDubai profile is ready.</p><a href="${dashboardUrl}" style="display:inline-block;background:#111;color:#fff;padding:14px 32px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:16px;">Open Dashboard</a></div>`,
+      }),
+    }).catch(() => {});
+  }
+}
+
+async function handleOnboardingStep(
+  senderPhone: string,
+  agent: { id: string; slug: string; name: string },
+  text: string,
+  supabase: ReturnType<typeof createClient>,
+) {
+  const { data: session } = await supabase
+    .from("whatsapp_sessions").select("turns").eq("agent_id", agent.id).single();
+
+  const turns = session?.turns || [];
+  const stateTurn = turns.find((t: any) => t.role === "onboarding");
+  if (!stateTurn) {
+    // Session lost — clean up and restart
+    await supabase.from("agents").delete().eq("id", agent.id);
+    await sendWhatsAppReply(senderPhone, "Session expired. Text *JOIN* to start again.");
+    return;
+  }
+
+  const state = JSON.parse(stateTurn.content);
+  const trimmed = text.trim();
+
+  if (state.step === "awaiting_name") {
+    if (trimmed.length < 2) {
+      await sendWhatsAppReply(senderPhone, "Please enter your full name.");
+      return;
+    }
+    state.data.name = trimmed;
+    state.step = "awaiting_brn";
+    await saveOnboardingState(agent.id, state, supabase);
+    await sendWhatsAppReply(senderPhone, `Nice to meet you, *${trimmed}*! 👋\n\nWhat's your RERA/DLD broker number? (Reply *SKIP* to add it later)`);
+    return;
+  }
+
+  if (state.step === "awaiting_brn") {
+    if (!/^skip$/i.test(trimmed)) {
+      const brnNum = parseInt(trimmed.replace(/\D/g, ""), 10);
+      if (isNaN(brnNum)) {
+        await sendWhatsAppReply(senderPhone, "Please enter your broker number (digits only), or reply *SKIP*.");
+        return;
+      }
+      const { data: dldBroker } = await supabase
+        .from("dld_brokers").select("id, license_end_date").eq("broker_number", brnNum).single();
+      state.data.broker_number = brnNum;
+      if (dldBroker) {
+        const licenseValid = dldBroker.license_end_date ? new Date(dldBroker.license_end_date) > new Date() : false;
+        state.data.dld_broker_id = dldBroker.id;
+        state.data.is_auto_verified = licenseValid;
+        const verifiedMsg = licenseValid ? "✅ DLD license verified!" : "Found your record — we'll verify manually.";
+        await sendWhatsAppReply(senderPhone, `${verifiedMsg}\n\nWhat's your email address? We'll send your dashboard login link there.`);
+      } else {
+        await sendWhatsAppReply(senderPhone, "Broker number noted. Our team will verify it.\n\nWhat's your email address?");
+      }
+    } else {
+      await sendWhatsAppReply(senderPhone, "No problem! What's your email address? We'll send your dashboard login link there.");
+    }
+    state.step = "awaiting_email";
+    await saveOnboardingState(agent.id, state, supabase);
+    return;
+  }
+
+  if (state.step === "awaiting_email") {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      await sendWhatsAppReply(senderPhone, "Please enter a valid email address (e.g. john@gmail.com).");
+      return;
+    }
+    const cleanEmail = trimmed.toLowerCase();
+    const { data: existing } = await supabase
+      .from("agents").select("id").eq("email", cleanEmail).neq("id", agent.id).limit(1);
+    if (existing && existing.length > 0) {
+      await sendWhatsAppReply(senderPhone, "That email is already registered. Please use a different one.");
+      return;
+    }
+    state.data.email = cleanEmail;
+    state.step = "awaiting_confirm";
+    await saveOnboardingState(agent.id, state, supabase);
+    const brnLine = state.data.broker_number ? `\n🪪 BRN: ${state.data.broker_number}` : "";
+    const verifiedLine = state.data.is_auto_verified ? "\n✅ DLD Verified" : "";
+    await sendWhatsAppReply(
+      senderPhone,
+      `*Almost done!* Here's your profile:\n\n👤 ${state.data.name}${brnLine}${verifiedLine}\n📧 ${cleanEmail}\n\nReply *CONFIRM* to go live, or *CANCEL* to start over.`,
+    );
+    return;
+  }
+
+  if (state.step === "awaiting_confirm") {
+    if (/^confirm$/i.test(trimmed)) {
+      await completeOnboarding(senderPhone, agent.id, agent.slug, state, supabase);
+    } else if (/^cancel$/i.test(trimmed)) {
+      await supabase.from("agents").delete().eq("id", agent.id);
+      await sendWhatsAppReply(senderPhone, "Registration cancelled. Text *JOIN* any time to start again, or visit sellingdubai.ae/join");
+    } else {
+      await sendWhatsAppReply(senderPhone, "Reply *CONFIRM* to create your profile, or *CANCEL* to start over.");
+    }
+    return;
+  }
+}
+
 async function handleShareCommand(
   senderPhone: string,
   agentId: string,
@@ -1053,13 +1318,26 @@ export async function handler(
 
     const { data: agent, error: agentErr } = await supabase
       .from("agents")
-      .select("id, name, slug, whatsapp, tier, stripe_subscription_status, stripe_current_period_end")
+      .select("id, name, slug, whatsapp, tier, stripe_subscription_status, stripe_current_period_end, verification_status")
       .or(`whatsapp.eq.${cleanPhone},whatsapp.eq.+${cleanPhone},whatsapp.ilike.%${cleanPhone.slice(-9)}`)
       .maybeSingle();
 
     if (agentErr || !agent) {
-      log({ event: 'auth_failed', status: 200 });
-      await sendWhatsAppReply(senderPhone, "Hi! Your number isn't registered on SellingDubai yet. Visit sellingdubai.ae/join to create your profile first.");
+      // No registered agent — start WhatsApp onboarding for text, redirect otherwise
+      if (msgType === "text") {
+        await startOnboarding(senderPhone, cleanPhone, supabase);
+      } else {
+        await sendWhatsAppReply(senderPhone, "👋 Text *JOIN* to create your SellingDubai agent profile, or visit sellingdubai.ae/join");
+      }
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+
+    // Agent has a WhatsApp onboarding in progress — route all text input to the onboarding handler
+    if (agent.verification_status === "pending_registration") {
+      if (msgType === "text") {
+        const rawText = msg.text?.body || "";
+        await handleOnboardingStep(senderPhone, agent, rawText, supabase);
+      }
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
 
@@ -1122,6 +1400,15 @@ export async function handler(
     if (msgType === "image") {
       const imageId = msg.image?.id;
       const caption = msg.image?.caption || "";
+
+      // Detect profile photo update intent — routes away from property listing flow
+      if (/\b(profile|headshot|my photo|update photo|change photo|profile pic|pfp)\b/i.test(caption)) {
+        if (imageId) {
+          await handleProfilePhotoUpdate(senderPhone, agent, imageId, supabase);
+        }
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
+      }
+
       const parsed = parsePropertyCaption(caption);
 
       // Upload image
