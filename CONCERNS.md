@@ -22,27 +22,9 @@ Severity scale: **CRITICAL** (data loss / user locked out / billing state corrup
 
 ---
 
-### C3 — MEDIUM: Agent created, magic link silently not stored
+### C3 — ~~MEDIUM~~ RESOLVED: Agent created, magic link silently not stored
 
-**Location:** `create-agent/index.ts` lines 311–323
-
-```ts
-const editToken = crypto.randomUUID();
-const { error: tokenError } = await supabase
-  .from("magic_links")
-  .insert({ agent_id: agent.id, token: editToken, expires_at: ... });
-
-if (tokenError) {
-  console.error("Magic link token error");
-  // ← no early return; function continues
-}
-```
-
-**Problem:** If the `magic_links` insert fails, `tokenError` is logged but execution continues. The function returns `{ success: true, edit_token: editToken }` to the browser. The browser stores this token and the user is redirected to `/edit?token=<editToken>`. That token does not exist in the database. Every subsequent `verify-magic-link` call will fail → the user cannot access their dashboard.
-
-**Why it matters:** The agent's profile exists but they have no way to log in. They must contact support or wait for a password-reset email to arrive (which also fails if the token is broken). Full onboarding lockout.
-
-**Fix direction:** Treat magic link insert failure as fatal — return `500` and let the user retry. The agent row can be cleaned up or reused on retry (the email dedup check at lines 110–121 will prevent a duplicate).
+**Fixed in:** verified in source — `if (tokenError)` block at lines 327–331 returns 500 with `"Registration failed. Please try again."` and flushes the log. No execution continues past a failed insert. Verified in source.
 
 ---
 
@@ -105,7 +87,7 @@ If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB looku
 |----|----------|----------|----------|--------|
 | C1 | create-agent | OTP consumed before invite validated → user locked out on retry | CRITICAL | **RESOLVED** bfc5961 |
 | C2 | create-agent | Invite `used_at` silently not written → token reusable | HIGH | **RESOLVED** 4e53772 |
-| C3 | create-agent | Magic link not stored → agent created with broken edit URL | MEDIUM | Open |
+| C3 | create-agent | Magic link not stored → agent created with broken edit URL | MEDIUM | **RESOLVED** (verified in source) |
 | C4 | capture-lead-v4 | `agent_notified_at` update throws → lead saved, 500 returned to browser | HIGH | **RESOLVED** 4e53772 |
 | C5 | capture-lead-v4 | Contact timeline fire-and-forget → lead without timeline | LOW | Open (intentional) |
 | C6 | stripe-webhook | `agents.update()` error discarded → Stripe gets 200, tier never written | CRITICAL | **RESOLVED** c622b06 |
@@ -136,5 +118,5 @@ If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB looku
 3. ~~**C4**~~ **RESOLVED** 4e53772
 4. ~~**C7**~~ **RESOLVED** c622b06
 5. ~~**C2**~~ **RESOLVED** 4e53772
-6. **C3** — Fix before onboarding scales. Magic link failures are rare but catastrophic for the affected user.
+6. ~~**C3**~~ **RESOLVED** — verified in source; magic link insert failure returns 500.
 7. **C8** — Monitor/alert; low urgency.
