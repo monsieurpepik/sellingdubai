@@ -770,3 +770,67 @@ Supabase does not support instant edge function rollback. To revert:
 1. Check out the previous working commit.
 2. Run `supabase functions deploy <name>` from that commit.
 3. The previous version is live within ~30 seconds.
+
+## RSI Data Pipeline
+
+Recursive Self-Improvement: every WhatsApp session becomes a labeled training example automatically. No agent action required.
+
+### How sessions get labeled
+
+Labels are inferred from behavior — four rules, checked in priority order:
+
+| Rule | Trigger | Outcome | Source |
+|------|---------|---------|--------|
+| **R4 — Agent tag** | Agent replies `GOOD`/`1` or `BAD`/`2` to the business number | `qualified` / `unqualified` | `agent_tag` |
+| **R1 — Agent replied** | Agent sent any message in this session (`agent_replied_at` is set) | `qualified` | `implicit_reply` |
+| **R2 — No response** | Session TTL expired (24 h), `turn_count >= 3`, no agent reply | `no_response` | `implicit_no_reply` |
+| **R3 — Unknown** | Session expired with fewer than 3 turns and no reply | `unknown` — excluded from training data | — |
+
+**R4** fires in `whatsapp-ingest` before routing to the AI secretary — the agent's GOOD/BAD reply updates `whatsapp_sessions.outcome` directly and returns immediately without hitting ai-secretary.
+
+**R1/R2** are evaluated lazily: on each new text message from the agent, `updateSessionRsiSignals()` checks whether the previous session is stale (last_active > 24 h ago) and closes it with the appropriate label. This is fire-and-forget and never blocks the reply path.
+
+### Buyer signals extracted per session
+
+| Column | Source |
+|--------|--------|
+| `buyer_budget_aed` | Regex on agent's message text — "2M", "AED 2,000,000" patterns |
+| `buyer_timeline_months` | "next month"=1, "this year"=6, "N months/years" |
+| `qualifying_question_count` | Incremented when AI reply contains a `?` + qualifying keyword (budget, timeline, area, etc.) |
+| `turn_count` | Incremented on every text message processed |
+| `agent_replied_at` | Set to `now()` on first agent message in the session |
+
+### The training data view
+
+```sql
+SELECT * FROM ai_training_data
+WHERE created_at > NOW() - INTERVAL '30 days';
+```
+
+Returns one row per labeled session with all buyer signals joined to agent metadata (`areas`, `agency_name`). The `is_positive` boolean is `true` for `qualified` outcomes.
+
+Excludes `unknown` sessions and sessions with no `conversation_turns`.
+
+### Cold start plan
+
+The model has no labeled data yet. To bootstrap the first training set:
+
+1. Open Supabase Dashboard → Table Editor → `whatsapp_sessions`
+2. Manually review the first 50 sessions (read `turns` column for context)
+3. Set `outcome` to `qualified` / `unqualified` / `no_response` and `outcome_source` to `manual_review`
+4. Run `SELECT * FROM ai_training_data` — those rows are your v1 training set
+
+### What to do at scale
+
+**At 100 labeled sessions:**
+- Run: `SELECT qualifying_question_count, outcome, COUNT(*) FROM ai_training_data GROUP BY 1, 2 ORDER BY 1`
+- Find which `qualifying_question_count` value correlates with `is_positive = true`
+- Update the ai-secretary system prompt to ask those questions earlier in the conversation
+
+**At 500 sessions:**
+- Analyze `buyer_budget_aed` and `buyer_timeline_months` distributions by outcome
+- Identify the budget/timeline ranges that predict qualified leads for Dubai specifically
+
+**At 1000+ sessions:**
+- Build a lead scoring model: features = `buyer_budget_aed`, `buyer_timeline_months`, `buyer_nationality`, `qualifying_question_count`; target = `is_positive`
+- This becomes a Dubai buyer intent model — proprietary data no competitor can replicate
