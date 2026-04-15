@@ -266,7 +266,8 @@ export async function renderAgent(agent: Agent): Promise<void> {
   }
 
   void loadProperties(agent.id);
-  void loadRemProjects(agent.slug ?? '', agent.id);
+  // Off-plan section hidden for core flow — re-enable when off-plan UX is ready
+  // void loadRemProjects(agent.slug ?? '', agent.id);
 
   // === SOCIAL ICONS ===
   const socialsEl = document.getElementById('socials');
