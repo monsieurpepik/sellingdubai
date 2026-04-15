@@ -558,7 +558,7 @@ async function sendWhatsAppDocument(to: string, mediaId: string, filename: strin
 // ── Profile Photo Update ──
 async function handleProfilePhotoUpdate(
   senderPhone: string,
-  agent: { id: string; slug: string },
+  agent: { id: string; slug: string; photo_url?: string | null },
   mediaId: string,
   supabase: ReturnType<typeof createClient>,
 ) {
@@ -567,6 +567,8 @@ async function handleProfilePhotoUpdate(
     await sendWhatsAppReply(senderPhone, "Photo upload unavailable. Please try again later.");
     return;
   }
+  const isReplacing = !!agent.photo_url;
+  await sendWhatsAppReply(senderPhone, isReplacing ? "🔄 Replacing your profile photo..." : "📸 Uploading your profile photo...");
   try {
     const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${mediaId}`, {
       headers: { Authorization: `Bearer ${WA_TOKEN}` },
@@ -581,18 +583,19 @@ async function handleProfilePhotoUpdate(
     const contentType = imgRes.headers.get("content-type") || "image/jpeg";
     const ext = contentType.includes("png") ? "png" : "jpg";
 
-    const photoPath = `agents/${agent.id}/photo.${ext}`;
+    const photoPath = `${agent.id}-profile.${ext}`;
     const { error: uploadErr } = await supabase.storage
       .from("agent-images")
       .upload(photoPath, imgBytes, { contentType, upsert: true });
     if (uploadErr) throw new Error("upload failed");
 
     const { data: urlData } = supabase.storage.from("agent-images").getPublicUrl(photoPath);
-    await supabase.from("agents").update({ photo_url: urlData.publicUrl }).eq("id", agent.id);
+    const cdnUrl = `/.netlify/images?url=${encodeURIComponent(urlData.publicUrl)}&w=400&h=400&fit=cover&fm=webp&q=80`;
+    await supabase.from("agents").update({ photo_url: cdnUrl }).eq("id", agent.id);
 
     await sendWhatsAppReply(
       senderPhone,
-      `✅ Profile photo updated!\n\nView your profile: https://sellingdubai.ae/a/${agent.slug}`,
+      `✅ Profile photo ${isReplacing ? "updated" : "set"}!\n\nView your profile: https://sellingdubai.ae/a/${agent.slug}`,
     );
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "Failed to update profile photo. Please try again.");
@@ -703,8 +706,8 @@ async function completeOnboarding(
   const dashboardUrl = `https://sellingdubai.ae/edit?token=${editToken}`;
 
   const msg = state.data.is_auto_verified
-    ? `🎉 *You're live on SellingDubai!*\n\n🔗 Your profile:\n${profileUrl}\n\n📊 Dashboard:\n${dashboardUrl}\n\nShare your profile link to start getting leads!`
-    : `✅ *Profile created!*\n\nOur team will verify your profile within 24 hours.\n\n📊 Dashboard:\n${dashboardUrl}\n\nWe'll message you when you go live.`;
+    ? `🎉 *You're live on SellingDubai!*\n\n🔗 Your profile:\n${profileUrl}\n\n📊 Dashboard:\n${dashboardUrl}\n\nShare your profile link to start getting leads!\n\n📸 Add a profile photo: send any image with the caption *profile*`
+    : `✅ *Profile created!*\n\nOur team will verify your profile within 24 hours.\n\n📊 Dashboard:\n${dashboardUrl}\n\nWe'll message you when you go live.\n\n📸 Add a profile photo: send any image with the caption *profile*`;
   await sendWhatsAppReply(senderPhone, msg);
 
   // Welcome email (fire-and-forget)
@@ -1427,7 +1430,7 @@ export async function handler(
 
     const { data: agent, error: agentErr } = await supabase
       .from("agents")
-      .select("id, name, slug, whatsapp, tier, stripe_subscription_status, stripe_current_period_end, verification_status")
+      .select("id, name, slug, whatsapp, tier, stripe_subscription_status, stripe_current_period_end, verification_status, photo_url")
       .or(`whatsapp.eq.${cleanPhone},whatsapp.eq.+${cleanPhone},whatsapp.ilike.%${cleanPhone.slice(-9)}`)
       .maybeSingle();
 
