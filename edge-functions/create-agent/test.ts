@@ -1,5 +1,5 @@
 import { handler } from "./index.ts";
-import { mockClientFactory } from "../_shared/test-mock.ts";
+import { createMockSupabase, mockClientFactory } from "../_shared/test-mock.ts";
 
 Deno.env.set("SUPABASE_URL", "http://test.local");
 Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
@@ -195,6 +195,58 @@ Deno.test("create-agent: no agency_invite_token proceeds normally", async () => 
   }
   const data = await res.json();
   if (!data.agent?.id) throw new Error("Expected agent.id in response");
+});
+
+// ─── C1 fix: invite validated before OTP is consumed ──────────────────────
+
+Deno.test("create-agent: OTP not consumed when invite token is invalid", async () => {
+  // Spy factory that records which tables received write operations.
+  // After the C1 fix, invite validation runs BEFORE the OTP update.
+  // If the invite is invalid, we return 400 early and email_verification_codes
+  // must NOT have been written — so the user can retry with the same OTP.
+  const writtenTables: string[] = [];
+
+  const responses = {
+    "email_verification_codes": {
+      data: { id: "otp-c1", email: "c1test@test.local", code: "777888", verified: false, expires_at: "2099-01-01T00:00:00Z" },
+      error: null,
+    },
+    // agent_invites intentionally absent → defaults to NOT_FOUND → invalid token
+  };
+
+  const spyFactory = (_url: string, _key: string) => {
+    const mock = createMockSupabase(responses);
+    return {
+      from: (tableName: string) => {
+        const builder = mock.from(tableName) as Record<string, unknown>;
+        const origUpdate = builder.update as (d: unknown) => typeof builder;
+        builder.update = (d: unknown) => { writtenTables.push(tableName); return origUpdate.call(builder, d); };
+        const origInsert = builder.insert as (d: unknown) => typeof builder;
+        builder.insert = (d: unknown) => { writtenTables.push(tableName); return origInsert.call(builder, d); };
+        return builder;
+      },
+    };
+  };
+
+  const res = await handler(
+    new Request("http://localhost", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        display_name: "C1 Test Agent",
+        email: "c1test@test.local",
+        whatsapp: "+971501234567",
+        otp_code: "777888",
+        agency_invite_token: "invalid-token",
+      }),
+    }),
+    spyFactory,
+  );
+
+  if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
+  if (writtenTables.includes("email_verification_codes")) {
+    throw new Error("OTP was consumed before invite validation — C1 ordering fix not applied");
+  }
 });
 
 Deno.test("create-agent: OPTIONS returns CORS headers", async () => {

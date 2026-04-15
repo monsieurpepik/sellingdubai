@@ -86,12 +86,10 @@ export async function handler(
       return json({ error: "Invalid or expired verification code. Please request a new one." }, 400, cors);
     }
 
-    await supabase
-      .from("email_verification_codes")
-      .update({ verified: true })
-      .eq("id", otpRecord.id);
-
-    // --- Agency invite token validation ---
+    // --- Agency invite token validation (before OTP is consumed) ---
+    // IMPORTANT: validate the invite FIRST. If it's invalid we return 400 early.
+    // Consuming the OTP before this check would lock the user out — the OTP is
+    // single-use and the 10-minute window cannot be recovered once it's marked verified.
     let agencyId: string | null = null;
     if (agency_invite_token) {
       const { data: invite, error: inviteError } = await supabase
@@ -106,6 +104,11 @@ export async function handler(
       }
       agencyId = invite.agency_id;
     }
+
+    await supabase
+      .from("email_verification_codes")
+      .update({ verified: true })
+      .eq("id", otpRecord.id);
 
     const { data: existingByEmail } = await supabase
       .from("agents")
