@@ -38,8 +38,8 @@ pass()  { echo -e "  ${GREEN}✓ PASS${NC}  $1"; }
 echo -e "${BOLD}=== SellingDubai Pre-Deploy Check ===${NC}"
 echo ""
 
-# ── 1. Build ──────────────────────────────────────────────────────────────────
-echo -e "${BOLD}1. Build${NC}"
+# ── Gate 1. Build ─────────────────────────────────────────────────────────────
+echo -e "${BOLD}Gate 1. Build${NC}"
 BUILD_OUTPUT=$(npm run build 2>&1)
 BUILD_EXIT=$?
 if [ $BUILD_EXIT -eq 0 ]; then
@@ -72,19 +72,8 @@ else
 fi
 echo ""
 
-# ── 2–7. Checks commented out — stripped to 3-gate fast check ─────────────────
-# Uncomment individual blocks to re-enable during a focused audit session.
-#
-# Removed checks (still valid rules, just not in the fast gate):
-#   2. Silent catch blocks
-#   3. Sequential await / Promise.allSettled
-#   4. Raw Supabase storage URLs
-#   5. CTA routing (waitlist anchor check)
-#   6. Billing gate (BILLING_LIVE flag)
-#   7. Field name consistency (bio vs tagline)
-
-# ── 8. Hardcoded prod URLs in edge functions ──────────────────────────────────
-echo -e "${BOLD}2. Hardcoded prod URLs${NC}"
+# ── Gate 2. Hardcoded prod URLs ───────────────────────────────────────────────
+echo -e "${BOLD}Gate 2. Hardcoded prod URLs${NC}"
 HARDCODED_PROD=$(grep -rn "pjyorgedaxevxophpfib\.supabase\.co" \
   edge-functions/ --include="*.ts" js/ --include="*.js" \
   | grep -v "\.test\.\|index\.test\." | grep -v "_shared" | grep -v "__SD_SUPABASE_URL__" | head -5 || true)
@@ -102,10 +91,28 @@ if grep -q "SUPABASE_URL=${PROD_URL}" supabase/.env 2>/dev/null; then
 fi
 echo ""
 
-# ── 3. Build gate complete — checks 3b–10 commented out ─────────────────────
-# Env var checks, Plan B function presence, integration test reminder,
-# and @ts-check are all valid but non-blocking for the 3-gate fast check.
-# Re-enable during audit sessions as needed.
+# ── Gate 3. Edge function coverage ───────────────────────────────────────────
+# Every function in edge-functions/ must have a matching entry in supabase/functions/.
+# Missing entries mean the function can't be deployed via `supabase functions deploy`.
+echo -e "${BOLD}Gate 3. Edge function coverage${NC}"
+MISSING_SYMLINKS=""
+for fn_dir in edge-functions/*/; do
+  fn_name=$(basename "$fn_dir")
+  # Skip shared helpers and build artifacts
+  [[ "$fn_name" == "_shared" ]] && continue
+  [[ "$fn_name" == "node_modules" ]] && continue
+  # Only check directories that contain an index.ts (actual deployable functions)
+  [ -f "edge-functions/${fn_name}/index.ts" ] || continue
+  if [ ! -d "supabase/functions/${fn_name}" ]; then
+    MISSING_SYMLINKS="${MISSING_SYMLINKS}\n    ${fn_name}"
+  fi
+done
+if [ -n "$MISSING_SYMLINKS" ]; then
+  fail "Functions in edge-functions/ with no supabase/functions/ entry (cannot be deployed):$MISSING_SYMLINKS"
+else
+  pass "All edge functions have a supabase/functions/ entry"
+fi
+echo ""
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo "══════════════════════════════════════"
