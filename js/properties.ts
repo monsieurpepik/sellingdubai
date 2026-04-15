@@ -231,12 +231,21 @@ export function renderPropertyList(props: Property[]): void {
   if (props.length === 0) {
     const hasFilters = currentFilters.search || currentFilters.priceMin || currentFilters.priceMax || currentFilters.beds || currentFilters.baths || currentFilters.areaMin || currentFilters.areaMax || (currentFilters.amenities?.length);
     const isFilterEmpty = hasFilters && allProperties.length > 0;
-    listEl.innerHTML = `<div class="prop-empty">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="${isFilterEmpty ? 'M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' : 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'}"/></svg>
-      <p style="color:rgba(255,255,255,0.6);font-size:15px;font-weight:500;">${isFilterEmpty ? 'No properties match your filters' : 'Portfolio coming soon'}</p>
-      <p style="color:rgba(255,255,255,0.35);font-size:13px;margin-top:8px;">${isFilterEmpty ? 'Try adjusting your search or clearing filters' : 'New listings are being added — check back shortly'}</p>
-      ${isFilterEmpty ? '<button data-action="resetFilters" style="margin-top:16px;padding:10px 24px;border-radius:100px;background:rgba(77,101,255,0.15);border:1px solid rgba(77,101,255,0.3);color:#fff;font-size:14px;font-weight:500;cursor:pointer;">Clear All Filters</button>' : ''}
-    </div>`;
+    if (propertiesError) {
+      listEl.innerHTML = `<div class="prop-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <p style="color:rgba(255,255,255,0.6);font-size:15px;font-weight:500;">Couldn't load listings</p>
+        <p style="color:rgba(255,255,255,0.35);font-size:13px;margin-top:8px;">Check your connection and try again</p>
+        <button data-action="retryProperties" style="margin-top:16px;padding:10px 24px;border-radius:100px;background:rgba(77,101,255,0.15);border:1px solid rgba(77,101,255,0.3);color:#fff;font-size:14px;font-weight:500;cursor:pointer;">Retry</button>
+      </div>`;
+    } else {
+      listEl.innerHTML = `<div class="prop-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="${isFilterEmpty ? 'M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' : 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'}"/></svg>
+        <p style="color:rgba(255,255,255,0.6);font-size:15px;font-weight:500;">${isFilterEmpty ? 'No properties match your filters' : 'Portfolio coming soon'}</p>
+        <p style="color:rgba(255,255,255,0.35);font-size:13px;margin-top:8px;">${isFilterEmpty ? 'Try adjusting your search or clearing filters' : 'New listings are being added — check back shortly'}</p>
+        ${isFilterEmpty ? '<button data-action="resetFilters" style="margin-top:16px;padding:10px 24px;border-radius:100px;background:rgba(77,101,255,0.15);border:1px solid rgba(77,101,255,0.3);color:#fff;font-size:14px;font-weight:500;cursor:pointer;">Clear All Filters</button>' : ''}
+      </div>`;
+    }
     countEl.textContent = '';
     return;
   }
@@ -368,7 +377,14 @@ interface RemProject {
   district_name?: string | null;
   area?: string | null;
   location?: string | null;
-  available_units?: Array<{ status?: string }> | null;
+  available_units?: Array<{
+    bedroom?: string;
+    property_types?: string;
+    lowest_price?: string;
+    highest_price?: string;
+    lowest_area?: string;
+    highest_area?: string;
+  }> | null;
   developers?: { name?: string; logo_url?: string } | null;
 }
 
@@ -405,13 +421,8 @@ function renderRemProjectCard(p: RemProject, devName: string): string {
   let availHtml = '';
   if (Array.isArray(p.available_units) && p.available_units.length > 0) {
     const total = p.available_units.length;
-    const available = p.available_units.filter(u => !u.status || u.status === 'available').length;
-    const pct = Math.max(10, Math.round((available / total) * 100));
     availHtml = `<div class="offplan-avail">
-      <div class="offplan-avail-bar">
-        <div class="offplan-avail-fill" style="width:${pct}%"></div>
-      </div>
-      <span class="offplan-avail-label">${available} unit${available !== 1 ? 's' : ''} available</span>
+      <span class="offplan-avail-label">${total} unit type${total !== 1 ? 's' : ''}</span>
     </div>`;
   }
 
@@ -496,7 +507,9 @@ export async function loadRemProjects(_agentSlug: string, agentId: string): Prom
       initOffPlanCarousel('rem-carousel', 'rem-dots');
     }
   } catch (e) {
-    // Non-critical — section stays hidden on error
+    // Non-critical — clear skeleton on error
+    const sectionEl = document.getElementById('rem-projects');
+    if (sectionEl) sectionEl.innerHTML = '';
     console.error('[rem-projects]', e);
   }
 }

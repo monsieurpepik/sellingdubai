@@ -78,10 +78,10 @@ function isPaidTier(agent: Agent): boolean {
   return true;
 }
 
+const DEFAULT_BG = 'https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
+
 export async function renderAgent(agent: Agent): Promise<void> {
   setCurrentAgent(agent);
-
-  const DEFAULT_BG = 'https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
   const bg = document.getElementById('bg');
   // Custom background is a Pro/Premium feature
   const bgUrl = (isPaidTier(agent) && safeUrl(agent.background_image_url ?? null)) || DEFAULT_BG;
@@ -478,11 +478,12 @@ export function hydrateOgMeta(agent: Agent): void {
     setMeta('og-title', title);
     setMeta('og-desc', desc);
     setMeta('og-url', url);
-    if (agent.photo_url) setMeta('og-image', optimizeImg(agent.photo_url, 1200));
+    const ogImage = agent.photo_url ? optimizeImg(agent.photo_url, 1200) : DEFAULT_BG;
+    setMeta('og-image', ogImage);
     // Update Twitter meta tags
     setMeta('twitter-title', title);
     setMeta('twitter-description', desc);
-    if (agent.photo_url) setMeta('twitter-image', optimizeImg(agent.photo_url, 1200));
+    setMeta('twitter-image', ogImage);
     const canon = document.getElementById('canonical-url');
     if (canon) canon.setAttribute('href', url);
     // Update meta description
