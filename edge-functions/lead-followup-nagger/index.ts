@@ -50,6 +50,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 type CreateClientFn = (url: string, key: string) => any;
 
 export async function handler(req: Request, _createClient: CreateClientFn = createClient): Promise<Response> {
+  const log = createLogger('lead-followup-nagger', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -101,7 +103,7 @@ export async function handler(req: Request, _createClient: CreateClientFn = crea
       .limit(50);
 
     if (leadsErr) {
-      console.error("Query error");
+      log({ event: 'error', status: 500, error: 'leads query error' });
       return new Response(
         JSON.stringify({ error: "Failed to query leads." }),
         { status: 500, headers: cors }
@@ -188,16 +190,19 @@ export async function handler(req: Request, _createClient: CreateClientFn = crea
       reminded.push(lead.name);
     }
 
+    log({ event: 'success', status: 200, reminded: reminded.length });
     return new Response(
       JSON.stringify({ reminded: reminded.length, leads: reminded }),
       { status: 200, headers: cors }
     );
   } catch (e) {
-    console.error("lead-followup-nagger error");
+    log({ event: 'error', status: 500, error: String(e) });
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors }
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 }
 

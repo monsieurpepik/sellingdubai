@@ -23,6 +23,8 @@ function json(body: unknown, status = 200): Response {
 }
 
 export async function handler(req: Request, _createClient: ClientFactory): Promise<Response> {
+  const log = createLogger('rotate-siri-token', req);
+  const _start = Date.now();
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS });
   }
@@ -83,6 +85,8 @@ export async function handler(req: Request, _createClient: ClientFactory): Promi
     .single();
 
   if (updateErr || !updated) {
+    log({ event: 'error', status: 500, error: 'failed to rotate siri_token' });
+    log.flush(Date.now() - _start);
     return json({ error: "Failed to rotate token" }, 500);
   }
 
@@ -93,10 +97,11 @@ export async function handler(req: Request, _createClient: ClientFactory): Promi
     .eq("token", token);
 
   if (stampErr) {
-    console.error("Failed to stamp magic link used_at", stampErr);
-    // Non-fatal: rotation succeeded; warn but don't fail the request
+    log({ event: 'warn', error: 'failed to stamp magic link used_at' });
   }
 
+  log({ event: 'success', status: 200 });
+  log.flush(Date.now() - _start);
   return json({ siri_token: updated.siri_token });
 }
 

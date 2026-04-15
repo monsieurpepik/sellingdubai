@@ -185,6 +185,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
 // ── Handler ──
 
 Deno.serve(async (req: Request) => {
+  const log = createLogger('lead-nudger', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -232,7 +234,7 @@ Deno.serve(async (req: Request) => {
       .limit(200);
 
     if (agentsErr) {
-      console.error("lead-nudger: agents query error");
+      log({ event: 'error', status: 500, error: 'agents query error' });
       return new Response(JSON.stringify({ error: "Failed to query agents." }), { status: 500, headers: cors });
     }
 
@@ -368,15 +370,18 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    log({ event: 'success', status: 200, sent, skipped });
     return new Response(
       JSON.stringify({ sent, skipped, details }),
       { status: 200, headers: cors },
     );
   } catch (e) {
-    console.error("lead-nudger: unhandled error");
+    log({ event: 'error', status: 500, error: String(e) });
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
       { status: 500, headers: cors },
     );
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

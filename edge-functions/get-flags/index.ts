@@ -58,6 +58,8 @@ async function getFlags(): Promise<Record<string, boolean>> {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  const log = createLogger('get-flags', req);
+  const _start = Date.now();
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "GET") {
@@ -66,8 +68,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   try {
     const flags = await getFlags();
+    log({ event: 'success', status: 200 });
     return new Response(JSON.stringify({ flags }), { status: 200, headers: cors });
   } catch (err) {
+    log({ event: 'error', status: 500, error: String(err) });
     return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: cors });
+  } finally {
+    log.flush(Date.now() - _start);
   }
 });

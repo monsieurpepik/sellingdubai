@@ -175,6 +175,8 @@ function getValidationIssues(p: unknown): string[] {
 type CreateClientFn = (url: string, key: string) => any;
 
 export async function handler(req: Request, _createClient: CreateClientFn = createClient): Promise<Response> {
+  const log = createLogger('sync-rem-offplan', req);
+  const _start = Date.now();
   if (req.method !== "POST" && req.method !== "GET") {
     return new Response(JSON.stringify({ error: "Method not allowed." }), {
       status: 405, headers: { "Content-Type": "application/json" },
@@ -459,6 +461,8 @@ export async function handler(req: Request, _createClient: CreateClientFn = crea
   }
 
   // ── 8. Return summary ─────────────────────────────────────────────────────────
+  log({ event: 'success', status: 200, projects_new: projectsNew, projects_updated: projectsUpdated, dubai_active: eligible.length });
+  log.flush(Date.now() - _start);
   return new Response(JSON.stringify({
     synced_at:             syncStarted,
     total_from_api:        remData.data.length,
