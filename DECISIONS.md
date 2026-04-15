@@ -355,6 +355,20 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 
 **Caveat:** Meta publishes their IP ranges but may add new ranges without notice. If webhooks stop being received after a Meta infrastructure change, check whether new CIDRs need to be added to `META_WEBHOOK_CIDRS` in `whatsapp-ingest/index.ts`.
 
+## 2026-04-15 — RSI feedback loop: quality rating via button reply, not text parse
+
+**What:** Lead quality rating (good/not qualified) is collected via WhatsApp interactive button messages, not free-text parsing. Button IDs encode the rating and lead UUID: `quality_1_<uuid>` (good) and `quality_2_<uuid>` (not qualified). The reply handler in `whatsapp-ingest` decodes the rating and UUID from the button ID without any NLP.
+
+**Why buttons not text:** Text parsing ("Reply 1 or 2") is fragile — agents may respond with "yes", "1 for sure", etc. Button replies are deterministic. WhatsApp Cloud API supports up to 3 reply buttons; two is sufficient here.
+
+**Button ID encoding:** The existing parser in `whatsapp-ingest` splits on `_` and takes segment 0 as `action`, the rest as `leadId`. For `quality_1_<uuid>` this gives `action="quality"`, `leadId="1_<uuid>"`. The quality handler further splits on the first `_` to get the rating digit separate from the UUID.
+
+**Why no new table for follow-up scheduling:** `quality_followup_due_at` and `quality_followup_sent_at` columns on `leads` serve as a lightweight task queue. A partial index (`WHERE quality_rating IS NULL AND quality_followup_sent_at IS NULL`) keeps the cron query O(1) on unrated leads. A dedicated queue table would add operational complexity without benefit at this scale.
+
+**ai_conversation_outcomes fire-and-forget:** On TTL-based session close in `whatsapp-ingest`, the `ai_conversation_outcomes` insert is fire-and-forget (`.then().catch()`). This is intentional — session analytics must never block the main message response path. A failure here is non-fatal and logged via `console.error`.
+
+**Weekly report "responded" proxy:** The true "responded within 5 min" metric requires an agent-response timestamp that doesn't exist yet. `status = 'contacted'` is used as a rough proxy for now. `response_time_seconds` is reserved in `ai_conversation_outcomes` for precise measurement once incoming agent message timestamps are stored going forward.
+
 ## 2026-04-12 — Contact Timeline feature
 
 **What:** Added `contact_interactions` and `contact_reminders` tables (migration `20260412000007_contact_timeline.sql`), a new `contact-timeline` edge function, smart reminder seeding in `capture-lead-v4`, and a Contacts tab in the dashboard with timeline modal.
@@ -368,3 +382,4 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 **WhatsApp links:** `wa.me/<phone>?text=<draft>` URLs generated client-side from `message_draft` stored in `contact_reminders`. No server round-trip for sending.
 
 **No new third-party scripts:** All UI rendered via vanilla JS templates in `dashboard.js` consistent with existing dashboard patterns.
+
