@@ -18,7 +18,7 @@
     "load-test:staging": "BASE_URL=https://staging.sellingdubai.com k6 run scripts/load-test.js"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
+    "@biomejs/biome": "^2.4.12",
     "@playwright/test": "^1.58.2",
     "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/container-queries": "^0.1.1",
