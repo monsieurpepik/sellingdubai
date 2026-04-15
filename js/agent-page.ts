@@ -5,7 +5,7 @@
 import { logEvent } from './analytics';
 import { SUPABASE_URL, } from './config';
 import { ICONS } from './icons';
-import { loadProperties, loadRemProjects, optimizeImg } from './properties';
+import { loadProperties, optimizeImg } from './properties';
 import type { Agent } from './state';
 import { currentAgent, setCurrentAgent } from './state';
 import { escAttr, escHtml, safeTrackingId, safeUrl } from './utils';
