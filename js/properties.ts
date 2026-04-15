@@ -179,6 +179,14 @@ export async function loadMoreProperties(): Promise<Property[]> {
 export { propertiesError, propertiesHasMore, propertiesLoaded, propertiesTotalCount };
 
 
+window.retryProperties = async () => {
+  if (!propertiesAgentId) return;
+  propertiesLoaded = false;
+  propertiesError = null;
+  const props = await loadProperties(propertiesAgentId);
+  renderPropertyList(props);
+};
+
 // Heart / favorite toggle
 window.toggleHeart = (btn: HTMLElement) => {
   btn.classList.toggle('liked');

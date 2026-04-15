@@ -168,17 +168,20 @@ export async function handler(
         }
         const periodEnd = new Date((sub.current_period_end as number) * 1000).toISOString();
 
-        const { error: updateErr1 } = await supabase.from("agents").update({
+        const { error: updateErr1, count: count1 } = await supabase.from("agents").update({
           tier:                      resolved.tier,
           stripe_subscription_id:    subscriptionId,
           stripe_customer_id:        customerId,
           stripe_subscription_status: "active",
           stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
-        }).eq("id", agentId);
+        }, { count: "exact" }).eq("id", agentId);
 
         if (updateErr1) {
           throw new Error(`agents.update failed (checkout.session.completed): ${updateErr1.message}`);
+        }
+        if (!count1) {
+          console.error(`[stripe-webhook] CRITICAL: checkout.session.completed matched 0 agents for agentId=${agentId} — billing event dropped`);
         }
 
         await supabase.from("subscription_events").insert({
@@ -214,16 +217,19 @@ export async function handler(
         const periodEnd = new Date((data.current_period_end as number) * 1000).toISOString();
         const status = data.status as string;
 
-        const { error: updateErr2 } = await supabase.from("agents").update({
+        const { error: updateErr2, count: count2 } = await supabase.from("agents").update({
           tier:                      resolved.tier,
           stripe_subscription_id:    subscriptionId,
           stripe_subscription_status: status,
           stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
-        }).eq("id", agentId);
+        }, { count: "exact" }).eq("id", agentId);
 
         if (updateErr2) {
           throw new Error(`agents.update failed (customer.subscription.updated): ${updateErr2.message}`);
+        }
+        if (!count2) {
+          console.error(`[stripe-webhook] CRITICAL: customer.subscription.updated matched 0 agents for agentId=${agentId} — billing event dropped`);
         }
 
         await supabase.from("subscription_events").insert({
@@ -250,16 +256,19 @@ export async function handler(
           break;
         }
 
-        const { error: updateErr3 } = await supabase.from("agents").update({
+        const { error: updateErr3, count: count3 } = await supabase.from("agents").update({
           tier:                      "free",
           stripe_subscription_id:    null,
           stripe_subscription_status: "canceled",
           stripe_plan:               null,
           stripe_current_period_end: null,
-        }).eq("id", agentId);
+        }, { count: "exact" }).eq("id", agentId);
 
         if (updateErr3) {
           throw new Error(`agents.update failed (customer.subscription.deleted): ${updateErr3.message}`);
+        }
+        if (!count3) {
+          console.error(`[stripe-webhook] CRITICAL: customer.subscription.deleted matched 0 agents for agentId=${agentId} — billing event dropped`);
         }
 
         await supabase.from("subscription_events").insert({
@@ -305,15 +314,18 @@ export async function handler(
           break;
         }
 
-        const { error: updateErr4 } = await supabase.from("agents").update({
+        const { error: updateErr4, count: count4 } = await supabase.from("agents").update({
           tier:                      resolved.tier,
           stripe_subscription_status: "active",
           stripe_plan:               resolved.plan,
           stripe_current_period_end: periodEnd,
-        }).eq("id", agentId);
+        }, { count: "exact" }).eq("id", agentId);
 
         if (updateErr4) {
           throw new Error(`agents.update failed (invoice.payment_succeeded): ${updateErr4.message}`);
+        }
+        if (!count4) {
+          console.error(`[stripe-webhook] CRITICAL: invoice.payment_succeeded matched 0 agents for agentId=${agentId} — billing event dropped`);
         }
 
         await supabase.from("subscription_events").insert({
@@ -348,12 +360,15 @@ export async function handler(
 
         // Set status to past_due but leave tier + period_end untouched.
         // Feature gates will check: if past_due AND now > period_end + 7 days → treat as free.
-        const { error: updateErr5 } = await supabase.from("agents").update({
+        const { error: updateErr5, count: count5 } = await supabase.from("agents").update({
           stripe_subscription_status: "past_due",
-        }).eq("id", agentId);
+        }, { count: "exact" }).eq("id", agentId);
 
         if (updateErr5) {
           throw new Error(`agents.update failed (invoice.payment_failed): ${updateErr5.message}`);
+        }
+        if (!count5) {
+          console.error(`[stripe-webhook] CRITICAL: invoice.payment_failed matched 0 agents for agentId=${agentId} — billing event dropped`);
         }
 
         await supabase.from("subscription_events").insert({

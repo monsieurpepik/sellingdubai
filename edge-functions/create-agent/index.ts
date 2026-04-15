@@ -325,7 +325,9 @@ export async function handler(
       });
 
     if (tokenError) {
-      console.error("Magic link token error");
+      log({ event: 'error', status: 500, error: 'magic link insert failed' });
+      log.flush(Date.now() - _start);
+      return json({ error: "Registration failed. Please try again." }, 500, cors);
     }
 
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";

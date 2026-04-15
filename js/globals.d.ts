@@ -76,6 +76,7 @@ declare global {
     swapDetailHero: ((dir: number) => void) | undefined;
     toggleCostMode: ((el: HTMLElement, mode: string) => void) | undefined;
     shareDetail: (() => void) | undefined;
+    retryProperties: (() => void) | undefined;
     resetFilters: (() => void) | undefined;
     closeLead: (() => void) | undefined;
     toggleExtra: (() => void) | undefined;

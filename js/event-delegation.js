@@ -134,6 +134,9 @@ document.addEventListener('click', (e) => {
       break;
 
     // Properties panel (properties.js)
+    case 'retryProperties':
+      if (typeof window.retryProperties === 'function') window.retryProperties();
+      break;
     case 'resetFilters':
       if (typeof window.resetFilters === 'function') window.resetFilters();
       break;
