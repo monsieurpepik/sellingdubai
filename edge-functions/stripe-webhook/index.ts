@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
+import { reportToSentry } from "../_shared/sentry.ts";
 
 // Stripe webhook — no CORS headers needed (Stripe calls this directly, not from browser)
 // Required env vars:
@@ -181,7 +182,9 @@ export async function handler(
           throw new Error(`agents.update failed (checkout.session.completed): ${updateErr1.message}`);
         }
         if (!count1) {
-          console.error(`[stripe-webhook] CRITICAL: checkout.session.completed matched 0 agents for agentId=${agentId} — billing event dropped`);
+          log({ event: 'zero_row_update', status: 200, event_type: eventType, agent_id: agentId, severity: 'critical' });
+          void reportToSentry(`stripe-webhook: 0 rows matched for ${eventType}`, 'fatal', { agentId, eventType, stripeEventId: event.id });
+          break;
         }
 
         await supabase.from("subscription_events").insert({
@@ -229,7 +232,9 @@ export async function handler(
           throw new Error(`agents.update failed (customer.subscription.updated): ${updateErr2.message}`);
         }
         if (!count2) {
-          console.error(`[stripe-webhook] CRITICAL: customer.subscription.updated matched 0 agents for agentId=${agentId} — billing event dropped`);
+          log({ event: 'zero_row_update', status: 200, event_type: eventType, agent_id: agentId, severity: 'critical' });
+          void reportToSentry(`stripe-webhook: 0 rows matched for ${eventType}`, 'fatal', { agentId, eventType, stripeEventId: event.id });
+          break;
         }
 
         await supabase.from("subscription_events").insert({
@@ -268,7 +273,9 @@ export async function handler(
           throw new Error(`agents.update failed (customer.subscription.deleted): ${updateErr3.message}`);
         }
         if (!count3) {
-          console.error(`[stripe-webhook] CRITICAL: customer.subscription.deleted matched 0 agents for agentId=${agentId} — billing event dropped`);
+          log({ event: 'zero_row_update', status: 200, event_type: eventType, agent_id: agentId, severity: 'critical' });
+          void reportToSentry(`stripe-webhook: 0 rows matched for ${eventType}`, 'fatal', { agentId, eventType, stripeEventId: event.id });
+          break;
         }
 
         await supabase.from("subscription_events").insert({
@@ -325,7 +332,9 @@ export async function handler(
           throw new Error(`agents.update failed (invoice.payment_succeeded): ${updateErr4.message}`);
         }
         if (!count4) {
-          console.error(`[stripe-webhook] CRITICAL: invoice.payment_succeeded matched 0 agents for agentId=${agentId} — billing event dropped`);
+          log({ event: 'zero_row_update', status: 200, event_type: eventType, agent_id: agentId, severity: 'critical' });
+          void reportToSentry(`stripe-webhook: 0 rows matched for ${eventType}`, 'fatal', { agentId, eventType, stripeEventId: event.id });
+          break;
         }
 
         await supabase.from("subscription_events").insert({
@@ -368,7 +377,9 @@ export async function handler(
           throw new Error(`agents.update failed (invoice.payment_failed): ${updateErr5.message}`);
         }
         if (!count5) {
-          console.error(`[stripe-webhook] CRITICAL: invoice.payment_failed matched 0 agents for agentId=${agentId} — billing event dropped`);
+          log({ event: 'zero_row_update', status: 200, event_type: eventType, agent_id: agentId, severity: 'critical' });
+          void reportToSentry(`stripe-webhook: 0 rows matched for ${eventType}`, 'fatal', { agentId, eventType, stripeEventId: event.id });
+          break;
         }
 
         await supabase.from("subscription_events").insert({

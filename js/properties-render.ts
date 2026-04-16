@@ -7,13 +7,24 @@
 // ==========================================
 
 import { renderOffPlanCard, renderPropertyCard } from './components';
-import { initOffPlanCarousel, propertiesTotalCount } from './properties';
+import { initOffPlanCarousel, propertiesError, propertiesTotalCount } from './properties';
 import { allProperties, currentFilters } from './state';
 
 export function renderPropertyList(props: { listing_type?: string; [key: string]: unknown }[]) {
   const listEl = document.getElementById('prop-list');
   const countEl = document.getElementById('prop-count');
   if (props.length === 0) {
+    // Error state — distinct from empty portfolio and empty filter results
+    if (propertiesError) {
+      listEl!.innerHTML = `<div class="prop-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(255,255,255,0.12)" style="margin-bottom:16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <p style="color:rgba(255,255,255,0.6);font-size:15px;font-weight:500;">Couldn't load listings</p>
+        <p style="color:rgba(255,255,255,0.35);font-size:13px;margin-top:8px;">Check your connection and try again</p>
+        <button data-action="retryProperties" style="margin-top:16px;padding:10px 24px;border-radius:100px;background:rgba(77,101,255,0.15);border:1px solid rgba(77,101,255,0.3);color:#fff;font-size:14px;font-weight:500;cursor:pointer;min-height:44px;">Retry</button>
+      </div>`;
+      countEl!.textContent = '';
+      return;
+    }
     const hasFilters = currentFilters.search || currentFilters.priceMin || currentFilters.priceMax || currentFilters.beds || currentFilters.baths || currentFilters.areaMin || currentFilters.areaMax || (currentFilters.amenities?.length);
     const isFilterEmpty = hasFilters && allProperties.length > 0;
     listEl!.innerHTML = `<div class="prop-empty">

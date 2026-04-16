@@ -104,3 +104,27 @@ document.querySelectorAll('.upgrade-btn').forEach((btn) => {
     startCheckout(plan, interval, btn);
   });
 });
+
+// Disable upgrade buttons when billing is off (runtime flag from get-flags)
+function applyBillingGate() {
+  const live = window.SD_FLAGS?.BILLING_LIVE;
+  document.querySelectorAll('.upgrade-btn').forEach((btn) => {
+    if (!live) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+    }
+  });
+  document.querySelectorAll('.billing-coming-soon').forEach((el) => {
+    el.style.display = live ? 'none' : 'block';
+  });
+}
+// SD_FLAGS loads async via sd-config.js — poll briefly
+let _bgAttempts = 0;
+const _bgPoll = setInterval(() => {
+  _bgAttempts++;
+  if (window.SD_FLAGS !== undefined || _bgAttempts >= 30) {
+    clearInterval(_bgPoll);
+    applyBillingGate();
+  }
+}, 100);
