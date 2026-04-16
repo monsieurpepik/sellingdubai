@@ -45,6 +45,26 @@ if (_refCode) {
   }
 }
 
+// Step 1: validate contact info and advance to RERA verification
+window.step1Next = function () {
+  clearError(1);
+  const name = (document.getElementById('contact-name')?.value || '').trim();
+  const email = (document.getElementById('contact-email')?.value || '').trim();
+  const wa = (document.getElementById('contact-whatsapp')?.value || '').trim();
+
+  if (!name) { showError(1, 'Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { showError(1, 'Please enter a valid email address.'); return; }
+  if (!wa || wa.length < 8) { showError(1, 'Please enter your WhatsApp number.'); return; }
+
+  // Pre-fill step 2 fields with contact info
+  const displayName = document.getElementById('display-name');
+  if (displayName && !displayName.value) displayName.value = name;
+
+  if (typeof gtag === 'function') gtag('event', 'step1_contact_complete');
+  saveFormState();
+  goStep(2);
+};
+
 function showError(step, msg) {
   const el = document.getElementById(`error-${step}`);
   el.textContent = msg; el.classList.add('show');
@@ -118,13 +138,21 @@ async function verifyBroker() {
     document.getElementById('verify-bn').textContent = `#${data.broker.broker_number}`;
     document.getElementById('verify-expiry').textContent = data.broker.license_end;
     document.getElementById('verify-status').textContent = 'Active';
-    document.getElementById('step2-name').textContent = name;
-    document.getElementById('display-name').value = name;
+    const displayName = document.getElementById('display-name');
+    if (displayName && !displayName.value) displayName.value = name;
+
+    // Show the verified card and the remaining profile details within step 2
+    const verifySection = document.getElementById('verify-card-section');
+    if (verifySection) verifySection.style.display = 'block';
+    const detailsSection = document.getElementById('step-2-details');
+    if (detailsSection) detailsSection.style.display = 'block';
+    // Hide the verify button + BRN field (already verified)
+    document.getElementById('btn-verify').style.display = 'none';
+    document.querySelector('#step-2 .field')?.style && (document.querySelector('#step-2 .field').style.display = 'none');
 
     setLoading('btn-verify', false, 'Verify My License');
-    if (typeof gtag === 'function') gtag('event', 'step1_complete');
+    if (typeof gtag === 'function') gtag('event', 'step2_verified');
     saveFormState();
-    goStep(2);
   } catch (e) {
     setLoading('btn-verify', false, 'Verify My License');
     showError(1, networkErrorMsg());
@@ -191,10 +219,10 @@ async function sendOtpAndShow() {
   const displayName = document.getElementById('display-name').value.trim();
   if (!displayName) { showError(2, 'Display name is required.'); return; }
 
-  const email = document.getElementById('email').value.trim();
+  const email = (document.getElementById('contact-email') || document.getElementById('email'))?.value?.trim() || '';
   if (!email?.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
 
-  const wa = document.getElementById('whatsapp').value.trim();
+  const wa = (document.getElementById('contact-whatsapp') || document.getElementById('whatsapp'))?.value?.trim() || '';
   if (!wa) { showError(2, 'WhatsApp number is required — it\'s your main contact button.'); return; }
 
   setLoading('btn-create', true, 'Sending verification code...', true);
@@ -233,7 +261,7 @@ async function sendOtpAndShow() {
 
 function resendOtp() {
   clearError(2);
-  const email = document.getElementById('email').value.trim();
+  const email = (document.getElementById('contact-email') || document.getElementById('email'))?.value?.trim() || '';
   const btn = document.getElementById('btn-resend-otp');
   btn.textContent = 'Sending...';
   btn.disabled = true;
@@ -285,10 +313,10 @@ async function createProfile(otpCode) {
   const displayName = document.getElementById('display-name').value.trim();
   if (!displayName) { showError(2, 'Display name is required.'); return; }
 
-  const email = document.getElementById('email').value.trim();
+  const email = (document.getElementById('contact-email') || document.getElementById('email'))?.value?.trim() || '';
   if (!email?.includes('@')) { showError(2, 'Email is required — you\'ll need it to edit your profile later.'); return; }
 
-  const wa = document.getElementById('whatsapp').value.trim();
+  const wa = (document.getElementById('contact-whatsapp') || document.getElementById('whatsapp'))?.value?.trim() || '';
   if (!wa) { showError(2, 'WhatsApp number is required — it\'s your main contact button.'); return; }
 
   if (!otpCode) { showError(2, 'Verification code is required.'); return; }

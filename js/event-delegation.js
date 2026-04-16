@@ -278,6 +278,9 @@ document.addEventListener('click', (e) => {
       break;
 
     // Join page (join.js)
+    case 'step1Next':
+      if (typeof window.step1Next === 'function') window.step1Next();
+      break;
     case 'verifyBroker':
       if (typeof window.verifyBroker === 'function') window.verifyBroker();
       break;

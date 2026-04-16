@@ -49,16 +49,16 @@
     <div id="dot-3" class="step-dot"></div>
   </div>
 
-  <!-- ============ STEP 1: VERIFY ============ -->
+  <!-- ============ STEP 1: CONTACT INFO (low friction) ============ -->
   <div id="step-1" class="step active">
     <div class="profile">
       <div class="profile-icon">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="rgba(255,255,255,0.35)"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <div class="name-row">
-        <h1 class="name">Verify your RERA licence</h1>
+        <h1 class="name">Claim your profile</h1>
       </div>
-      <p class="bio">Enter your RERA broker number to confirm your identity. Takes under 2 minutes — your license number is never shown publicly.</p>
+      <p class="bio">Go live in under 2 minutes. Free forever — you own every lead.</p>
       <p id="referral-badge" style="display:none;margin-top:12px;font-size:13px;color:#4ade80;font-weight:500;"></p>
     </div>
 
@@ -66,16 +66,69 @@
       <div id="error-1" class="error-msg" role="alert" aria-live="assertive"></div>
 
       <div class="field">
+        <label>Your Full Name <span class="req">required</span></label>
+        <input type="text" id="contact-name" placeholder="Ahmed Al Mansouri" autocomplete="name" required>
+      </div>
+
+      <div class="field">
+        <label>Email <span class="req">required</span></label>
+        <input type="email" id="contact-email" placeholder="you@agency.com" autocomplete="email" required>
+        <p class="field-hint">We'll send a magic link to this email so you can edit your profile later.</p>
+      </div>
+
+      <div class="field">
+        <label>WhatsApp Number <span class="req">required</span></label>
+        <input type="tel" id="contact-whatsapp" placeholder="+971 50 123 4567" inputmode="tel" autocomplete="tel" required>
+        <p class="field-hint">Clients tap this to reach you directly.</p>
+      </div>
+
+      <button class="link-btn link-btn-wa" id="btn-step1-next" data-action="step1Next">
+        <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        Continue
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 2: RERA VERIFICATION ============ -->
+  <div id="step-2" class="step">
+    <div class="profile">
+      <div class="profile-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="rgba(255,255,255,0.35)"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="name-row">
+        <h2 class="name">Verify your RERA licence</h2>
+      </div>
+      <p class="bio">Enter your RERA broker number to get verified. It's never shown publicly.</p>
+    </div>
+
+    <div class="links">
+      <div id="error-2" class="error-msg" role="alert" aria-live="assertive"></div>
+
+      <div class="field">
         <label>RERA Broker Number</label>
         <input type="text" id="broker-number" placeholder="e.g. 66391" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-        <p class="field-hint">Your registered broker license number</p>
-        <p class="field-hint" style="margin-top:4px;font-size:11px;">Your DLD number is used for verification only — it is never shown publicly.</p>
+        <p class="field-hint">Your registered broker license number (4-7 digits)</p>
       </div>
 
       <button class="link-btn link-btn-wa" id="btn-verify" data-action="verifyBroker">
         <span class="btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
         Verify My License
       </button>
+
+      <!-- Verified DLD record card (shown after successful verification) -->
+      <div id="verify-card-section" style="display:none;">
+        <div class="verify-card">
+          <div class="verify-label">License Registry Match</div>
+          <div id="verify-name" class="verify-name"></div>
+          <div class="verify-row"><span class="vl">Broker #</span><span id="verify-bn" class="vv"></span></div>
+          <div class="verify-row"><span class="vl">Valid Until</span><span id="verify-expiry" class="vv"></span></div>
+          <div class="verify-row"><span class="vl">Status</span><span id="verify-status" class="vv active"></span></div>
+          <div class="badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            License Verified
+          </div>
+        </div>
+      </div>
 
       <!-- Fallback: manual RERA upload -->
       <div id="fallback-upload" style="display:none;">
@@ -90,7 +143,7 @@
         </div>
 
         <div style="margin-top:14px;width:100%;">
-          <label for="file-rera" style="display:block;font-size:8px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;">RERA Card Photo <span class="req">required</span></label>
+          <label for="file-rera" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;">RERA Card Photo <span class="req">required</span></label>
           <button type="button" id="rera-upload-area" aria-label="Upload RERA card photo" style="width:100%;padding:28px 20px;border-radius:16px;background:rgba(255,255,255,0.04);border:2px dashed rgba(255,255,255,0.12);text-align:center;cursor:pointer;transition:all 0.2s;" data-action="triggerInput" data-target="file-rera">
             <div id="rera-placeholder">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.2)" style="margin-bottom:8px;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -115,36 +168,8 @@
     </div>
   </div>
 
-  <!-- ============ STEP 2: CONFIRM + DETAILS ============ -->
-  <div id="step-2" class="step">
-    <div class="profile">
-      <div class="profile-icon" id="step2-icon">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-      </div>
-      <div class="name-row">
-        <h2 class="name" id="step2-name">Confirm Your DLD Record</h2>
-        <span class="verified">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#4d65ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </span>
-      </div>
-      <p class="bio">Complete your profile details</p>
-    </div>
-
-    <div class="links">
-      <div id="error-2" class="error-msg" role="alert" aria-live="assertive"></div>
-
-      <div class="verify-card">
-        <div class="verify-label">License Registry Match</div>
-        <div id="verify-name" class="verify-name"></div>
-        <div class="verify-row"><span class="vl">Broker #</span><span id="verify-bn" class="vv"></span></div>
-        <div class="verify-row"><span class="vl">Valid Until</span><span id="verify-expiry" class="vv"></span></div>
-        <div class="verify-row"><span class="vl">Status</span><span id="verify-status" class="vv active"></span></div>
-        <div class="badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-          License Verified
-        </div>
-      </div>
-
+  <!-- Step 2 details (shown after RERA verification succeeds) -->
+  <div id="step-2-details" style="display:none;">
       <div class="field">
         <label>Display Name <span class="optional">edit if needed</span></label>
         <input type="text" id="display-name" placeholder="Your name as shown on your profile">
@@ -163,26 +188,8 @@
       </div>
 
       <div class="field">
-        <label>WhatsApp Number <span class="req">required</span></label>
-        <input type="tel" id="whatsapp" placeholder="+971 50 123 4567" inputmode="tel" required>
-        <p class="field-hint">Clients tap this to reach you directly</p>
-      </div>
-
-      <div class="field">
-        <label>Email <span class="req">required — needed to edit your profile later</span></label>
-        <input type="email" id="email" placeholder="you@agency.com" required>
-        <p class="field-hint">We'll send a magic link to this email whenever you need to update your profile. Never shared or sold.</p>
-      </div>
-
-      <div class="field">
         <label>Tagline <span class="optional">optional</span></label>
         <input type="text" id="tagline" placeholder="e.g. Luxury Specialist | Palm & Downtown" maxlength="80">
-      </div>
-
-      <div class="field">
-        <label>Calendly URL <span class="optional">optional</span></label>
-        <input type="url" id="calendly" placeholder="https://calendly.com/yourname">
-        <p class="field-hint">Clients book consultations directly — no lead form needed</p>
       </div>
 
       <div class="field">
