@@ -63,6 +63,9 @@ export function showPage(id: string): void {
   document.getElementById('error')?.classList.add('hidden');
   document.getElementById('pending')?.classList.add('hidden');
   document.getElementById('agent-page')?.classList.add('hidden');
+  // Hide SSR hero injected by og-injector edge function
+  const ssrHero = document.getElementById('ssr-hero');
+  if (ssrHero) ssrHero.style.display = 'none';
   document.getElementById(id)?.classList.remove('hidden');
 }
 

@@ -92,13 +92,13 @@ export default async (request: Request, context: Context) => {
 
   // Fetch agent from Supabase — do this BEFORE context.next() so we
   // can bail cleanly if the agent doesn't exist.
-  let agent: { name: string; tagline: string; photo_url: string; slug: string; verification_status: string } | null = null;
+  let agent: { name: string; tagline: string; photo_url: string; slug: string; verification_status: string; whatsapp: string | null; broker_number: string | null; dld_broker_number: string | null } | null = null;
 
   try {
     const ogCtrl = new AbortController();
     const ogTid = setTimeout(() => ogCtrl.abort(), 3000);
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/agents?slug=eq.${encodeURIComponent(slug)}&select=name,tagline,photo_url,slug,verification_status`,
+      `${SUPABASE_URL}/rest/v1/agents?slug=eq.${encodeURIComponent(slug)}&select=name,tagline,photo_url,slug,verification_status,whatsapp,broker_number,dld_broker_number`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -189,6 +189,36 @@ export default async (request: Request, context: Context) => {
     `;
 
     modified = modified.replace(/<\/head>/i, `${ogBlock}</head>`);
+
+    // ─── SSR: Inject above-fold content for instant first paint ───
+    // This HTML renders immediately; JS hydrates over it when ready.
+    // The #ssr-hero div is hidden by init.ts once the full page renders.
+    const isVerified = agent.verification_status === 'verified';
+    const initials = escapeHtml((agent.name || '').split(' ').map(n => (n?.[0] ?? '')).join('').slice(0, 2));
+    const photoHtml = agent.photo_url
+      ? `<img src="${url.origin}/.netlify/images?url=${encodeURIComponent(agent.photo_url)}&w=200&fm=webp&q=80" width="96" height="96" alt="${escapeHtml(agent.name)}" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:2.5px solid ${isVerified ? 'rgba(77,101,255,0.5)' : 'rgba(255,255,255,0.2)'};box-shadow:0 12px 40px rgba(0,0,0,0.4);">`
+      : `<div style="width:96px;height:96px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.2);background:linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;font-family:'Manrope',sans-serif;box-shadow:0 12px 40px rgba(0,0,0,0.4);">${initials}</div>`;
+    const verifiedSvg = isVerified ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="#4d65ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>` : '';
+    const waNum = (agent.whatsapp || '').replace(/[^0-9]/g, '');
+    const firstName = (agent.name || '').split(' ')[0] || '';
+    const waHtml = waNum
+      ? `<a href="https://wa.me/${waNum}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:340px;padding:17px 24px;background:#25d366;color:#fff;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;box-shadow:0 1px 2px rgba(0,0,0,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg> WhatsApp ${escapeHtml(firstName)}</a>`
+      : '';
+
+    const ssrHero = `<div id="ssr-hero" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;padding:40px 24px;text-align:center;animation:fadeUp 0.4s ease both;">
+      <div style="margin-bottom:20px;">${photoHtml}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <h1 style="font-family:'Manrope',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.6px;color:#fff;margin:0;">${escapeHtml(agent.name)}</h1>
+        ${verifiedSvg}
+      </div>
+      ${agent.tagline ? `<p style="font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:24px;max-width:300px;">${escapeHtml(agent.tagline)}</p>` : '<div style="margin-bottom:24px;"></div>'}
+      ${waHtml}
+    </div>`;
+
+    modified = modified.replace(
+      /(<div id="loading")/,
+      `${ssrHero}$1`
+    );
 
     // CRITICAL: Strip Content-Encoding and Content-Length.
     // response.text() decompresses the body (gzip/br → plain text).
