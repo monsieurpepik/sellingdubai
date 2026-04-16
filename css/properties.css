@@ -19,6 +19,10 @@
   border-bottom: 1px solid var(--color-surface-raised);
   display: flex; flex-direction: column;
 }
+.prop-header::before {
+  content: ''; display: block; width: 36px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.15); margin: 0 auto 12px;
+}
 .prop-header-row {
   display: flex; justify-content: space-between; align-items: center;
   padding-bottom: 12px;

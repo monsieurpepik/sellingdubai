@@ -48,6 +48,28 @@ window.openPropertyDetail = (propIndex: number) => {
   logEvent('link_click', { link_type: 'property_detail', property: p.title });
 };
 
+// Swipe-down-to-close on detail sheet (when scrolled to top)
+{
+  let _swipeStartY = 0;
+  let _swiping = false;
+  const _sheet = document.getElementById('detail-sheet');
+  if (_sheet) {
+    _sheet.addEventListener('touchstart', (e: TouchEvent) => {
+      if (_sheet.scrollTop <= 0) {
+        _swipeStartY = e.touches[0]!.clientY;
+        _swiping = true;
+      }
+    }, { passive: true });
+    _sheet.addEventListener('touchend', (e: TouchEvent) => {
+      if (_swiping && e.changedTouches[0]) {
+        const dy = e.changedTouches[0].clientY - _swipeStartY;
+        if (dy > 80) window.closeDetail?.();
+      }
+      _swiping = false;
+    }, { passive: true });
+  }
+}
+
 window.closeDetail = () => {
   document.getElementById('detail-overlay')?.classList.remove('open');
   document.querySelector('script[data-sd-project-ld]')?.remove();
@@ -270,6 +292,23 @@ function renderDetailView(p: Property): void {
     </div>
   `;
   sheet.scrollTop = 0;
+
+  // Sticky header on scroll — shows property title when scrolled past the title bar
+  let _stickyEl = document.getElementById('detail-sticky-header');
+  if (!_stickyEl) {
+    _stickyEl = document.createElement('div');
+    _stickyEl.id = 'detail-sticky-header';
+    _stickyEl.className = 'detail-sticky-header';
+    document.getElementById('detail-overlay')?.appendChild(_stickyEl);
+  }
+  _stickyEl.textContent = p.title ?? '';
+  _stickyEl.classList.remove('visible');
+  const _titleBar = sheet.querySelector('.detail-title-bar') as HTMLElement | null;
+  sheet.addEventListener('scroll', () => {
+    if (!_titleBar || !_stickyEl) return;
+    const threshold = _titleBar.offsetTop + _titleBar.offsetHeight;
+    _stickyEl.classList.toggle('visible', sheet.scrollTop > threshold);
+  }, { passive: true });
 
   // Wire bottom CTA buttons
   const waBtn = document.getElementById('detail-wa-btn') as HTMLElement | null;

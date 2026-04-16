@@ -120,10 +120,15 @@ document.addEventListener('click', (e) => {
       break;
     case 'shareDetail': {
       const title = el.dataset.title || '';
+      const shareUrl = window.location.href;
       if (navigator.share) {
-        navigator.share({ title, url: window.location.href });
+        navigator.share({ title, url: shareUrl }).catch(() => {});
       } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href).then(() => { el.textContent = 'Link Copied!'; });
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          const origHtml = el.innerHTML;
+          el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Copied!';
+          setTimeout(() => { el.innerHTML = origHtml; }, 2000);
+        });
       }
       break;
     }
