@@ -87,6 +87,16 @@
   }
   .metric-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
   .metric-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .metric-value-skeleton {
+    width: 60px; height: 28px; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease infinite; margin-bottom: 6px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
   .metric-change { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
   .metric-up { color: #22c55e; }
   .metric-down { color: #ef4444; }
@@ -409,12 +419,13 @@
 
   /* ── Toast ── */
   .toast {
-    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(12px);
     padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
     background: #22c55e; color: #fff; z-index: 200;
-    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    opacity: 0; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   }
-  .toast.show { opacity: 1; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ── Mobile ── */
   @media (max-width: 768px) {

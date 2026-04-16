@@ -58,6 +58,9 @@ body {
   --color-brand: #1127d2;
   --color-brand-light: #4d65ff;
   --color-success: #25d366;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
   /* Spacing (Fibonacci-inspired) */
   --space-xs: 4px;
   --space-sm: 8px;

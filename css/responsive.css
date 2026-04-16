@@ -12,7 +12,7 @@
   .btn-grid { gap: 8px; }
   .link-btn-glass { padding: 14px 14px; font-size: var(--text-xs-plus); }
   .socials { gap: 14px; }
-  .socials a { width: 40px; height: 40px; }
+  .socials a { width: 44px; height: 44px; }
   .top-nav { padding: 16px 16px 0; }
   .detail-title-above { font-size: var(--text-xl-sm); }
   .detail-price { font-size: var(--text-2xl); }
