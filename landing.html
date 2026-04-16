@@ -207,24 +207,6 @@
   }
   .noise-texture > * { position: relative; z-index: 1; }
 
-  /* ── Custom cursor (pointer devices only) ── */
-  @media (pointer: fine) {
-    body { cursor: none; }
-    .cursor-dot {
-      position: fixed; top: 0; left: 0; width: 8px; height: 8px;
-      border-radius: 50%; background: #0a0a0a; pointer-events: none; z-index: 9999;
-      transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s;
-    }
-    .cursor-ring {
-      position: fixed; top: 0; left: 0; width: 32px; height: 32px;
-      border-radius: 50%; border: 1.5px solid #0a0a0a;
-      pointer-events: none; z-index: 9998; background: transparent;
-      transform: translate(-50%, -50%);
-      transition: width 0.25s ease, height 0.25s ease, opacity 0.25s ease;
-    }
-    .cursor-ring.hover { width: 44px; height: 44px; opacity: 0.5; }
-    .cursor-dot.hover { width: 4px; height: 4px; }
-  }
 
   /* ── Social proof ticker ── */
   .ticker-wrapper {
@@ -475,28 +457,6 @@
 <!-- ======== ABOVE-FOLD HERO ======== -->
 <section class="hero-above-fold">
 
-  <!-- Social proof ticker -->
-  <div class="ticker-wrapper" aria-hidden="true">
-    <div class="ticker-track">
-      <span class="ticker-item">Ahmed Al Mansouri <span class="ticker-sep">·</span> RERA Certified</span>
-      <span class="ticker-item">Sara Khalid <span class="ticker-sep">·</span> Luxury Specialist</span>
-      <span class="ticker-item">James Chen <span class="ticker-sep">·</span> Off-Plan Expert</span>
-      <span class="ticker-item">Maria Santos <span class="ticker-sep">·</span> Investment Advisor</span>
-      <span class="ticker-item">Omar Farooq <span class="ticker-sep">·</span> DLD Verified</span>
-      <span class="ticker-item">Priya Kapoor <span class="ticker-sep">·</span> Property Consultant</span>
-      <span class="ticker-item">Michael Brown <span class="ticker-sep">·</span> Marina Specialist</span>
-      <span class="ticker-item">Layla Hassan <span class="ticker-sep">·</span> Buyer's Agent</span>
-      <!-- duplicate for seamless loop -->
-      <span class="ticker-item">Ahmed Al Mansouri <span class="ticker-sep">·</span> RERA Certified</span>
-      <span class="ticker-item">Sara Khalid <span class="ticker-sep">·</span> Luxury Specialist</span>
-      <span class="ticker-item">James Chen <span class="ticker-sep">·</span> Off-Plan Expert</span>
-      <span class="ticker-item">Maria Santos <span class="ticker-sep">·</span> Investment Advisor</span>
-      <span class="ticker-item">Omar Farooq <span class="ticker-sep">·</span> DLD Verified</span>
-      <span class="ticker-item">Priya Kapoor <span class="ticker-sep">·</span> Property Consultant</span>
-      <span class="ticker-item">Michael Brown <span class="ticker-sep">·</span> Marina Specialist</span>
-      <span class="ticker-item">Layla Hassan <span class="ticker-sep">·</span> Buyer's Agent</span>
-    </div>
-  </div>
 
   <div class="hero-inner">
     <span class="hero-brand">SellingDubai</span>
@@ -676,23 +636,6 @@
   </div>
 </section>
 
-<!-- ======== 3 FACTS ======== -->
-<section class="facts-row">
-  <div class="facts-inner">
-    <div class="fact reveal stagger-0">
-      <div class="fact-number">Free</div>
-      <div class="fact-label">Free to start — no credit card</div>
-    </div>
-    <div class="fact reveal stagger-1">
-      <div class="fact-number">DLD</div>
-      <div class="fact-label">Verified badge on every profile</div>
-    </div>
-    <div class="fact reveal stagger-2">
-      <div class="fact-number">0%</div>
-      <div class="fact-label">Platform commission on your leads</div>
-    </div>
-  </div>
-</section>
 
 </main>
 
@@ -737,12 +680,9 @@
 
 <!-- ======== STICKY MOBILE CTA ======== -->
 <div class="sticky-cta">
-  <button data-open-wizard style="display:block;width:100%;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;border:none;cursor:pointer;">Claim Your Profile — Free</button>
+  <button data-open-wizard style="display:block;width:100%;background:#1d1d1f;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700;font-family:'Manrope',sans-serif;border:none;cursor:pointer;letter-spacing:-0.01em;">Claim Your Profile &rarr;</button>
 </div>
 
-<!-- ── Custom cursor (pointer: fine only) ── -->
-<div class="cursor-dot" aria-hidden="true"></div>
-<div class="cursor-ring" aria-hidden="true"></div>
 
 <script src="/js/sd-config.js"></script>
 <script src="/js/landing-chip-anim.js" defer></script>
@@ -754,24 +694,6 @@
 (function () {
   var isPointerFine = window.matchMedia('(pointer: fine)').matches;
 
-  // ── Custom cursor ──
-  if (isPointerFine) {
-    var dot = document.querySelector('.cursor-dot');
-    var ring = document.querySelector('.cursor-ring');
-    if (dot && ring) {
-      document.addEventListener('mousemove', function (e) {
-        dot.style.left = e.clientX + 'px';
-        dot.style.top = e.clientY + 'px';
-        ring.style.left = e.clientX + 'px';
-        ring.style.top = e.clientY + 'px';
-      });
-      var hoverEls = document.querySelectorAll('a, button, [data-open-wizard]');
-      hoverEls.forEach(function (el) {
-        el.addEventListener('mouseenter', function () { ring.classList.add('hover'); dot.classList.add('hover'); });
-        el.addEventListener('mouseleave', function () { ring.classList.remove('hover'); dot.classList.remove('hover'); });
-      });
-    }
-  }
 
   // ── Magnetic CTA button ──
   if (isPointerFine) {

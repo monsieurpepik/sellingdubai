@@ -412,11 +412,19 @@
     if (!chart.length) { container.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:13px;">No data</div>'; return; }
 
     const max = Math.max(...chart.map(d => d.views), 1);
-    container.innerHTML = chart.map(d => {
+    // Show date labels for first, mid, and last bars
+    const labelIndices = new Set([0, Math.floor(chart.length / 2), chart.length - 1]);
+    const fmtDate = (s) => { try { const d = new Date(s); return d.toLocaleDateString('en-AE', { month: 'short', day: 'numeric' }); } catch (_) { return s; } };
+
+    container.innerHTML = chart.map((d, i) => {
       const h = Math.max(2, (d.views / max) * 80);
       const cls = d.views > 0 ? 'chart-bar chart-bar-fill' : 'chart-bar';
-      return `<div class="${cls}" style="height:${h}px" title="${esc(d.date)}: ${d.views} views"></div>`;
+      const label = labelIndices.has(i) ? `<span style="position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap;">${fmtDate(d.date)}</span>` : '';
+      const tooltip = `<span class="chart-tooltip" style="display:none;position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.95);color:#0a0a0a;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${d.views}</span>`;
+      return `<div class="${cls}" style="height:${h}px;position:relative;" onmouseenter="this.querySelector('.chart-tooltip').style.display='block'" onmouseleave="this.querySelector('.chart-tooltip').style.display='none'">${tooltip}${label}</div>`;
     }).join('');
+    // Add bottom margin for date labels
+    container.style.marginBottom = '20px';
   }
 
   // ── Render Referrers ──
@@ -436,7 +444,7 @@
     document.getElementById('leads-count').textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''} (30 days)`;
 
     if (!leads.length) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No leads yet</div><div class="empty-sub">Post your link on Instagram or WhatsApp — leads will appear here</div></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg></div><div class="empty-title">No leads yet</div><div class="empty-sub">Post your link on Instagram or WhatsApp — leads will appear here</div></div>';
       return;
     }
 
