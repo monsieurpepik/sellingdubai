@@ -118,7 +118,7 @@
 .link-btn {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; padding: 17px 24px;
-  background: var(--color-brand); color: #fff;
+  background: var(--color-brand); color: var(--color-text-primary);
   border-radius: var(--radius-card); font-size: var(--text-base); font-weight: 600;
   text-decoration: none; letter-spacing: -0.1px;
   transition: transform var(--duration-medium) var(--spring), box-shadow var(--duration-medium) var(--spring), background var(--duration-fast);
@@ -143,7 +143,7 @@
   }
 }
 
-.link-btn-wa { background: var(--color-success); color: #fff; }
+.link-btn-wa { background: var(--color-success); color: var(--color-text-primary); }
 .btn-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
 /* ========== SOCIALS ========== */
@@ -163,7 +163,7 @@
 .socials a:active { transform: scale(0.88); transition-duration: var(--duration-instant); }
 @media (hover: hover) {
   .socials a:hover {
-    color: #fff; background: var(--color-border);
+    color: var(--color-text-primary); background: var(--color-border);
     border-color: var(--color-text-muted);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);

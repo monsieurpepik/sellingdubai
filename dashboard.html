@@ -198,7 +198,17 @@
         <span class="chart-title">Profile Views</span>
         <span class="chart-period">Last 30 days</span>
       </div>
-      <div class="chart-bars" id="chart-bars"></div>
+      <div class="chart-bars" id="chart-bars">
+        <div style="display:flex;align-items:flex-end;gap:3px;height:80px;width:100%;">
+          <div class="metric-value-skeleton" style="flex:1;height:30%;border-radius:4px 4px 0 0;"></div>
+          <div class="metric-value-skeleton" style="flex:1;height:45%;border-radius:4px 4px 0 0;animation-delay:0.1s;"></div>
+          <div class="metric-value-skeleton" style="flex:1;height:60%;border-radius:4px 4px 0 0;animation-delay:0.2s;"></div>
+          <div class="metric-value-skeleton" style="flex:1;height:40%;border-radius:4px 4px 0 0;animation-delay:0.3s;"></div>
+          <div class="metric-value-skeleton" style="flex:1;height:70%;border-radius:4px 4px 0 0;animation-delay:0.4s;"></div>
+          <div class="metric-value-skeleton" style="flex:1;height:50%;border-radius:4px 4px 0 0;animation-delay:0.5s;"></div>
+          <div class="metric-value-skeleton" style="flex:1;height:35%;border-radius:4px 4px 0 0;animation-delay:0.6s;"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Referrers + Sources -->
@@ -206,16 +216,20 @@
       <div class="ref-card">
         <div class="ref-title">Traffic Sources</div>
         <div id="ref-list">
-          <div class="empty-state" style="padding:24px;border:none;">
-            <div class="empty-sub">No visits yet — share your profile link to get started</div>
+          <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0;">
+            <div class="metric-value-skeleton" style="width:80%;height:14px;"></div>
+            <div class="metric-value-skeleton" style="width:60%;height:14px;animation-delay:0.1s;"></div>
+            <div class="metric-value-skeleton" style="width:45%;height:14px;animation-delay:0.2s;"></div>
           </div>
         </div>
       </div>
       <div class="ref-card">
         <div class="ref-title">Lead Sources</div>
         <div id="lead-source-list">
-          <div class="empty-state" style="padding:24px;border:none;">
-            <div class="empty-sub">Lead sources will appear once you receive your first inquiry</div>
+          <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0;">
+            <div class="metric-value-skeleton" style="width:70%;height:14px;"></div>
+            <div class="metric-value-skeleton" style="width:55%;height:14px;animation-delay:0.1s;"></div>
+            <div class="metric-value-skeleton" style="width:40%;height:14px;animation-delay:0.2s;"></div>
           </div>
         </div>
       </div>
