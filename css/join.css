@@ -3,7 +3,7 @@
   html, body {
     font-family: 'Inter', -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    background: #0a0a0a;
+    background: var(--color-bg-deep);
     color: #fff;
     height: 100vh;
     height: 100dvh;
@@ -86,7 +86,7 @@
     .link-btn-wa:hover { box-shadow: 0 8px 28px rgba(37,211,102,0.35); }
   }
   .link-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
-  .link-btn-wa { background: #25d366; color: #fff; }
+  .link-btn-wa { background: var(--color-success); color: #fff; }
 
   .btn-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
@@ -124,7 +124,7 @@
     margin-top: 6px; line-height: 1.4; text-align: center;
   }
   .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.6); font-size: 11px; }
-  .req { font-weight: 600; text-transform: none; letter-spacing: 0; color: #25d366; font-size: 11px; }
+  .req { font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--color-success); font-size: 11px; }
 
   /* Social input rows */
   .social-field {
@@ -169,11 +169,11 @@
   }
   .verify-row .vl { color: rgba(255,255,255,0.7); }
   .verify-row .vv { color: rgba(255,255,255,0.85); font-weight: 600; }
-  .verify-row .vv.active { color: #25d366; }
+  .verify-row .vv.active { color: var(--color-success); }
   .badge {
     display: inline-flex; align-items: center; gap: 5px;
     margin-top: 12px; font-size: 11px; font-weight: 700;
-    color: #25d366; letter-spacing: 0.02em;
+    color: var(--color-success); letter-spacing: 0.02em;
   }
 
   /* Photo upload */
@@ -270,7 +270,7 @@
   }
   .preview-btn {
     width: 100%; padding: 12px; border-radius: 12px;
-    background: #25d366; color: #fff; font-size: 13px; font-weight: 700;
+    background: var(--color-success); color: #fff; font-size: 13px; font-weight: 700;
     text-align: center; margin-bottom: 8px;
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
@@ -328,7 +328,7 @@
     background: rgba(255,255,255,0.15); transition: all 0.3s;
   }
   .step-dot.active::after { background: rgba(255,255,255,0.7); transform: scale(1.2); }
-  .step-dot.done::after { background: #25d366; }
+  .step-dot.done::after { background: var(--color-success); }
 
   @media (max-width: 380px) {
     .brand { margin-top: 20px; margin-bottom: 32px; }

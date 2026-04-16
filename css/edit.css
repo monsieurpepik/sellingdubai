@@ -2,7 +2,7 @@
   html, body {
     font-family: 'Inter', -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    background: #0a0a0a; color: #fff;
+    background: var(--color-bg-deep); color: var(--color-text-primary);
     height: 100vh; height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
@@ -58,7 +58,7 @@
   .field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,0.45); }
   .field textarea { resize: none; height: 70px; }
   .field select, select { outline: none; }
-  .field select option, select option { background: #111; color: #fff; }
+  .field select option, select option { background: var(--color-surface); color: #fff; }
   .field-hint { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 6px; }
   .optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.6); font-size: 11px; }
   .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
@@ -67,7 +67,7 @@
   .toggle-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: 0.3s; }
   .toggle input:checked + .toggle-slider { background: #25d366; }
   .toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: #fff; }
-  .req { color: #25d366; }
+  .req { color: var(--color-success); }
 
   .social-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   .social-row:last-child { margin-bottom: 0; }
@@ -120,7 +120,7 @@
   .success-msg {
     width: 100%; border-radius: 16px;
     background: rgba(37,211,102,0.06); padding: 16px;
-    font-size: 13px; color: #25d366; display: none; line-height: 1.4;
+    font-size: 13px; color: var(--color-success); display: none; line-height: 1.4;
     text-align: center; margin-bottom: 16px;
   }
   .success-msg.show { display: block; }
@@ -167,7 +167,7 @@
     background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
   }
   .share-row-copy:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
-  .share-row-copy.copied { background: rgba(37,211,102,0.15); color: #25d366; }
+  .share-row-copy.copied { background: rgba(37,211,102,0.15); color: var(--color-success); }
   .share-row-view {
     background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.65);
     text-decoration: none;
@@ -192,7 +192,7 @@
   .verify-banner p { font-size: 12px; margin: 0; opacity: 0.7; }
   .verify-banner svg { flex-shrink: 0; margin-top: 2px; }
   .verify-pending { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
-  .verify-verified { background: rgba(37,211,102,0.06); border: 1px solid rgba(37,211,102,0.15); color: #25d366; }
+  .verify-verified { background: rgba(37,211,102,0.06); border: 1px solid rgba(37,211,102,0.15); color: var(--color-success); }
   .verify-rejected { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.15); color: #f87171; }
 
   .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; opacity: 0.4; }
@@ -260,7 +260,7 @@
   .stat-change {
     font-size: 10px; font-weight: 700; margin-top: 4px;
   }
-  .stat-change.up { color: #25d366; }
+  .stat-change.up { color: var(--color-success); }
   .stat-change.down { color: #f87171; }
   .stat-change.flat { color: rgba(255,255,255,0.3); }
   .chart-container {
