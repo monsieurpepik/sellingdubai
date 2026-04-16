@@ -56,12 +56,24 @@ body {
   --color-text-dim: rgba(255,255,255,0.6);
   --color-text-muted: rgba(255,255,255,0.55);
   --color-brand: #1127d2;
+  --color-brand-dark: #0d1fa8;
   --color-brand-light: #4d65ff;
   --color-success: #25d366;
+  --color-success-dark: #22c55e;
   --color-error: #ef4444;
+  --color-error-light: #f87171;
   --color-warning: #f59e0b;
   --color-info: #3b82f6;
-  /* Spacing (Fibonacci-inspired) */
+  --color-accent-purple: #a855f7;
+  --color-accent-indigo: #818cf8;
+  --color-text-soft: rgba(255,255,255,0.7);
+  --color-text-faint: rgba(255,255,255,0.45);
+  --color-text-ghost: rgba(255,255,255,0.35);
+  --color-border-subtle: rgba(255,255,255,0.1);
+  --color-border-faint: rgba(255,255,255,0.06);
+  --color-border-ghost: rgba(255,255,255,0.04);
+  /* Spacing (8px grid with half-steps) */
+  --space-2xs: 2px;
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -70,6 +82,8 @@ body {
   --space-2xl: 24px;
   --space-3xl: 32px;
   --space-4xl: 48px;
+  --space-5xl: 64px;
+  --space-6xl: 80px;
   /* Radii */
   --radius-2xs: 2px;
   --radius-xs: 4px;
@@ -83,20 +97,25 @@ body {
   --radius-2xl: 24px;
   --radius-pill: 100px;
   --radius-full: 50%;
-  /* Typography */
+  /* Typography — 7 core sizes + legacy aliases */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 26px;
+  --text-3xl: 32px;
+  /* Legacy aliases (avoid in new code) */
   --text-4xs: 9px;
   --text-3xs: 10px;
   --text-2xs: 11px;
-  --text-xs: 12px;
   --text-xs-plus: 13px;
-  --text-sm: 14px;
-  --text-base: 15px;
   --text-md: 16px;
-  --text-lg: 18px;
   --text-xl-sm: 20px;
-  --text-xl: 22px;
-  --text-2xl: 24px;
-  --text-3xl: 26px;
+  /* Line heights */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
   /* Shadows */
   --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
   --shadow-sheet: 0 -4px 24px rgba(0,0,0,0.5);
