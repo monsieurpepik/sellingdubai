@@ -210,7 +210,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
     const waUrl = `https://wa.me/${waNum}?text=${waMsg}`;
     const firstName = (agent.name || '').split(' ')[0] || 'Me';
     buttonsHTML += `<a href="${escAttr(waUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn link-btn-wa" data-track="whatsapp" data-url="${escAttr(waUrl)}">
-      <span class="btn-icon">${ICONS.whatsapp}</span> WhatsApp ${esc(firstName)}
+      <span class="btn-icon">${ICONS.whatsapp}</span> WhatsApp ${escHtml(firstName)}
     </a>`;
   }
 
