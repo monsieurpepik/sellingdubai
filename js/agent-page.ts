@@ -334,11 +334,15 @@ export async function renderAgent(agent: Agent): Promise<void> {
 
   showPage('agent-page');
 
+  // === INTENT SECTION ===
+  const intentSection = document.getElementById('intent-section') as HTMLElement | null;
+  if (intentSection) intentSection.classList.remove('hidden');
+
   // === STICKY BOTTOM CTA BAR ===
   const stickyCta = document.getElementById('sticky-cta') as HTMLElement | null;
   const stickyWaBtn = document.getElementById('sticky-wa-btn') as HTMLElement | null;
   if (stickyCta) {
-    // Wire WhatsApp button
+    // Wire WhatsApp button — only show if agent has WhatsApp
     if (agent.whatsapp && stickyWaBtn) {
       const waNum = agent.whatsapp.replace(/[^0-9]/g, '');
       const waMsg = encodeURIComponent(`Hi ${agent.name}, I found your profile on SellingDubai and I'm interested in Dubai properties.`);

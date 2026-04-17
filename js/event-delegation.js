@@ -323,6 +323,29 @@ document.addEventListener('click', (e) => {
     case 'submitLead':
       if (typeof window.submitLead === 'function') window.submitLead();
       break;
+
+    // Intent flows — sell & buy qualifier sheets
+    case 'openSellFlow':
+      if (typeof window.openSellFlow === 'function') window.openSellFlow();
+      break;
+    case 'closeSellFlow':
+      if (typeof window.closeSellFlow === 'function') window.closeSellFlow();
+      break;
+    case 'submitSellFlow':
+      if (typeof window.submitSellFlow === 'function') window.submitSellFlow();
+      break;
+    case 'openBuyFlow':
+      if (typeof window.openBuyFlow === 'function') window.openBuyFlow();
+      break;
+    case 'closeBuyFlow':
+      if (typeof window.closeBuyFlow === 'function') window.closeBuyFlow();
+      break;
+    case 'submitBuyFlow':
+      if (typeof window.submitBuyFlow === 'function') window.submitBuyFlow();
+      break;
+    case 'selectChip':
+      if (typeof window.selectChip === 'function') window.selectChip(el);
+      break;
     case 'closeProps':
       if (typeof window.closeProps === 'function') window.closeProps();
       break;
