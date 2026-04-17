@@ -3,7 +3,7 @@
 // ==========================================
 
 import { logEvent } from './analytics';
-import { SUPABASE_URL, } from './config';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config';
 import { ICONS } from './icons';
 import { loadProperties, optimizeImg } from './properties';
 import type { Agent } from './state';
@@ -338,6 +338,9 @@ export async function renderAgent(agent: Agent): Promise<void> {
   const intentSection = document.getElementById('intent-section') as HTMLElement | null;
   if (intentSection) intentSection.classList.remove('hidden');
 
+  // === TESTIMONIALS (non-blocking) ===
+  void loadProfileTestimonials(agent.id);
+
   // === STICKY BOTTOM CTA BAR ===
   const stickyCta = document.getElementById('sticky-cta') as HTMLElement | null;
   const stickyWaBtn = document.getElementById('sticky-wa-btn') as HTMLElement | null;
@@ -406,6 +409,41 @@ window.nativeShare = async () => {
     if (currentAgent) logEvent('share', { method: 'share' in navigator ? 'native' : 'clipboard' });
   } catch (_e) { /* user cancelled share sheet */ }
 };
+
+// ==========================================
+// TESTIMONIALS — fetch and render on profile
+// ==========================================
+export async function loadProfileTestimonials(agentId: string): Promise<void> {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/testimonials?agent_id=eq.${encodeURIComponent(agentId)}&select=client_name,client_role,content,rating&order=created_at.desc&limit=6`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!res.ok) return;
+    const items = await res.json() as Array<{ client_name: string; client_role?: string; content: string; rating: number }>;
+    if (!items?.length) return;
+
+    const section = document.getElementById('profile-testimonials');
+    if (!section) return;
+
+    section.innerHTML = `
+      <div class="testimonials-heading">What clients say</div>
+      <div class="testimonials-grid">
+        ${items.map(t => `
+          <div class="profile-testimonial">
+            <div class="profile-testimonial-stars">${'★'.repeat(Math.min(5, t.rating || 5))}</div>
+            <div class="profile-testimonial-text">"${t.content.replace(/"/g, '&quot;').replace(/</g, '&lt;')}"</div>
+            <div class="profile-testimonial-client">
+              <span class="profile-testimonial-name">${t.client_name.replace(/</g, '&lt;')}</span>
+              ${t.client_role ? `<span class="profile-testimonial-role">${t.client_role.replace(/</g, '&lt;')}</span>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    section.classList.remove('hidden');
+  } catch (_e) { /* non-critical */ }
+}
 
 // ==========================================
 // OWNER DETECTION — show Edit button if logged in

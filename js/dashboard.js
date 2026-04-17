@@ -196,6 +196,7 @@
     renderSecretarySection(currentAgent);
     loadContacts();
     renderQrSection();
+    loadTestimonials();
   }
 
   // ── Billing Card ──
@@ -468,17 +469,24 @@
 
       let actions = '';
       if (waPhone) {
-        const waMsg = encodeURIComponent(`Hi ${l.name || ''}, thanks for reaching out! How can I help you with Dubai properties?`);
+        const intentCtx = l.intent === 'seller'
+          ? `I saw you want to sell your property — I'd love to help with a free valuation.`
+          : l.intent === 'buyer'
+          ? `I saw you're looking for a property — let me find the best options for you.`
+          : `Thanks for reaching out! How can I help you with Dubai properties?`;
+        const waMsg = encodeURIComponent(`Hi ${l.name || ''}, ${intentCtx}`);
         actions += `<a class="lead-btn lead-btn-wa" href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`;
       }
       if (phone) actions += `<a class="lead-btn lead-btn-call" href="tel:${esc(phone)}">Call</a>`;
       if (email) actions += `<a class="lead-btn lead-btn-email" href="mailto:${esc(email)}">Email</a>`;
 
       let pills = '';
+      if (l.intent === 'seller') pills += `<span class="lead-pill lead-pill-seller">🏠 Seller</span>`;
+      else if (l.intent === 'buyer') pills += `<span class="lead-pill lead-pill-buyer">🔍 Buyer</span>`;
       if (l.budget_range) pills += `<span class="lead-pill">${esc(l.budget_range)}</span>`;
       if (l.property_type) pills += `<span class="lead-pill">${esc(l.property_type)}</span>`;
       if (l.preferred_area) pills += `<span class="lead-pill">${esc(l.preferred_area)}</span>`;
-      if (l.source) pills += `<span class="lead-pill">${esc(l.source)}</span>`;
+      if (l.source && l.source !== 'sell_qualifier' && l.source !== 'buy_qualifier') pills += `<span class="lead-pill">${esc(l.source)}</span>`;
 
       return '<div class="lead-card">' +
         '<div class="lead-top">' +
@@ -1270,16 +1278,173 @@
 
   // ── End Cobroke ────────────────────────────────────────────────────────────
 
+  // ── Testimonials ──
+  let _testimonialRating = 5;
+
+  async function loadTestimonials() {
+    if (!authToken) return;
+    const TESTIMONIALS_URL = `${SUPABASE_URL}/functions/v1/manage-testimonials`;
+    const res = await fetch(TESTIMONIALS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'list' })
+    }).catch(() => null);
+    if (!res?.ok) return;
+    const data = await res.json();
+    renderTestimonials(data.testimonials || []);
+  }
+
+  function renderTestimonials(items) {
+    const countEl = document.getElementById('testimonials-count');
+    const listEl = document.getElementById('testimonials-list');
+    if (countEl) countEl.textContent = `${items.length} / 10`;
+    if (!listEl) return;
+    if (!items.length) {
+      listEl.innerHTML = '<div class="empty-state" style="padding:20px 0"><div class="empty-title" style="font-size:14px">No testimonials yet</div><div class="empty-sub">Add your first client quote — it shows on your public profile</div></div>';
+      return;
+    }
+    listEl.innerHTML = items.map(t => `
+      <div class="testimonial-card" data-id="${esc(t.id)}">
+        <div class="testimonial-top">
+          <div>
+            <span class="testimonial-client">${esc(t.client_name)}</span>
+            ${t.client_role ? `<span class="testimonial-role">${esc(t.client_role)}</span>` : ''}
+          </div>
+          <div class="testimonial-stars">${'★'.repeat(t.rating || 5)}</div>
+        </div>
+        <div class="testimonial-text">"${esc(t.content)}"</div>
+        <button class="testimonial-delete" data-action="deleteTestimonial" data-id="${esc(t.id)}" aria-label="Delete testimonial">Delete</button>
+      </div>
+    `).join('');
+  }
+
+  // Star picker
+  document.getElementById('star-picker')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.star');
+    if (!btn) return;
+    _testimonialRating = Number(btn.dataset.val) || 5;
+    document.querySelectorAll('#star-picker .star').forEach((s, i) => {
+      s.classList.toggle('active', i < _testimonialRating);
+    });
+  });
+
+  window.addTestimonial = async function () {
+    if (!authToken) return;
+    const name = document.getElementById('t-client-name')?.value.trim();
+    const role = document.getElementById('t-client-role')?.value.trim();
+    const content = document.getElementById('t-content')?.value.trim();
+    const errEl = document.getElementById('t-error');
+    const btn = document.getElementById('t-add-btn');
+    if (errEl) errEl.textContent = '';
+    if (!name) { if (errEl) errEl.textContent = 'Client name is required.'; return; }
+    if (!content || content.length < 10) { if (errEl) errEl.textContent = 'Testimonial must be at least 10 characters.'; return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding...'; }
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/manage-testimonials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'add', client_name: name, client_role: role || null, content, rating: _testimonialRating })
+    }).catch(() => null);
+    if (btn) { btn.disabled = false; btn.textContent = 'Add Testimonial'; }
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => ({}));
+      if (errEl) errEl.textContent = d?.error || 'Failed to add — try again.';
+      return;
+    }
+    document.getElementById('t-client-name').value = '';
+    document.getElementById('t-client-role').value = '';
+    document.getElementById('t-content').value = '';
+    _testimonialRating = 5;
+    document.querySelectorAll('#star-picker .star').forEach((s, i) => s.classList.toggle('active', i === 4));
+    showToast('Testimonial added!');
+    loadTestimonials();
+  };
+
+  window.deleteTestimonial = async function (id) {
+    if (!authToken || !id) return;
+    if (!confirm('Delete this testimonial?')) return;
+    await fetch(`${SUPABASE_URL}/functions/v1/manage-testimonials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, action: 'delete', id })
+    }).catch(() => null);
+    showToast('Deleted');
+    loadTestimonials();
+  };
+
   // ── AI Secretary Section ──
+  let _secretaryHistory = [];
+
   function renderSecretarySection(agent) {
     const section = document.getElementById('secretary-section');
     if (!section || !agent) return;
-    const phoneEl = document.getElementById('secretary-phone');
-    const tokenEl = document.getElementById('secretary-token');
-    if (phoneEl) phoneEl.textContent = (window.SD_CONFIG && window.SD_CONFIG.VAPI_PHONE_NUMBER) || 'Not configured';
-    if (tokenEl) tokenEl.textContent = agent.siri_token || '—';
-    section.style.display = '';
+    // Section is always visible — no display:none needed
   }
+
+  function appendSecretaryMessage(role, text) {
+    const container = document.getElementById('secretary-messages');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = `secretary-msg secretary-msg-${role === 'user' ? 'user' : 'ai'}`;
+    const bubble = document.createElement('div');
+    bubble.className = 'secretary-msg-bubble';
+    bubble.textContent = text;
+    div.appendChild(bubble);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function sendToSecretary(message) {
+    if (!authToken || !message.trim()) return;
+    const input = document.getElementById('secretary-input');
+    const sendBtn = document.getElementById('secretary-send-btn');
+    if (input) input.value = '';
+    if (sendBtn) sendBtn.disabled = true;
+    appendSecretaryMessage('user', message);
+
+    // Thinking indicator
+    const thinkingEl = document.createElement('div');
+    thinkingEl.className = 'secretary-msg secretary-msg-ai secretary-thinking';
+    thinkingEl.innerHTML = '<div class="secretary-msg-bubble"><span class="thinking-dots"><span></span><span></span><span></span></span></div>';
+    document.getElementById('secretary-messages')?.appendChild(thinkingEl);
+    document.getElementById('secretary-messages').scrollTop = 999999;
+
+    try {
+      _secretaryHistory.push({ role: 'user', content: message });
+      if (_secretaryHistory.length > 10) _secretaryHistory = _secretaryHistory.slice(-10);
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-secretary`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+        body: JSON.stringify({ message, channel: 'dashboard', token: authToken, history: _secretaryHistory.slice(0, -1) })
+      });
+      thinkingEl.remove();
+      if (!res.ok) { appendSecretaryMessage('ai', 'Sorry, I had trouble connecting. Try again in a moment.'); }
+      else {
+        const data = await res.json();
+        const reply = data.reply || 'I didn\'t get a response — please try again.';
+        _secretaryHistory.push({ role: 'assistant', content: reply });
+        appendSecretaryMessage('ai', reply);
+      }
+    } catch (e) {
+      thinkingEl.remove();
+      appendSecretaryMessage('ai', 'Connection error. Please check your connection and try again.');
+    }
+    if (sendBtn) sendBtn.disabled = false;
+  }
+
+  window.sendSecretaryMessage = function () {
+    const input = document.getElementById('secretary-input');
+    if (input?.value.trim()) sendToSecretary(input.value.trim());
+  };
+
+  window.secretaryPrompt = function (el) {
+    const msg = el?.dataset?.msg;
+    if (msg) sendToSecretary(msg);
+  };
+
+  document.getElementById('secretary-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendSecretaryMessage(); }
+  });
 
   window.copySecretaryPhone = function () {
     const phone = document.getElementById('secretary-phone')?.textContent || '';

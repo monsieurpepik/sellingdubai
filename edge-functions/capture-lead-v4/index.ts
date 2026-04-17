@@ -233,7 +233,7 @@ export async function handler(
     const {
       agent_slug, name, phone, email,
       budget_range, property_type, preferred_area, message,
-      source, utm_source, utm_medium, utm_campaign, device_type
+      source, utm_source, utm_medium, utm_campaign, device_type, intent
     } = body;
 
     // === HONEYPOT: reject bots that fill hidden field ===
@@ -355,13 +355,14 @@ export async function handler(
         preferred_area: preferred_area?.trim() || null,
         message: message?.trim() || null,
         source: source || "profile",
+        intent: (intent === 'seller' || intent === 'buyer') ? intent : null,
         utm_source: utm_source || null,
         utm_medium: utm_medium || null,
         utm_campaign: utm_campaign || null,
         device_type: device_type || null,
         ip_hash: ipHash,
       })
-      .select("id, name, phone, email, budget_range, property_type, preferred_area, message, source, utm_source, utm_medium, utm_campaign, device_type, created_at")
+      .select("id, name, phone, email, budget_range, property_type, preferred_area, message, source, intent, utm_source, utm_medium, utm_campaign, device_type, created_at")
       .single();
 
     if (insertErr) {

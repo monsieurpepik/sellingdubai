@@ -160,6 +160,20 @@ document.addEventListener('click', (e) => {
       if (typeof window.mortOpProceed === 'function') window.mortOpProceed();
       break;
 
+    // Testimonials + AI Secretary (dashboard.js)
+    case 'addTestimonial':
+      if (typeof window.addTestimonial === 'function') window.addTestimonial();
+      break;
+    case 'deleteTestimonial':
+      if (typeof window.deleteTestimonial === 'function') window.deleteTestimonial(el.dataset.id);
+      break;
+    case 'sendSecretaryMessage':
+      if (typeof window.sendSecretaryMessage === 'function') window.sendSecretaryMessage();
+      break;
+    case 'secretaryPrompt':
+      if (typeof window.secretaryPrompt === 'function') window.secretaryPrompt(el);
+      break;
+
     // Cobroke (dashboard.js)
     case 'cobrokeTab':
       if (typeof window.cobrokeTab === 'function') window.cobrokeTab(el.dataset.tab);

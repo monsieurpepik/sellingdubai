@@ -427,6 +427,40 @@
 }
 .intent-card-arrow { color: rgba(255,255,255,0.25); flex-shrink: 0; }
 
+/* ========== PROFILE TESTIMONIALS ========== */
+#profile-testimonials {
+  margin: 24px 0 8px;
+  animation: fadeUp var(--duration-slow) var(--ease-out-expo) both;
+}
+.testimonials-heading {
+  font-family: 'Manrope', sans-serif; font-size: var(--text-xs);
+  font-weight: 600; color: rgba(255,255,255,0.35);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 14px; padding: 0 2px;
+}
+.testimonials-grid { display: flex; flex-direction: column; gap: 12px; }
+.profile-testimonial {
+  border: 1px solid rgba(255,255,255,0.07); border-radius: var(--radius-card);
+  padding: 18px 20px; background: rgba(255,255,255,0.02);
+}
+.profile-testimonial-stars {
+  color: #f59e0b; font-size: 13px; letter-spacing: 2px; margin-bottom: 10px;
+}
+.profile-testimonial-text {
+  font-family: 'Inter', sans-serif; font-size: var(--text-sm); line-height: 1.65;
+  color: rgba(255,255,255,0.65); font-style: italic; margin-bottom: 12px;
+  font-weight: 300;
+}
+.profile-testimonial-client { display: flex; align-items: baseline; gap: 8px; }
+.profile-testimonial-name {
+  font-family: 'Manrope', sans-serif; font-size: var(--text-sm); font-weight: 700;
+  color: var(--color-text-primary);
+}
+.profile-testimonial-role {
+  font-family: 'Inter', sans-serif; font-size: var(--text-xs);
+  color: rgba(255,255,255,0.35); font-weight: 400;
+}
+
 /* ========== QUALIFIER BOTTOM SHEETS ========== */
 .intent-sheet {
   position: fixed; inset: 0; z-index: 200;

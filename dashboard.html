@@ -400,19 +400,66 @@
       </div>
     </div>
 
-      <!-- AI Secretary -->
-      <div class="secretary-section" id="secretary-section" style="display:none">
+      <!-- Testimonials -->
+      <div class="leads-section" id="testimonials-section">
         <div class="leads-header">
-          <span class="leads-title">AI Secretary</span>
+          <span class="leads-title">Testimonials</span>
+          <span class="leads-count" id="testimonials-count"></span>
         </div>
-        <div class="secretary-card">
-          <div class="secretary-row">
-            <div class="secretary-label">Secretary number</div>
-            <div class="secretary-value-row">
-              <span id="secretary-phone" class="secretary-value"></span>
-              <button class="btn-sm btn-outline" data-action="copySecretaryPhone">Copy</button>
+        <!-- Add form -->
+        <div class="testimonial-add-card" id="testimonial-add-form">
+          <div class="testimonial-add-title">Add a client testimonial</div>
+          <div class="testimonial-fields">
+            <input id="t-client-name" class="dash-input" type="text" placeholder="Client name *" maxlength="100" autocomplete="off">
+            <input id="t-client-role" class="dash-input" type="text" placeholder="Role / transaction (e.g. Sold 2BR Marina)" maxlength="100" autocomplete="off">
+            <textarea id="t-content" class="dash-input dash-textarea" placeholder="What did they say? (10–500 characters) *" maxlength="500" rows="3"></textarea>
+            <div class="testimonial-rating-row">
+              <span class="testimonial-rating-label">Rating:</span>
+              <div class="star-picker" id="star-picker">
+                <button class="star" data-val="1" aria-label="1 star">★</button>
+                <button class="star" data-val="2" aria-label="2 stars">★</button>
+                <button class="star" data-val="3" aria-label="3 stars">★</button>
+                <button class="star" data-val="4" aria-label="4 stars">★</button>
+                <button class="star active" data-val="5" aria-label="5 stars">★</button>
+              </div>
             </div>
           </div>
+          <div id="t-error" class="t-error"></div>
+          <button class="btn-primary btn-sm" id="t-add-btn" data-action="addTestimonial">Add Testimonial</button>
+        </div>
+        <!-- List -->
+        <div id="testimonials-list"></div>
+      </div>
+
+      <!-- AI Secretary -->
+      <div class="secretary-section" id="secretary-section">
+        <div class="leads-header">
+          <span class="leads-title">AI Secretary</span>
+          <span class="leads-count" id="secretary-status-badge">Ask anything</span>
+        </div>
+        <div class="secretary-desc">Your AI assistant knows your leads, listings, and stats. Ask it anything — or let it handle WhatsApp enquiries after hours.</div>
+
+        <!-- Chat interface -->
+        <div class="secretary-chat" id="secretary-chat">
+          <div class="secretary-chat-messages" id="secretary-messages">
+            <div class="secretary-msg secretary-msg-ai">
+              <div class="secretary-msg-bubble">Hi! I'm your AI secretary. Ask me about your leads, listings, or stats — or type "draft a follow-up" and I'll write one for you.</div>
+            </div>
+          </div>
+          <div class="secretary-chat-input-row">
+            <input id="secretary-input" class="secretary-input" type="text" placeholder="Ask anything..." maxlength="500" autocomplete="off">
+            <button class="secretary-send-btn" id="secretary-send-btn" data-action="sendSecretaryMessage">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick prompts -->
+        <div class="secretary-prompts">
+          <button class="secretary-prompt-chip" data-action="secretaryPrompt" data-msg="Who are my newest leads?">New leads</button>
+          <button class="secretary-prompt-chip" data-action="secretaryPrompt" data-msg="Which leads should I follow up with today?">Follow up</button>
+          <button class="secretary-prompt-chip" data-action="secretaryPrompt" data-msg="What's my profile performance this week?">This week</button>
+          <button class="secretary-prompt-chip" data-action="secretaryPrompt" data-msg="Draft a professional follow-up message for a buyer lead">Draft message</button>
         </div>
       </div>
   </main>

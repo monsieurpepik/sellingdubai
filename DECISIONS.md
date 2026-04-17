@@ -383,3 +383,11 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 
 **No new third-party scripts:** All UI rendered via vanilla JS templates in `dashboard.js` consistent with existing dashboard patterns.
 
+
+## 2026-04-18 — agent-page chunk 20.35KB (minor budget overage)
+
+**What:** `dist/chunks/agent-page-*.js` is 20.35KB, slightly over the 20KB guideline.
+
+**Why justified:** Added `loadProfileTestimonials()` (~1.2KB minified) to `agent-page.ts`. This function is essential to the testimonials feature which is core to the agent profile value prop. Splitting it into a separate lazy chunk would require an additional dynamic import + network round-trip for a ~1.2KB payload, which is worse for performance than the marginal overage. The 20KB guideline is a soft budget; the hard limit is 30KB for `init.bundle.js` (currently 8.5KB).
+
+**Accepted risk:** None — 350 bytes over a soft threshold with a clear feature justification.
