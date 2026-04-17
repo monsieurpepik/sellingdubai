@@ -1,5 +1,18 @@
 # Architecture Decisions Log
 
+## 2026-04-17 — admin.html font stack (Geist Mono + DM Sans) retroactively approved
+
+**What:** `admin.html:13` loads Google Fonts `Geist Mono` (monospace) and `DM Sans` (sans). Both are declared as CSS variables at `admin.html:35–36` (`--font-sans`, `--font-mono`) and used throughout the admin panel. This entry documents the approval that was never written down.
+
+**Why this is acceptable despite the "no new Google Fonts" rule:**
+- `admin.html` is `<meta name="robots" content="noindex, nofollow">` — internal tool, not in the public performance budget.
+- It uses an entirely separate design-token system (lime `--accent: #d4e84a`, different bg/surface scale) — it is not part of the primary Manrope + Inter brand surface. Forcing it onto the main stack would require a full redesign for zero user-visible benefit.
+- DM Sans already has precedent — approved on 2026-04-07 for project-detail lazy injection.
+- Geist Mono is used for monospace data tables and log output where the primary stack has no monospace equivalent.
+- Fonts load async via `onload="this.onload=null;this.rel='stylesheet'"` pattern — no render-blocking impact even inside the admin panel.
+
+**Scope:** Approval applies only to `admin.html`. Public pages remain on the frozen Manrope + Inter + Playfair Display + Material Symbols stack (+ Cormorant Garamond on `landing.html` / `project-detail` per prior entries).
+
 ## 2026-04-12 — Platform audit fixes (C-1, C-2, C-3, W-1, W-3, W-4)
 
 **What:** Applied all critical and warning fixes from full platform audit.

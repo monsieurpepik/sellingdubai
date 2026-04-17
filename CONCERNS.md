@@ -125,8 +125,8 @@ If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB looku
 
 ## Design system debt — 2026-04-17 designer audit follow-ups
 
-**D1 — MEDIUM: admin.html uses Geist Mono + DM Sans without DECISIONS.md entry**
-`admin.html:13` loads `Geist Mono` and `DM Sans` via Google Fonts. DM Sans already has precedent (DECISIONS.md 2026-04-07 for project-detail). admin.html is `noindex, nofollow` and uses its own design token system (`--font-sans`, `--font-mono` at lines 35–36) — not in the public perf budget. Add a retroactive DECISIONS.md entry approving the admin stack, or migrate admin to the primary Manrope+Inter stack. No user impact; documentation debt only.
+**D1 — ~~MEDIUM~~ RESOLVED: admin.html Geist Mono + DM Sans documented**
+Retroactive approval added in DECISIONS.md on 2026-04-17. No code change; admin stack remains as-is.
 
 **D2 — ~~MEDIUM~~ RESOLVED: Additional sub-12px font sizes**
 Fixed: `css/edit.css:199` `.trust-copy` (7px→12px); `css/footer.css:73,84` (10px and 9px → 12px). Footer colors also retokenized to `--color-text-faint` / `--color-text-ghost`.
