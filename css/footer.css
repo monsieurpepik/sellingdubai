@@ -21,24 +21,69 @@
 .referral-cta-link:active { transform: scale(0.97); }
 .referral-cta-link:hover { color: #fff; }
 
-/* ========== FOOTER (whisper-quiet — agent is the brand) ========== */
+/* ========== FOOTER — platform tell ========== */
 .sd-footer {
-  width: 100%; padding: 32px 24px 28px;
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center; gap: 10px; margin-top: 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 24px;
 }
-.sd-footer-powered {
-  display: inline-block; text-decoration: none;
+.sd-footer-platform {
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 28px 24px 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
-.sd-footer-powered:hover img { opacity: 0.5 !important; }
-.sd-footer-legal {
-  font-family: 'Inter', sans-serif; font-size: var(--text-3xs); color: rgba(255,255,255,0.55);
+.sd-footer-wordmark {
+  font-family: 'Manrope', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
 }
-.sd-footer-legal a { color: var(--color-text-muted); text-decoration: none; }
-.sd-footer-legal a:hover { color: rgba(255,255,255,0.55); }
-.sd-footer-difc {
-  font-family: 'Inter', sans-serif; font-size: var(--text-4xs); color: rgba(255,255,255,0.55);
-  margin-top: 4px; letter-spacing: 0.02em;
+.sd-footer-tagline {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.4;
+  margin: 0;
+}
+.sd-footer-cta {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f5c842;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.sd-footer-cta:hover { opacity: 0.75; }
+.sd-footer-legal-row {
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 12px 24px 20px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+}
+.sd-footer-legal-row a {
+  color: rgba(255,255,255,0.25);
+  text-decoration: none;
+}
+.sd-footer-legal-row a:hover { color: rgba(255,255,255,0.5); }
+.sd-footer-entity {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.15);
 }
 
 /* ========== COOKIE CONSENT ========== */
