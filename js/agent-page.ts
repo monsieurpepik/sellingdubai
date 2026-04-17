@@ -228,19 +228,6 @@ export async function renderAgent(agent: Agent): Promise<void> {
     </button>`;
   }
 
-  const safeCustom1 = safeUrl(agent.custom_link_1_url ?? null);
-  if (safeCustom1 && agent.custom_link_1_label) {
-    buttonsHTML += `<a href="${escAttr(safeCustom1)}" target="_blank" rel="noopener noreferrer" class="link-btn link-btn-glass" data-track="custom" data-url="${escAttr(safeCustom1)}">
-      ${escHtml(agent.custom_link_1_label)}
-    </a>`;
-  }
-  // Second custom link is a Pro/Premium feature
-  const safeCustom2 = isPaidTier(agent) ? safeUrl(agent.custom_link_2_url ?? null) : null;
-  if (safeCustom2 && agent.custom_link_2_label) {
-    buttonsHTML += `<a href="${escAttr(safeCustom2)}" target="_blank" rel="noopener noreferrer" class="link-btn link-btn-glass" data-track="custom" data-url="${escAttr(safeCustom2)}">
-      ${escHtml(agent.custom_link_2_label)}
-    </a>`;
-  }
 
 
   if (linksEl) linksEl.innerHTML = buttonsHTML;
