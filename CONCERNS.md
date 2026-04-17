@@ -120,3 +120,23 @@ If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB looku
 5. ~~**C2**~~ **RESOLVED** 4e53772
 6. ~~**C3**~~ **RESOLVED** — verified in source; magic link insert failure returns 500.
 7. **C8** — Monitor/alert; low urgency.
+
+---
+
+## Design system debt — 2026-04-17 designer audit follow-ups
+
+**D1 — MEDIUM: admin.html uses Geist Mono + DM Sans without DECISIONS.md entry**
+`admin.html:13` loads `Geist Mono` and `DM Sans` via Google Fonts. DM Sans already has precedent (DECISIONS.md 2026-04-07 for project-detail). admin.html is `noindex, nofollow` and uses its own design token system (`--font-sans`, `--font-mono` at lines 35–36) — not in the public perf budget. Add a retroactive DECISIONS.md entry approving the admin stack, or migrate admin to the primary Manrope+Inter stack. No user impact; documentation debt only.
+
+**D2 — MEDIUM: Additional sub-12px font sizes outside today's fix scope**
+- `css/edit.css:199` — `.trust-copy` at 7px
+- `css/footer.css:73,84` — 9–10px text
+Same class of WCAG issue as the join.css fix committed today; deferred to avoid scope creep.
+
+**D3 — MEDIUM: Additional rgba(255,255,255,0.3–0.4) on readable text**
+- `css/edit.css:278` — `.lead-time` at `rgba(255,255,255,0.3)`
+- `css/edit.css:289` — `.empty-state` at `rgba(255,255,255,0.3)`
+Adjacent to today's fix, same bug class, deferred.
+
+**D4 — LOW: Audit error — Cormorant Garamond is NOT unauthorized**
+The 2026-04-17 audit flagged `landing.html:31` as a fonts-rule violation. DECISIONS.md 2026-04-12 explicitly approves it. No action required; noted so future audits don't re-flag.

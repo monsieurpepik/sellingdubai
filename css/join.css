@@ -307,17 +307,17 @@
     text-align: center; word-break: break-all; letter-spacing: -0.2px;
   }
   .btn-copy {
-    background: none; border: none; color: rgba(255,255,255,0.4);
-    padding: 10px; font-size: 8px; cursor: pointer; font-weight: 700;
+    background: none; border: none; color: var(--color-text-muted);
+    padding: 10px; font-size: 12px; cursor: pointer; font-weight: 700;
     font-family: 'Inter', sans-serif; letter-spacing: 0.18em;
     text-transform: uppercase; transition: color 0.15s;
   }
-  .btn-copy:hover { color: rgba(255,255,255,0.7); }
+  .btn-copy:hover { color: var(--color-text-high); }
 
   /* Trust footer — same as profile */
-  .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; opacity: 0.4; }
-  .trust-dld { font-size: 8px; text-transform: uppercase; letter-spacing: 0.18em; line-height: 2.2; margin-bottom: 12px; }
-  .trust-copy { font-size: 7px; text-transform: uppercase; letter-spacing: 0.18em; }
+  .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; opacity: 0.55; }
+  .trust-dld { font-size: 12px; text-transform: uppercase; letter-spacing: 0.18em; line-height: 2.2; margin-bottom: 12px; }
+  .trust-copy { font-size: 12px; text-transform: uppercase; letter-spacing: 0.18em; }
 
   .hidden { display: none !important; }
 

@@ -222,7 +222,7 @@
 
   /* ── AI Secretary Chat ── */
   .secretary-desc {
-    font-size: var(--text-sm); color: rgba(255,255,255,0.4); line-height: 1.55;
+    font-size: var(--text-sm); color: var(--color-text-dim); line-height: 1.55;
     margin-bottom: 16px; font-family: 'Inter', sans-serif;
   }
   .secretary-chat {
