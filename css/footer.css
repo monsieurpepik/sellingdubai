@@ -70,19 +70,19 @@
   padding: 12px 24px 20px;
   text-align: center;
   font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  color: rgba(255,255,255,0.25);
+  font-size: 12px;
+  color: var(--color-text-faint);
 }
 .sd-footer-legal-row a {
-  color: rgba(255,255,255,0.25);
+  color: var(--color-text-faint);
   text-decoration: none;
 }
-.sd-footer-legal-row a:hover { color: rgba(255,255,255,0.5); }
+.sd-footer-legal-row a:hover { color: var(--color-text-high); }
 .sd-footer-entity {
   display: block;
   margin-top: 4px;
-  font-size: 9px;
-  color: rgba(255,255,255,0.15);
+  font-size: 12px;
+  color: var(--color-text-ghost);
 }
 
 /* ========== COOKIE CONSENT ========== */

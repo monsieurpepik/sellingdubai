@@ -195,8 +195,8 @@
   .verify-verified { background: rgba(37,211,102,0.06); border: 1px solid rgba(37,211,102,0.15); color: var(--color-success); }
   .verify-rejected { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.15); color: #f87171; }
 
-  .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; opacity: 0.4; }
-  .trust-copy { font-size: 7px; text-transform: uppercase; letter-spacing: 0.18em; }
+  .trust { margin-top: auto; padding: 0 24px 36px; text-align: center; opacity: 0.55; }
+  .trust-copy { font-size: 12px; text-transform: uppercase; letter-spacing: 0.18em; }
 
   /* Webhook help */
   .help-box {
@@ -275,7 +275,7 @@
   .lead-item:last-child { border-bottom: none; }
   .lead-name { font-size: 14px; font-weight: 600; color: #fff; }
   .lead-meta { font-size: 12px; color: var(--color-text-dim); margin-top: 2px; }
-  .lead-time { font-size: 11px; color: rgba(255,255,255,0.3); white-space: nowrap; }
+  .lead-time { font-size: 12px; color: var(--color-text-dim); white-space: nowrap; }
   .referrer-bar {
     display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
   }
@@ -286,7 +286,7 @@
   }
   .referrer-count { font-size: 12px; color: var(--color-text-dim); min-width: 30px; }
   .empty-state {
-    text-align: center; padding: 24px; color: rgba(255,255,255,0.3); font-size: 13px;
+    text-align: center; padding: 24px; color: var(--color-text-dim); font-size: 13px;
   }
 
 .toast {
