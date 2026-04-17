@@ -56,6 +56,7 @@
   height: 100dvh;
   display: flex; flex-direction: column; align-items: center;
   overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   touch-action: pan-y;
   padding-bottom: env(safe-area-inset-bottom);

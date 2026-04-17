@@ -40,11 +40,10 @@
   gap: 6px;
 }
 .sd-footer-wordmark {
-  font-family: 'Manrope', sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: #fff;
+  display: block;
+  height: 28px;
+  width: auto;
+  opacity: 0.9;
 }
 .sd-footer-tagline {
   font-family: 'Inter', sans-serif;
