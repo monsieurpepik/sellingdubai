@@ -66,6 +66,16 @@
 .detail-show-all:active { transform: scale(0.95); transition-duration: var(--duration-instant); }
 .detail-show-all:hover { background: var(--color-overlay); }
 
+.hero-counter {
+  position: absolute; bottom: 16px; left: 16px; z-index: 10;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.85);
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.06em; padding: 5px 11px; border-radius: 20px;
+  pointer-events: none;
+}
+
 .detail-title-bar {
   padding: 24px 24px 16px;
   animation: fadeUp var(--duration-moderate) var(--ease-out-expo) var(--duration-instant) both;

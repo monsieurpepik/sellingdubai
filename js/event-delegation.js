@@ -102,6 +102,7 @@ document.addEventListener('click', (e) => {
 
     // Property detail (property-detail.js)
     case 'openDetailHero':
+      if (window._heroSwipeOccurred) { window._heroSwipeOccurred = false; break; }
       if (typeof window.openPhotoViewer === 'function') window.openPhotoViewer(window._currentDetailHeroIdx || 0);
       break;
     case 'swapDetailHero':

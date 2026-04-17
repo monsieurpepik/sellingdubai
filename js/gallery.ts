@@ -45,7 +45,14 @@ window.swapDetailHero = (idx: number) => {
   if (idx < 0 || idx >= images.length) return;
   window._currentDetailHeroIdx = idx;
   const hero = document.getElementById('detail-hero-img') as HTMLImageElement | null;
-  if (hero) hero.src = images[idx] ?? '';
+  if (hero) {
+    hero.style.transition = 'opacity 0.18s ease';
+    hero.style.opacity = '0.35';
+    hero.src = images[idx] ?? '';
+    hero.onload = () => { hero.style.opacity = '1'; };
+  }
+  const counter = document.getElementById('hero-counter');
+  if (counter) counter.textContent = `${idx + 1} / ${images.length}`;
 };
 
 window.closePhotoViewer = () => {

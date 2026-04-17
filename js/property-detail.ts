@@ -103,7 +103,8 @@ function renderDetailView(p: Property): void {
         `<img src="${escAttr(url)}" alt="" loading="lazy" data-action="swapDetailHero" data-dir="${i + 1}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:pointer" data-managed>`
       ).join('');
       const showAllBtn = `<button class="detail-show-all" data-action="openFullGallery"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>SHOW ALL PHOTOS</button>`;
-      galleryHtml = `<div class="detail-gallery-wrap">${heroImg}<div class="detail-gallery">${gridImgs}</div>${showAllBtn}</div>`;
+      const counterHtml = `<div id="hero-counter" class="hero-counter">1 / ${allImages.length}</div>`;
+      galleryHtml = `<div class="detail-gallery-wrap">${heroImg}${counterHtml}<div class="detail-gallery">${gridImgs}</div>${showAllBtn}</div>`;
     } else {
       galleryHtml = heroImg;
     }
@@ -292,6 +293,26 @@ function renderDetailView(p: Property): void {
     </div>
   `;
   sheet.scrollTop = 0;
+
+  // Hero swipe — swipe left/right to cycle through property images
+  if (allImages.length > 1) {
+    const heroEl = document.getElementById('detail-hero-img');
+    if (heroEl) {
+      let _heroSwipeStartX = 0;
+      heroEl.addEventListener('touchstart', (e: TouchEvent) => {
+        _heroSwipeStartX = e.touches[0]!.clientX;
+      }, { passive: true });
+      heroEl.addEventListener('touchend', (e: TouchEvent) => {
+        const dx = e.changedTouches[0]!.clientX - _heroSwipeStartX;
+        if (Math.abs(dx) > 50) {
+          window._heroSwipeOccurred = true;
+          const cur = window._currentDetailHeroIdx ?? 0;
+          const next = (cur + (dx < 0 ? 1 : -1) + allImages.length) % allImages.length;
+          window.swapDetailHero?.(next);
+        }
+      }, { passive: true });
+    }
+  }
 
   // Sticky header on scroll — shows property title when scrolled past the title bar
   let _stickyEl = document.getElementById('detail-sticky-header');
