@@ -214,34 +214,17 @@ export async function renderAgent(agent: Agent): Promise<void> {
     </a>`;
   }
 
-  // Calendly booking link is a Pro/Premium feature
-  const safeCalendly = isPaidTier(agent) ? safeUrl(agent.calendly_url ?? null) : null;
-  if (safeCalendly) {
-    buttonsHTML += `<a href="${escAttr(safeCalendly)}" target="_blank" rel="noopener noreferrer" class="link-btn" data-track="consultation" data-url="${escAttr(safeCalendly)}">
-      <span class="btn-icon">${ICONS.calendar}</span> Get Free Consultation
-    </a>`;
-  } else {
-    buttonsHTML += `<button class="link-btn" data-action="openLead" data-track="consultation">
-      <span class="btn-icon">${ICONS.calendar}</span> Send an Enquiry
-    </button>`;
-  }
+  // Portfolio in the primary secondary slot (replaces Enquiry/Calendly)
+  buttonsHTML += `<button class="link-btn link-btn-glass" data-action="openProps" data-track="listings" style="width:100%">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.7"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    Portfolio
+  </button>`;
 
   const showPreapproval = agent.show_preapproval !== false;
   if (showPreapproval) {
-    buttonsHTML += `<div class="btn-grid">
-      <button class="link-btn link-btn-glass" data-action="openProps" data-track="listings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.7"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-        Portfolio
-      </button>
-      <button class="link-btn link-btn-glass" data-action="openMortgage" data-track="mortgage" style="border:none;cursor:pointer;">
-        <span class="btn-icon" style="width:16px;height:16px;">${ICONS.shield}</span>
-        Get Pre-Approved
-      </button>
-    </div>`;
-  } else {
-    buttonsHTML += `<button class="link-btn link-btn-glass" data-action="openProps" data-track="listings" style="width:100%">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.7"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-      Portfolio
+    buttonsHTML += `<button class="link-btn link-btn-glass" data-action="openMortgage" data-track="mortgage" style="width:100%;border:none;cursor:pointer;">
+      <span class="btn-icon" style="width:16px;height:16px;">${ICONS.shield}</span>
+      Get Pre-Approved
     </button>`;
   }
 
@@ -259,9 +242,6 @@ export async function renderAgent(agent: Agent): Promise<void> {
     </a>`;
   }
 
-  buttonsHTML += `<button class="link-btn link-btn-ghost" data-action="saveContact" data-track="save_contact">
-    <span class="btn-icon" style="width:16px;height:16px;opacity:0.6">${ICONS.contact}</span> Save My Contact
-  </button>`;
 
   if (linksEl) linksEl.innerHTML = buttonsHTML;
 
