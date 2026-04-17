@@ -432,10 +432,10 @@ export async function loadProfileTestimonials(agentId: string): Promise<void> {
         ${items.map(t => `
           <div class="profile-testimonial">
             <div class="profile-testimonial-stars">${'★'.repeat(Math.min(5, t.rating || 5))}</div>
-            <div class="profile-testimonial-text">"${t.content.replace(/"/g, '&quot;').replace(/</g, '&lt;')}"</div>
+            <div class="profile-testimonial-text">"${escHtml(t.content)}"</div>
             <div class="profile-testimonial-client">
-              <span class="profile-testimonial-name">${t.client_name.replace(/</g, '&lt;')}</span>
-              ${t.client_role ? `<span class="profile-testimonial-role">${t.client_role.replace(/</g, '&lt;')}</span>` : ''}
+              <span class="profile-testimonial-name">${escHtml(t.client_name)}</span>
+              ${t.client_role ? `<span class="profile-testimonial-role">${escHtml(t.client_role)}</span>` : ''}
             </div>
           </div>
         `).join('')}

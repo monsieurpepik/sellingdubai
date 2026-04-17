@@ -229,10 +229,10 @@ function _closeSheet(id: string, bodyId: string): void {
   sheet.classList.remove('open');
   sheet.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
-  // Restore body content if it was replaced by success state
   const body = document.getElementById(bodyId);
   if (body && body.querySelector('.sheet-success')) {
-    // Reset chip state defaults
+    const orig = body.dataset.origHtml;
+    if (orig) { body.innerHTML = orig; delete body.dataset.origHtml; }
     _chipState['sell-type'] = 'Apartment';
     _chipState['sell-timeline'] = '1-3 months';
     _chipState['buy-mode'] = 'Buy';
@@ -307,7 +307,7 @@ window.submitSellFlow = () => {
   }).catch(() => {});
 
   const body = document.getElementById('sell-body');
-  if (body) body.innerHTML = _buildSuccessPanel(first, 'sell');
+  if (body) { body.dataset.origHtml = body.innerHTML; body.innerHTML = _buildSuccessPanel(first, 'sell'); }
   logEvent('lead_submit', { source: 'sell_qualifier' });
 };
 
@@ -366,7 +366,7 @@ window.submitBuyFlow = () => {
   }).catch(() => {});
 
   const body = document.getElementById('buy-body');
-  if (body) body.innerHTML = _buildSuccessPanel(first, 'buy');
+  if (body) { body.dataset.origHtml = body.innerHTML; body.innerHTML = _buildSuccessPanel(first, 'buy'); }
   logEvent('lead_submit', { source: 'buy_qualifier' });
 };
 
