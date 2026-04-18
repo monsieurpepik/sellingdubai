@@ -185,7 +185,7 @@
   }
   .testimonial-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
   .dash-input {
-    width: 100%; padding: 11px 13px; border-radius: var(--radius-m);
+    width: 100%; padding: 12px 14px; border-radius: var(--radius-m);
     border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
     color: var(--color-text-primary); font-family: 'Inter', sans-serif;
     font-size: var(--text-sm); outline: none; box-sizing: border-box;
@@ -256,7 +256,7 @@
     background: rgba(255,255,255,0.02);
   }
   .secretary-input {
-    flex: 1; padding: 13px 14px; background: transparent; border: none;
+    flex: 1; padding: 12px 14px; background: transparent; border: none;
     color: var(--color-text-primary); font-family: 'Inter', sans-serif;
     font-size: var(--text-sm); outline: none;
   }
@@ -433,7 +433,7 @@
   .modal-body { display: flex; flex-direction: column; gap: 14px; }
   .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
   .modal-label { font-size: 12px; font-weight: 600; color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-  .modal-input, .modal-select { width: 100%; padding: 11px 13px; background: rgba(255,255,255,0.05); border: 1px solid var(--color-border-subtle); border-radius: 8px; color: var(--color-text-primary); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; }
+  .modal-input, .modal-select { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--color-border-subtle); border-radius: 8px; color: var(--color-text-primary); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; }
   .modal-input:focus, .modal-select:focus { border-color: rgba(99,102,241,0.5); }
   .modal-select option { background: #1a1a1f; color: var(--color-text-primary); }
   .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
