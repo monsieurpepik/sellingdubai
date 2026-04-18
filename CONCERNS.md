@@ -136,3 +136,9 @@ Fixed: `css/edit.css:278` `.lead-time` and `:289` `.empty-state` swapped to `var
 
 **D4 — LOW: Audit error — Cormorant Garamond is NOT unauthorized**
 The 2026-04-17 audit flagged `landing.html:31` as a fonts-rule violation. DECISIONS.md 2026-04-12 explicitly approves it. No action required; noted so future audits don't re-flag.
+
+**D5 — MEDIUM: Inline style= attribute extraction (index.html + edit.html)**
+`index.html` has ~106 inline `style=` attributes; `edit.html` has ~69. These block design-token propagation and make theming impossible. Verification-pending banner in `index.html:141` uses hardcoded amber hex inline instead of a `.banner-warning` class referencing `--color-warning`. Scope: grep both files for `style=`, group by pattern, extract into component/utility classes in `css/profile.css` or `css/edit.css`, verify visual parity per page state (loading / auth-gated / verification-pending / loaded / error). Estimated 2–4 hour session. **Schedule as its own fix session — do not combine with other work.**
+
+**D6 — MEDIUM: Hardcoded hex/px values in `js/project-detail.ts` template strings**
+Lines 370–414 render HTML via template literals with hardcoded colors (`#f5f2ec`, `#1a1916`, `#8a8780`), font sizes (`10px`, `12px`, `16px`, `20px`, `28px`), and font-family declarations ("Cormorant Garamond", "DM Sans"). Same token-bypass bug as inline CSS, just in JS. Fix by extracting a `css/project-detail.css` module with proper class hooks and rendering class names instead of inline styles. Must preserve the lazy-injection pattern (`_injectPdFonts` at js/project-detail.ts:94) documented in DECISIONS.md 2026-04-07. Estimated 1–2 hour session. **Schedule as its own fix session.**
