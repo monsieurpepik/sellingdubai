@@ -239,10 +239,6 @@ export async function renderAgent(agent: Agent): Promise<void> {
 
   if (linksEl) linksEl.innerHTML = buttonsHTML;
 
-  if (agent.show_golden_visa !== false) {
-    document.getElementById('gv-widget')?.classList.remove('hidden');
-  }
-
   void loadProperties(agent.id);
   // Off-plan section hidden for core flow — re-enable when off-plan UX is ready
   // void loadRemProjects(agent.slug ?? '', agent.id);

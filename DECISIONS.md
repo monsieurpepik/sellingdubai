@@ -391,3 +391,13 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 **Why justified:** Added `loadProfileTestimonials()` (~1.2KB minified) to `agent-page.ts`. This function is essential to the testimonials feature which is core to the agent profile value prop. Splitting it into a separate lazy chunk would require an additional dynamic import + network round-trip for a ~1.2KB payload, which is worse for performance than the marginal overage. The 20KB guideline is a soft budget; the hard limit is 30KB for `init.bundle.js` (currently 8.5KB).
 
 **Accepted risk:** None — 350 bytes over a soft threshold with a clear feature justification.
+
+---
+
+## 2026-04-22 — agents.show_golden_visa column now unused (Phase 2 scope consolidation)
+
+**What:** Removed the Golden Visa widget (`#gv-widget`) from the agent profile surface. Deleted DOM in `index.html`, display logic in `js/agent-page.ts` (the `show_golden_visa !== false` guard), and orphaned CSS in `css/profile.css` (`.gv-widget`, `.gv-card`, `.gv-icon`, `.gv-info`, `.gv-threshold`).
+
+**Why:** Phase 2 scope consolidation — reducing the profile page to four canonical functional elements. Golden Visa is informational filler, not agent-specific content. Agents with `show_golden_visa = true` in the DB will simply no longer see the widget; no data migration needed.
+
+**Schema note:** `agents.show_golden_visa` column remains in the DB as a future schema drop candidate. Do not drop it without a dedicated migration PR. No query references this column anywhere in the codebase after this commit.
