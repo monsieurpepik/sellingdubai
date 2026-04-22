@@ -53,17 +53,6 @@
   line-height: 1.4;
   margin: 0;
 }
-.sd-footer-cta {
-  display: inline-block;
-  margin-top: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: #f5c842;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-.sd-footer-cta:hover { opacity: 0.75; }
 .sd-footer-legal-row {
   background: #000;
   border-top: 1px solid rgba(255,255,255,0.04);

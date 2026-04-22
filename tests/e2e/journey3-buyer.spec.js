@@ -63,18 +63,6 @@ test('Agent profile page loads and shows #agent-page', async ({ page }) => {
   await expect(page.locator('#loading')).not.toBeVisible();
 });
 
-test('Nav claim CTA points to /join', async ({ page }) => {
-  await mockAgentData(page);
-  await page.goto(`/a/${AGENT_SLUG}`);
-  const bodyHTML = await page.evaluate(() => document.getElementById('agent-page')?.className);
-  console.log('agent-page class:', bodyHTML);
-  await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
-
-  const claimBtn = page.locator('#nav-claim-btn');
-  await expect(claimBtn).toBeVisible();
-  await expect(claimBtn).toHaveAttribute('href', '/join');
-});
-
 test('Mortgage modal opens and closes', async ({ page }) => {
   await mockAgentData(page);
   await page.goto(`/a/${AGENT_SLUG}`);

@@ -73,16 +73,6 @@
   text-decoration: none;
 }
 .brand-spacer { margin-top: 28px; margin-bottom: 40px; }
-.nav-claim {
-  font-size: var(--text-2xs); font-weight: 600; color: rgba(255,255,255,0.55);
-  text-decoration: none; padding: 7px 14px; border-radius: var(--radius-xl);
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-  letter-spacing: 0.06em; text-transform: uppercase;
-  transition: transform var(--duration-normal) var(--spring), color var(--duration-fast), background var(--duration-fast), border-color var(--duration-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-.nav-claim:active { transform: scale(0.95); transition-duration: var(--duration-instant); }
-.nav-claim:hover { color: rgba(255,255,255,0.8); background: var(--color-border); border-color: var(--color-border-strong); }
 .nav-share {
   width: 44px; height: 44px; border-radius: var(--radius-full); border: 1px solid var(--color-border);
   background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.55); cursor: pointer;

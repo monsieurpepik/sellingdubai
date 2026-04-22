@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sd-v3';
+const CACHE_NAME = 'sd-v4';
 // '/' removed — HTML is handled network-first in the fetch handler
 const PRECACHE = ['/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
 

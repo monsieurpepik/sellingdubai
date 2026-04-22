@@ -401,3 +401,13 @@ Load test workflow (`.github/workflows/load-test.yml`) uses `grafana/setup-k6-ac
 **Why:** Phase 2 scope consolidation — reducing the profile page to four canonical functional elements. Golden Visa is informational filler, not agent-specific content. Agents with `show_golden_visa = true` in the DB will simply no longer see the widget; no data migration needed.
 
 **Schema note:** `agents.show_golden_visa` column remains in the DB as a future schema drop candidate. Do not drop it without a dedicated migration PR. No query references this column anywhere in the codebase after this commit.
+
+---
+
+## 2026-04-22 — Removed platform growth CTAs from agent profile; sw.js cache bump to sd-v4
+
+**What:** Removed `#nav-claim-btn` ("Get Your Page") from nav and `.sd-footer-cta` ("Agents — claim your page →") from footer in `index.html`. Deleted corresponding claimBtn hide/show logic from `js/agent-page.ts` (two locations in `showEditButtonIfOwner`). Deleted orphaned `.nav-claim` CSS rules from `css/layout.css` and `.sd-footer-cta` rules from `css/footer.css`. Deleted E2E test `'Nav claim CTA points to /join'` from `journey3-buyer.spec.js`. Bumped `sw.js` `CACHE_NAME` from `sd-v3` → `sd-v4` to force cache invalidation on existing service workers.
+
+**Why:** Phase 2 scope consolidation — CTAs targeting agent acquisition do not belong on a buyer-facing profile page. The `/join` destination is still reachable from `landing.html` (lines 651, 659) and all direct links.
+
+**Staging load-test note:** `staging.sellingdubai.com` was unreachable during this session (timeout). Full k6 `agent_profile` scenario p95 reading deferred to post-staging-deploy. Expected improvement: ~6KB HTML reduction + 4,657-byte JS chunk reduction (lead-modal) from commit 1. Baseline: index.html 58,307 bytes, lead-modal chunk 9,624 bytes.

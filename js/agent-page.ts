@@ -429,8 +429,6 @@ export async function showEditButtonIfOwner(agent: Agent, preResolvedIsOwner?: b
         editBtn.classList.remove('hidden');
       }
       // Hide "Get Your Page" since they already have one
-      const claimBtn = document.getElementById('nav-claim-btn') as HTMLElement | null;
-      if (claimBtn) claimBtn.style.display = 'none';
     }
     return;
   }
@@ -456,9 +454,6 @@ export async function showEditButtonIfOwner(agent: Agent, preResolvedIsOwner?: b
         editBtn.href = '/edit';
         editBtn.classList.remove('hidden');
       }
-      // Hide "Get Your Page" since they already have one
-      const claimBtn = document.getElementById('nav-claim-btn') as HTMLElement | null;
-      if (claimBtn) claimBtn.style.display = 'none';
     }
   } catch (_e) { /* silently fail — not critical */ }
 }
