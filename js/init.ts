@@ -99,17 +99,6 @@ window.openLeadForProperty = async function openLeadForPropertyLazy(propertyTitl
   await _leadModal;
   if (window.openLeadForProperty !== openLeadForPropertyLazy) window.openLeadForProperty?.(propertyTitle);
 };
-window.openSellFlow = async function openSellFlowLazy() {
-  if (!_leadModal) _leadModal = lazyLoad(import('./lead-modal'), 'lead-modal');
-  await _leadModal;
-  if (window.openSellFlow !== openSellFlowLazy) window.openSellFlow?.();
-};
-window.openBuyFlow = async function openBuyFlowLazy() {
-  if (!_leadModal) _leadModal = lazyLoad(import('./lead-modal'), 'lead-modal');
-  await _leadModal;
-  if (window.openBuyFlow !== openBuyFlowLazy) window.openBuyFlow?.();
-};
-
 // filters.ts — loaded on first filters/properties panel open
 window.openFilters = async function openFiltersLazy() {
   if (!_filters) _filters = lazyLoad(import('./filters'), 'filters');

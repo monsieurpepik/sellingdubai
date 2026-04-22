@@ -26,13 +26,6 @@ declare global {
     openLead: (() => void) | undefined;
     openLeadForBrochure: ((projectName: string, brochureUrl: string) => void) | undefined;
     openLeadForProperty: ((propertyTitle: string) => void) | undefined;
-    openSellFlow: (() => void) | undefined;
-    closeSellFlow: (() => void) | undefined;
-    submitSellFlow: (() => void) | undefined;
-    openBuyFlow: (() => void) | undefined;
-    closeBuyFlow: (() => void) | undefined;
-    submitBuyFlow: (() => void) | undefined;
-    selectChip: ((el: HTMLElement) => void) | undefined;
     openFilters: (() => void) | undefined;
     openProps: (() => void) | undefined;
     openMortgage: (() => void) | undefined;
