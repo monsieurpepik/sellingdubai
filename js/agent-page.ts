@@ -111,7 +111,14 @@ export async function renderAgent(agent: Agent): Promise<void> {
     img.width = 80;
     img.height = 80;
     img.alt = agent.name ?? '';
+    let triedRaw = false;
     img.onerror = () => {
+      if (canOptimize && !triedRaw) {
+        triedRaw = true;
+        img.removeAttribute('srcset');
+        img.src = agent.photo_url!;
+        return;
+      }
       if (avatarContainer) avatarContainer.innerHTML = `<div class="avatar-fallback${isVerified ? ' avatar-verified' : ''}">${safeInitials}</div>`;
     };
     avatarContainer.innerHTML = '';
