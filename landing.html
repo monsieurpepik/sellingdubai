@@ -30,6 +30,8 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" rel="stylesheet"/></noscript>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" as="style" data-async-css>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" as="style" data-async-css>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"></noscript>
 <script src="https://browser.sentry-cdn.com/10.45.0/bundle.min.js" integrity="sha384-VEWXXAPF7WUgeV+xakxNZBV/Lx8q5Ikv6yAz/Vq/dRloef1siHfu0VXQsMitckYU" crossorigin="anonymous" defer></script>
 <!-- Must come before sentry-init.js -->
 <script src="/dist/release-config.js"></script>
@@ -520,6 +522,67 @@
     width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0;
   }
 
+  /* ── Loading screen ── */
+  @keyframes ldLabelIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ldCounterIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #sd-loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0a0a0a;
+    pointer-events: all;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #sd-loader.ld-done { opacity: 0; pointer-events: none; }
+  .ld-label {
+    position: absolute; top: 32px; left: 32px;
+    font-size: 11px; color: #888888; font-family: 'Manrope', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.3em; font-weight: 500;
+    opacity: 0; transform: translateY(-20px);
+    animation: ldLabelIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+  }
+  @media (min-width: 768px) { .ld-label { top: 48px; left: 48px; font-size: 13px; } }
+  .ld-words {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ld-word {
+    position: absolute;
+    font-family: 'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(36px, 7vw, 80px);
+    color: rgba(245, 245, 245, 0.8);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none; user-select: none;
+  }
+  .ld-word.ld-word-active  { opacity: 1; transform: translateY(0); }
+  .ld-word.ld-word-exit    { opacity: 0; transform: translateY(-20px); }
+  .ld-counter {
+    position: absolute; bottom: 32px; right: 32px;
+    font-family: 'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(64px, 10vw, 120px);
+    color: #f5f5f5; line-height: 1;
+    font-variant-numeric: tabular-nums;
+    opacity: 0; transform: translateY(20px);
+    animation: ldCounterIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+  }
+  @media (min-width: 768px) { .ld-counter { bottom: 48px; right: 48px; } }
+  .ld-bar-track {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px; background: rgba(31, 31, 31, 0.5);
+  }
+  .ld-bar-fill {
+    height: 100%; transform-origin: left; transform: scaleX(0);
+    background: linear-gradient(90deg, #89AACC 0%, #4E85BF 100%);
+    box-shadow: 0 0 8px rgba(137, 170, 204, 0.35);
+  }
+
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","SoftwareApplication"],"name":"SellingDubai","url":"https://sellingdubai.ae","description":"The DLD-verified link-in-bio platform for Dubai real estate agents. Verified badge, listings, WhatsApp, and analytics.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"AED","description":"Verified agent profile, up to 3 listings, basic analytics, and lead capture."},{"@type":"Offer","name":"Pro","price":"299","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"299","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Free plus up to 20 listings, advanced analytics, lead CRM, and custom branding."},{"@type":"Offer","name":"Premium","price":"799","priceCurrency":"AED","priceSpecification":{"@type":"UnitPriceSpecification","price":"799","priceCurrency":"AED","unitCode":"MON"},"description":"Everything in Pro plus unlimited listings, lead export, featured agent badge, and dedicated support."}],"areaServed":{"@type":"City","name":"Dubai"},"sameAs":["https://sellingdubai.ae"]}</script>
 <style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:#000;color:#fff;padding:8px 16px;font-size:14px;text-decoration:none;border-radius:4px;}.skip-link:focus{left:50%;transform:translateX(-50%);top:8px;width:auto;height:auto;overflow:visible;}</style>
@@ -530,6 +593,56 @@
 
 <body class="bg-surface font-body text-on-surface antialiased overflow-x-hidden">
 <a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="sd-loader" role="status" aria-label="Loading SellingDubai">
+  <div class="ld-label">Selling Dubai . com</div>
+  <div class="ld-words" aria-hidden="true">
+    <span class="ld-word ld-word-active">Design</span>
+    <span class="ld-word">Create</span>
+    <span class="ld-word">Inspire</span>
+  </div>
+  <div class="ld-counter" aria-hidden="true">000</div>
+  <div class="ld-bar-track" aria-hidden="true">
+    <div class="ld-bar-fill"></div>
+  </div>
+</div>
+<script>
+(function () {
+  var loader = document.getElementById('sd-loader');
+  if (!loader) return;
+  var counter = loader.querySelector('.ld-counter');
+  var barFill = loader.querySelector('.ld-bar-fill');
+  var words = loader.querySelectorAll('.ld-word');
+  var wordIndex = 0;
+  var DURATION = 2700;
+  var startTs = null;
+  var rafDone = false;
+  var wordTimer = setInterval(function () {
+    words[wordIndex].classList.remove('ld-word-active');
+    words[wordIndex].classList.add('ld-word-exit');
+    wordIndex++;
+    if (wordIndex < words.length) words[wordIndex].classList.add('ld-word-active');
+    if (wordIndex >= words.length - 1) clearInterval(wordTimer);
+  }, 900);
+  function tick(ts) {
+    if (!startTs) startTs = ts;
+    var elapsed = ts - startTs;
+    var progress = Math.min((elapsed / DURATION) * 100, 100);
+    var rounded = Math.round(progress);
+    if (counter) counter.textContent = rounded.toString().padStart(3, '0');
+    if (barFill) barFill.style.transform = 'scaleX(' + (progress / 100) + ')';
+    if (progress < 100) {
+      requestAnimationFrame(tick);
+    } else if (!rafDone) {
+      rafDone = true;
+      setTimeout(function () {
+        loader.classList.add('ld-done');
+        setTimeout(function () { loader.remove(); }, 700);
+      }, 400);
+    }
+  }
+  requestAnimationFrame(tick);
+}());
+</script>
 
 <!-- ======== FLOATING PILL NAV ======== -->
 <nav class="hero-nav" aria-label="Main navigation">

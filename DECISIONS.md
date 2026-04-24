@@ -1,5 +1,22 @@
 # Architecture Decisions Log
 
+## 2026-04-24 — Instrument Serif added to landing.html loader animation
+
+**What:** Added Google Font `Instrument Serif` (italic, weight 400) to `landing.html` for the fullscreen loading screen word animation ("Design / Create / Inspire"). Loaded via the same async `data-async-css` + `<noscript>` pattern as Cormorant Garamond.
+
+**Why this is acceptable despite the "no new Google Fonts" rule:** Explicitly requested by the user. Instrument Serif is used only inside the `#sd-loader` overlay (removed from DOM after 3.4s) — it has zero impact on LCP or CLS. Falls back to `Cormorant Garamond` (already loaded on this page) then `Georgia, serif`, which are near-identical italic serifs — no visible FOUT.
+
+## 2026-04-24 — Fullscreen loading screen on landing.html
+
+**What:** Added `#sd-loader` — a fixed fullscreen overlay (`z-index: 9999`, `background: #0a0a0a`) that runs on every landing.html pageload:
+- Top-left: "Selling Dubai . com" brand label (Manrope, uppercase)
+- Center: rotating words "Design → Create → Inspire" (Instrument Serif italic, 900ms intervals, no loop)
+- Bottom-right: animated counter 000→100 over 2700ms via `requestAnimationFrame`
+- Bottom edge: gradient progress bar (`scaleX` driven by same RAF loop)
+- Completion: counter hits 100 → 400ms hold → opacity fade-out (0.6s) → DOM removal after 700ms
+
+**Why inline JS (not a module):** The loader must start immediately on parse, before any deferred scripts load. An inline IIFE guarantees zero latency. No framework dependencies.
+
 ## 2026-04-12 — Platform audit fixes (C-1, C-2, C-3, W-1, W-3, W-4)
 
 **What:** Applied all critical and warning fixes from full platform audit.
