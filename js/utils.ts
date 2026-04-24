@@ -57,10 +57,15 @@ export function getAgentSlug(): string | null {
 // ==========================================
 // IMAGE OPTIMIZATION
 // ==========================================
-// Netlify Image CDN — WebP, max width, quality 80
-// Unsplash URLs are not allowlisted — served directly
+// Domains that Netlify Image CDN can proxy server-side without being blocked.
+// Google's aida-public CDN blocks server-side proxy requests — do not add googleusercontent.com.
+export const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae'];
+
+// Netlify Image CDN — WebP, max width, quality 80.
+// Returns raw URL for unsupported domains so the browser fetches directly.
 export function optimizeImg(url: string | null | undefined, w = 800): string {
   if (!url) return '';
   if (url.includes('images.unsplash.com')) return url;
+  if (!SAFE_CDN_DOMAINS.some(d => url.includes(d))) return url;
   return `/.netlify/images?url=${encodeURIComponent(url)}&w=${w}&q=80&fm=webp`;
 }

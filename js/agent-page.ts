@@ -3,7 +3,7 @@
 // ==========================================
 
 import { logEvent } from './analytics';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config';
+import { SUPABASE_URL } from './config';
 import { ICONS } from './icons';
 import { loadProperties, optimizeImg } from './properties';
 import type { Agent } from './state';
@@ -98,13 +98,13 @@ export async function renderAgent(agent: Agent): Promise<void> {
   const avatarContainer = document.getElementById('avatar-container');
   const safeInitials = escHtml((agent.name || '').split(' ').map(n => (n[0] ?? '')).join('').slice(0, 2));
   const isVerified = agent.verification_status === 'verified' || agent.dld_verified;
-  const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae'];
   if (agent.photo_url && avatarContainer) {
     const img = document.createElement('img');
     img.className = `avatar${isVerified ? ' avatar-verified' : ''}`;
-    const canOptimize = SAFE_CDN_DOMAINS.some(d => agent.photo_url!.includes(d));
-    img.src = canOptimize ? optimizeImg(agent.photo_url, 200) : agent.photo_url;
-    if (canOptimize) {
+    const photoSrc = optimizeImg(agent.photo_url, 200);
+    const isCdnUrl = photoSrc.startsWith('/.netlify/images');
+    img.src = photoSrc;
+    if (isCdnUrl) {
       img.srcset = `${optimizeImg(agent.photo_url, 80)} 80w, ${optimizeImg(agent.photo_url, 160)} 160w`;
       img.sizes = '80px';
     }
@@ -113,7 +113,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
     img.alt = agent.name ?? '';
     let triedRaw = false;
     img.onerror = () => {
-      if (canOptimize && !triedRaw) {
+      if (isCdnUrl && !triedRaw) {
         triedRaw = true;
         img.removeAttribute('srcset');
         img.src = agent.photo_url!;
@@ -134,7 +134,19 @@ export async function renderAgent(agent: Agent): Promise<void> {
   }
 
   const agentBioEl = document.getElementById('agent-bio');
-  if (agentBioEl) agentBioEl.textContent = agent.tagline || '';
+  if (agentBioEl) {
+    agentBioEl.textContent = agent.tagline || '';
+    if ((agent.tagline || '').length > 80) {
+      const expandBtn = document.createElement('button');
+      expandBtn.className = 'bio-expand-btn';
+      expandBtn.textContent = 'Read more';
+      expandBtn.onclick = () => {
+        const expanded = agentBioEl.classList.toggle('bio-expanded');
+        expandBtn.textContent = expanded ? 'Read less' : 'Read more';
+      };
+      agentBioEl.insertAdjacentElement('afterend', expandBtn);
+    }
+  }
 
   // Trust bar — single consolidated verification line
   const trustBar = document.getElementById('trust-bar');
@@ -175,9 +187,7 @@ export async function renderAgent(agent: Agent): Promise<void> {
   if (agencyEl && (agent.agency_name || (isPaidTier(agent) && agent.agency_logo_url))) {
     let badgeHTML = '';
     if (isPaidTier(agent) && agent.agency_logo_url) {
-      const canOptimizeLogo = SAFE_CDN_DOMAINS.some(d => agent.agency_logo_url!.includes(d));
-      const logoSrc = canOptimizeLogo ? optimizeImg(agent.agency_logo_url, 120) : agent.agency_logo_url;
-      badgeHTML += `<img class="agency-logo" src="${escAttr(logoSrc)}" alt="" data-managed data-onerror="hide">`;
+      badgeHTML += `<img class="agency-logo" src="${escAttr(optimizeImg(agent.agency_logo_url, 120))}" alt="" data-managed data-onerror="hide">`;
     }
     if (agent.agency_name) badgeHTML += `<span class="agency-name">${escHtml(agent.agency_name)}</span>`;
     agencyEl.innerHTML = badgeHTML;
@@ -312,9 +322,6 @@ export async function renderAgent(agent: Agent): Promise<void> {
   const intentSection = document.getElementById('intent-section') as HTMLElement | null;
   if (intentSection) intentSection.classList.remove('hidden');
 
-  // === TESTIMONIALS (non-blocking) ===
-  void loadProfileTestimonials(agent.id);
-
   // === STICKY BOTTOM CTA BAR ===
   const stickyCta = document.getElementById('sticky-cta') as HTMLElement | null;
   const stickyWaBtn = document.getElementById('sticky-wa-btn') as HTMLElement | null;
@@ -383,41 +390,6 @@ window.nativeShare = async () => {
     if (currentAgent) logEvent('share', { method: 'share' in navigator ? 'native' : 'clipboard' });
   } catch (_e) { /* user cancelled share sheet */ }
 };
-
-// ==========================================
-// TESTIMONIALS — fetch and render on profile
-// ==========================================
-export async function loadProfileTestimonials(agentId: string): Promise<void> {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/testimonials?agent_id=eq.${encodeURIComponent(agentId)}&select=client_name,client_role,content,rating&order=created_at.desc&limit=6`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
-    if (!res.ok) return;
-    const items = await res.json() as Array<{ client_name: string; client_role?: string; content: string; rating: number }>;
-    if (!items?.length) return;
-
-    const section = document.getElementById('profile-testimonials');
-    if (!section) return;
-
-    section.innerHTML = `
-      <div class="testimonials-heading">What clients say</div>
-      <div class="testimonials-grid">
-        ${items.map(t => `
-          <div class="profile-testimonial">
-            <div class="profile-testimonial-stars">${'★'.repeat(Math.min(5, t.rating || 5))}</div>
-            <div class="profile-testimonial-text">"${escHtml(t.content)}"</div>
-            <div class="profile-testimonial-client">
-              <span class="profile-testimonial-name">${escHtml(t.client_name)}</span>
-              ${t.client_role ? `<span class="profile-testimonial-role">${escHtml(t.client_role)}</span>` : ''}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    section.classList.remove('hidden');
-  } catch (_e) { /* non-critical */ }
-}
 
 // ==========================================
 // OWNER DETECTION — show Edit button if logged in
