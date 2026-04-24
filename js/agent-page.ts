@@ -184,6 +184,10 @@ export async function renderAgent(agent: Agent): Promise<void> {
     agencyEl.classList.remove('hidden');
   }
 
+  if (agent.show_golden_visa !== false) {
+    document.getElementById('gv-widget')?.classList.remove('hidden');
+  }
+
   // SEO — upsert meta tags (prevents duplicates on re-render)
   document.title = `${agent.name} | SellingDubai`;
 

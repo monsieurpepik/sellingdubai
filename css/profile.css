@@ -218,4 +218,25 @@
   .link-btn-ghost:hover { color: rgba(255,255,255,0.65); border-color: var(--color-text-muted); transform: translateY(-1px); }
 }
 
+/* ========== GOLDEN VISA INFO LINE ========== */
+.gv-widget {
+  width: 100%; max-width: 420px; padding: 0 24px; margin-bottom: 20px;
+}
+.gv-card {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-surface-ghost); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius-card);
+  transition: border-color var(--duration-fast);
+}
+.gv-icon {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.gv-info {
+  font-size: var(--text-2xs); color: var(--color-text-muted); line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+}
+.gv-threshold {
+  font-weight: 700; color: var(--color-text-muted);
+}
 
