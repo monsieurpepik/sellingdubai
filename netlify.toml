@@ -29,6 +29,11 @@
   function = "og-injector"
 
 [[redirects]]
+  from = "/"
+  to = "/sd-landing-v2.html"
+  status = 200
+
+[[redirects]]
   from = "/agency/*"
   to = "/agency.html"
   status = 200
