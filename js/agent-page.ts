@@ -90,15 +90,22 @@ export async function renderAgent(agent: Agent): Promise<void> {
   const bgUrl = (isPaidTier(agent) && safeUrl(agent.background_image_url ?? null)) || DEFAULT_BG;
   // Double-check the URL doesn't contain CSS-breaking characters
   if (bg && bgUrl && /^https?:\/\//.test(bgUrl)) {
-    bg.style.backgroundImage = `url('${bgUrl.replace(/'/g, "\\'")}')`;
-    bg.classList.remove('bg-fallback');
+    const probe = new Image();
+    probe.onload = () => {
+      bg.style.backgroundImage = `url('${bgUrl.replace(/'/g, "\\'")}')`;
+      bg.classList.remove('bg-fallback');
+    };
+    probe.onerror = () => {
+      bg.style.backgroundImage = '';
+    };
+    probe.src = bgUrl;
   }
 
   // Avatar with error fallback
   const avatarContainer = document.getElementById('avatar-container');
   const safeInitials = escHtml((agent.name || '').split(' ').map(n => (n[0] ?? '')).join('').slice(0, 2));
   const isVerified = agent.verification_status === 'verified' || agent.dld_verified;
-  const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae', 'googleusercontent.com'];
+  const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae'];
   if (agent.photo_url && avatarContainer) {
     const img = document.createElement('img');
     img.className = `avatar${isVerified ? ' avatar-verified' : ''}`;
