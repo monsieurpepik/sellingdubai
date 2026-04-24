@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SellingDubai — Your Verified Agent Profile</title>
+  <meta name="description" content="Your verified agent profile on SellingDubai. One link for every lead. Go live in under 60 seconds." />
+  <meta property="og:title" content="SellingDubai — Your Verified Agent Profile" />
+  <meta property="og:description" content="Your verified agent profile on SellingDubai. One link for every lead. Go live in under 60 seconds." />
+  <meta property="og:image" content="https://sellingdubai.ae/dubai-skyline.jpg" />
+  <meta property="og:url" content="https://sellingdubai.ae/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SellingDubai — Your Verified Agent Profile" />
+  <meta name="twitter:description" content="Your verified agent profile on SellingDubai. One link for every lead." />
+  <meta name="twitter:image" content="https://sellingdubai.ae/dubai-skyline.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" /></noscript>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --spring:        cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+      --color-bg-deep:        #08080a;
+      --color-surface-raised: rgba(255,255,255,0.06);
+      --color-surface-subtle: rgba(255,255,255,0.04);
+      --color-border:         rgba(255,255,255,0.08);
+      --color-border-strong:  rgba(255,255,255,0.16);
+      --color-text-primary:   #fff;
+      --color-text-secondary: rgba(255,255,255,0.72);
+      --color-text-muted:     rgba(255,255,255,0.44);
+      --color-text-faint:     rgba(255,255,255,0.28);
+      --color-brand:          #1127d2;
+      --color-brand-light:    #4d65ff;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--color-bg-deep);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* ── Video bg ── */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(ellipse at 60% 40%, #0d1035 0%, #06060d 55%, #020204 100%);
+    }
+    .video-bg video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.62;
+    }
+    .video-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(8,8,10,0.55) 0%, rgba(8,8,10,0.10) 40%, rgba(8,8,10,0.78) 100%),
+        linear-gradient(to right,  rgba(8,8,10,0.55) 0%, rgba(8,8,10,0.10) 55%, transparent 100%);
+    }
+
+    /* ── Page shell ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 28px 36px;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .logo img {
+      height: 48px;
+      width: auto;
+      display: block;
+      opacity: 0.92;
+    }
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-raised);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .nav-pill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-brand-light);
+      animation: dot-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50%       { opacity: 1;    transform: scale(1.25); }
+    }
+
+    /* ── Hero ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 580px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .eyebrow-line {
+      width: 28px; height: 1px;
+      background: var(--color-brand-light);
+      opacity: 0.5;
+    }
+    .eyebrow-text {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-brand-light);
+      opacity: 0.75;
+    }
+
+    h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: clamp(48px, 6.5vw, 88px);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      color: var(--color-text-primary);
+      margin-bottom: 24px;
+    }
+    h1 .dim {
+      color: rgba(255,255,255,0.38);
+    }
+
+    .subline {
+      font-size: clamp(15px, 1.4vw, 18px);
+      font-weight: 400;
+      color: var(--color-text-secondary);
+      line-height: 1.55;
+      max-width: 400px;
+      margin-bottom: 40px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── URL preview pill ── */
+    .url-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 16px;
+      border-radius: 50px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-subtle);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      margin-bottom: 36px;
+      width: fit-content;
+    }
+    .url-pill-icon {
+      width: 14px; height: 14px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+    .url-pill-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      letter-spacing: 0;
+    }
+    .url-pill-slug {
+      color: var(--color-text-primary);
+      font-weight: 600;
+      filter: blur(5px);
+      user-select: none;
+      letter-spacing: -0.01em;
+      transition: filter 0.4s ease;
+    }
+    .url-pill-slug.typing {
+      filter: none;
+    }
+    /* Blinking cursor during typing */
+    .url-pill-slug.typing::after {
+      content: '|';
+      color: var(--color-brand-light);
+      animation: blink 0.7s step-end infinite;
+      font-weight: 400;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── CTAs ── */
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 16px 28px;
+      background: var(--color-brand);
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.22s var(--spring), box-shadow 0.22s var(--spring);
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(17,39,210,0.45), 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      padding: 16px 24px;
+      border-radius: 14px;
+      border: 1px solid var(--color-border-strong);
+      background: var(--color-surface-raised);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.22s var(--spring), border-color 0.22s var(--spring), background 0.22s var(--spring), transform 0.22s var(--spring);
+    }
+    .btn-ghost:hover {
+      color: var(--color-text-primary);
+      border-color: rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.09);
+      transform: translateY(-2px);
+    }
+    .btn-ghost:active { transform: scale(0.98); }
+    .btn-ghost svg { transition: transform 0.18s var(--spring); }
+    .btn-ghost:hover svg { transform: translateX(3px); }
+
+    /* ── Footer strip ── */
+    .footer-strip {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding-bottom: 4px;
+    }
+    .footer-dot {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.14);
+    }
+    .footer-item {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .footer-item.hl {
+      color: rgba(255,255,255,0.50);
+    }
+
+    /* ── Profile screenshot float ── */
+    .phone-mockup {
+      position: absolute;
+      right: clamp(40px, 6vw, 88px);
+      top: 50%;
+      transform: translateY(-50%) rotate(2deg);
+      width: 300px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow:
+        0 64px 128px rgba(0,0,0,0.72),
+        0 24px 48px rgba(0,0,0,0.4),
+        0 0 0 1px rgba(255,255,255,0.10);
+      animation: card-entrance 1.1s var(--ease-out-expo) 0.85s both;
+    }
+    @keyframes card-entrance {
+      from { opacity: 0; transform: translateY(-44%) rotate(2deg) translateX(40px); }
+      to   { opacity: 1; transform: translateY(-50%) rotate(2deg) translateX(0); }
+    }
+
+    /* Screenshot */
+    .phone-screen {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Fade bottom edge into background */
+    .phone-mockup::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 80px;
+      background: linear-gradient(to bottom, transparent, rgba(8,8,10,0.85));
+      pointer-events: none;
+    }
+
+    /* Hide on smaller screens */
+    @media (max-width: 960px) {
+      .phone-mockup { display: none; }
+    }
+
+    /* ── Animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    nav          { animation: fadeUp 0.6s var(--ease-out-expo) 0.05s both; }
+    .eyebrow     { animation: fadeUp 0.7s var(--ease-out-expo) 0.15s both; }
+    h1           { animation: fadeUp 0.8s var(--ease-out-expo) 0.25s both; }
+    .subline     { animation: fadeUp 0.7s var(--ease-out-expo) 0.38s both; }
+    .url-pill    { animation: fadeUp 0.7s var(--ease-out-expo) 0.48s both; }
+    .cta-row     { animation: fadeUp 0.7s var(--ease-out-expo) 0.58s both; }
+    .footer-strip{ animation: fadeUp 0.6s var(--ease-out-expo) 0.68s both; }
+
+    /* ── Tablet — prevent content clipping ── */
+    @media (max-width: 960px) {
+      html, body { overflow: auto; }
+      .page { height: auto; min-height: 100vh; }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      .page { padding: 20px 20px; }
+      h1 { font-size: clamp(38px, 10.5vw, 60px); margin-bottom: 16px; }
+      .eyebrow { margin-bottom: 20px; }
+      .subline { margin-bottom: 28px; font-size: 15px; }
+      .url-pill { margin-bottom: 28px; max-width: 100%; overflow: hidden; }
+      .url-pill-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100vw - 100px); }
+      .cta-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .btn-primary, .btn-ghost { justify-content: center; padding: 16px 24px; font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-bg">
+    <video
+      src="dubai-city.mp4"
+      autoplay muted loop playsinline
+      preload="auto"
+      poster="/dubai-skyline.jpg"
+    ></video>
+  </div>
+
+  <div class="page">
+
+    <nav>
+      <div class="logo"><img src="sellingdubailogo.png" alt="SellingDubai" height="48" /></div>
+      <div class="nav-pill">
+        <span class="nav-pill-dot"></span>
+        Dubai Real Estate
+      </div>
+    </nav>
+
+    <div class="hero">
+
+      <div class="eyebrow">
+        <div class="eyebrow-line"></div>
+        <div class="eyebrow-text">Dubai's Agent Operating System</div>
+      </div>
+
+      <h1>Your verified<br /><span class="dim">agent identity.</span></h1>
+
+      <p class="subline">One link. Every lead. Go live in under 60 seconds.</p>
+
+      <div class="url-pill">
+        <svg class="url-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span class="url-pill-text">sellingdubai.ae/<span class="url-pill-slug" id="slug">your-name</span></span>
+      </div>
+
+      <div class="cta-row">
+        <a href="/join" class="btn-primary">
+          Claim My Profile
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+        </a>
+        <a href="/a/boban-pepic" target="_blank" rel="noopener" class="btn-ghost">
+          See a live profile
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Phone mockup — right side -->
+    <div class="phone-mockup" aria-hidden="true">
+      <img class="phone-screen" src="profile-preview.jpg" alt="" />
+    </div>
+
+    <div class="footer-strip">
+      <span class="footer-item">Powered by</span>
+      <div class="footer-dot"></div>
+      <span class="footer-item hl">Proptefi Tech Limited</span>
+      <div class="footer-dot"></div>
+      <span class="footer-item">DIFC</span>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      var slug = document.getElementById('slug');
+      if (!slug) return;
+
+      var names = ['ahmed-al-mansoori', 'sarah.johnson', 'boban-pepic', 'layla.al-rashidi'];
+      var nameIndex = 0;
+      var charIndex = 0;
+      var isDeleting = false;
+
+      function type() {
+        var current = names[nameIndex];
+
+        if (!isDeleting) {
+          charIndex++;
+          slug.textContent = current.slice(0, charIndex);
+          if (charIndex === current.length) {
+            isDeleting = true;
+            setTimeout(type, 2200);
+            return;
+          }
+          setTimeout(type, 68);
+        } else {
+          charIndex--;
+          slug.textContent = current.slice(0, charIndex);
+          if (charIndex === 0) {
+            isDeleting = false;
+            nameIndex = (nameIndex + 1) % names.length;
+            setTimeout(type, 320);
+            return;
+          }
+          setTimeout(type, 34);
+        }
+      }
+
+      // Start after entrance animations settle
+      setTimeout(function () {
+        slug.classList.add('typing');
+        slug.textContent = '';
+        charIndex = 0;
+        type();
+      }, 1800);
+    }());
+  </script>
+
+</body>
+</html>
