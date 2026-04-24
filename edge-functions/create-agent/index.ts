@@ -347,7 +347,7 @@ export async function handler(
               <h1 style="font-size:24px;font-weight:700;color:#111;margin-bottom:8px;">You're live, ${display_name}!</h1>
               <p style="font-size:16px;color:#555;line-height:1.6;margin-bottom:24px;">Your verified profile is now live. Share your link and start getting leads.</p>
               <div style="text-align:center;margin-bottom:24px;">
-                <a href="${profileUrl}" style="display:inline-block;background:#111;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">View My Profile</a>
+                <a href="https://sellingdubai.ae/dashboard" style="display:inline-block;background:#111;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">Go to Dashboard</a>
               </div>
               <div style="background:#f8f8f8;border-radius:8px;padding:16px;margin-bottom:24px;">
                 <p style="font-size:14px;color:#333;font-weight:600;margin-bottom:8px;">Your profile link:</p>

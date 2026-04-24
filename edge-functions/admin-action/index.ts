@@ -99,7 +99,7 @@ async function getAgents(sb: SB, params: Record<string, any>): Promise<Response>
 
   let q = sb
     .from("agents")
-    .select("id, name, email, slug, tier, created_at, is_active, agency_id")
+    .select("id, name, email, slug, tier, created_at, is_active, verification_status, agency_id")
     .order("created_at", { ascending: false })
     .range(offset, offset + (limit as number) - 1);
 
@@ -232,6 +232,44 @@ async function deleteAgent(
   return json({ ok: true });
 }
 
+// deno-lint-ignore no-explicit-any
+async function approveAgent(
+  sb: SB,
+  params: Record<string, any>,
+  tokenHash: string,
+): Promise<Response> {
+  const { agent_id } = params;
+  if (!agent_id) return json({ error: "Missing agent_id." }, 400);
+
+  const { error } = await sb
+    .from("agents")
+    .update({ verification_status: "verified", is_active: true })
+    .eq("id", agent_id);
+
+  if (error) return json({ error: "DB error." }, 500);
+  await logAudit(sb, "approve_agent", tokenHash, agent_id, { agent_id });
+  return json({ ok: true });
+}
+
+// deno-lint-ignore no-explicit-any
+async function rejectAgent(
+  sb: SB,
+  params: Record<string, any>,
+  tokenHash: string,
+): Promise<Response> {
+  const { agent_id } = params;
+  if (!agent_id) return json({ error: "Missing agent_id." }, 400);
+
+  const { error } = await sb
+    .from("agents")
+    .update({ verification_status: "unverified" })
+    .eq("id", agent_id);
+
+  if (error) return json({ error: "DB error." }, 500);
+  await logAudit(sb, "reject_agent", tokenHash, agent_id, { agent_id });
+  return json({ ok: true });
+}
+
 async function getPlatformHealth(): Promise<Response> {
   return json({
     functions: [
@@ -303,6 +341,8 @@ export async function handler(req: Request): Promise<Response> {
       case "get_audit_log":        result = await getAuditLog(sb, params); break;
       case "suspend_agent":        result = await suspendAgent(sb, params, tokenHash); break;
       case "delete_agent":         result = await deleteAgent(sb, params, tokenHash); break;
+      case "approve_agent":        result = await approveAgent(sb, params, tokenHash); break;
+      case "reject_agent":         result = await rejectAgent(sb, params, tokenHash); break;
       case "get_platform_health":  result = await getPlatformHealth(); break;
       default:
         result = json({ error: `Unknown action: ${action}` }, 400);

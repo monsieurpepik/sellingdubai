@@ -37,9 +37,8 @@ function redirectToAuth(plan, interval) {
 async function startCheckout(plan, interval, btn) {
   if (!window.SD_FLAGS?.BILLING_LIVE) {
     if (btn) {
-      const original = btn.textContent;
-      btn.textContent = 'Billing coming soon';
-      setTimeout(() => { btn.textContent = original; }, 2000);
+      btn.textContent = 'Coming Soon';
+      btn.disabled = true;
     }
     return;
   }
@@ -111,6 +110,7 @@ function applyBillingGate() {
   document.querySelectorAll('.upgrade-btn').forEach((btn) => {
     if (!live) {
       btn.disabled = true;
+      btn.textContent = 'Coming Soon';
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
     }

@@ -215,6 +215,7 @@ async function renderOverview(c: HTMLElement): Promise<void> {
 interface AgentRow {
   id: string; name: string; email: string; slug: string;
   tier: string; created_at: string; is_active: boolean;
+  verification_status: string;
 }
 
 let agentsSearch = "";
@@ -242,11 +243,11 @@ async function renderAgents(c: HTMLElement): Promise<void> {
     </div>
     <table class="data-table">
       <thead>
-        <tr><th>Name</th><th>Email</th><th>Slug</th><th>Plan</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+        <tr><th>Name</th><th>Email</th><th>Slug</th><th>Plan</th><th>Status</th><th>Verification</th><th>Joined</th><th>Actions</th></tr>
       </thead>
       <tbody>
         ${data.agents.length === 0
-          ? `<tr><td colspan="7" class="empty-cell">No agents found.</td></tr>`
+          ? `<tr><td colspan="8" class="empty-cell">No agents found.</td></tr>`
           : data.agents.map((a) => `
             <tr>
               <td>${escHtml(a.name)}</td>
@@ -254,8 +255,13 @@ async function renderAgents(c: HTMLElement): Promise<void> {
               <td class="mono">${escHtml(a.slug)}</td>
               <td><span class="badge badge--${escAttr(a.tier ?? "free")}">${escHtml(a.tier ?? "free")}</span></td>
               <td><span class="badge badge--${a.is_active ? "active" : "suspended"}">${a.is_active ? "active" : "suspended"}</span></td>
+              <td><span class="badge badge--${escAttr(a.verification_status ?? "unverified")}">${escHtml(a.verification_status ?? "unverified")}</span></td>
               <td class="mono">${fmtDate(a.created_at)}</td>
               <td class="actions-cell">
+                ${a.verification_status === "pending" ? `
+                <button class="action-btn action-btn--approve" data-act="approve" data-id="${escAttr(a.id)}">Approve</button>
+                <button class="action-btn action-btn--danger" data-act="reject" data-id="${escAttr(a.id)}">Reject</button>
+                ` : ""}
                 <button class="action-btn" data-act="suspend" data-id="${escAttr(a.id)}" data-active="${a.is_active}">
                   ${a.is_active ? "Suspend" : "Unsuspend"}
                 </button>
@@ -297,6 +303,36 @@ async function renderAgents(c: HTMLElement): Promise<void> {
       btn.disabled = true;
       try {
         await callAdmin("suspend_agent", { agent_id: id, suspended: active });
+        renderAgents(c);
+      } catch (err) {
+        alert(`Failed: ${String(err)}`);
+        btn.disabled = false;
+      }
+    });
+  });
+
+  c.querySelectorAll<HTMLElement>("[data-act='approve']").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id!;
+      if (!confirm("Approve this agent? Their profile will go live.")) return;
+      btn.disabled = true;
+      try {
+        await callAdmin("approve_agent", { agent_id: id });
+        renderAgents(c);
+      } catch (err) {
+        alert(`Failed: ${String(err)}`);
+        btn.disabled = false;
+      }
+    });
+  });
+
+  c.querySelectorAll<HTMLElement>("[data-act='reject']").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id!;
+      if (!confirm("Reject this agent? Their verification_status will be set to unverified.")) return;
+      btn.disabled = true;
+      try {
+        await callAdmin("reject_agent", { agent_id: id });
         renderAgents(c);
       } catch (err) {
         alert(`Failed: ${String(err)}`);

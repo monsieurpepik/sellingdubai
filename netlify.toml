@@ -48,6 +48,11 @@
   to = "/admin.html"
   status = 200
 
+[[redirects]]
+  from = "/support"
+  to = "mailto:hello@sellingdubai.ae"
+  status = 302
+
 # Security headers — all pages
 [[headers]]
   for = "/*"
