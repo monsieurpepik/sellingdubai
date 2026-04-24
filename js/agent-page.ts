@@ -81,8 +81,7 @@ function isPaidTier(agent: Agent): boolean {
   return true;
 }
 
-const DEFAULT_BG = 'https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
-const DEFAULT_BG_RAW = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
+const DEFAULT_BG = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
 
 export async function renderAgent(agent: Agent): Promise<void> {
   setCurrentAgent(agent);
@@ -91,22 +90,8 @@ export async function renderAgent(agent: Agent): Promise<void> {
   const bgUrl = (isPaidTier(agent) && safeUrl(agent.background_image_url ?? null)) || DEFAULT_BG;
   // Double-check the URL doesn't contain CSS-breaking characters
   if (bg && bgUrl && /^https?:\/\//.test(bgUrl)) {
-    const applyBg = (url: string) => {
-      bg.style.backgroundImage = `url('${url.replace(/'/g, "\\'")}')`;
-      bg.classList.remove('bg-fallback');
-    };
-    const probe = new Image();
-    let triedRaw = false;
-    probe.onload = () => { applyBg(probe.src); };
-    probe.onerror = () => {
-      if (!triedRaw && bgUrl === DEFAULT_BG) {
-        triedRaw = true;
-        probe.src = DEFAULT_BG_RAW;
-        return;
-      }
-      bg.style.backgroundImage = '';
-    };
-    probe.src = bgUrl;
+    bg.style.backgroundImage = `url('${bgUrl.replace(/'/g, "\\'")}')`;
+    bg.classList.remove('bg-fallback');
   }
 
   // Avatar with error fallback
