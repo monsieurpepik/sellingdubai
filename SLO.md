@@ -36,6 +36,7 @@ baseline) and is monitored via Sentry alerts.
 | `get-flags` | p95 response time | < 500ms | 289ms @ 30 VUs | k6 Run 7 — 2026-04-14 |
 | `capture-lead-v4` | p95 response time | < 1000ms | 517ms @ 20 VUs | k6 Run 7 — 2026-04-14 |
 | PostgREST `/projects` | p95 response time | < 800ms | 150ms @ 20 VUs | k6 Run 7 — 2026-04-14 |
+| `whatsapp-ingest` | p95 response time | < 1500ms | not yet baselined | first run at 50 agents |
 | `send-magic-link` | p95 response time | < 1000ms | not yet baselined | — |
 | Page load (Lighthouse) | Performance score | ≥ 80 | 99 | Lighthouse CI — 2026-04-14 |
 

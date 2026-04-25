@@ -37,15 +37,17 @@ if (BASE_URL === 'https://sellingdubai.com' || BASE_URL === 'http://sellingdubai
 
 // --- Custom metrics ----------------------------------------------------
 
-const agentPageErrors     = new Rate('agent_page_errors');
-const leadCaptureErrors   = new Rate('lead_capture_errors');
-const flagsErrors         = new Rate('flags_errors');
-const projectsErrors      = new Rate('projects_errors');
+const agentPageErrors       = new Rate('agent_page_errors');
+const leadCaptureErrors     = new Rate('lead_capture_errors');
+const flagsErrors           = new Rate('flags_errors');
+const projectsErrors        = new Rate('projects_errors');
+const whatsappIngestErrors  = new Rate('whatsapp_ingest_errors');
 
-const agentPageDuration   = new Trend('agent_page_duration',   true);
-const leadCaptureDuration = new Trend('lead_capture_duration', true);
-const flagsDuration       = new Trend('flags_duration',        true);
-const projectsDuration    = new Trend('projects_duration',     true);
+const agentPageDuration     = new Trend('agent_page_duration',     true);
+const leadCaptureDuration   = new Trend('lead_capture_duration',   true);
+const flagsDuration         = new Trend('flags_duration',          true);
+const projectsDuration      = new Trend('projects_duration',       true);
+const whatsappIngestDuration = new Trend('whatsapp_ingest_duration', true);
 
 // --- Load profile: 0 → 50 VUs over 30s, 2min sustained, ramp down -----
 
@@ -95,6 +97,18 @@ export const options = {
       ],
       exec: 'offplanProjects',
     },
+    whatsapp_ingest: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '30s', target: 10 },
+        { duration: '2m',  target: 10 },
+        { duration: '15s', target: 0  },
+      ],
+      exec: 'whatsappIngest',
+      // NOTE: not yet baselined — first run expected at 50 agents or 1000 leads/month.
+      // 10 VUs conservative: each request triggers a Supabase write + potential AI call.
+    },
   },
 
   thresholds: {
@@ -112,6 +126,9 @@ export const options = {
 
     projects_errors:        ['rate<0.01'],
     projects_duration:      ['p(95)<800'],  // revised up from 500ms — REST p95 at 20 VUs
+
+    // whatsapp_ingest — no threshold yet, collect data only on first run
+    whatsapp_ingest_errors: ['rate<0.01'],
   },
 };
 
@@ -212,4 +229,38 @@ export function offplanProjects() {
   projectsErrors.add(!ok);
   projectsDuration.add(res.timings.duration);
   sleep(1);
+}
+
+// --- Scenario 5: WhatsApp ingest ---------------------------------------
+// Simulates an inbound WhatsApp message routed via the webhook.
+// Not yet baselined — first real run at 50 agents or 1000 leads/month.
+// 4xx (e.g. signature validation failure) is expected in load test context
+// because we can't reproduce the real Twilio signature. Error rate tracks
+// 5xx only.
+
+export function whatsappIngest() {
+  const payload = JSON.stringify({
+    From:    'whatsapp:+971500000000',
+    To:      'whatsapp:+14155238886',
+    Body:    'k6 load test — automated',
+    // No valid Twilio signature — function should return 401/403, not 5xx
+  });
+
+  const res = http.post(
+    `${SUPABASE_URL}/functions/v1/whatsapp-ingest`,
+    payload,
+    {
+      headers: { 'Content-Type': 'application/json' },
+      tags:    { scenario: 'whatsapp_ingest' },
+    }
+  );
+
+  // 4xx expected (signature failure) — only 5xx counts as error
+  const ok = check(res, {
+    'whatsapp_ingest not 5xx': (r) => r.status < 500,
+  });
+
+  whatsappIngestErrors.add(res.status >= 500);
+  whatsappIngestDuration.add(res.timings.duration);
+  sleep(3);
 }
