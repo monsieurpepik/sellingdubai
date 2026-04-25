@@ -148,7 +148,8 @@ async function verifyBroker() {
     if (detailsSection) detailsSection.style.display = 'block';
     // Hide the verify button + BRN field (already verified)
     document.getElementById('btn-verify').style.display = 'none';
-    document.querySelector('#step-2 .field')?.style && (document.querySelector('#step-2 .field').style.display = 'none');
+    const step2Field = document.querySelector('#step-2 .field');
+    if (step2Field) step2Field.style.display = 'none';
 
     setLoading('btn-verify', false, 'Verify My License');
     if (typeof gtag === 'function') gtag('event', 'step2_verified');
