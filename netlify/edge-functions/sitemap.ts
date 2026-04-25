@@ -33,7 +33,7 @@ export default async (_request: Request, _context: Context) => {
   }
 
   const agentUrls = agentSlugs.map(slug =>
-    `  <url>\n    <loc>https://sellingdubai.ae/a/${encodeURIComponent(slug)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+    `  <url>\n    <loc>https://sellingdubai.ae/${encodeURIComponent(slug)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
   );
 
   const staticUrls = STATIC_PAGES.map(p =>

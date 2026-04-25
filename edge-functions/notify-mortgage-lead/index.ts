@@ -91,7 +91,7 @@ function buildAgentEmailHtml(
     <p style="font-size:12px;color:#4d65ff;font-weight:600;margin:0;">&#9889; You'll be notified when they're pre-approved and ready to make an offer</p>
   </div>
   <div style="text-align:center;padding:16px;">
-    <p style="font-size:11px;color:#bbb;margin:0;"><a href="https://sellingdubai.ae/a/${agent.slug}" style="color:#999;text-decoration:none;">View your profile</a> &middot; <a href="https://sellingdubai.ae/edit" style="color:#999;text-decoration:none;">Dashboard</a></p>
+    <p style="font-size:11px;color:#bbb;margin:0;"><a href="https://sellingdubai.ae/${agent.slug}" style="color:#999;text-decoration:none;">View your profile</a> &middot; <a href="https://sellingdubai.ae/edit" style="color:#999;text-decoration:none;">Dashboard</a></p>
   </div>
 </div></body></html>`;
 }

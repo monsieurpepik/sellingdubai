@@ -507,7 +507,7 @@ async function generatePropertyPDF(
     page.drawText(sanitizeForPDF(agent.email), { x: contactX, y: contactY, size: 9, font: fontRegular, color: muted });
     contactY -= 13;
   }
-  page.drawText(`sellingdubai.ae/a/${agent.slug}`, { x: contactX, y: contactY, size: 9, font: fontRegular, color: blue });
+  page.drawText(`sellingdubai.ae/${agent.slug}`, { x: contactX, y: contactY, size: 9, font: fontRegular, color: blue });
 
   return pdfDoc.save();
 }
@@ -595,7 +595,7 @@ async function handleProfilePhotoUpdate(
 
     await sendWhatsAppReply(
       senderPhone,
-      `✅ Profile photo ${isReplacing ? "updated" : "set"}!\n\nView your profile: https://sellingdubai.ae/a/${agent.slug}`,
+      `✅ Profile photo ${isReplacing ? "updated" : "set"}!\n\nView your profile: https://sellingdubai.ae/${agent.slug}`,
     );
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "Failed to update profile photo. Please try again.");
@@ -702,7 +702,7 @@ async function completeOnboarding(
   // Clear onboarding session so AI secretary can take over
   await supabase.from("whatsapp_sessions").delete().eq("agent_id", agentId);
 
-  const profileUrl = `https://sellingdubai.ae/a/${realSlug}`;
+  const profileUrl = `https://sellingdubai.ae/${realSlug}`;
   const dashboardUrl = `https://sellingdubai.ae/edit?token=${editToken}`;
 
   const msg = state.data.is_auto_verified
@@ -887,7 +887,7 @@ async function handleShareCommand(
     }
 
     const priceStr = matchedProp.price ? ` | ${formatPriceForPDF(matchedProp.price)}` : "";
-    const caption = `${matchedProp.title}${priceStr} | sellingdubai.ae/a/${agentSlug}`;
+    const caption = `${matchedProp.title}${priceStr} | sellingdubai.ae/${agentSlug}`;
     await sendWhatsAppDocument(senderPhone, mediaId, filename, caption);
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "Failed to generate brochure. Please try again.");
@@ -1617,7 +1617,7 @@ export async function handler(
       }
 
       // Build confirmation + social templates
-      const profileUrl = `https://sellingdubai.ae/a/${agent.slug}`;
+      const profileUrl = `https://sellingdubai.ae/${agent.slug}`;
       let confirmMsg = `✅ *Listed!*\n\n*${finalTitle}*`;
       if (parsed.price) confirmMsg += `\nPrice: ${parsed.price}`;
       if (parsed.area) confirmMsg += `\n📍 ${parsed.area}`;

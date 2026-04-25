@@ -60,7 +60,7 @@ window.closeDetail = () => {
     delete stickyCta.dataset.prevDisplay;
   }
   _currentDetailProp = null;
-  if (currentAgent) history.pushState(null, '', `/a/${currentAgent.slug}`);
+  if (currentAgent) history.pushState(null, '', `/${currentAgent.slug}`);
 };
 
 function renderDetailView(p) {

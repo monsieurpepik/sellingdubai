@@ -178,8 +178,8 @@
     const a = currentAgent;
     document.getElementById('sidebar-name').textContent = a.name || '—';
     document.getElementById('sidebar-tier').textContent = `${(a.tier || 'free').charAt(0).toUpperCase() + (a.tier || 'free').slice(1)} plan`;
-    document.getElementById('nav-view-profile').href = `/a/${a.slug || ''}`;
-    document.getElementById('mobile-view-profile').href = `/a/${a.slug || ''}`;
+    document.getElementById('nav-view-profile').href = `/${a.slug || ''}`;
+    document.getElementById('mobile-view-profile').href = `/${a.slug || ''}`;
 
     const avatarEl = document.getElementById('sidebar-avatar');
     if (a.photo_url) {
@@ -567,7 +567,7 @@
 
   window.copyProfileLink = () => {
     if (!currentAgent) return;
-    const url = `https://sellingdubai.ae/a/${currentAgent.slug}`;
+    const url = `https://sellingdubai.ae/${currentAgent.slug}`;
 
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById('btn-share');
@@ -956,7 +956,7 @@
 
   window.shareProperty = (propId) => {
     if (!currentAgent) return;
-    const url = `https://sellingdubai.ae/a/${currentAgent.slug}?open=property&id=${propId}`;
+    const url = `https://sellingdubai.ae/${currentAgent.slug}?open=property&id=${propId}`;
     navigator.clipboard.writeText(url).then(() => {
       showToast('Link copied!');
     }, () => {
@@ -1760,7 +1760,7 @@
   function renderQrSection() {
     const a = currentAgent;
     if (!a?.slug) return;
-    const profileUrl = `https://sellingdubai.ae/a/${a.slug}`;
+    const profileUrl = `https://sellingdubai.ae/${a.slug}`;
     const qrBase = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(profileUrl)}`;
 
     const img = document.getElementById('qr-img');

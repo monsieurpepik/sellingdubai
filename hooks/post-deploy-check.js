@@ -21,7 +21,7 @@ const CRITICAL_URLS = [
   'https://sellingdubai.ae/join',
   'https://sellingdubai.ae/dashboard.html',
   'https://sellingdubai.ae/pricing.html',
-  'https://sellingdubai.ae/a/boban-pepic',
+  'https://sellingdubai.ae/boban-pepic',
 ];
 
 // Broken patterns to flag in changed HTML/JS files

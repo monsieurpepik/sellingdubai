@@ -20,7 +20,7 @@ window.saveContact = () => {
   const firstName = nameParts[0] ?? '';
   const lastName = nameParts.slice(1).join(' ') || '';
   const waNum = (a.whatsapp || '').replace(/[^0-9+]/g, '');
-  const profileUrl = `https://sellingdubai.ae/a/${a.slug}`;
+  const profileUrl = `https://sellingdubai.ae/${a.slug}`;
 
   const vcard: string[] = [
     'BEGIN:VCARD',
@@ -498,7 +498,7 @@ window.searchAgent = async () => {
   if (agents && agents.length > 0) {
     resultsEl.style.display = 'block';
     resultsEl.innerHTML = agents.map(a =>
-      `<a href="/a/${escAttr(a.slug ?? '')}" style="display:block;padding:12px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:6px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">${escHtml(a.name ?? '')}</a>`
+      `<a href="/${escAttr(a.slug ?? '')}" style="display:block;padding:12px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:6px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">${escHtml(a.name ?? '')}</a>`
     ).join('');
   } else {
     resultsEl.style.display = 'block';

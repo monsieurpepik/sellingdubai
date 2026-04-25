@@ -140,7 +140,7 @@ function renderMembersTable(agents) {
           <div class="member-avatar">${avatar}</div>
           <div>
             <div class="member-name">${escapeHtml(a.name) || '—'}</div>
-            <div class="member-slug"><a href="/a/${encodeURIComponent(a.slug)}" target="_blank" style="color:rgba(255,255,255,0.4);">@${escapeHtml(a.slug)}</a></div>
+            <div class="member-slug"><a href="/${encodeURIComponent(a.slug)}" target="_blank" style="color:rgba(255,255,255,0.4);">@${escapeHtml(a.slug)}</a></div>
           </div>
         </div>
       </td>

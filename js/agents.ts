@@ -82,7 +82,7 @@ function renderCard(agent: Agent): string {
     ${tierBadge}
     ${leadHtml}
   </div>
-  <a class="card-cta" href="/a/${escAttr(agent.slug)}">View Profile</a>
+  <a class="card-cta" href="/${escAttr(agent.slug)}">View Profile</a>
 </div>`;
 }
 

@@ -140,7 +140,7 @@ function buildEmailHtml(
   <!-- Footer -->
   <div style="text-align:center;padding:8px 16px 24px;">
     <p style="font-size:11px;color:#bbb;margin:0;">
-      <a href="https://agents.sellingdubai.ae/a/${agent.slug}" style="color:#999;text-decoration:none;">View your profile</a>
+      <a href="https://agents.sellingdubai.ae/${agent.slug}" style="color:#999;text-decoration:none;">View your profile</a>
       &nbsp;&middot;&nbsp;
       <a href="https://agents.sellingdubai.ae/edit" style="color:#999;text-decoration:none;">Edit dashboard</a>
     </p>
@@ -500,7 +500,7 @@ export async function handler(
             event_name: "Lead",
             event_time: Math.floor(Date.now() / 1000),
             action_source: "website",
-            event_source_url: `https://agents.sellingdubai.ae/a/${agent.slug}`,
+            event_source_url: `https://agents.sellingdubai.ae/${agent.slug}`,
             user_data: userData,
             custom_data: {
               lead_id: lead.id,

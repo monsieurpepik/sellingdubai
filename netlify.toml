@@ -25,8 +25,14 @@
   force = true
 
 [[edge_functions]]
-  path = "/a/*"
+  path = "/*"
   function = "og-injector"
+
+[[redirects]]
+  from = "/a/:slug"
+  to = "/:slug"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/"

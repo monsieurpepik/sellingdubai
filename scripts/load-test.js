@@ -119,7 +119,7 @@ export const options = {
 // Full HTML render via Netlify + og-injector edge function
 
 export function agentProfile() {
-  const res = http.get(`${BASE_URL}/a/boban-pepic`, {
+  const res = http.get(`${BASE_URL}/boban-pepic`, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     },

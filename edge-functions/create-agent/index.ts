@@ -333,7 +333,7 @@ export async function handler(
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
     if (RESEND_KEY) {
       try {
-        const profileUrl = `https://sellingdubai.ae/a/${slug}`;
+        const profileUrl = `https://sellingdubai.ae/${slug}`;
         const subject = isAutoVerified
           ? `You're live on SellingDubai!`
           : `We're reviewing your profile \u2014 SellingDubai`;

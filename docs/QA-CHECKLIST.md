@@ -97,28 +97,28 @@ To activate: set `ENABLE_TEST_MODE=true` in Supabase Dashboard → Edge Function
 
 ---
 
-## Journey 3 — Buyer Journey (`/a/[slug]`)
+## Journey 3 — Buyer Journey (`/[slug]`)
 
 ### Profile Page
 
-- [ ] **URL:** `https://www.sellingdubai.ae/a/[slug]` (use a real agent slug)
+- [ ] **URL:** `https://www.sellingdubai.ae/[slug]` (use a real agent slug)
   - **Action:** Open the page
   - **Expected:** Agent name, photo, DLD badge, tagline, and listings all load; no broken images
   - **Verify:** Agent photo uses `/.netlify/images?url=...&fm=webp` URL; OG tags have agent photo (not raw Supabase URL)
 
-- [ ] **URL:** `https://www.sellingdubai.ae/a/[slug]`
+- [ ] **URL:** `https://www.sellingdubai.ae/[slug]`
   - **Action:** Check the "Get Your Page" nav button and any referral CTA
   - **Expected:** Both link to `/join` — not `/#hero-waitlist` and not any waitlist anchor
   - **Verify:** `href` of `#nav-claim-btn` is `/join`; referral CTA `href` is `/join`
 
 ### Lead Submission
 
-- [ ] **URL:** `https://www.sellingdubai.ae/a/[slug]`
+- [ ] **URL:** `https://www.sellingdubai.ae/[slug]`
   - **Action:** Click a listing → fill in buyer name, phone, message → submit lead form
   - **Expected:** Success confirmation shown; lead delivered (appears in agent's dashboard + WhatsApp if configured)
   - **Verify:** Success state visible in UI; lead row created in Supabase `leads` table
 
-- [ ] **URL:** `https://www.sellingdubai.ae/a/[slug]`
+- [ ] **URL:** `https://www.sellingdubai.ae/[slug]`
   - **Action:** Click "Mortgage Calculator" / any mortgage trigger
   - **Expected:** Mortgage modal opens; no infinite spinner or JS error in console
   - **Verify:** Console shows no `[mortgage] failed to load` error; modal opens on first and subsequent clicks
@@ -134,7 +134,7 @@ Set browser to 390×844 (iPhone 14 equivalent) before running these checks.
   - **Expected:** No horizontal scroll; inputs are tappable (min 44px touch target); OTP field readable
   - **Verify:** `document.body.scrollWidth === window.innerWidth` (no overflow); form submits correctly
 
-- [ ] **URL:** `https://www.sellingdubai.ae/a/[slug]` at 390px
+- [ ] **URL:** `https://www.sellingdubai.ae/[slug]` at 390px
   - **Action:** Scroll through full agent profile
   - **Expected:** Photos, listing cards, and CTAs all render within viewport; no text overflow
   - **Verify:** Lead form visible and submittable without horizontal scroll

@@ -230,11 +230,11 @@ async function init() {
     // showEditButtonIfOwner falls back to its own fetch only if called without the second argument.
     try { showEditButtonIfOwner(agent, ownerToken ? isOwner : undefined); } catch (e) { console.error('[owner-check]', e); }
 
-    // Detect /a/[agent-slug]/project/[project-slug] sub-path
+    // Detect /[agent-slug]/project/[project-slug] sub-path
     const pathParts = window.location.pathname.split('/').filter(Boolean);
-    // pathParts: ['a', 'agent-slug', 'project', 'project-slug']
-    if (pathParts[2] === 'project' && pathParts[3]) {
-      const projectSlug = decodeURIComponent(pathParts[3]);
+    // pathParts: ['agent-slug', 'project', 'project-slug']
+    if (pathParts[1] === 'project' && pathParts[2]) {
+      const projectSlug = decodeURIComponent(pathParts[2]);
       setTimeout(() => import('./project-detail.js').then(m => m.openProjectDetail(projectSlug)).catch(e => {
         console.error('[project-detail] sub-path load failed:', e);
         showFeatureError('project-detail');

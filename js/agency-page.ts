@@ -131,7 +131,7 @@ async function init(): Promise<void> {
       ? `<img src="${escAttr(NETLIFY_IMG(safePhoto, 112))}" srcset="${escAttr(NETLIFY_IMG(safePhoto, 80))} 80w, ${escAttr(NETLIFY_IMG(safePhoto, 160))} 160w" sizes="80px" width="56" height="56" alt="${escAttr(a.name ?? '')}" style="width:100%;height:100%;object-fit:cover;">`
       : `<span style="font-size:20px;font-weight:700;">${escHtml(initials)}</span>`;
     return `
-      <a href="/a/${encodeURIComponent(a.slug ?? '')}" class="agent-card">
+      <a href="/${encodeURIComponent(a.slug ?? '')}" class="agent-card">
         <div class="agent-avatar">${avatarHtml}</div>
         <div class="agent-name">${escHtml(a.name ?? '')}</div>
         ${a.tagline ? `<div class="agent-tagline">${escHtml(a.tagline)}</div>` : ''}

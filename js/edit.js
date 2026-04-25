@@ -169,13 +169,13 @@
       document.getElementById('edit-avatar').textContent = initials;
     }
     document.getElementById('edit-name').textContent = a.name;
-    document.getElementById('edit-slug').textContent = `sellingdubai.ae/a/${a.slug}`;
-    document.getElementById('btn-view-profile').href = `/a/${a.slug}`;
+    document.getElementById('edit-slug').textContent = `sellingdubai.ae/${a.slug}`;
+    document.getElementById('btn-view-profile').href = `/${a.slug}`;
     document.getElementById('share-row').classList.remove('hidden');
 
     // Load analytics dashboard
     loadAnalytics();
-    window._profileUrl = `${window.location.origin}/a/${a.slug}`;
+    window._profileUrl = `${window.location.origin}/${a.slug}`;
 
     // Populate fields
     document.getElementById('ed-name').value = a.name || '';

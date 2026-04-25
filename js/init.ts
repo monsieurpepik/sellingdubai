@@ -267,11 +267,11 @@ async function init(): Promise<void> {
     // Passing no second argument so it uses its own fetch path with a timeout.
     try { void showEditButtonIfOwner(agentData); } catch (e) { console.error('[owner-check]', e); }
 
-    // Detect /a/[agent-slug]/project/[project-slug] sub-path
+    // Detect /[agent-slug]/project/[project-slug] sub-path
     const pathParts = window.location.pathname.split('/').filter(Boolean);
-    // pathParts: ['a', 'agent-slug', 'project', 'project-slug']
-    const projectSlugPart = pathParts[3];
-    if (pathParts[2] === 'project' && projectSlugPart) {
+    // pathParts: ['agent-slug', 'project', 'project-slug']
+    const projectSlugPart = pathParts[2];
+    if (pathParts[1] === 'project' && projectSlugPart) {
       const projectSlug = decodeURIComponent(projectSlugPart);
       setTimeout(() => void import('./project-detail').then(m => m.openProjectDetail(projectSlug)).catch((e: unknown) => {
         console.error('[project-detail] sub-path load failed:', e);

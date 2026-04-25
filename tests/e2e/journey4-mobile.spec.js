@@ -62,7 +62,7 @@ test('Landing page has no horizontal scroll at 390px width', async ({ page }) =>
 
 test('Index/agent page has no horizontal scroll at 390px width', async ({ page }) => {
   await mockAgentData(page);
-  await page.goto(`/a/${AGENT_SLUG}`);
+  await page.goto(`/${AGENT_SLUG}`);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
 
   const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);

@@ -113,7 +113,7 @@ export async function handler(
         // Skip if zero activity
         if (viewCount === 0 && waCount === 0 && leadCount === 0) continue;
 
-        const profileUrl = `https://sellingdubai.ae/a/${agent.slug}`;
+        const profileUrl = `https://sellingdubai.ae/${agent.slug}`;
         const dashUrl = `https://sellingdubai.ae/dashboard`;
 
         const emailHtml = `

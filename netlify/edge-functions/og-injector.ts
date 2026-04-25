@@ -39,8 +39,18 @@ export default async (request: Request, context: Context) => {
     return context.next();
   }
 
+  // Skip paths with file extensions (static assets)
+  if (/\.\w{2,5}$/.test(slug)) {
+    return context.next();
+  }
+
   // Skip known paths that aren't agent slugs
-  const reserved = ['join', 'edit', 'landing', 'dashboard', 'pricing', 'terms', 'privacy', 'favicon.ico', '_redirects'];
+  const reserved = [
+    'join', 'edit', 'landing', 'dashboard', 'pricing', 'terms', 'privacy',
+    'agents', 'admin', 'agency-dashboard', 'support', 'agency',
+    'favicon.ico', '_redirects', '_next', 'sitemap.xml', 'robots.txt',
+    'manifest.json', 'sw.js', 'dist', 'js', 'css', 'fonts', 'images',
+  ];
   if (reserved.includes(slug)) {
     return context.next();
   }
@@ -145,7 +155,7 @@ export default async (request: Request, context: Context) => {
       }
     }
     const image = escapeHtml(rawImage);
-    const profileUrl = `${url.origin}/a/${encodeURIComponent(agent.slug)}`;
+    const profileUrl = `${url.origin}/${encodeURIComponent(agent.slug)}`;
 
     let modified = html.replace(
       /<title>[^<]*<\/title>/,

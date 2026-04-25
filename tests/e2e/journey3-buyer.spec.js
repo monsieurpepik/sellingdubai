@@ -56,7 +56,7 @@ function mockAgentData(page) {
 
 test('Agent profile page loads and shows #agent-page', async ({ page }) => {
   await mockAgentData(page);
-  await page.goto(`/a/${AGENT_SLUG}`);
+  await page.goto(`/${AGENT_SLUG}`);
   const bodyHTML = await page.evaluate(() => document.getElementById('agent-page')?.className);
   console.log('agent-page class:', bodyHTML);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });
@@ -65,7 +65,7 @@ test('Agent profile page loads and shows #agent-page', async ({ page }) => {
 
 test('Mortgage modal opens and closes', async ({ page }) => {
   await mockAgentData(page);
-  await page.goto(`/a/${AGENT_SLUG}`);
+  await page.goto(`/${AGENT_SLUG}`);
   const bodyHTML = await page.evaluate(() => document.getElementById('agent-page')?.className);
   console.log('agent-page class:', bodyHTML);
   await expect(page.locator('#agent-page')).toBeVisible({ timeout: 10000 });

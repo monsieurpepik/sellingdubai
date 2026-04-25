@@ -86,7 +86,7 @@ function renderAgentPage(agent: any, properties: any[]): string {
   const rawBio = agent.bio || '';
   const photo = agent.photo_url || DEFAULT_IMAGE;
   const slug = agent.slug || '';
-  const pageUrl = `${SITE_URL}/a/${slug}`;
+  const pageUrl = `${SITE_URL}/${slug}`;
 
   const propCount = properties.length;
   const offPlan = properties.filter((p: any) => p.listing_type === 'off_plan' || p.listing_type === 'new_launch');
