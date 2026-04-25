@@ -1,5 +1,20 @@
 # Architecture Decisions Log
 
+## 2026-04-25 — CSP XSS effectiveness deferred (Lighthouse Trust and Safety)
+
+**What:** Lighthouse flags the current CSP (`script-src` host allowlists in `netlify.toml`) as insufficient against XSS because it uses origin allowlists rather than nonce-based directives. No change made.
+
+**Why deferred:** Fixing requires a nonce-based CSP rewrite across all HTML pages and edge functions — significant effort with blast radius across every page. Current Lighthouse Best Practices score is 83 (vs 92+ with nonce CSP). Accepted as known tech debt. Revisit when preparing for agency director / enterprise sales where security posture matters. Documented in CLAUDE.md Known Tech Debt.
+
+## 2026-04-25 — Lighthouse/PWA audit fixes
+
+**What:** Three targeted fixes from Lighthouse + DevTools audit:
+1. `js/agent-page.ts` `DEFAULT_BG` raw Supabase URL → Netlify Image CDN URL (`/.netlify/images?url=...&w=1200&fm=webp&q=80`). Fixes "serves images with low resolution" and pre-deploy-check raw URL warning.
+2. `js/agent-page.ts` vcard NOTE field `SellingDubai.ae` → `SellingDubai.com` — missed in domain rename.
+3. `landing.html` — added `<script src="/js/register-sw.js" defer>` so the service worker is registered on first visit to the landing page (previously only registered when visiting index.html first). Removed duplicate `<link rel="apple-touch-icon">` pointing to `icon-192.png` (kept the canonical `180x180 apple-touch-icon.png` entry at the top of `<head>`).
+
+**Why:** PWA installability requires the SW to be registered on the audited page. landing.html is one of two Lighthouse CI targets (`lighthouserc.js`). All other PWA signals (manifest, theme-color, maskable icon) were already present on all pages.
+
 ## 2026-04-25 — Page entrance animation pattern (page-in class, body fade-in, join pageIn)
 
 **What:** Added sub-400ms entrance animations to smooth UX across three surfaces:

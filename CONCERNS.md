@@ -64,20 +64,9 @@ Severity scale: **CRITICAL** (data loss / user locked out / billing state corrup
 
 ---
 
-### C8 — MEDIUM: 0-row update returns 200 — unknown agent silently accepted
+### C8 — ~~MEDIUM~~ RESOLVED: 0-row update returns 200 — unknown agent silently accepted
 
-**Location:** `stripe-webhook/index.ts` — all handlers
-
-After `resolveAgentId` returns a non-null `agentId`, the code proceeds to:
-```ts
-await supabase.from("agents").update({ ... }).eq("id", agentId);
-```
-
-If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB lookup), it could be any UUID — including one that doesn't exist in the `agents` table. Supabase will execute the UPDATE, match 0 rows, return `{ count: 0, error: null }`, and the function returns `200` to Stripe.
-
-**Scenario:** An agent's row was deleted from the DB after a Stripe subscription was created (e.g., test agent cleanup, admin deletion). Stripe still has their `customer_id`. Any subsequent billing events for that customer are silently dropped.
-
-**Fix direction:** After each `supabase.from("agents").update(...)`, check that `count > 0` (using `{ count: "exact" }` option or inspecting the response). If `count === 0`, log a critical Sentry alert and optionally return `500` to trigger Stripe retry (though retry won't fix a genuinely deleted agent — alerting is more useful here).
+**Fixed in:** verified in source — all 5 `agents.update()` calls in `stripe-webhook/index.ts` use `{ count: "exact" }` and invoke `reportToSentry(..., 'fatal', ...)` when `count === 0`. Verified in source.
 
 ---
 
@@ -92,22 +81,16 @@ If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB looku
 | C5 | capture-lead-v4 | Contact timeline fire-and-forget → lead without timeline | LOW | Open (intentional) |
 | C6 | stripe-webhook | `agents.update()` error discarded → Stripe gets 200, tier never written | CRITICAL | **RESOLVED** c622b06 |
 | C7 | stripe-webhook | No `subscription_events` log written in any handler | HIGH | **RESOLVED** c622b06 |
-| C8 | stripe-webhook | 0-row update on unknown agent returns 200 → silently dropped | MEDIUM | Open |
-| C9 | properties.ts | `retryProperties` button has no handler wired in init.ts | MEDIUM | Open |
+| C8 | stripe-webhook | 0-row update on unknown agent returns 200 → silently dropped | MEDIUM | **RESOLVED** (verified in source) |
+| C9 | properties.ts | `retryProperties` button has no handler wired in init.ts | MEDIUM | **RESOLVED** (verified in source) |
 
 ---
 
 ## 4. Frontend — `js/properties.ts`
 
-### C9 — MEDIUM: `data-action="retryProperties"` button has no handler wired
+### C9 — ~~MEDIUM~~ RESOLVED: `data-action="retryProperties"` button has no handler wired
 
-**Location:** `js/properties.ts` — `renderPropertyList()` error state branch
-
-`data-action="retryProperties"` button renders in the error state but has no handler wired in `init.ts`. Button renders but does nothing when clicked.
-
-**Fix direction:** Add event delegation in `init.ts` or `event-delegation.js` to call `loadProperties(agent.id)` on click.
-
-**Not blocking for demo** — error state displays correctly, retry just doesn't work yet.
+**Fixed in:** verified in source — `js/event-delegation.js` lines 143-145 handle `case 'retryProperties': if (typeof window.retryProperties === 'function') window.retryProperties(); break;`. Verified in source.
 
 ---
 
@@ -119,4 +102,5 @@ If `agentId` came from `metadata.agent_id` in the Stripe session (not a DB looku
 4. ~~**C7**~~ **RESOLVED** c622b06
 5. ~~**C2**~~ **RESOLVED** 4e53772
 6. ~~**C3**~~ **RESOLVED** — verified in source; magic link insert failure returns 500.
-7. **C8** — Monitor/alert; low urgency.
+7. ~~**C8**~~ **RESOLVED** — verified in source.
+8. ~~**C9**~~ **RESOLVED** — verified in source.

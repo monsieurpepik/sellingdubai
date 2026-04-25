@@ -36,7 +36,7 @@ window.saveContact = () => {
   if (a.instagram_url) vcard.push(`X-SOCIALPROFILE;TYPE=instagram:${a.instagram_url}`);
   if (a.linkedin_url) vcard.push(`X-SOCIALPROFILE;TYPE=linkedin:${a.linkedin_url}`);
   if (a.photo_url) vcard.push(`PHOTO;VALUE=URI:${a.photo_url}`);
-  vcard.push(`NOTE:Dubai Real Estate Agent | SellingDubai.ae`);
+  vcard.push(`NOTE:Dubai Real Estate Agent | SellingDubai.com`);
   vcard.push('END:VCARD');
 
   const vcardStr = vcard.join('\r\n');
@@ -94,7 +94,7 @@ function isPaidTier(agent: Agent): boolean {
   return true;
 }
 
-const DEFAULT_BG = 'https://pjyorgedaxevxophpfib.supabase.co/storage/v1/object/public/agent-images/dubai-skyline.jpg';
+const DEFAULT_BG = 'https://sellingdubai.com/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
 
 export async function renderAgent(agent: Agent): Promise<void> {
   setCurrentAgent(agent);
