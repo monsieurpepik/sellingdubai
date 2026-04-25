@@ -17,35 +17,28 @@ test('Landing page has no broken waitlist anchors on primary CTAs', async ({ pag
   await expect(staleAnchors).toHaveCount(0);
 });
 
-test('Join page shows step-1 broker verification on load', async ({ page }) => {
+test('Join page shows step-1 contact info form on load', async ({ page }) => {
   await page.goto('/join.html');
   await expect(page.locator('#step-1')).toBeVisible({ timeout: 8000 });
   await expect(page.locator('#step-2')).not.toBeVisible();
   await expect(page.locator('#step-3')).not.toBeVisible();
-  await expect(page.locator('#btn-verify')).toBeVisible();
+  await expect(page.locator('#btn-step1-next')).toBeVisible();
 });
 
-test('Join page: valid broker number advances to step-2', async ({ page }) => {
-  await page.route('**/verify-broker**', route => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({
-      verified: true,
-      license_active: true,
-      broker: { name_en: 'Test Agent', broker_number: '12345', license_end: '2026-12-31' }
-    })
-  }));
-
+test('Join page: completing step-1 contact info advances to step-2 RERA verification', async ({ page }) => {
   await page.goto('/join.html');
   await expect(page.locator('#step-1')).toBeVisible({ timeout: 8000 });
-  await page.locator('#broker-number').fill('12345');
-  await page.locator('#btn-verify').click();
+
+  await page.locator('#contact-name').fill('Test Agent');
+  await page.locator('#contact-email').fill('agent@example.com');
+  await page.locator('#contact-whatsapp').fill('+971501234567');
+  await page.locator('#btn-step1-next').click();
 
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('#step-1')).not.toBeVisible();
 });
 
-test('Join page: Create My Profile triggers send-otp and shows OTP section', async ({ page }) => {
+test('Join page: valid broker number shows profile form and OTP section', async ({ page }) => {
   await page.route('**/verify-broker**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -63,19 +56,27 @@ test('Join page: Create My Profile triggers send-otp and shows OTP section', asy
 
   await page.goto('/join.html');
   await expect(page.locator('#step-1')).toBeVisible({ timeout: 8000 });
+
+  // Complete step-1 contact info
+  await page.locator('#contact-name').fill('Test Agent');
+  await page.locator('#contact-email').fill('agent@example.com');
+  await page.locator('#contact-whatsapp').fill('+971501234567');
+  await page.locator('#btn-step1-next').click();
+
+  // Step-2: RERA broker verification
+  await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
   await page.locator('#broker-number').fill('12345');
   await page.locator('#btn-verify').click();
-  await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
 
-  // Fill required step-2 fields and trigger OTP
-  await page.locator('#whatsapp').fill('+971501234567');
-  await page.locator('#email').fill('agent@example.com');
+  // Profile details form appears after successful broker verify
+  await expect(page.locator('#step-2-details')).toBeVisible({ timeout: 5000 });
+
+  // Trigger OTP send
   await page.locator('#btn-create').click();
-
   await expect(page.locator('#otp-section')).toBeVisible({ timeout: 5000 });
 });
 
-test('Join page: refreshing after step-1 verification resumes at step-2', async ({ page }) => {
+test('Join page: refreshing after broker verification resumes at step-2', async ({ page }) => {
   await page.route('**/verify-broker**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -87,16 +88,24 @@ test('Join page: refreshing after step-1 verification resumes at step-2', async 
   }));
 
   await page.goto('/join.html');
+
+  // Complete step-1
+  await page.locator('#contact-name').fill('Resume Test Agent');
+  await page.locator('#contact-email').fill('resume@example.com');
+  await page.locator('#contact-whatsapp').fill('+971501234568');
+  await page.locator('#btn-step1-next').click();
+
+  // Complete step-2 broker verification
+  await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
   await page.locator('#broker-number').fill('55555');
   await page.locator('#btn-verify').click();
-  // Wait for step 2 to become visible
-  await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('#step-2-details')).toBeVisible({ timeout: 5000 });
 
-  // Reload the page to simulate returning agent
+  // Reload to simulate returning agent
   await page.reload();
   await page.waitForLoadState('domcontentloaded');
 
-  // Should resume at step 2 without needing to re-verify
+  // Should resume at step-2 without re-verifying
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('#step-1')).not.toBeVisible();
   await expect(page.locator('#verify-bn')).toContainText('55555');

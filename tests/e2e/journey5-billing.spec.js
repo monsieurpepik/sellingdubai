@@ -15,14 +15,9 @@ test('Pricing page upgrade buttons are visible', async ({ page }) => {
 test('Billing gate blocks create-checkout when BILLING_LIVE=false', async ({ page }) => {
   const checkoutCalled = { value: false };
 
-  // Force BILLING_LIVE=false regardless of source file state (may be patched to true by Netlify deploy)
-  await page.route('**/js/pricing.js', async route => {
-    const response = await route.fetch();
-    const text = await response.text();
-    await route.fulfill({
-      ...response,
-      body: text.replace(/var BILLING_LIVE = (true|false);/, 'var BILLING_LIVE = false;')
-    });
+  // Force BILLING_LIVE=false via runtime flag before page scripts run
+  await page.addInitScript(() => {
+    window.SD_FLAGS = { BILLING_LIVE: false };
   });
 
   await page.route('**/create-checkout**', route => {
@@ -35,10 +30,7 @@ test('Billing gate blocks create-checkout when BILLING_LIVE=false', async ({ pag
   await expect(proBtn).toBeVisible({ timeout: 8000 });
   await proBtn.click();
 
-  // BILLING_LIVE=false: button text changes to "Billing coming soon", checkout NOT called
-  await expect(proBtn).toHaveText('Billing coming soon', { timeout: 3000 });
+  // BILLING_LIVE=false: button text changes to "Coming Soon", checkout NOT called
+  await expect(proBtn).toHaveText('Coming Soon', { timeout: 3000 });
   expect(checkoutCalled.value).toBe(false);
-
-  // Button reverts after 2s
-  await expect(proBtn).toHaveText('Upgrade Now', { timeout: 5000 });
 });

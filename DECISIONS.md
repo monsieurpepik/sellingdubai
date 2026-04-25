@@ -1,5 +1,14 @@
 # Architecture Decisions Log
 
+## 2026-04-25 — Page entrance animation pattern (page-in class, body fade-in, join pageIn)
+
+**What:** Added sub-400ms entrance animations to smooth UX across three surfaces:
+- `css/layout.css`: `.page-in` keyframe class (`opacity 0→1, translateY 12px→0, 0.35s ease-out`) for reuse on any page
+- `index.html`: inline `body { opacity: 0; animation: fadeIn 0.3s ease forwards; }` so the agent profile shell fades in smoothly instead of hard-cutting from blank page to loading dots
+- `css/join.css`: `@keyframes pageIn` (`opacity 0→1, translateY 16px→0, 0.4s ease-out`) applied to `.card` so landing→join transition feels smooth on arrival
+
+**Why:** After removing the `/a/` URL prefix and adding the landing page loader, the hard-cut from navigation to loading-spinner state became jarring on mobile. Each animation is scoped to its page and has zero impact on LCP (the element animates in already-loaded state, not gating content). No new JS, no new dependencies.
+
 ## 2026-04-24 — Instrument Serif added to landing.html loader animation
 
 **What:** Added Google Font `Instrument Serif` (italic, weight 400) to `landing.html` for the fullscreen loading screen word animation ("Design / Create / Inspire"). Loaded via the same async `data-async-css` + `<noscript>` pattern as Cormorant Garamond.
