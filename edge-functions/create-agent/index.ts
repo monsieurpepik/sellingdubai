@@ -333,7 +333,7 @@ export async function handler(
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
     if (RESEND_KEY) {
       try {
-        const profileUrl = `https://sellingdubai.ae/${slug}`;
+        const profileUrl = `https://sellingdubai.com/${slug}`;
         const subject = isAutoVerified
           ? `You're live on SellingDubai!`
           : `We're reviewing your profile \u2014 SellingDubai`;
@@ -347,14 +347,14 @@ export async function handler(
               <h1 style="font-size:24px;font-weight:700;color:#111;margin-bottom:8px;">You're live, ${display_name}!</h1>
               <p style="font-size:16px;color:#555;line-height:1.6;margin-bottom:24px;">Your verified profile is now live. Share your link and start getting leads.</p>
               <div style="text-align:center;margin-bottom:24px;">
-                <a href="https://sellingdubai.ae/dashboard" style="display:inline-block;background:#111;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">Go to Dashboard</a>
+                <a href="https://sellingdubai.com/dashboard" style="display:inline-block;background:#111;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">Go to Dashboard</a>
               </div>
               <div style="background:#f8f8f8;border-radius:8px;padding:16px;margin-bottom:24px;">
                 <p style="font-size:14px;color:#333;font-weight:600;margin-bottom:8px;">Your profile link:</p>
                 <p style="font-size:14px;color:#1127d2;word-break:break-all;">${profileUrl}</p>
               </div>
               <p style="font-size:14px;color:#555;line-height:1.6;">Add it to your Instagram bio, WhatsApp status, and business card.</p>
-              <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">&copy; 2026 SellingDubai.ae</p>
+              <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">&copy; 2026 SellingDubai.com</p>
             </div>
           `
           : `
@@ -369,9 +369,9 @@ export async function handler(
                 <p style="font-size:13px;color:#a16207;margin-top:4px;">We'll email you when your profile is verified and live.</p>
               </div>
               <div style="text-align:center;margin-bottom:24px;">
-                <a href="https://sellingdubai.ae/edit?token=${editToken}" style="display:inline-block;background:#111;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">Edit My Profile</a>
+                <a href="https://sellingdubai.com/edit?token=${editToken}" style="display:inline-block;background:#111;color:#fff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;">Edit My Profile</a>
               </div>
-              <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">&copy; 2026 SellingDubai.ae</p>
+              <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">&copy; 2026 SellingDubai.com</p>
             </div>
           `;
 
@@ -382,7 +382,7 @@ export async function handler(
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
+            from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>",
             to: [cleanEmail],
             subject,
             html: bodyHtml,

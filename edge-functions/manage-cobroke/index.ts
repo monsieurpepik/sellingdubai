@@ -31,7 +31,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "SellingDubai <cobroke@sellingdubai.ae>",
+      from: "SellingDubai <cobroke@sellingdubai.com>",
       to: [to],
       subject,
       html,
@@ -183,7 +183,7 @@ export async function handler(
               <p><strong>${escHtml(listingAgent.name)}</strong> has accepted your request to bring a buyer to <strong>${escHtml(property?.title || "their property")}</strong>.</p>
               <p>You can now coordinate the viewing. The listing agent has your buyer's details.</p>
               <p><strong>Commission split:</strong> Listing ${deal.listing_agent_split}% / You ${deal.buying_agent_split}%</p>
-              <a href="https://agents.sellingdubai.ae/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:12px;">View Deal</a>
+              <a href="https://agents.sellingdubai.com/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:12px;">View Deal</a>
             </div>`
           );
         }

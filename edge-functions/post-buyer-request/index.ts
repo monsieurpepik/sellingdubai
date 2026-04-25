@@ -20,9 +20,9 @@ const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
 const CORS_ORIGINS = [
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.ae",
-  "https://agents.sellingdubai.ae",
+  "https://sellingdubai.com",
+  "https://www.sellingdubai.com",
+  "https://agents.sellingdubai.com",
   "https://staging.sellingdubai.com",
 ];
 
@@ -50,7 +50,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "SellingDubai <matches@sellingdubai.ae>",
+      from: "SellingDubai <matches@sellingdubai.com>",
       to: [to],
       subject,
       html,
@@ -356,7 +356,7 @@ export async function handler(
               ${propListHtml}
             </table>
             <p style="color:#666;font-size:13px;">Respond in your dashboard to connect with this agent. No buyer details are shared — you coordinate directly agent-to-agent.</p>
-            <a href="https://agents.sellingdubai.ae/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">View Match</a>
+            <a href="https://agents.sellingdubai.com/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">View Match</a>
           </div>`
         );
       }

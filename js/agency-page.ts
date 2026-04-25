@@ -38,7 +38,7 @@ async function init(): Promise<void> {
   document.title = `${agency.name} \u2014 SellingDubai`;
   const canonicalEl = document.createElement('link');
   canonicalEl.rel = 'canonical';
-  canonicalEl.href = `https://sellingdubai.ae/agency/${encodeURIComponent(agency.slug)}`;
+  canonicalEl.href = `https://sellingdubai.com/agency/${encodeURIComponent(agency.slug)}`;
   document.head.appendChild(canonicalEl);
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', `${agency.name} \u2014 SellingDubai`);
   const agencyDesc = agency.description ?? `${agency.name} \u2014 verified DLD real estate agency in Dubai. Browse agent profiles, listings, and contact directly.`;
@@ -70,7 +70,7 @@ async function init(): Promise<void> {
 
   const safeLogoUrl = safeImgUrl(agency.logo_url);
   if (safeLogoUrl) {
-    const ogImageUrl = `https://sellingdubai.ae${NETLIFY_IMG(safeLogoUrl, 400)}`;
+    const ogImageUrl = `https://sellingdubai.com${NETLIFY_IMG(safeLogoUrl, 400)}`;
     document.querySelector('meta[property="og:image"]')?.setAttribute('content', ogImageUrl);
   }
 

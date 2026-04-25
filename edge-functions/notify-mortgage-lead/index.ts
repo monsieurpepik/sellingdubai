@@ -15,8 +15,8 @@ if (!PLATFORM_OPS_EMAIL) {
 }
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -91,7 +91,7 @@ function buildAgentEmailHtml(
     <p style="font-size:12px;color:#4d65ff;font-weight:600;margin:0;">&#9889; You'll be notified when they're pre-approved and ready to make an offer</p>
   </div>
   <div style="text-align:center;padding:16px;">
-    <p style="font-size:11px;color:#bbb;margin:0;"><a href="https://sellingdubai.ae/${agent.slug}" style="color:#999;text-decoration:none;">View your profile</a> &middot; <a href="https://sellingdubai.ae/edit" style="color:#999;text-decoration:none;">Dashboard</a></p>
+    <p style="font-size:11px;color:#bbb;margin:0;"><a href="https://sellingdubai.com/${agent.slug}" style="color:#999;text-decoration:none;">View your profile</a> &middot; <a href="https://sellingdubai.com/edit" style="color:#999;text-decoration:none;">Dashboard</a></p>
   </div>
 </div></body></html>`;
 }
@@ -181,7 +181,7 @@ function buildOpsEmailHtml(
   </div>
 
   <div style="text-align:center;padding:16px;">
-    <p style="font-size:11px;color:#bbb;margin:0;">&copy; 2026 SellingDubai.ae &middot; Platform Ops</p>
+    <p style="font-size:11px;color:#bbb;margin:0;">&copy; 2026 SellingDubai.com &middot; Platform Ops</p>
   </div>
 
 </div></body></html>`;
@@ -251,7 +251,7 @@ export async function handler(
     }
 
     const RESEND_KEY = Deno.env.get('RESEND_API_KEY') || '';
-    const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'SellingDubai <leads@sellingdubai.ae>';
+    const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'SellingDubai <leads@sellingdubai.com>';
 
     const appData = {
       id: app.id,

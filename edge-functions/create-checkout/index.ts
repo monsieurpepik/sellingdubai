@@ -2,8 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -143,8 +143,8 @@ export async function handler(
     }
 
     // Create Checkout Session
-    const successUrl = Deno.env.get("STRIPE_SUCCESS_URL") ?? "https://www.sellingdubai.ae/dashboard.html?billing=success";
-    const cancelUrl  = Deno.env.get("STRIPE_CANCEL_URL")  ?? "https://www.sellingdubai.ae/pricing.html?billing=cancel";
+    const successUrl = Deno.env.get("STRIPE_SUCCESS_URL") ?? "https://www.sellingdubai.com/dashboard.html?billing=success";
+    const cancelUrl  = Deno.env.get("STRIPE_CANCEL_URL")  ?? "https://www.sellingdubai.com/pricing.html?billing=cancel";
 
     const sessionParams = new URLSearchParams({
       "customer": customerId,

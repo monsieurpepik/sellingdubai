@@ -686,7 +686,7 @@ Deno.serve(async (req: Request) => {
       method: "POST",
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "SellingDubai <no-reply@sellingdubai.ae>",
+        from: "SellingDubai <no-reply@sellingdubai.com>",
         to: [agentEmail],
         subject: `[Resent] New lead: ${lead.name}`,
         html: `<p>Hi ${agentName},</p><p>This is a resent notification for a lead from <strong>${lead.name}</strong>.</p><p>Contact: ${lead.phone || lead.email || "—"}</p><p>Message: ${lead.message || "No message"}</p>`,

@@ -13,7 +13,7 @@ function makeRequest(opts: {
   const method = opts.method ?? "POST";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Origin": "https://sellingdubai.ae",
+    "Origin": "https://sellingdubai.com",
     ...(opts.headers ?? {}),
   };
   return new Request("http://localhost/verify-telegram-init", {
@@ -284,7 +284,7 @@ Deno.test("verify-telegram-init: bot_auth with used magic link returns 401", asy
     body: { mode: "bot_auth", bot_auth_token: "valid-token-xyz" },
     headers: {
       "Content-Type": "application/json",
-      "Origin": "https://sellingdubai.ae",
+      "Origin": "https://sellingdubai.com",
       "Authorization": "Bearer some-bearer-token",
     },
   });

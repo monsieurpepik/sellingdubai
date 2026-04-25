@@ -4,11 +4,11 @@ const SUPABASE_URL = Netlify.env.get('SUPABASE_URL') || 'https://pjyorgedaxevxop
 const SUPABASE_ANON_KEY = Netlify.env.get('SUPABASE_ANON_KEY') || '';
 
 const STATIC_PAGES = [
-  { loc: 'https://sellingdubai.ae/', changefreq: 'weekly', priority: '1.0' },
-  { loc: 'https://sellingdubai.ae/join', changefreq: 'monthly', priority: '0.8' },
-  { loc: 'https://sellingdubai.ae/pricing', changefreq: 'monthly', priority: '0.7' },
-  { loc: 'https://sellingdubai.ae/terms', changefreq: 'yearly', priority: '0.3' },
-  { loc: 'https://sellingdubai.ae/privacy', changefreq: 'yearly', priority: '0.3' },
+  { loc: 'https://sellingdubai.com/', changefreq: 'weekly', priority: '1.0' },
+  { loc: 'https://sellingdubai.com/join', changefreq: 'monthly', priority: '0.8' },
+  { loc: 'https://sellingdubai.com/pricing', changefreq: 'monthly', priority: '0.7' },
+  { loc: 'https://sellingdubai.com/terms', changefreq: 'yearly', priority: '0.3' },
+  { loc: 'https://sellingdubai.com/privacy', changefreq: 'yearly', priority: '0.3' },
 ];
 
 export default async (_request: Request, _context: Context) => {
@@ -33,7 +33,7 @@ export default async (_request: Request, _context: Context) => {
   }
 
   const agentUrls = agentSlugs.map(slug =>
-    `  <url>\n    <loc>https://sellingdubai.ae/${encodeURIComponent(slug)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+    `  <url>\n    <loc>https://sellingdubai.com/${encodeURIComponent(slug)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`
   );
 
   const staticUrls = STATIC_PAGES.map(p =>

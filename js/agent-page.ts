@@ -20,7 +20,7 @@ window.saveContact = () => {
   const firstName = nameParts[0] ?? '';
   const lastName = nameParts.slice(1).join(' ') || '';
   const waNum = (a.whatsapp || '').replace(/[^0-9+]/g, '');
-  const profileUrl = `https://sellingdubai.ae/${a.slug}`;
+  const profileUrl = `https://sellingdubai.com/${a.slug}`;
 
   const vcard: string[] = [
     'BEGIN:VCARD',

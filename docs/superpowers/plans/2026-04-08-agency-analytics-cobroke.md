@@ -100,7 +100,7 @@ const MEMBERS = [{ id: "m-1", name: "Alice Broker", slug: "alice", photo_url: nu
 function makeRequest(body: Record<string, unknown>) {
   return new Request("http://localhost/agency-stats", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Origin": "https://sellingdubai.ae" },
+    headers: { "Content-Type": "application/json", "Origin": "https://sellingdubai.com" },
     body: JSON.stringify(body),
   });
 }
@@ -579,7 +579,7 @@ function renderAgencyHeader(agency) {
   document.getElementById('agency-slug-el').textContent = `/${agency.slug}`;
   const link = document.getElementById('agency-profile-link');
   link.href = `/agency/${agency.slug}`;
-  link.textContent = `sellingdubai.ae/agency/${agency.slug}`;
+  link.textContent = `sellingdubai.com/agency/${agency.slug}`;
   const logoEl = document.getElementById('agency-logo-el');
   if (agency.logo_url) {
     const logoSrc = agency.logo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')
@@ -916,7 +916,7 @@ function makeGET(params = "") {
     method: "GET",
     headers: {
       "Authorization": "Bearer valid-token",
-      "Origin": "https://sellingdubai.ae",
+      "Origin": "https://sellingdubai.com",
     },
   });
 }
@@ -924,7 +924,7 @@ function makeGET(params = "") {
 Deno.test("cobroke-discover: no auth header → 401", async () => {
   const req = new Request("http://localhost/cobroke-discover", {
     method: "GET",
-    headers: { "Origin": "https://sellingdubai.ae" },
+    headers: { "Origin": "https://sellingdubai.com" },
   });
   const res = await handler(req, mockClientFactory());
   assertEquals(res.status, 401);
@@ -952,7 +952,7 @@ Deno.test("cobroke-discover: valid token returns listings array", async () => {
 Deno.test("cobroke-discover: OPTIONS returns 204", async () => {
   const req = new Request("http://localhost/cobroke-discover", {
     method: "OPTIONS",
-    headers: { "Origin": "https://sellingdubai.ae" },
+    headers: { "Origin": "https://sellingdubai.com" },
   });
   const res = await handler(req, mockClientFactory());
   assertEquals(res.status, 204);
@@ -994,9 +994,9 @@ import { createLogger } from "../_shared/logger.ts";
  */
 
 const CORS_ORIGINS = [
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.ae",
-  "https://agents.sellingdubai.ae",
+  "https://sellingdubai.com",
+  "https://www.sellingdubai.com",
+  "https://agents.sellingdubai.com",
   "https://staging.sellingdubai.com",
 ];
 

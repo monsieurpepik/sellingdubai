@@ -19,7 +19,7 @@ window.saveContact = () => {
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
   const waNum = (a.whatsapp || '').replace(/[^0-9+]/g, '');
-  const profileUrl = `https://sellingdubai.ae/${a.slug}`;
+  const profileUrl = `https://sellingdubai.com/${a.slug}`;
 
   const vcard = [
     'BEGIN:VCARD',
@@ -80,7 +80,7 @@ function isPaidTier(agent) {
 export async function renderAgent(agent) {
   setCurrentAgent(agent);
 
-  const DEFAULT_BG = 'https://sellingdubai.ae/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
+  const DEFAULT_BG = 'https://sellingdubai.com/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1200&fm=webp&q=80';
   const bg = document.getElementById('bg');
   // Custom background is a Pro/Premium feature
   const bgUrl = (isPaidTier(agent) && safeUrl(agent.background_image_url)) || DEFAULT_BG;
@@ -94,7 +94,7 @@ export async function renderAgent(agent) {
   const avatarContainer = document.getElementById('avatar-container');
   const safeInitials = escHtml((agent.name || '').split(' ').map(n => (n[0] || '')).join('').slice(0, 2));
   const isVerified = agent.verification_status === 'verified' || agent.dld_verified;
-  const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae', 'googleusercontent.com'];
+  const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.com', 'googleusercontent.com'];
   if (agent.photo_url) {
     const img = document.createElement('img');
     img.className = `avatar${isVerified ? ' avatar-verified' : ''}`;

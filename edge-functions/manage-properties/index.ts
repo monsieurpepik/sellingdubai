@@ -5,8 +5,8 @@ import { createLogger } from '../_shared/logger.ts';
 type CreateClientFn = (url: string, key: string) => any;
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",

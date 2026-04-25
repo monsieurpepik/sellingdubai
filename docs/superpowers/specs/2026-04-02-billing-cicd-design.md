@@ -111,7 +111,7 @@ This makes it physically impossible for a failing build to reach production.
 
 - Every push to `main` triggers the Actions workflow
 - A broken build fails the `ci` job and the `deploy` job does not run
-- A green `ci` job auto-deploys to `https://sellingdubai.ae`
+- A green `ci` job auto-deploys to `https://sellingdubai.com`
 - Every production deploy at Netlify links back to a specific GitHub commit with a green check
 
 ---

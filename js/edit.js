@@ -169,7 +169,7 @@
       document.getElementById('edit-avatar').textContent = initials;
     }
     document.getElementById('edit-name').textContent = a.name;
-    document.getElementById('edit-slug').textContent = `sellingdubai.ae/${a.slug}`;
+    document.getElementById('edit-slug').textContent = `sellingdubai.com/${a.slug}`;
     document.getElementById('btn-view-profile').href = `/${a.slug}`;
     document.getElementById('share-row').classList.remove('hidden');
 

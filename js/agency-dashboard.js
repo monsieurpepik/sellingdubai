@@ -57,7 +57,7 @@ function renderAgencyHeader(agency) {
   document.getElementById('agency-slug-el').textContent = `/${agency.slug}`;
   const link = document.getElementById('agency-profile-link');
   link.href = `/agency/${agency.slug}`;
-  link.textContent = `sellingdubai.ae/agency/${agency.slug}`;
+  link.textContent = `sellingdubai.com/agency/${agency.slug}`;
   const logoEl = document.getElementById('agency-logo-el');
   if (agency.logo_url) {
     const logoSrc = agency.logo_url.startsWith('https://pjyorgedaxevxophpfib.supabase.co/')

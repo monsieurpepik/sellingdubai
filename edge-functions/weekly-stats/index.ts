@@ -113,8 +113,8 @@ export async function handler(
         // Skip if zero activity
         if (viewCount === 0 && waCount === 0 && leadCount === 0) continue;
 
-        const profileUrl = `https://sellingdubai.ae/${agent.slug}`;
-        const dashUrl = `https://sellingdubai.ae/dashboard`;
+        const profileUrl = `https://sellingdubai.com/${agent.slug}`;
+        const dashUrl = `https://sellingdubai.com/dashboard`;
 
         const emailHtml = `
 <!DOCTYPE html>
@@ -150,7 +150,7 @@ export async function handler(
       <a href="${profileUrl}" style="font-size:13px;color:#666;text-decoration:none;">Share your profile &rarr;</a>
     </div>
   </div>
-  <p style="font-size:11px;color:#ccc;margin:24px 0 0;text-align:center;">&copy; 2026 SellingDubai.ae</p>
+  <p style="font-size:11px;color:#ccc;margin:24px 0 0;text-align:center;">&copy; 2026 SellingDubai.com</p>
 </div>
 </body>
 </html>`;
@@ -162,7 +162,7 @@ export async function handler(
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
+            from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>",
             to: [agent.email],
             subject: `${viewCount} views, ${leadCount} leads — Your Week on SellingDubai`,
             html: emailHtml,

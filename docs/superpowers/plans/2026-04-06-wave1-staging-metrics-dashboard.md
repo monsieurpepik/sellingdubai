@@ -55,7 +55,7 @@ User-agent: *
 Disallow: /ops.html
 Disallow: /admin.html
 
-Sitemap: https://agents.sellingdubai.ae/sitemap.xml
+Sitemap: https://agents.sellingdubai.com/sitemap.xml
 ```
 
 - [ ] **Step 3: Verify the file looks correct**
@@ -100,7 +100,7 @@ supabase db push
 
 - [ ] **Step 3: Create staging Netlify site (if needed)**
 
-In Netlify dashboard: Add new site → connect to the same GitHub repo → set deploy branch to `staging`. Site URL: `staging-agents.sellingdubai.ae`. Set environment variables:
+In Netlify dashboard: Add new site → connect to the same GitHub repo → set deploy branch to `staging`. Site URL: `staging-agents.sellingdubai.com`. Set environment variables:
 - `SUPABASE_URL` = staging project URL
 - `SUPABASE_ANON_KEY` = staging anon key
 - `OPS_SECRET` = a long random string (generate with `openssl rand -hex 32`)

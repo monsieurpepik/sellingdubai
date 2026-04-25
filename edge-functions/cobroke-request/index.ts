@@ -25,7 +25,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "SellingDubai <cobroke@sellingdubai.ae>",
+      from: "SellingDubai <cobroke@sellingdubai.com>",
       to: [to],
       subject,
       html,
@@ -218,7 +218,7 @@ export async function handler(
             <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Commission Split</td><td style="padding:8px;border-bottom:1px solid #eee;">You ${listingSplit}% / Buyer agent ${buyingSplit}%</td></tr>
           </table>
           <p style="color:#666;">Accept this request in your dashboard to see the buyer's contact details and coordinate the viewing.</p>
-          <a href="https://agents.sellingdubai.ae/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">Review Request</a>
+          <a href="https://agents.sellingdubai.com/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">Review Request</a>
         </div>`
       );
     }

@@ -117,7 +117,7 @@ Deno.test("capture-lead-v4: OPTIONS returns 200", async () => {
   const res = await handler(
     new Request("http://localhost", {
       method: "OPTIONS",
-      headers: { "Origin": "https://sellingdubai.ae" },
+      headers: { "Origin": "https://sellingdubai.com" },
     }),
     mockClientFactory(),
   );

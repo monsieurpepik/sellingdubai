@@ -5,8 +5,8 @@ import { createLogger } from '../_shared/logger.ts';
 type CreateClientFn = (url: string, key: string) => any;
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -89,7 +89,7 @@ export async function handler(
     if (name.length < 2) return new Response(JSON.stringify({ error: "Agency name required (min 2 chars)." }), { status: 400, headers: cors });
     // Billing gate — Pro or Premium required
     const { data: agentTierData } = await supabase.from("agents").select("tier").eq("id", agentId).single();
-    if (!agentTierData || agentTierData.tier === "free") return new Response(JSON.stringify({ error: "Agency creation requires a Pro or Premium plan. Upgrade at sellingdubai.ae to unlock this feature." }), { status: 403, headers: cors });
+    if (!agentTierData || agentTierData.tier === "free") return new Response(JSON.stringify({ error: "Agency creation requires a Pro or Premium plan. Upgrade at sellingdubai.com to unlock this feature." }), { status: 403, headers: cors });
     const { data: existing } = await supabase.from("agencies").select("id").eq("owner_agent_id", agentId).maybeSingle();
     if (existing) return new Response(JSON.stringify({ error: "You already have an agency." }), { status: 409, headers: cors });
     // Generate unique slug
@@ -171,7 +171,7 @@ export async function handler(
     }
     // Notify new member via email (fire-and-forget)
     const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
-    const RESEND_FROM = Deno.env.get("RESEND_FROM") || "SellingDubai <leads@sellingdubai.ae>";
+    const RESEND_FROM = Deno.env.get("RESEND_FROM") || "SellingDubai <leads@sellingdubai.com>";
     if (RESEND_KEY && target.email) {
       fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -180,7 +180,7 @@ export async function handler(
           from: RESEND_FROM,
           to: [target.email],
           subject: `You've been added to ${ownerAgency.name} on SellingDubai`,
-          html: `<p>Hi ${target.name},</p><p>You've been added to <strong>${ownerAgency.name}</strong> on SellingDubai by ${ownerAgent?.name || "an agency owner"}.</p><p>You can now view agency analytics via your dashboard. If this was unexpected, please contact <a href="mailto:support@sellingdubai.ae">support@sellingdubai.ae</a>.</p>`,
+          html: `<p>Hi ${target.name},</p><p>You've been added to <strong>${ownerAgency.name}</strong> on SellingDubai by ${ownerAgent?.name || "an agency owner"}.</p><p>You can now view agency analytics via your dashboard. If this was unexpected, please contact <a href="mailto:support@sellingdubai.com">support@sellingdubai.com</a>.</p>`,
         }),
       }).catch(() => {});
     }

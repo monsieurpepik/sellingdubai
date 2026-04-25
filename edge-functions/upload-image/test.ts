@@ -79,7 +79,7 @@ Deno.test("upload-image: OPTIONS returns CORS headers", async () => {
   const res = await handler(
     new Request("http://localhost", {
       method: "OPTIONS",
-      headers: { "Origin": "https://sellingdubai.ae" },
+      headers: { "Origin": "https://sellingdubai.com" },
     }),
     mockClientFactory(),
   );

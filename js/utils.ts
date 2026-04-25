@@ -59,7 +59,7 @@ export function getAgentSlug(): string | null {
 // ==========================================
 // Domains that Netlify Image CDN can proxy server-side without being blocked.
 // Google's aida-public CDN blocks server-side proxy requests — do not add googleusercontent.com.
-export const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.ae'];
+export const SAFE_CDN_DOMAINS = ['supabase.co', 'netlify.app', 'sellingdubai.com'];
 
 // Netlify Image CDN — WebP, max width, quality 80.
 // Returns raw URL for unsupported domains so the browser fetches directly.

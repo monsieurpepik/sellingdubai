@@ -27,8 +27,8 @@ function escHtml(s: string): string {
 }
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -59,7 +59,7 @@ export async function handler(
 
   try {
     const RESEND_KEY_CHECK = Deno.env.get("RESEND_API_KEY") || "";
-    const RESEND_FROM_CHECK = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>";
+    const RESEND_FROM_CHECK = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>";
 
     const { email, destination } = await req.json();
 
@@ -144,7 +144,7 @@ export async function handler(
     // Build magic link URL — destination defaults to /dashboard
     const allowedDests = ['/edit', '/dashboard'];
     const dest = typeof destination === 'string' && allowedDests.includes(destination) ? destination : '/dashboard';
-    const siteUrl = Deno.env.get("SITE_URL") || "https://sellingdubai.ae";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://sellingdubai.com";
     const loginUrl = `${siteUrl}${dest}?token=${token}`;
     const buttonText = dest === '/dashboard' ? 'Go to My Dashboard' : 'Edit My Profile';
 

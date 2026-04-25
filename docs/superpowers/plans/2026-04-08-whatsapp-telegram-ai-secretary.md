@@ -1157,7 +1157,7 @@ async function handlePendingAuth(
   if (!agent) {
     await sendTelegramMessage(
       chatId,
-      "No account found for that email. Make sure you're using the email you registered with at sellingdubai.ae/join",
+      "No account found for that email. Make sure you're using the email you registered with at sellingdubai.com/join",
     );
     return;
   }

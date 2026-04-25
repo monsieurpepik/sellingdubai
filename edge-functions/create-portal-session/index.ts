@@ -2,8 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -81,7 +81,7 @@ export async function handler(req: Request, _createClient: CreateClientFn = crea
     }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY")!;
-    const returnUrl = Deno.env.get("STRIPE_PORTAL_RETURN_URL") ?? "https://www.sellingdubai.ae/dashboard.html";
+    const returnUrl = Deno.env.get("STRIPE_PORTAL_RETURN_URL") ?? "https://www.sellingdubai.com/dashboard.html";
 
     const portalRes = await fetch("https://api.stripe.com/v1/billing_portal/sessions", {
       method: "POST",

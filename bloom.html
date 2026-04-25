@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloom — AI Plant Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --hsl-0:   hsl(0, 0%, 100%);
+      --hsl-5:   hsl(0, 0%, 95%);
+      --hsl-15:  hsl(0, 0%, 85%);
+      --hsl-30:  hsl(0, 0%, 70%);
+      --hsl-45:  hsl(0, 0%, 55%);
+      --hsl-60:  hsl(0, 0%, 40%);
+      --hsl-75:  hsl(0, 0%, 25%);
+      --hsl-85:  hsl(0, 0%, 15%);
+      --hsl-92:  hsl(0, 0%, 8%);
+      --hsl-95:  hsl(0, 0%, 5%);
+      --hsl-100: hsl(0, 0%, 0%);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: var(--hsl-95);
+      color: var(--hsl-0);
+      overflow: hidden;
+    }
+
+    /* ── Video background ── */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+    .video-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .video-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg,
+        hsla(0,0%,0%,0.62) 0%,
+        hsla(0,0%,0%,0.38) 50%,
+        hsla(0,0%,0%,0.55) 100%
+      );
+    }
+
+    /* ── Liquid glass components ── */
+    .liquid-glass {
+      position: relative;
+      background: hsla(0,0%,100%,0.07);
+      backdrop-filter: blur(4px) saturate(140%);
+      -webkit-backdrop-filter: blur(4px) saturate(140%);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        hsla(0,0%,100%,0.22) 0%,
+        hsla(0,0%,100%,0.06) 40%,
+        hsla(0,0%,100%,0.14) 100%
+      );
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .liquid-glass-strong {
+      position: relative;
+      background: hsla(0,0%,100%,0.10);
+      backdrop-filter: blur(50px) saturate(160%);
+      -webkit-backdrop-filter: blur(50px) saturate(160%);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .liquid-glass-strong::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        hsla(0,0%,100%,0.30) 0%,
+        hsla(0,0%,100%,0.08) 40%,
+        hsla(0,0%,100%,0.20) 100%
+      );
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* ── Layout ── */
+    .scene {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      height: 100vh;
+      padding: 24px;
+      gap: 20px;
+    }
+
+    /* ── Left panel (52%) ── */
+    .panel-left {
+      display: flex;
+      flex-direction: column;
+      width: 52%;
+      flex-shrink: 0;
+    }
+
+    /* Nav */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+    .nav-logo {
+      font-family: 'Source Serif 4', serif;
+      font-size: 22px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--hsl-0);
+      letter-spacing: 0.01em;
+    }
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--hsl-0);
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: opacity 0.2s;
+    }
+    .nav-menu:hover { opacity: 0.7; }
+    .nav-menu:active { transform: scale(0.97); }
+
+    /* Hero text */
+    .hero-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--hsl-30);
+      margin-bottom: 20px;
+    }
+    .hero-h1 {
+      font-family: 'Source Serif 4', serif;
+      font-size: clamp(40px, 5.5vw, 72px);
+      font-weight: 300;
+      line-height: 1.08;
+      color: var(--hsl-0);
+      margin-bottom: 32px;
+    }
+    .hero-h1 em {
+      font-style: italic;
+      color: var(--hsl-15);
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 28px;
+      background: var(--hsl-0);
+      color: var(--hsl-100);
+      border: none;
+      border-radius: 50px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      align-self: flex-start;
+      margin-bottom: 36px;
+      text-decoration: none;
+    }
+    .hero-cta:hover { transform: scale(1.04); box-shadow: 0 8px 32px hsla(0,0%,100%,0.18); }
+    .hero-cta:active { transform: scale(0.97); }
+
+    /* Pills */
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 48px;
+    }
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--hsl-15);
+      letter-spacing: 0.03em;
+      cursor: default;
+      transition: transform 0.2s;
+      border-radius: 50px;
+    }
+    .pill:hover { transform: scale(1.04); }
+
+    /* Quote */
+    .hero-quote {
+      border-left: 2px solid hsla(0,0%,100%,0.18);
+      padding-left: 20px;
+    }
+    .hero-quote blockquote {
+      font-family: 'Source Serif 4', serif;
+      font-size: 15px;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--hsl-45);
+      line-height: 1.6;
+    }
+    .hero-quote cite {
+      display: block;
+      font-family: 'Poppins', sans-serif;
+      font-style: normal;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--hsl-60);
+      margin-top: 10px;
+    }
+
+    /* ── Right panel (48%, desktop only) ── */
+    .panel-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top row */
+    .right-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .social-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 50px;
+    }
+    .social-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: hsla(0,0%,100%,0.08);
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .social-icon:hover { transform: scale(1.1); background: hsla(0,0%,100%,0.15); }
+    .social-icon:active { transform: scale(0.95); }
+    .social-divider {
+      width: 1px;
+      height: 20px;
+      background: hsla(0,0%,100%,0.15);
+    }
+    .social-arrow {
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      background: hsla(0,0%,100%,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .social-arrow:hover { transform: scale(1.1) translateX(2px); }
+
+    .account-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--hsl-0);
+      cursor: pointer;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }
+    .account-btn:hover { transform: scale(1.04); }
+    .account-btn:active { transform: scale(0.97); }
+
+    /* Community card */
+    .community-card {
+      flex: 1;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .community-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--hsl-45);
+      margin-bottom: 12px;
+    }
+    .community-stat {
+      font-family: 'Source Serif 4', serif;
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 300;
+      color: var(--hsl-0);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .community-sub {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--hsl-45);
+      line-height: 1.5;
+      max-width: 260px;
+      margin-bottom: 24px;
+    }
+    .avatar-row {
+      display: flex;
+      align-items: center;
+      gap: -8px;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid hsla(0,0%,100%,0.1);
+      background: var(--hsl-75);
+      margin-left: -8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--hsl-30);
+    }
+    .avatar:first-child { margin-left: 0; }
+    .avatar-more {
+      background: hsla(0,0%,100%,0.08);
+      color: var(--hsl-15);
+    }
+
+    /* Feature section */
+    .feature-section {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .feature-card {
+      padding: 20px;
+    }
+    .feature-card-wide {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: hsla(0,0%,100%,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .feature-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--hsl-0);
+      margin-bottom: 4px;
+    }
+    .feature-desc {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--hsl-45);
+      line-height: 1.5;
+    }
+
+    /* ── Mobile: hide right panel ── */
+    @media (max-width: 900px) {
+      .panel-right { display: none; }
+      .panel-left { width: 100%; }
+      .scene { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Video background -->
+  <div class="video-bg">
+    <video
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260315_073750_51473149-4350-4920-ae24-c8214286f323.mp4"
+      autoplay muted loop playsinline
+      preload="auto"
+    ></video>
+  </div>
+
+  <div class="scene">
+
+    <!-- ══════════════ LEFT PANEL ══════════════ -->
+    <div class="panel-left">
+
+      <!-- Nav -->
+      <nav class="nav">
+        <span class="nav-logo">bloom</span>
+        <button class="nav-menu liquid-glass">
+          <!-- Menu icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+          </svg>
+          Menu
+        </button>
+      </nav>
+
+      <!-- Hero content -->
+      <div class="hero-content">
+        <p class="hero-eyebrow">Generative Plant Intelligence</p>
+
+        <h1 class="hero-h1">
+          Innovating the<br />
+          <em>spirit of bloom</em><br />
+          AI
+        </h1>
+
+        <a class="hero-cta" href="#">
+          <!-- Download icon -->
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Explore Now
+        </a>
+
+        <div class="pills">
+          <div class="pill liquid-glass">
+            <!-- Wand2 icon -->
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 4-8.5 8.5c-.83.83-.83 2.17 0 3L8 17c.83.83 2.17.83 3 0L19.5 8.5c.83-.83.83-2.17 0-3L18 4c-.83-.83-2.17-.83-3 0Z"/>
+              <path d="m6 6 4.5 4.5"/><path d="m14 4 6 6"/>
+            </svg>
+            Artistic Gallery
+          </div>
+          <div class="pill liquid-glass">
+            <!-- Sparkles icon -->
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+            </svg>
+            AI Generation
+          </div>
+          <div class="pill liquid-glass">
+            <!-- BookOpen icon -->
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            3D Structures
+          </div>
+        </div>
+
+        <div class="hero-quote">
+          <blockquote>
+            "Nature is not a place to visit.<br />It is home."
+          </blockquote>
+          <cite>— Gary Snyder</cite>
+        </div>
+      </div>
+
+    </div><!-- /panel-left -->
+
+    <!-- ══════════════ RIGHT PANEL ══════════════ -->
+    <div class="panel-right">
+
+      <!-- Top row: social pill + account -->
+      <div class="right-top">
+        <div class="social-pill liquid-glass">
+          <div class="social-icon" title="Twitter">
+            <!-- Twitter/X icon -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </div>
+          <div class="social-icon" title="LinkedIn">
+            <!-- LinkedIn icon -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </div>
+          <div class="social-icon" title="Instagram">
+            <!-- Instagram icon -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </div>
+          <div class="social-divider"></div>
+          <div class="social-arrow">
+            <!-- ArrowRight icon -->
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+
+        <button class="account-btn liquid-glass">
+          <!-- Sparkles icon -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+          </svg>
+          My Account
+        </button>
+      </div>
+
+      <!-- Community card -->
+      <div class="community-card liquid-glass-strong" style="min-height: 220px;">
+        <div>
+          <p class="community-label">Community</p>
+          <p class="community-stat">48,200+</p>
+          <p class="community-sub">Designers, florists, and botanists growing together with AI-powered tools.</p>
+        </div>
+        <div class="avatar-row">
+          <div class="avatar">JM</div>
+          <div class="avatar">RL</div>
+          <div class="avatar">AK</div>
+          <div class="avatar">SF</div>
+          <div class="avatar avatar-more">+</div>
+        </div>
+      </div>
+
+      <!-- Feature section -->
+      <div class="feature-section">
+        <div class="feature-row">
+          <!-- Processing card -->
+          <div class="feature-card liquid-glass">
+            <div class="feature-icon" style="margin-bottom: 14px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            </div>
+            <p class="feature-title">Processing</p>
+            <p class="feature-desc">Real-time generative rendering for complex botanical structures.</p>
+          </div>
+
+          <!-- Growth Archive card -->
+          <div class="feature-card liquid-glass">
+            <div class="feature-icon" style="margin-bottom: 14px;">
+              <!-- BookOpen icon -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+            </div>
+            <p class="feature-title">Growth Archive</p>
+            <p class="feature-desc">Track and version every design across its full lifecycle.</p>
+          </div>
+        </div>
+
+        <!-- Advanced Plant Sculpting — wide card -->
+        <div class="feature-card-wide liquid-glass">
+          <div class="feature-icon" style="width: 48px; height: 48px; border-radius: 14px;">
+            <!-- Wand2 icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 4-8.5 8.5c-.83.83-.83 2.17 0 3L8 17c.83.83 2.17.83 3 0L19.5 8.5c.83-.83.83-2.17 0-3L18 4c-.83-.83-2.17-.83-3 0Z"/>
+              <path d="m6 6 4.5 4.5"/><path d="m14 4 6 6"/>
+            </svg>
+          </div>
+          <div>
+            <p class="feature-title">Advanced Plant Sculpting</p>
+            <p class="feature-desc">Sculpt, layer, and animate living forms with AI-guided precision — from seed to full bloom.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panel-right -->
+
+  </div><!-- /scene -->
+
+</body>
+</html>

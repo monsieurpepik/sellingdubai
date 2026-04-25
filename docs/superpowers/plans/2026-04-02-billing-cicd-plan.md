@@ -393,7 +393,7 @@ Once 4a–4d are complete and the CI pipeline has run successfully at least once
    - GitHub → repository secrets → `BILLING_LIVE`
    - Netlify → Site configuration → Environment variables → `BILLING_LIVE`
 2. Push any commit to `main` (or trigger a manual deploy in Netlify)
-3. Verify on `sellingdubai.ae/pricing.html`:
+3. Verify on `sellingdubai.com/pricing.html`:
    - Clicking "Upgrade Now" redirects to Stripe Checkout (not "Billing coming soon")
    - Completing a test checkout updates `agents.tier` in Supabase
    - `pricing.html` source no longer has `noindex`
@@ -411,5 +411,5 @@ Once 4a–4d are complete and the CI pipeline has run successfully at least once
 **CI/CD:**
 - [ ] Every push to `main` triggers the Actions workflow
 - [ ] A broken `npm run check` fails the `ci` job and the `deploy` job does not run
-- [ ] A green `ci` job on `main` auto-deploys to `https://sellingdubai.ae`
+- [ ] A green `ci` job on `main` auto-deploys to `https://sellingdubai.com`
 - [ ] Every production deploy at Netlify links back to a specific GitHub commit with a green check

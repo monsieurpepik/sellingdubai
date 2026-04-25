@@ -1,6 +1,6 @@
 # Privacy Reference — SellingDubai
 
-Quick reference for developers. Full policy: https://sellingdubai.ae/privacy
+Quick reference for developers. Full policy: https://sellingdubai.com/privacy
 
 ## Data Collected
 
@@ -35,8 +35,8 @@ Quick reference for developers. Full policy: https://sellingdubai.ae/privacy
 
 ## Data Deletion
 
-Agents may request full data deletion at privacy@sellingdubai.ae. This triggers deletion of `agents`, `leads`, `properties`, `magic_links`, and storage objects under `agent-images/{agent_id}/`.
+Agents may request full data deletion at privacy@sellingdubai.com. This triggers deletion of `agents`, `leads`, `properties`, `magic_links`, and storage objects under `agent-images/{agent_id}/`.
 
 ## DPA
 
-Business customers can request a Data Processing Agreement: privacy@sellingdubai.ae
+Business customers can request a Data Processing Agreement: privacy@sellingdubai.com

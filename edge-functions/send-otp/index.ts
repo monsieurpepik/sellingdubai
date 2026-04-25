@@ -6,8 +6,8 @@ import { createLogger } from "../_shared/logger.ts";
 type CreateClientFn = (url: string, key: string) => any;
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -128,7 +128,7 @@ export async function handler(
     let emailSent = false;
 
     if (RESEND_KEY) {
-      const fromAddress = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>";
+      const fromAddress = Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>";
 
       const emailHtml = `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:420px;margin:0 auto;padding:40px 24px;">
@@ -144,7 +144,7 @@ export async function handler(
           </div>
           <p style="font-size:13px;color:#999;text-align:center;margin-bottom:4px;">This code expires in 10 minutes.</p>
           <p style="font-size:13px;color:#999;text-align:center;">If you didn't request this, you can safely ignore this email.</p>
-          <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">&copy; 2026 SellingDubai.ae</p>
+          <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">&copy; 2026 SellingDubai.com</p>
         </div>
       `;
 

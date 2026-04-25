@@ -17,11 +17,11 @@ const path = require('path');
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 const CRITICAL_URLS = [
-  'https://sellingdubai.ae',
-  'https://sellingdubai.ae/join',
-  'https://sellingdubai.ae/dashboard.html',
-  'https://sellingdubai.ae/pricing.html',
-  'https://sellingdubai.ae/boban-pepic',
+  'https://sellingdubai.com',
+  'https://sellingdubai.com/join',
+  'https://sellingdubai.com/dashboard.html',
+  'https://sellingdubai.com/pricing.html',
+  'https://sellingdubai.com/boban-pepic',
 ];
 
 // Broken patterns to flag in changed HTML/JS files

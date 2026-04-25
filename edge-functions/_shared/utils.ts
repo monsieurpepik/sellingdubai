@@ -4,9 +4,9 @@
  */
 
 export const CORS_ORIGINS = [
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.ae",
-  "https://agents.sellingdubai.ae",
+  "https://sellingdubai.com",
+  "https://www.sellingdubai.com",
+  "https://agents.sellingdubai.com",
   "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://staging.sellingdubai.com",

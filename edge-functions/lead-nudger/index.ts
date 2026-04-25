@@ -135,7 +135,7 @@ async function sendWhatsApp(
 
 // ── Message builders ──
 
-const DASHBOARD_URL = "https://sellingdubai.ae/dashboard";
+const DASHBOARD_URL = "https://sellingdubai.com/dashboard";
 
 function buildDay1Message(agentName: string): string {
   return `Hi ${agentName} 👋 Welcome to SellingDubai! Add your first property listing to start receiving enquiries from buyers: ${DASHBOARD_URL}`;
@@ -166,8 +166,8 @@ function buildIdleLeadMessage(agentName: string, leadName: string, daysIdle: num
 // ── CORS ──
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
 ];
 

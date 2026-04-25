@@ -507,7 +507,7 @@ async function generatePropertyPDF(
     page.drawText(sanitizeForPDF(agent.email), { x: contactX, y: contactY, size: 9, font: fontRegular, color: muted });
     contactY -= 13;
   }
-  page.drawText(`sellingdubai.ae/${agent.slug}`, { x: contactX, y: contactY, size: 9, font: fontRegular, color: blue });
+  page.drawText(`sellingdubai.com/${agent.slug}`, { x: contactX, y: contactY, size: 9, font: fontRegular, color: blue });
 
   return pdfDoc.save();
 }
@@ -595,7 +595,7 @@ async function handleProfilePhotoUpdate(
 
     await sendWhatsAppReply(
       senderPhone,
-      `✅ Profile photo ${isReplacing ? "updated" : "set"}!\n\nView your profile: https://sellingdubai.ae/${agent.slug}`,
+      `✅ Profile photo ${isReplacing ? "updated" : "set"}!\n\nView your profile: https://sellingdubai.com/${agent.slug}`,
     );
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "Failed to update profile photo. Please try again.");
@@ -640,7 +640,7 @@ async function startOnboarding(
     .single();
 
   if (insertErr || !newAgent) {
-    await sendWhatsAppReply(senderPhone, "Something went wrong. Please visit sellingdubai.ae/join to register.");
+    await sendWhatsAppReply(senderPhone, "Something went wrong. Please visit sellingdubai.com/join to register.");
     return;
   }
 
@@ -688,7 +688,7 @@ async function completeOnboarding(
 
   const { error: updateErr } = await supabase.from("agents").update(updates).eq("id", agentId);
   if (updateErr) {
-    await sendWhatsAppReply(senderPhone, "Something went wrong. Please visit sellingdubai.ae/join to complete registration.");
+    await sendWhatsAppReply(senderPhone, "Something went wrong. Please visit sellingdubai.com/join to complete registration.");
     return;
   }
 
@@ -702,8 +702,8 @@ async function completeOnboarding(
   // Clear onboarding session so AI secretary can take over
   await supabase.from("whatsapp_sessions").delete().eq("agent_id", agentId);
 
-  const profileUrl = `https://sellingdubai.ae/${realSlug}`;
-  const dashboardUrl = `https://sellingdubai.ae/edit?token=${editToken}`;
+  const profileUrl = `https://sellingdubai.com/${realSlug}`;
+  const dashboardUrl = `https://sellingdubai.com/edit?token=${editToken}`;
 
   const msg = state.data.is_auto_verified
     ? `🎉 *You're live on SellingDubai!*\n\n🔗 Your profile:\n${profileUrl}\n\n📊 Dashboard:\n${dashboardUrl}\n\nShare your profile link to start getting leads!\n\n📸 Add a profile photo: send any image with the caption *profile*`
@@ -717,7 +717,7 @@ async function completeOnboarding(
       method: "POST",
       headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
+        from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>",
         to: [state.data.email],
         subject: state.data.is_auto_verified ? "You're live on SellingDubai!" : "Profile under review — SellingDubai",
         html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;"><h1 style="font-size:22px;color:#111;">Hi ${state.data.name}!</h1><p style="color:#555;">Your SellingDubai profile is ready.</p><a href="${dashboardUrl}" style="display:inline-block;background:#111;color:#fff;padding:14px 32px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:16px;">Open Dashboard</a></div>`,
@@ -815,7 +815,7 @@ async function handleOnboardingStep(
       await completeOnboarding(senderPhone, agent.id, agent.slug, state, supabase);
     } else if (/^cancel$/i.test(trimmed)) {
       await supabase.from("agents").delete().eq("id", agent.id);
-      await sendWhatsAppReply(senderPhone, "Registration cancelled. Text *JOIN* any time to start again, or visit sellingdubai.ae/join");
+      await sendWhatsAppReply(senderPhone, "Registration cancelled. Text *JOIN* any time to start again, or visit sellingdubai.com/join");
     } else {
       await sendWhatsAppReply(senderPhone, "Reply *CONFIRM* to create your profile, or *CANCEL* to start over.");
     }
@@ -887,7 +887,7 @@ async function handleShareCommand(
     }
 
     const priceStr = matchedProp.price ? ` | ${formatPriceForPDF(matchedProp.price)}` : "";
-    const caption = `${matchedProp.title}${priceStr} | sellingdubai.ae/${agentSlug}`;
+    const caption = `${matchedProp.title}${priceStr} | sellingdubai.com/${agentSlug}`;
     await sendWhatsAppDocument(senderPhone, mediaId, filename, caption);
   } catch (_e) {
     await sendWhatsAppReply(senderPhone, "Failed to generate brochure. Please try again.");
@@ -1439,7 +1439,7 @@ export async function handler(
       if (msgType === "text") {
         await startOnboarding(senderPhone, cleanPhone, supabase);
       } else {
-        await sendWhatsAppReply(senderPhone, "👋 Text *JOIN* to create your SellingDubai agent profile, or visit sellingdubai.ae/join");
+        await sendWhatsAppReply(senderPhone, "👋 Text *JOIN* to create your SellingDubai agent profile, or visit sellingdubai.com/join");
       }
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     }
@@ -1581,8 +1581,8 @@ export async function handler(
 
         if ((activeCount ?? 0) >= limit) {
           const upgradeMsg = effectiveTier === "free"
-            ? `You've reached the ${limit}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai.ae/pricing`
-            : `You've reached the ${limit}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai.ae/pricing`;
+            ? `You've reached the ${limit}-listing limit on the Free plan.\n\nUpgrade to Pro (AED 199/mo) for up to 20 listings, or Premium (AED 499/mo) for unlimited.\n\n👉 sellingdubai.com/pricing`
+            : `You've reached the ${limit}-listing limit on the Pro plan.\n\nUpgrade to Premium (AED 499/mo) for unlimited listings.\n\n👉 sellingdubai.com/pricing`;
           await sendWhatsAppReply(senderPhone, upgradeMsg);
           return new Response(JSON.stringify({ success: true }), { headers: CORS });
         }
@@ -1617,7 +1617,7 @@ export async function handler(
       }
 
       // Build confirmation + social templates
-      const profileUrl = `https://sellingdubai.ae/${agent.slug}`;
+      const profileUrl = `https://sellingdubai.com/${agent.slug}`;
       let confirmMsg = `✅ *Listed!*\n\n*${finalTitle}*`;
       if (parsed.price) confirmMsg += `\nPrice: ${parsed.price}`;
       if (parsed.area) confirmMsg += `\n📍 ${parsed.area}`;

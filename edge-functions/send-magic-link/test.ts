@@ -4,7 +4,7 @@ import { mockClientFactory } from "../_shared/test-mock.ts";
 Deno.env.set("SUPABASE_URL", "http://test.local");
 Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
 Deno.env.set("RESEND_API_KEY", "");
-Deno.env.set("SITE_URL", "https://sellingdubai.ae");
+Deno.env.set("SITE_URL", "https://sellingdubai.com");
 
 Deno.test("send-magic-link: missing email returns 400", async () => {
   const res = await handler(
@@ -103,7 +103,7 @@ Deno.test("send-magic-link: OPTIONS returns CORS headers", async () => {
   const res = await handler(
     new Request("http://localhost", {
       method: "OPTIONS",
-      headers: { "Origin": "https://sellingdubai.ae" },
+      headers: { "Origin": "https://sellingdubai.com" },
     }),
     mockClientFactory(),
   );

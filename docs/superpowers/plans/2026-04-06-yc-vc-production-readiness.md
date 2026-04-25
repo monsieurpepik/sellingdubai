@@ -162,9 +162,9 @@ grep -n "CORS_ORIGINS\|sellingdubai" supabase/functions/_shared/utils.ts
 Current state (lines ~8–17):
 ```ts
 export const CORS_ORIGINS = [
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.ae",
-  "https://agents.sellingdubai.ae",
+  "https://sellingdubai.com",
+  "https://www.sellingdubai.com",
+  "https://agents.sellingdubai.com",
   "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai-agents.netlify.app",  // dead domain
@@ -176,9 +176,9 @@ export const CORS_ORIGINS = [
 In `supabase/functions/_shared/utils.ts`, replace the entire `CORS_ORIGINS` export with:
 ```ts
 export const CORS_ORIGINS = [
-  "https://sellingdubai.ae",
-  "https://www.sellingdubai.ae",
-  "https://agents.sellingdubai.ae",
+  "https://sellingdubai.com",
+  "https://www.sellingdubai.com",
+  "https://agents.sellingdubai.com",
   "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://staging.sellingdubai.com",

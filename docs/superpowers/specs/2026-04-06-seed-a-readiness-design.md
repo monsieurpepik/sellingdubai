@@ -67,7 +67,7 @@ This spec covers the full technical roadmap to take SellingDubai from its curren
 ### 3.2 Staging Environment
 - New Supabase project: `sellingdubai-staging`
 - Schema kept in sync via `supabase db push` in CI against staging project
-- New Netlify site: `staging-agents.sellingdubai.ae`
+- New Netlify site: `staging-agents.sellingdubai.com`
 - Deploys from `staging` git branch
 - GitHub Actions: new `SUPABASE_URL_STAGING` + `SUPABASE_ANON_KEY_STAGING` secrets
 - Existing `e2e` CI stage runs against staging, not production

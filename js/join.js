@@ -360,7 +360,7 @@ async function createProfile(otpCode) {
     if (!res.ok) {
       setLoading('btn-verify-otp', false, 'Verify & Create Profile');
       showError(2, data.slug
-        ? `This broker already has a profile at sellingdubai.ae/${data.slug}`
+        ? `This broker already has a profile at sellingdubai.com/${data.slug}`
         : (data.error || `Server error ${res.status} — please try again or contact support.`));
       return;
     }
@@ -396,7 +396,7 @@ async function createProfile(otpCode) {
     document.getElementById('preview-tagline').textContent =
       document.getElementById('tagline').value.trim() || 'Licensed Real Estate Broker in Dubai';
     document.getElementById('preview-broker').textContent = verifiedBroker.broker_number ? `#${verifiedBroker.broker_number}` : 'Pending';
-    document.getElementById('profile-url').textContent = `sellingdubai.ae/${createdSlug}`;
+    document.getElementById('profile-url').textContent = `sellingdubai.com/${createdSlug}`;
     document.getElementById('btn-view').href = `/${createdSlug}`;
 
     // Token is already in localStorage — edit.html will pick it up automatically
@@ -427,7 +427,7 @@ async function createProfile(otpCode) {
 }
 
 function copyUrl() {
-  const url = `https://sellingdubai.ae/${createdSlug}`;
+  const url = `https://sellingdubai.com/${createdSlug}`;
   const doCopy = navigator.clipboard?.writeText
     ? navigator.clipboard.writeText(url)
     : new Promise((resolve, reject) => {
@@ -444,7 +444,7 @@ function copyUrl() {
 }
 
 function shareWhatsApp() {
-  const url = `https://sellingdubai.ae/${createdSlug}`;
+  const url = `https://sellingdubai.com/${createdSlug}`;
   const text = encodeURIComponent(`Check out my verified Dubai real estate profile: ${url}`);
   window.open(`https://wa.me/?text=${text}`, '_blank');
 }

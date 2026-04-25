@@ -29,8 +29,8 @@ function escHtml(s: string): string {
 }
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -141,7 +141,7 @@ export async function handler(req: Request, _createClient: CreateClientFn = crea
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.ae>",
+              from: Deno.env.get("RESEND_FROM") || "SellingDubai <noreply@sellingdubai.com>",
               to: [agent.email],
               subject: `⏰ Follow up with ${(lead.name || '').substring(0, 100)} — 30+ min waiting`,
               html: `
@@ -170,7 +170,7 @@ export async function handler(req: Request, _createClient: CreateClientFn = crea
                     ${lead.phone ? `<a href="tel:${escHtml(lead.phone)}" style="display:inline-block;background:#111;color:#fff;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;margin-top:8px;">Call ${escHtml(lead.name)}</a>` : ""}
                   </div>
                   <p style="font-size:12px;color:#ccc;margin-top:32px;text-align:center;">
-                    &copy; 2026 SellingDubai.ae
+                    &copy; 2026 SellingDubai.com
                   </p>
                 </div>
               `,

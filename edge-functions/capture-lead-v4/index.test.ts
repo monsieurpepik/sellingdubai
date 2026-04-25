@@ -24,7 +24,7 @@ Deno.test("capture-lead: happy path with phone", async () => {
   const res = await handler(
     new Request("http://localhost", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Origin": "https://sellingdubai.ae" },
+      headers: { "Content-Type": "application/json", "Origin": "https://sellingdubai.com" },
       body: JSON.stringify({ agent_slug: "test-agent", name: "Test Lead", phone: "+971501234567", source: "profile" }),
     }),
     mockClientFactory({
@@ -43,7 +43,7 @@ Deno.test("capture-lead: happy path with email", async () => {
   const res = await handler(
     new Request("http://localhost", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Origin": "https://sellingdubai.ae" },
+      headers: { "Content-Type": "application/json", "Origin": "https://sellingdubai.com" },
       body: JSON.stringify({ agent_slug: "test-agent", name: "Test Lead", email: "lead@example.com", source: "profile" }),
     }),
     mockClientFactory({
@@ -225,7 +225,7 @@ Deno.test("capture-lead: OPTIONS returns CORS headers", async () => {
   const res = await handler(
     new Request("http://localhost", {
       method: "OPTIONS",
-      headers: { "Origin": "https://sellingdubai.ae" },
+      headers: { "Origin": "https://sellingdubai.com" },
     }),
     mockClientFactory(),
   );

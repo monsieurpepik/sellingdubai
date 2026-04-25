@@ -4,8 +4,8 @@ import { createLogger } from '../_shared/logger.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SITE_URL = 'https://sellingdubai.ae';
-const DEFAULT_IMAGE = `https://sellingdubai.ae/.netlify/images?url=${encodeURIComponent(SUPABASE_URL + '/storage/v1/object/public/agent-images/dubai-skyline.jpg')}&w=1200&fm=webp&q=80`;
+const SITE_URL = 'https://sellingdubai.com';
+const DEFAULT_IMAGE = `https://sellingdubai.com/.netlify/images?url=${encodeURIComponent(SUPABASE_URL + '/storage/v1/object/public/agent-images/dubai-skyline.jpg')}&w=1200&fm=webp&q=80`;
 
 // deno-lint-ignore no-explicit-any
 type CreateClientFn = (url: string, key: string) => any;

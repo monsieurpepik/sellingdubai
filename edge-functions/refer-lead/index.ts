@@ -18,7 +18,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "SellingDubai <referrals@sellingdubai.ae>",
+      from: "SellingDubai <referrals@sellingdubai.com>",
       to: [to],
       subject,
       html,
@@ -212,7 +212,7 @@ export async function handler(
             <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Referral Fee</td><td style="padding:8px;border-bottom:1px solid #eee;">${feePercent}% of your commission</td></tr>
           </table>
           <p style="color:#666;">Log in to your dashboard to accept this referral and view the full lead details.</p>
-          <a href="https://agents.sellingdubai.ae/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">View Referral</a>
+          <a href="https://agents.sellingdubai.com/dashboard" style="display:inline-block;padding:12px 24px;background:#1127d2;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;">View Referral</a>
         </div>`,
       );
     }

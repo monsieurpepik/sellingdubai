@@ -567,7 +567,7 @@
 
   window.copyProfileLink = () => {
     if (!currentAgent) return;
-    const url = `https://sellingdubai.ae/${currentAgent.slug}`;
+    const url = `https://sellingdubai.com/${currentAgent.slug}`;
 
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById('btn-share');
@@ -593,7 +593,7 @@
   function loadReferralSection(referralStats) {
     if (!currentAgent) return;
     const code = currentAgent.referral_code || currentAgent.slug;
-    const link = `https://sellingdubai.ae/join?ref=${encodeURIComponent(code)}`;
+    const link = `https://sellingdubai.com/join?ref=${encodeURIComponent(code)}`;
     document.getElementById('referral-link').value = link;
 
     // Use referral stats from analytics response (authenticated, bypasses RLS)
@@ -956,7 +956,7 @@
 
   window.shareProperty = (propId) => {
     if (!currentAgent) return;
-    const url = `https://sellingdubai.ae/${currentAgent.slug}?open=property&id=${propId}`;
+    const url = `https://sellingdubai.com/${currentAgent.slug}?open=property&id=${propId}`;
     navigator.clipboard.writeText(url).then(() => {
       showToast('Link copied!');
     }, () => {
@@ -1760,7 +1760,7 @@
   function renderQrSection() {
     const a = currentAgent;
     if (!a?.slug) return;
-    const profileUrl = `https://sellingdubai.ae/${a.slug}`;
+    const profileUrl = `https://sellingdubai.com/${a.slug}`;
     const qrBase = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(profileUrl)}`;
 
     const img = document.getElementById('qr-img');

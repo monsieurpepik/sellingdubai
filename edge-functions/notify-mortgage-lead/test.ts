@@ -3,7 +3,7 @@ import { mockClientFactory } from "../_shared/test-mock.ts";
 
 Deno.env.set("SUPABASE_URL", "http://test.local");
 Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
-Deno.env.set("PLATFORM_OPS_EMAIL", "ops@sellingdubai.ae");
+Deno.env.set("PLATFORM_OPS_EMAIL", "ops@sellingdubai.com");
 Deno.env.set("RESEND_API_KEY", "");
 
 Deno.test("notify-mortgage-lead: missing Authorization returns 401", async () => {

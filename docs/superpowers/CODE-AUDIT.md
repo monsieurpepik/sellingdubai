@@ -102,7 +102,7 @@ The IP-based rate limit check runs AFTER creating the Supabase client and fetchi
 **File:** `edge-functions/capture-lead-v4/index.ts` (local ALLOWED_ORIGINS)
 **Score:** HIGH
 
-`_shared/utils.ts` defines the canonical CORS origin list including `agents.sellingdubai.ae`. Individual edge functions maintain local copies of this list that may not stay in sync. If `agents.sellingdubai.ae` is added to `_shared/utils.ts` but not to a function's local copy, CORS preflight will fail for that subdomain.
+`_shared/utils.ts` defines the canonical CORS origin list including `agents.sellingdubai.com`. Individual edge functions maintain local copies of this list that may not stay in sync. If `agents.sellingdubai.com` is added to `_shared/utils.ts` but not to a function's local copy, CORS preflight will fail for that subdomain.
 
 **Fix:** All edge functions should import and use the CORS list from `_shared/utils.ts` rather than maintaining local copies. This is especially important for `capture-lead-v4`.
 
@@ -229,7 +229,7 @@ Cross-module state is passed via `window._*` globals rather than the established
 
 The Sentry DSN `https://689d6d66...@o4511110584926208.ingest.us.sentry.io/4511110595215360` is hardcoded in the HTML. Sentry DSNs are client-side by design (they must be in the browser), but they allow anyone to send arbitrary error events to your Sentry project, polluting error dashboards and potentially consuming quota. Sentry recommends rate limiting or allowlisting inbound events by origin on the Sentry project settings.
 
-**Fix:** Configure Sentry project to reject events from non-sellingdubai.ae origins. This is a Sentry dashboard setting, not a code change.
+**Fix:** Configure Sentry project to reject events from non-sellingdubai.com origins. This is a Sentry dashboard setting, not a code change.
 
 ---
 

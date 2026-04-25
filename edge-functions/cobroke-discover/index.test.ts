@@ -35,7 +35,7 @@ function makeRequest(body: Record<string, unknown> = {}, token = "valid-token") 
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
-      "Origin": "https://agents.sellingdubai.ae",
+      "Origin": "https://agents.sellingdubai.com",
     },
     body: JSON.stringify(body),
   });
@@ -247,7 +247,7 @@ Deno.test("cobroke-discover: OPTIONS returns 204 with CORS headers", async () =>
   const res = await handler(
     new Request("http://localhost/cobroke-discover", {
       method: "OPTIONS",
-      headers: { "Origin": "https://agents.sellingdubai.ae" },
+      headers: { "Origin": "https://agents.sellingdubai.com" },
     }),
     mockClientFactory(),
   );

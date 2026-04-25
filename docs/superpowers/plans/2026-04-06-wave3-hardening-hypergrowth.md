@@ -523,13 +523,13 @@ npx web-push generate-vapid-keys
 Copy the output. Add to Netlify environment variables (staging + production):
 - `VAPID_PUBLIC_KEY` = the public key
 - `VAPID_PRIVATE_KEY` = the private key
-- `VAPID_SUBJECT` = `mailto:hello@sellingdubai.ae`
+- `VAPID_SUBJECT` = `mailto:hello@sellingdubai.com`
 
 Add to `supabase/.env` and `supabase/.env.example`:
 ```
 VAPID_PUBLIC_KEY=<your-public-key>
 VAPID_PRIVATE_KEY=<your-private-key>
-VAPID_SUBJECT=mailto:hello@sellingdubai.ae
+VAPID_SUBJECT=mailto:hello@sellingdubai.com
 ```
 
 - [ ] **Step 2: Create push_subscriptions table**
@@ -579,7 +579,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") || "";
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY") || "";
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:hello@sellingdubai.ae";
+const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:hello@sellingdubai.com";
 
 // Encode Uint8Array to base64url
 function base64urlEncode(data: Uint8Array): string {
@@ -1191,7 +1191,7 @@ The load-test workflow and `scripts/load-test.js` already exist. This task valid
 - [ ] **Step 1: Run the existing load test against staging**
 
 In GitHub Actions → Actions → "Load Test (k6)" → "Run workflow". Set:
-- `base_url`: `https://staging-agents.sellingdubai.ae` (or current staging URL)
+- `base_url`: `https://staging-agents.sellingdubai.com` (or current staging URL)
 - `supabase_url`: staging Supabase functions URL
 
 - [ ] **Step 2: Check the results against SLOs**

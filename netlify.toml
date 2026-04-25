@@ -13,14 +13,14 @@
 
 # Canonical domain: redirect www to bare domain
 [[redirects]]
-  from = "https://www.sellingdubai.ae/*"
-  to = "https://sellingdubai.ae/:splat"
+  from = "https://www.sellingdubai.com/*"
+  to = "https://sellingdubai.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.sellingdubai.com/*"
-  to = "https://sellingdubai.ae/:splat"
+  to = "https://sellingdubai.com/:splat"
   status = 301
   force = true
 
@@ -61,7 +61,7 @@
 
 [[redirects]]
   from = "/support"
-  to = "mailto:hello@sellingdubai.ae"
+  to = "mailto:hello@sellingdubai.com"
   status = 302
 
 # Security headers — all pages

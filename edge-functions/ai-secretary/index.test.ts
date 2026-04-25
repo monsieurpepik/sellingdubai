@@ -65,7 +65,7 @@ Deno.test("OPTIONS → 200 with CORS headers", async () => {
   // CORS headers should be present
   const origin = res.headers.get("access-control-allow-origin");
   const methods = res.headers.get("access-control-allow-methods");
-  assertEquals(origin, "https://www.sellingdubai.ae");
+  assertEquals(origin, "https://www.sellingdubai.com");
   assertEquals(methods?.includes("POST"), true);
 });
 

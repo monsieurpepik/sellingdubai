@@ -125,7 +125,7 @@ In `index.html`, locate:
   <div class="trust-badges">
     ...
   </div>
-  <a href="https://www.sellingdubai.ae" ... class="sd-footer-powered">
+  <a href="https://www.sellingdubai.com" ... class="sd-footer-powered">
     <img src="/sellingdubailogo.png" ...>
   </a>
   <p class="sd-footer-legal">...</p>

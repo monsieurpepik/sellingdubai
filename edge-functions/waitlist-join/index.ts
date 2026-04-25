@@ -5,8 +5,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from '../_shared/logger.ts';
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://staging.sellingdubai.com",
@@ -102,7 +102,7 @@ export async function handler(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Selling Dubai <hello@sellingdubai.ae>",
+        from: "Selling Dubai <hello@sellingdubai.com>",
         to: email,
         subject: "You're on the Selling Dubai waitlist",
         html: `<p>Hi ${firstName},</p>

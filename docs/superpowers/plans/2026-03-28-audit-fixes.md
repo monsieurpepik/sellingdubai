@@ -61,7 +61,7 @@ In `index.html`, find:
 ```
 Replace with:
 ```html
-  <link rel="canonical" id="canonical-url" href="https://sellingdubai.ae/">
+  <link rel="canonical" id="canonical-url" href="https://sellingdubai.com/">
 ```
 
 Find:
@@ -71,8 +71,8 @@ Find:
 ```
 Replace with:
 ```html
-    <meta property="og:image" id="og-image" content="https://sellingdubai.ae/sellingdubailogo.png">
-    <meta property="og:url" id="og-url" content="https://sellingdubai.ae/">
+    <meta property="og:image" id="og-image" content="https://sellingdubai.com/sellingdubailogo.png">
+    <meta property="og:url" id="og-url" content="https://sellingdubai.com/">
 ```
 
 - [ ] **Step 3: Add Twitter card meta tags**
@@ -86,7 +86,7 @@ Replace with:
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" id="twitter-title" content="SellingDubai — Find Dubai Real Estate Agents">
     <meta name="twitter:description" id="twitter-description" content="Connect with verified Dubai real estate agents. Browse profiles, listings, and contact agents directly.">
-    <meta name="twitter:image" id="twitter-image" content="https://sellingdubai.ae/sellingdubailogo.png">
+    <meta name="twitter:image" id="twitter-image" content="https://sellingdubai.com/sellingdubailogo.png">
 ```
 
 - [ ] **Step 4: Add default WebSite schema to the empty JSON-LD**
@@ -97,7 +97,7 @@ Find:
 ```
 Replace with:
 ```html
-  <script type="application/ld+json" id="schema-agent">{"@context":"https://schema.org","@type":"WebSite","name":"SellingDubai","url":"https://sellingdubai.ae/"}</script>
+  <script type="application/ld+json" id="schema-agent">{"@context":"https://schema.org","@type":"WebSite","name":"SellingDubai","url":"https://sellingdubai.com/"}</script>
 ```
 
 - [ ] **Step 5: Update JS that writes og:image and og:url to also update twitter tags**
@@ -131,7 +131,7 @@ git commit -m "fix: absolute og:image/url, add twitter meta tags, default WebSit
 **Files:**
 - Modify: `landing.html` line 9
 
-**Issue confirmed:** Line 9 has `<link rel="canonical" href="https://sellingdubai.ae/landing"/>` — the landing page IS the homepage (served at `/`), so the canonical should be `https://sellingdubai.ae/` not `/landing`. This tells Google there are two separate pages when there is only one.
+**Issue confirmed:** Line 9 has `<link rel="canonical" href="https://sellingdubai.com/landing"/>` — the landing page IS the homepage (served at `/`), so the canonical should be `https://sellingdubai.com/` not `/landing`. This tells Google there are two separate pages when there is only one.
 
 - [ ] **Step 1: Read landing.html lines 1-20 to confirm**
 
@@ -141,11 +141,11 @@ Read `landing.html` lines 1-20.
 
 Find:
 ```html
-  <link rel="canonical" href="https://sellingdubai.ae/landing"/>
+  <link rel="canonical" href="https://sellingdubai.com/landing"/>
 ```
 Replace with:
 ```html
-  <link rel="canonical" href="https://sellingdubai.ae/"/>
+  <link rel="canonical" href="https://sellingdubai.com/"/>
 ```
 
 - [ ] **Step 3: Commit**
@@ -614,13 +614,13 @@ After all tasks are committed:
 # View index.html head
 grep -n "og:image\|og:url\|twitter:\|canonical\|schema-agent" index.html | head -20
 ```
-Expected: og:image and og:url have `https://sellingdubai.ae/...`, twitter:title/description/image present, canonical has href, schema-agent has WebSite type.
+Expected: og:image and og:url have `https://sellingdubai.com/...`, twitter:title/description/image present, canonical has href, schema-agent has WebSite type.
 
 **2. landing.html canonical:**
 ```bash
 grep "canonical" landing.html
 ```
-Expected: `href="https://sellingdubai.ae/"`
+Expected: `href="https://sellingdubai.com/"`
 
 **3. Build passes:**
 ```bash

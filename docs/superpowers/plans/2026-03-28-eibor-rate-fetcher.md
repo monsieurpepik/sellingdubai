@@ -101,8 +101,8 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const EIBOR_URL = "https://www.centralbank.ae/en/forex-eibor/eibor-rates/";
 
 const ALLOWED_ORIGINS = [
-  "https://www.sellingdubai.ae",
-  "https://sellingdubai.ae",
+  "https://www.sellingdubai.com",
+  "https://sellingdubai.com",
   "https://www.sellingdubai.com",
   "https://sellingdubai.com",
   "https://sellingdubai-agents.netlify.app",
@@ -121,7 +121,7 @@ async function scrapeEibor(): Promise<number | null> {
   try {
     const res = await fetch(EIBOR_URL, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; SellingDubai/1.0; +https://sellingdubai.ae)",
+        "User-Agent": "Mozilla/5.0 (compatible; SellingDubai/1.0; +https://sellingdubai.com)",
         "Accept": "text/html,application/xhtml+xml",
       },
       signal: AbortSignal.timeout(8000),

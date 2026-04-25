@@ -205,7 +205,7 @@ Budget violations cause the `ci` job to fail via `npm run check`. On PRs, the `b
 | `SENTRY_AUTH_TOKEN` | Source map upload + release tagging |
 | `SENTRY_ORG` | Sentry org slug |
 | `SENTRY_PROJECT` | Sentry project slug |
-| `SMOKE_BASE_URL` | Smoke test target (`https://sellingdubai.ae`) |
+| `SMOKE_BASE_URL` | Smoke test target (`https://sellingdubai.com`) |
 | `SMOKE_SUPABASE_URL` | Supabase URL for smoke test edge function checks |
 
 ---

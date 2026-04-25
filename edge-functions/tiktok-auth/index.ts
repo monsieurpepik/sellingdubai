@@ -7,7 +7,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const TT_CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_KEY') || '';
 const TT_CLIENT_SECRET = Deno.env.get('TIKTOK_CLIENT_SECRET')!;
-const REDIRECT_URI = 'https://agents.sellingdubai.ae/edit?tt_callback=1';
+const REDIRECT_URI = 'https://agents.sellingdubai.com/edit?tt_callback=1';
 
 // deno-lint-ignore no-explicit-any
 type CreateClientFn = (url: string, key: string) => any;

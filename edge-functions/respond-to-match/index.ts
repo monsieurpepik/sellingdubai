@@ -33,7 +33,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "SellingDubai <matches@sellingdubai.ae>",
+      from: "SellingDubai <matches@sellingdubai.com>",
       to: [to],
       subject,
       html,
