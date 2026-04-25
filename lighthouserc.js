@@ -2,8 +2,8 @@ module.exports = {
   ci: {
     collect: {
       url: [
-        'https://sellingdubai.ae/',
-        'https://sellingdubai.ae/landing.html',
+        'https://sellingdubai.com/',
+        'https://sellingdubai.com/landing.html',
       ],
       numberOfRuns: 3,
     },
