@@ -63,10 +63,23 @@ export function showPage(id: string): void {
   document.getElementById('error')?.classList.add('hidden');
   document.getElementById('pending')?.classList.add('hidden');
   document.getElementById('agent-page')?.classList.add('hidden');
-  // Hide SSR hero injected by og-injector edge function
+
+  // Fade out SSR hero injected by og-injector edge function
   const ssrHero = document.getElementById('ssr-hero');
-  if (ssrHero) ssrHero.style.display = 'none';
-  document.getElementById(id)?.classList.remove('hidden');
+  if (ssrHero) {
+    ssrHero.style.transition = 'opacity 0.25s ease';
+    ssrHero.style.opacity = '0';
+    setTimeout(() => { ssrHero.style.display = 'none'; }, 250);
+  }
+
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('hidden');
+  if (id === 'agent-page') {
+    // Force reflow so child animations restart after display:none is removed
+    void el.offsetHeight;
+    el.classList.add('page-in');
+  }
 }
 
 // Returns true if the agent's paid tier is still active (handles 7-day grace on past_due).
