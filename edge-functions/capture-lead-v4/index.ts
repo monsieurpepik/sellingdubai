@@ -546,7 +546,7 @@ export async function handler(
         .update(notifyPayload)
         .eq("id", lead.id);
     } catch (notifyErr) {
-      log.error('notification update failed — lead saved, tracking missed', { leadId: lead.id, error: notifyErr });
+      log({ event: 'notification_update_failed', status: 500, leadId: lead.id, error: String(notifyErr) });
     }
 
     // === SMART REMINDERS — fire-and-forget, never blocks response ===

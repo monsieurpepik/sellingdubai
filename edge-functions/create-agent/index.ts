@@ -224,7 +224,7 @@ export async function handler(
         .update({ used_at: new Date().toISOString() })
         .eq("token", agency_invite_token);
       if (inviteError) {
-        log.error('Failed to mark invite as used', { inviteToken: agency_invite_token, error: inviteError });
+        log({ event: 'invite_mark_used_failed', status: 500, inviteToken: agency_invite_token, error: String(inviteError) });
         return new Response(JSON.stringify({ error: 'Registration failed. Please try again.' }), { status: 500 });
       }
     }
