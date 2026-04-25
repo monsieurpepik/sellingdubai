@@ -27,6 +27,11 @@
     background: linear-gradient(160deg, #0c1929 0%, #1a2744 15%, #1e3555 25%, #2a4a6b 35%, #1a3050 45%, #162540 55%, #0f1c30 65%, #1a2b45 75%, #253d5c 85%, #0c1929 100%);
   }
 
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   .page {
     position: relative; z-index: 1;
     height: 100vh; height: 100dvh;
@@ -35,6 +40,7 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     padding-bottom: env(safe-area-inset-bottom);
+    animation: pageIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .brand {

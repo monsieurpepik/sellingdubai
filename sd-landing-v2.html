@@ -374,7 +374,17 @@
       .page { height: auto; min-height: 100vh; }
     }
 
-    /* ── Mobile ── */
+    /* ── Mobile: static image instead of video (more reliable + faster) ── */
+    @media (max-width: 768px) {
+      .video-bg video { display: none; }
+      .video-bg {
+        background-image: url('/.netlify/images?url=/dubai-skyline.jpg&w=1200&fm=webp&q=80'), radial-gradient(ellipse at 60% 40%, #0d1035 0%, #06060d 55%, #020204 100%);
+        background-size: cover, cover;
+        background-position: center, center;
+      }
+    }
+
+    /* ── Mobile layout ── */
     @media (max-width: 600px) {
       .page { padding: 20px 20px; }
       h1 { font-size: clamp(38px, 10.5vw, 60px); margin-bottom: 16px; }
