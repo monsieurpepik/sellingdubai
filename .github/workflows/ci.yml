@@ -293,7 +293,7 @@ jobs:
       - name: Post-deploy smoke test
         run: bash scripts/smoke-test.sh
         env:
-          SMOKE_BASE_URL: https://sellingdubai.ae
+          SMOKE_BASE_URL: https://sellingdubai.com
           SMOKE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
   lighthouse:

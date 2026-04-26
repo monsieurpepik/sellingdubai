@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://sellingdubai.ae/sitemap.xml
+Sitemap: https://sellingdubai.com/sitemap.xml
 
 # Disallow internal paths
 Disallow: /dashboard

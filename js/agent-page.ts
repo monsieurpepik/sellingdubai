@@ -329,6 +329,17 @@ export async function renderAgent(agent: Agent): Promise<void> {
     gtag('config', safeGaId);
   }
 
+  // Await bg + avatar downloads before revealing so they paint together (1.5s max).
+  // Browser deduplicates requests — these Image() probes resolve on the already-in-flight downloads.
+  const imgPreloads: Promise<void>[] = [
+    new Promise<void>(r => { const t = new Image(); t.onload = t.onerror = () => r(); t.src = bgUrl; }),
+  ];
+  if (agent.photo_url) {
+    const photoSrc = optimizeImg(agent.photo_url, 200);
+    imgPreloads.push(new Promise<void>(r => { const t = new Image(); t.onload = t.onerror = () => r(); t.src = photoSrc; }));
+  }
+  await Promise.race([Promise.all(imgPreloads), new Promise<void>(r => setTimeout(r, 1500))]);
+
   showPage('agent-page');
 
   // === INTENT SECTION ===

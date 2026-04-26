@@ -24,6 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pjyorgedaxevxophpfib.supabase.co" crossorigin>
+<link rel="prefetch" href="/a/boban-pepic">
 <link rel="preload" href="/css/fonts.css" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="/css/fonts.css"></noscript>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add_circle,analytics,apartment,bolt,calendar_month,call,check,check_circle,close,done,group,home_work,link,lock_open,notifications,person_off,photo_camera,share,shield,trending_up,verified,workspace_premium&display=swap" as="style" data-async-css/>
@@ -123,6 +124,17 @@
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; opacity: 0.55;
   }
+  /* Mobile: hide video, show static photo instead */
+  .hero-fs-photo {
+    display: none;
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    background-image: url('https://sellingdubai.com/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=828&fm=webp&q=80');
+    background-size: cover; background-position: center; opacity: 0.55;
+  }
+  @media (max-width: 768px) {
+    .hero-fs-video { display: none; }
+    .hero-fs-photo { display: block; }
+  }
   .hero-fs-gradient-top {
     position: absolute; top: 0; left: 0; right: 0; height: 35%;
     background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
@@ -207,6 +219,8 @@
   .hero-cta-btn:hover, .hero-cta-btn:focus-visible { transform: scale(1.04); }
   .hero-cta-btn:active { transform: scale(0.97); }
   .hero-agent-count { font-size: 11px; color: rgba(255,255,255,0.38); font-family: 'Manrope', sans-serif; }
+  .hero-cta-secondary { font-size: 13px; color: rgba(255,255,255,0.55); font-family: 'Manrope', sans-serif; text-decoration: none; letter-spacing: -0.01em; transition: color 0.15s; }
+  .hero-cta-secondary:hover { color: rgba(255,255,255,0.85); }
   /* Mobile adjustments */
   @media (max-width: 768px) {
     .hero-word { font-size: clamp(52px, 15vw, 80px); }
@@ -615,7 +629,9 @@
 
   <video class="hero-fs-video" autoplay loop muted playsinline preload="none"
     src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_063509_7d167302-4fd4-480b-8260-18ab572333d4.mp4"
+    poster="https://sellingdubai.com/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1280&fm=webp&q=80"
     aria-hidden="true"></video>
+  <div class="hero-fs-photo" aria-hidden="true"></div>
 
   <div class="hero-fs-gradient-top" aria-hidden="true"></div>
   <div class="hero-fs-gradient-bot" aria-hidden="true"></div>
@@ -646,6 +662,7 @@
   <!-- CTA -->
   <div class="hero-cta-wrap">
     <button class="hero-cta-btn js-magnetic" data-open-wizard>Claim Your Profile &rarr;</button>
+    <a class="hero-cta-secondary" href="/a/boban-pepic">See a live profile &rarr;</a>
     <p class="hero-agent-count"><span id="agent-count-live">—</span> agents already on the platform</p>
   </div>
 
@@ -844,7 +861,7 @@
     </div>
   </div>
   <div class="max-w-7xl mx-auto px-8 mb-16 pt-8 border-t border-white/10 flex flex-wrap gap-6 items-center justify-between">
-    <p class="text-[11px] text-zinc-600">&copy; 2026 SellingDubai.ae &middot; <a href="https://www.proptefi.com/" class="text-zinc-600 hover:text-zinc-400 transition-colors" target="_blank" rel="noopener noreferrer">Proptefi</a></p>
+    <p class="text-[11px] text-zinc-600">&copy; 2026 SellingDubai.com &middot; <a href="https://www.proptefi.com/" class="text-zinc-600 hover:text-zinc-400 transition-colors" target="_blank" rel="noopener noreferrer">Proptefi</a></p>
     <div class="flex gap-6">
       <a class="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors" href="/terms">Terms of Service</a>
       <a class="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors" href="/privacy">Privacy Policy</a>

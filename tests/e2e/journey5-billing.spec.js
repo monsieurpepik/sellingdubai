@@ -28,9 +28,9 @@ test('Billing gate blocks create-checkout when BILLING_LIVE=false', async ({ pag
   await page.goto('/pricing.html');
   const proBtn = page.locator('.upgrade-btn[data-plan="pro"]');
   await expect(proBtn).toBeVisible({ timeout: 8000 });
-  await proBtn.click();
 
-  // BILLING_LIVE=false: button text changes to "Coming Soon", checkout NOT called
-  await expect(proBtn).toHaveText('Coming Soon', { timeout: 3000 });
+  // BILLING_LIVE=false: applyBillingGate() disables the button on load — no click needed
+  await expect(proBtn).toBeDisabled({ timeout: 3000 });
+  await expect(proBtn).toHaveText('Coming Soon');
   expect(checkoutCalled.value).toBe(false);
 });

@@ -1,10 +1,18 @@
 # Architecture Decisions Log
 
-## 2026-04-25 — CSP XSS effectiveness deferred (Lighthouse Trust and Safety)
+## 2026-04-25 — Nonce-based CSP implemented via og-injector edge function
 
-**What:** Lighthouse flags the current CSP (`script-src` host allowlists in `netlify.toml`) as insufficient against XSS because it uses origin allowlists rather than nonce-based directives. No change made.
+**What:** Replaced static host-allowlist CSP in `netlify.toml` with a per-request cryptographic nonce injected by `netlify/edge-functions/og-injector.ts`, which now runs on all HTML responses (not just agent slug pages).
 
-**Why deferred:** Fixing requires a nonce-based CSP rewrite across all HTML pages and edge functions — significant effort with blast radius across every page. Current Lighthouse Best Practices score is 83 (vs 92+ with nonce CSP). Accepted as known tech debt. Revisit when preparing for agency director / enterprise sales where security posture matters. Documented in CLAUDE.md Known Tech Debt.
+**How it works:**
+- Edge function generates a 16-byte random nonce (`crypto.getRandomValues`) per request, base64-encoded.
+- `injectNonces()` regex-replaces `<script` → `<script nonce="..."` (skipping `type="application/ld+json"` via negative lookahead) and `<style` → `<style nonce="..."` across all HTML.
+- Dynamic CSP header set: `script-src 'nonce-{n}' 'strict-dynamic' https: 'unsafe-inline'` — strict-dynamic propagates trust to dynamically inserted scripts (GTM, Sentry loader); `https:` + `unsafe-inline` are CSP2 fallbacks ignored by compliant browsers.
+- `style-src 'nonce-{n}' 'self' https://fonts.googleapis.com` — removes `unsafe-inline` for styles.
+- Static CSP in `netlify.toml` remains as fallback for non-HTML assets and as a last resort if the edge function bypasses.
+- Bot prerender responses are not nonce-injected (bots don't execute JS).
+
+**Why:** Lighthouse "Trust and Safety — Ensure CSP is effective against XSS attacks" requires nonce or hash-based policy. Origin allowlists alone are bypassed by JSONP endpoints on allowlisted domains. This brings Lighthouse Best Practices from 83 toward 92+. Required for agency director / enterprise sales security posture.
 
 ## 2026-04-25 — Lighthouse/PWA audit fixes
 

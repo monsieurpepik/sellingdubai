@@ -509,15 +509,15 @@ function saveFormState() {
     if (document.getElementById('step-3')?.classList.contains('active')) currentStep = 3;
 
     localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify({
-      displayName: document.getElementById('display-name').value,
-      email:       document.getElementById('email').value,
-      whatsapp:    document.getElementById('whatsapp').value,
-      tagline:     document.getElementById('tagline').value,
-      calendly:    document.getElementById('calendly').value,
-      instagram:   document.getElementById('instagram').value,
-      youtube:     document.getElementById('youtube').value,
-      tiktok:      document.getElementById('tiktok').value,
-      linkedin:    document.getElementById('linkedin').value,
+      displayName: document.getElementById('display-name')?.value ?? '',
+      email:       document.getElementById('email')?.value ?? '',
+      whatsapp:    document.getElementById('whatsapp')?.value ?? '',
+      tagline:     document.getElementById('tagline')?.value ?? '',
+      calendly:    document.getElementById('calendly')?.value ?? '',
+      instagram:   document.getElementById('instagram')?.value ?? '',
+      youtube:     document.getElementById('youtube')?.value ?? '',
+      tiktok:      document.getElementById('tiktok')?.value ?? '',
+      linkedin:    document.getElementById('linkedin')?.value ?? '',
       step: currentStep,
       verifiedBroker: verifiedBroker || null,
     }));
@@ -547,7 +547,8 @@ function restoreFormState() {
       document.getElementById('verify-bn').textContent = `#${verifiedBroker.broker_number}`;
       document.getElementById('verify-expiry').textContent = verifiedBroker.license_end || '—';
       document.getElementById('verify-status').textContent = 'Active';
-      document.getElementById('step2-name').textContent = name;
+      const step2NameEl = document.getElementById('step2-name');
+      if (step2NameEl) step2NameEl.textContent = name;
       if (s.displayName) document.getElementById('display-name').value = s.displayName;
       goStep(2);
     }
@@ -609,7 +610,8 @@ async function manualSubmit() {
   `;
   badge.style.color = 'rgba(255,255,255,0.55)';
 
-  document.getElementById('step2-name').textContent = name;
+  const step2NameEl2 = document.getElementById('step2-name');
+  if (step2NameEl2) step2NameEl2.textContent = name;
   document.getElementById('display-name').value = name;
 
   saveFormState();
