@@ -91,6 +91,22 @@ if grep -q "SUPABASE_URL=${PROD_URL}" supabase/.env 2>/dev/null; then
 fi
 echo ""
 
+# ── Gate 2b. Broken Netlify Image CDN URLs (local path passed as url= param) ──
+echo -e "${BOLD}Gate 2b. Broken CDN image URLs${NC}"
+# Pattern: /.netlify/images?url=/ — means a local path was passed, not a full https:// URL.
+# This results in a broken image in production. All CDN URLs must use an absolute https:// source.
+BROKEN_CDN=$(grep -rn '\.netlify/images?url=/' \
+  --include="*.html" --include="*.css" --include="*.js" --include="*.ts" \
+  . \
+  | grep -v "node_modules" | grep -v "dist/" | grep -v "\.worktrees/" | head -10 || true)
+if [ -n "$BROKEN_CDN" ]; then
+  fail "Broken Netlify Image CDN URL — url= param must be an absolute https:// path, not a local path:"
+  echo "$BROKEN_CDN" | sed 's/^/    /'
+else
+  pass "No broken Netlify CDN local-path URLs found"
+fi
+echo ""
+
 # ── Gate 3. Edge function coverage ───────────────────────────────────────────
 # Every function in edge-functions/ must have a matching entry in supabase/functions/.
 # Missing entries mean the function can't be deployed via `supabase functions deploy`.

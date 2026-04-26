@@ -210,6 +210,15 @@
 
 .hidden { display: none; }
 
+/* Smooth reveal when skeleton → agent page */
+@keyframes page-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+#agent-page:not(.hidden) {
+  animation: page-in 0.3s ease forwards;
+}
+
 /* ========== BUTTON HIERARCHY ========== */
 .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .link-btn-glass {

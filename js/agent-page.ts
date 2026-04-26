@@ -335,7 +335,9 @@ export async function renderAgent(agent: Agent): Promise<void> {
     new Promise<void>(r => { const t = new Image(); t.onload = t.onerror = () => r(); t.src = bgUrl; }),
   ];
   if (agent.photo_url) {
-    const photoSrc = optimizeImg(agent.photo_url, 200);
+    // Preload the 160px srcset candidate — browser picks this on 2x screens (all modern phones).
+    // img.src uses 200px but srcset+sizes='80px' means the browser ignores src and fetches 160w on 2x.
+    const photoSrc = optimizeImg(agent.photo_url, 160);
     imgPreloads.push(new Promise<void>(r => { const t = new Image(); t.onload = t.onerror = () => r(); t.src = photoSrc; }));
   }
   await Promise.race([Promise.all(imgPreloads), new Promise<void>(r => setTimeout(r, 1500))]);

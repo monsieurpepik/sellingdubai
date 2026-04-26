@@ -454,7 +454,7 @@ const bgEl = document.getElementById('bg');
 const bgImg = new Image();
 bgImg.onload = () => { /* image loaded fine */ };
 bgImg.onerror = () => { bgEl.classList.add('bg-fallback'); };
-bgImg.src = '/.netlify/images?url=/dubai-skyline.jpg&w=1600&fm=webp&q=80';
+bgImg.src = 'https://sellingdubai.com/.netlify/images?url=https%3A%2F%2Fpjyorgedaxevxophpfib.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fagent-images%2Fdubai-skyline.jpg&w=1600&fm=webp&q=80';
 
 function networkErrorMsg() {
   return navigator.onLine
